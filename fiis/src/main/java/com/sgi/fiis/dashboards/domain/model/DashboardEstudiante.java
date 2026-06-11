@@ -12,7 +12,6 @@ public class DashboardEstudiante {
     // Métricas del estudiante/tesista
     private int planesTesisPresentados;
     private String estadoPlanActual;   // uso string en DTO
-    private String estadoPlanActualDescripcion;
     private int tramitesPendientes;
     private int documentosCargados;
     private int convocatoriasAbiertas;
