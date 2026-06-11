@@ -46,7 +46,7 @@ jobs:
         run: |
           ./mvnw clean verify sonar:sonar \
           -Dsonar.projectKey=sgi-fiis \
-          -Dsonar.organization=SGI-FIIS
+          -Dsonar.organization=sgi-fiis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
