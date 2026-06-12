@@ -67,11 +67,11 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: 12345
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: false
-          # Le damos un empujón de memoria a Maven y Java
-          MAVEN_OPTS: "-Xmx1024m -XX:MaxPermSize=512m"
+          # Dejamos solo el límite de memoria RAM total (Xmx), que es el único que se necesita
+          MAVEN_OPTS: "-Xmx1024m"
         run: |
           # 1. Primero compilamos y verificamos los tests para generar los reportes
-          ./mvnw clean verify -DskipTests=false
+          ./mvnw clean verify
           
           # 2. Luego, con la máquina limpia, enviamos los resultados a SonarCloud
           ./mvnw sonar:sonar \
