@@ -61,15 +61,19 @@ jobs:
         working-directory: ./fiis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # CAMBIO AQUÍ: Usamos el nombre exacto de tu secreto guardado en GitHub
           SONAR_TOKEN: ${{ secrets.SGI_FIIS_TOKEN }}
-          # Variables de entorno para que Spring Boot conecte a Postgres durante el build
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/db_fiis_investigacion
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: 12345
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: false
+          # Le damos un empujón de memoria a Maven y Java
+          MAVEN_OPTS: "-Xmx1024m -XX:MaxPermSize=512m"
         run: |
-          ./mvnw clean verify sonar:sonar \
+          # 1. Primero compilamos y verificamos los tests para generar los reportes
+          ./mvnw clean verify -DskipTests=false
+          
+          # 2. Luego, con la máquina limpia, enviamos los resultados a SonarCloud
+          ./mvnw sonar:sonar \
           -Dsonar.projectKey=sgi-fiis \
-          -Dsonar.organization=SGI-FIIS
+          -Dsonar.organization=sgi-fiis
