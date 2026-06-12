@@ -48,6 +48,9 @@ public class UsuarioEntity {
     @JoinColumn(name = "id_rol", nullable = false)
     private RolEntity rol;
 
+    @Column(name = "oauth_provider", length = 50)
+    private String oauthProvider;
+
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 

@@ -60,4 +60,11 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return ResponseEntity.ok(usuarioMapper.toResponseDto(usuario));
     }
+
+    /** Error de autenticación OAuth2 (Microsoft) */
+    @GetMapping("/oauth2/error")
+    public ResponseEntity<Map<String, String>> oauthError() {
+        return ResponseEntity.status(401)
+                .body(Map.of("error", "Error al autenticar con Microsoft"));
+    }
 }

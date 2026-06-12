@@ -18,6 +18,8 @@ services:
     container_name: sgifiis-backend-api
     ports:
       - "8080:8080"
+    env_file:
+      - ./fiis/.env
     environment:
       # Configuración de conexión que usará Spring Boot
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_fiis:5432/db_fiis_investigacion

@@ -81,6 +81,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
                 .mustChangePassword(entity.isMustChangePassword())
                 .rolCodigo(entity.getRol().getCodigoRol())
                 .rolDescripcion(entity.getRol().getDescripcion())
+                .oauthProvider(entity.getOauthProvider())
                 .fechaCreacion(entity.getFechaCreacion())
                 .fechaActualizacion(entity.getFechaActualizacion())
                 .build();
@@ -97,6 +98,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
         entity.setPasswordHash(domain.getPasswordHash());
         entity.setActivo(domain.isActivo());
         entity.setMustChangePassword(domain.isMustChangePassword());
+        entity.setOauthProvider(domain.getOauthProvider());
         entity.setFechaCreacion(domain.getFechaCreacion());
         entity.setFechaActualizacion(domain.getFechaActualizacion());
 

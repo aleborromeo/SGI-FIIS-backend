@@ -30,6 +30,7 @@ public class Usuario {
     private String rolDescripcion;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
+    private String oauthProvider;
 
     // ========== Lógica de negocio ==========
 
