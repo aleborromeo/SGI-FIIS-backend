@@ -18,7 +18,7 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
 
-    # Agregamos el servicio de base de datos para que pasen tus pruebas unitarias
+    # 1. Levantamos la base de datos para que tus pruebas compilen limpio en Actions
     services:
       postgres:
         image: postgres:15-alpine
@@ -61,19 +61,18 @@ jobs:
         working-directory: ./fiis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SGI_FIIS_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          # Variables de entorno para que Spring Boot conecte a la BD del contenedor
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/db_fiis_investigacion
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: 12345
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: false
-          # Dejamos solo el límite de memoria RAM total (Xmx), que es el único que se necesita
+          # Límite de memoria RAM para que Maven no se sature
           MAVEN_OPTS: "-Xmx1024m"
         run: |
-          # 1. Primero compilamos y verificamos los tests para generar los reportes
+          # Primero compilamos y verificamos los tests con la BD activa
           ./mvnw clean verify
           
-          # 2. Luego, con la máquina limpia, enviamos los resultados a SonarCloud
-          ./mvnw sonar:sonar \
-          -Dsonar.projectKey=sgi-fiis \
-          -Dsonar.organization=sgi-fiis
+          # Segundo enviamos el resultado usando el Key en minúsculas que dio éxito local
+          ./mvnw sonar:sonar -Dsonar.projectKey=sgi-fiis -Dsonar.organization=sgi-fiis
