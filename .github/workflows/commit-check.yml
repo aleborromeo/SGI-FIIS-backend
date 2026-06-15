@@ -11,6 +11,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate Commit Messages
         uses: wagoid/commitlint-github-action@v6
+        with:
+          commitDepth: 1
