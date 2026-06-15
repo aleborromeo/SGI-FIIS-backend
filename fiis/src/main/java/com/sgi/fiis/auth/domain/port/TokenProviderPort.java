@@ -1,6 +1,5 @@
 package com.sgi.fiis.auth.domain.port;
 
-import com.sgi.fiis.users.domain.model.Usuario;
 
 /**
  * Puerto del dominio para generación y validación de tokens JWT.

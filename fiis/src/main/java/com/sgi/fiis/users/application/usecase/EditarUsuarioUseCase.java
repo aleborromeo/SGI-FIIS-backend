@@ -55,7 +55,7 @@ public class EditarUsuarioUseCase {
             usuario.setRolCodigo(rolCodigo);
         }
 
-        usuario.setFechaActualizacion(LocalDateTime.now());
+        usuario.setFechaActualizacion(LocalDateTime.now(java.time.ZoneId.systemDefault()));
         return usuarioRepository.save(usuario);
     }
 }

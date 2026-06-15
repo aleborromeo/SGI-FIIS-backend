@@ -25,14 +25,14 @@ public class JwtTokenProvider implements TokenProviderPort {
 
     @Override
     public String generateToken(String email, String rolCodigo) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expirationMs);
+        java.time.Instant now = java.time.Instant.now();
+        java.time.Instant expiryDate = now.plusMillis(expirationMs);
 
         return Jwts.builder()
                 .subject(email)
                 .claim("rol", rolCodigo)
-                .issuedAt(now)
-                .expiration(expiryDate)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiryDate))
                 .signWith(key)
                 .compact();
     }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class RolRepositoryAdapter implements RolRepositoryPort {
@@ -27,7 +26,7 @@ public class RolRepositoryAdapter implements RolRepositoryPort {
     public List<Rol> findAll() {
         return springDataRepository.findAll().stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Rol toDomain(RolEntity entity) {

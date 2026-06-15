@@ -39,7 +39,7 @@ public class Usuario {
      */
     public void activar() {
         this.activo = true;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 
     /**
@@ -47,7 +47,7 @@ public class Usuario {
      */
     public void desactivar() {
         this.activo = false;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 
     /**
@@ -74,7 +74,7 @@ public class Usuario {
      */
     public void marcarCambioPasswordObligatorio() {
         this.mustChangePassword = true;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 
     /**
@@ -82,7 +82,7 @@ public class Usuario {
      */
     public void confirmarCambioPassword() {
         this.mustChangePassword = false;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 
     private String normalizarTexto(String texto) {

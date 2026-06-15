@@ -54,8 +54,8 @@ public class CrearUsuarioUseCase {
         usuario.setPasswordHash(passwordEncoder.encode(usuario.getDni()));
         usuario.setActivo(true);
         usuario.setMustChangePassword(true);
-        usuario.setFechaCreacion(LocalDateTime.now());
-        usuario.setFechaActualizacion(LocalDateTime.now());
+        usuario.setFechaCreacion(LocalDateTime.now(java.time.ZoneId.systemDefault()));
+        usuario.setFechaActualizacion(LocalDateTime.now(java.time.ZoneId.systemDefault()));
 
         return usuarioRepository.save(usuario);
     }

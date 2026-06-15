@@ -27,38 +27,42 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            // OAuth2 necesita sesión temporal durante el redirect de Microsoft
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .authorizeHttpRequests(auth -> auth
-                // Rutas públicas
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/health").permitAll()
-                // Rutas OAuth2 (Spring Security las maneja internamente)
-                .requestMatchers("/login/**", "/oauth2/**").permitAll()
-                // Rutas protegidas por rol
-                .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
-                // Todo lo demás requiere autenticación
-                .anyRequest().authenticated()
-            )
-            // JWT filter para endpoints protegidos
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            // OAuth2 login con Microsoft
-            .oauth2Login(oauth -> oauth
-                .successHandler(oAuth2SuccessHandler)
-                .failureHandler(oAuth2FailureHandler)
-            )
-            .exceptionHandling(exceptions -> exceptions
-                .defaultAuthenticationEntryPointFor(
-                    new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
-                    org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern("/api/**")
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        try {
+            http
+                .csrf(csrf -> csrf.disable())
+                // OAuth2 necesita sesión temporal durante el redirect de Microsoft
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .authorizeHttpRequests(auth -> auth
+                    // Rutas públicas
+                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/health").permitAll()
+                    // Rutas OAuth2 (Spring Security las maneja internamente)
+                    .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                    // Rutas protegidas por rol
+                    .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
+                    // Todo lo demás requiere autenticación
+                    .anyRequest().authenticated()
                 )
-            );
+                // JWT filter para endpoints protegidos
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // OAuth2 login con Microsoft
+                .oauth2Login(oauth -> oauth
+                    .successHandler(oAuth2SuccessHandler)
+                    .failureHandler(oAuth2FailureHandler)
+                )
+                .exceptionHandling(exceptions -> exceptions
+                    .defaultAuthenticationEntryPointFor(
+                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
+                        org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern("/api/**")
+                    )
+                );
 
-        return http.build();
+            return http.build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to configure security filter chain", e);
+        }
     }
 
     @Bean

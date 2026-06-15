@@ -25,7 +25,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         UsuarioEntity usuario = usuarioRepository.findByCorreoInstitucional(correo)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + correo));
 
-        return new User(
+        return new CustomUserDetails(
+                usuario.getId(),
                 usuario.getCorreoInstitucional(),
                 usuario.getPasswordHash(),
                 usuario.isActivo(),  // enabled

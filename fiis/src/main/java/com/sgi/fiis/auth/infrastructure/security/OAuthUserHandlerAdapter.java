@@ -53,7 +53,7 @@ public class OAuthUserHandlerAdapter implements OAuthUserHandlerPort {
         String nombres = parts[0];
         String apellidos = parts.length > 1 ? parts[1] : "";
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.systemDefault());
 
         Usuario nuevoUsuario = Usuario.builder()
                 .dni(dniPlaceholder)

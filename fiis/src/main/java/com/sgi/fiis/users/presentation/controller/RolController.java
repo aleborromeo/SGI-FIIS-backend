@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/roles")
@@ -27,7 +26,7 @@ public class RolController {
     public ResponseEntity<List<RolResponseDto>> listarRoles() {
         List<RolResponseDto> response = rolRepository.findAll().stream()
                 .map(rolMapper::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(response);
     }
 }

@@ -6,6 +6,7 @@ import com.sgi.fiis.users.application.dto.UsuarioUpdateDto;
 import com.sgi.fiis.users.application.usecase.*;
 import com.sgi.fiis.users.domain.model.Usuario;
 import com.sgi.fiis.users.presentation.mapper.UsuarioMapper;
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/usuarios")
@@ -68,7 +68,7 @@ public class UsuarioController {
             @RequestParam(required = false) String query) {
         List<UsuarioResponseDto> usuarios = listarUsuariosUseCase.execute(query).stream()
                 .map(mapper::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(usuarios);
     }
 
@@ -85,8 +85,11 @@ public class UsuarioController {
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> body) {
         boolean activar = body.getOrDefault("activo", true);
-        // TODO: Obtener ID del usuario autenticado desde SecurityContext
         Long idAutenticado = 0L;
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            idAutenticado = customUserDetails.getId();
+        }
         Usuario actualizado = cambiarEstadoUseCase.execute(id, activar, idAutenticado);
         return ResponseEntity.ok(mapper.toResponseDto(actualizado));
     }

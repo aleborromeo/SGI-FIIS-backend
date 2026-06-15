@@ -4,7 +4,6 @@ import tools.jackson.databind.ObjectMapper;
 import com.sgi.fiis.users.application.dto.UsuarioRequestDto;
 import com.sgi.fiis.users.application.usecase.*;
 import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.presentation.mapper.UsuarioMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
