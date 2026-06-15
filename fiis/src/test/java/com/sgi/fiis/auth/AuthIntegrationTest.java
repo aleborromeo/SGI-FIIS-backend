@@ -1,6 +1,6 @@
 package com.sgi.fiis.auth;
 
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sgi.fiis.auth.application.dto.LoginRequestDto;
 import com.sgi.fiis.users.domain.model.Rol;
 import com.sgi.fiis.users.domain.model.Usuario;
