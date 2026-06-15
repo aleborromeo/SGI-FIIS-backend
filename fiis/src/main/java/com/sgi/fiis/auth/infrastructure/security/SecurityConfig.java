@@ -42,7 +42,7 @@ public class SecurityConfig {
                     // Rutas protegidas por rol
                     .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
-                    // Todo lo demás requiere autenticación
+                    // Cualquier otra petición requiere autenticación
                     .anyRequest().authenticated()
                 )
                 // JWT filter para endpoints protegidos

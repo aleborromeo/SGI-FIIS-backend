@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 @Component
 public class JwtTokenProvider implements TokenProviderPort {
@@ -31,8 +30,8 @@ public class JwtTokenProvider implements TokenProviderPort {
         return Jwts.builder()
                 .subject(email)
                 .claim("rol", rolCodigo)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(expiryDate))
+                .issuedAt(java.util.Date.from(now))
+                .expiration(java.util.Date.from(expiryDate))
                 .signWith(key)
                 .compact();
     }

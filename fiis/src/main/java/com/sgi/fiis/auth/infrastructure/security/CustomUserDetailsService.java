@@ -30,9 +30,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 usuario.getCorreoInstitucional(),
                 usuario.getPasswordHash(),
                 usuario.isActivo(),  // enabled
-                true,                // accountNonExpired
-                true,                // credentialsNonExpired
-                true,                // accountNonLocked
                 Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getCodigoRol())
                 )
