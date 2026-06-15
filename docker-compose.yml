@@ -26,7 +26,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin
       # Configuración para que Flyway se ejecute automáticamente al arrancar
-      - SPRING_FLYWAY_ENABLED=false
+      - SPRING_FLYWAY_ENABLED=true
     depends_on:
       - db_fiis
     networks:
