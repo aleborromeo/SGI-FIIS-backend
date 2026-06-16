@@ -5,9 +5,9 @@ services:
     environment:
       POSTGRES_DB: db_fiis_investigacion
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
+      POSTGRES_PASSWORD: 1234
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_fiis_data:/var/lib/postgresql/data
     networks:
@@ -22,7 +22,7 @@ services:
       # Configuración de conexión que usará Spring Boot
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_fiis:5432/db_fiis_investigacion
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=12345
+      - SPRING_DATASOURCE_PASSWORD=1234
       # Configuración para que Flyway se ejecute automáticamente al arrancar
       - SPRING_FLYWAY_ENABLED=false
     depends_on:
