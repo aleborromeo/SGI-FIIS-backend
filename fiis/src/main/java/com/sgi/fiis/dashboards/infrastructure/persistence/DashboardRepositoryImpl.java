@@ -57,11 +57,11 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         int tramitesAprobados = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'APROBADO'");
         int tramitesRechazados = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'RECHAZADO'");
 
-        List<DashboardAdmin.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         int proyectosObservados = count("SELECT COUNT(*) FROM proyectos WHERE estado_proyecto = 'OBSERVADO'");
         if (proyectosObservados > 0) {
-            alertas.add(DashboardAdmin.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_ALERTA)
                     .titulo("Proyectos observados")
                     .descripcion(proyectosObservados + " proyecto(s) requieren subsanación.")
@@ -69,7 +69,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         }
 
         if (tramitesPendientes > 0) {
-            alertas.add(DashboardAdmin.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Trámites pendientes de atención")
                     .descripcion(tramitesPendientes + " trámite(s) sin resolver.")
@@ -78,7 +78,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
 
         int convocatoriasAbiertas = count(SQL_COUNT_CONVOCATORIAS_ABIERTAS);
         if (convocatoriasAbiertas > 0) {
-            alertas.add(DashboardAdmin.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_INFO)
                     .titulo(TITULO_CONVOCATORIA_ACTIVA)
                     .descripcion(convocatoriasAbiertas + " convocatoria(s) abiertas actualmente.")
@@ -124,24 +124,26 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         int tramitesEnDecano = count("SELECT COUNT(*) FROM tramites WHERE rol_revisor_actual = 'DECANO'");
         int tramitesFinalizados = count("SELECT COUNT(*) FROM tramites WHERE estado_actual IN ('APROBADO','RECHAZADO')");
 
-        List<DashboardDirector.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         if (tramitesPendientesRevision > 0) {
-            alertas.add(DashboardDirector.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Trámites pendientes de revisión")
                     .descripcion(tramitesPendientesRevision + " trámite(s) esperan su revisión.")
                     .build());
         }
+
         if (informesPorVencer > 0) {
-            alertas.add(DashboardDirector.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_ALERTA)
                     .titulo("Informes de avance pendientes")
                     .descripcion(informesPorVencer + " informe(s) de avance sin aprobar.")
                     .build());
         }
+
         if (convocatoriasAbiertas > 0) {
-            alertas.add(DashboardDirector.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_INFO)
                     .titulo(TITULO_CONVOCATORIA_ACTIVA)
                     .descripcion("Fondo concursable FIIS disponible.")
@@ -195,7 +197,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
             return DashboardCoordinador.builder()
                     .nombreGrupo("Sin grupo asignado")
                     .codigoGrupo("")
-                    .alertas(List.of(DashboardCoordinador.AlertaItem.builder()
+                    .alertas(List.of(AlertaItem.builder()
                             .tipo(TIPO_ALERTA)
                             .titulo("Sin grupo asignado")
                             .descripcion("No se encontró un grupo activo coordinado por este usuario.")
@@ -219,17 +221,18 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         int tramitesAprobados = count(SQL_COUNT_TRAMITES_GRUPO + idGrupo + " AND estado_actual = 'APROBADO'");
         int tramitesObservados = count(SQL_COUNT_TRAMITES_GRUPO + idGrupo + " AND estado_actual = 'OBSERVADO'");
 
-        List<DashboardCoordinador.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         if (tramitesPendientesGrupo > 0) {
-            alertas.add(DashboardCoordinador.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Trámites pendientes en tu grupo")
                     .descripcion(tramitesPendientesGrupo + " trámite(s) de tu grupo sin resolver.")
                     .build());
         }
+
         if (tramitesObservados > 0) {
-            alertas.add(DashboardCoordinador.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_ALERTA)
                     .titulo("Trámites observados")
                     .descripcion(tramitesObservados + " trámite(s) requieren correcciones.")
@@ -280,17 +283,18 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         int proyectosEnEjecucion = count(SQL_COUNT_PROYECTOS_RESPONSABLE + idUsuario + " AND estado_proyecto = 'EN_EJECUCION'");
         int proyectosFinalizados = count(SQL_COUNT_PROYECTOS_RESPONSABLE + idUsuario + " AND estado_proyecto = 'FINALIZADO'");
 
-        List<DashboardDocente.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         if (tramitesPendientes > 0) {
-            alertas.add(DashboardDocente.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Trámites en proceso")
                     .descripcion(tramitesPendientes + " trámite(s) tuyos aún en revisión.")
                     .build());
         }
+
         if (informesAvancePendientes > 0) {
-            alertas.add(DashboardDocente.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_ALERTA)
                     .titulo("Informes de avance pendientes")
                     .descripcion(informesAvancePendientes + " informe(s) de avance sin aprobar.")
@@ -299,7 +303,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
 
         int convocatoriasAbiertas = count(SQL_COUNT_CONVOCATORIAS_ABIERTAS);
         if (convocatoriasAbiertas > 0) {
-            alertas.add(DashboardDocente.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_INFO)
                     .titulo(TITULO_CONVOCATORIA_ACTIVA)
                     .descripcion("Hay " + convocatoriasAbiertas + " convocatoria(s) abiertas.")
@@ -337,10 +341,10 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         int evaluacionesRechazadas = count(SQL_COUNT_EVALUACIONES_EVALUADOR + idUsuario + " AND resultado = 'RECHAZADO'");
         int evaluacionesConObservaciones = count(SQL_COUNT_EVALUACIONES_EVALUADOR + idUsuario + " AND resultado = 'CON_OBSERVACIONES'");
 
-        List<DashboardEvaluador.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         if (evaluacionesPendientes > 0) {
-            alertas.add(DashboardEvaluador.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Evaluaciones pendientes")
                     .descripcion(evaluacionesPendientes + " evaluación(es) asignadas sin completar.")
@@ -381,17 +385,18 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         int tramitesRechazadosMes = count(
                 "SELECT COUNT(*) FROM tramites WHERE estado_actual = 'RECHAZADO' AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', CURRENT_DATE)");
 
-        List<DashboardDecano.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         if (tramitesPendientesFirma > 0) {
-            alertas.add(DashboardDecano.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Trámites pendientes de firma")
                     .descripcion(tramitesPendientesFirma + " trámite(s) esperan aprobación del Decano.")
                     .build());
         }
+
         if (convocatoriasActivas > 0) {
-            alertas.add(DashboardDecano.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_INFO)
                     .titulo(TITULO_CONVOCATORIA_ACTIVA)
                     .descripcion("Hay " + convocatoriasActivas + " convocatoria(s) abiertas en la facultad.")
@@ -448,24 +453,26 @@ public class DashboardRepositoryImpl implements DashboardRepository {
             codigoGrupo = (String) grupoResult.get(0).get("codigo_grupo");
         }
 
-        List<DashboardEstudiante.AlertaItem> alertas = new ArrayList<>();
+        List<AlertaItem> alertas = new ArrayList<>();
 
         if (tramitesPendientes > 0) {
-            alertas.add(DashboardEstudiante.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_REVISION)
                     .titulo("Trámites en proceso")
                     .descripcion(tramitesPendientes + " trámite(s) tuyos en revisión.")
                     .build());
         }
+
         if ("OBSERVADO".equals(estadoPlan)) {
-            alertas.add(DashboardEstudiante.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_ALERTA)
                     .titulo("Plan de tesis observado")
                     .descripcion("Tu plan de tesis tiene observaciones que debes subsanar.")
                     .build());
         }
+
         if (convocatoriasAbiertas > 0) {
-            alertas.add(DashboardEstudiante.AlertaItem.builder()
+            alertas.add(AlertaItem.builder()
                     .tipo(TIPO_INFO)
                     .titulo(TITULO_CONVOCATORIA_ACTIVA)
                     .descripcion("Hay " + convocatoriasAbiertas + " convocatoria(s) abiertas.")

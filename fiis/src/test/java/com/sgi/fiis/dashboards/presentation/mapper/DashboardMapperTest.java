@@ -23,7 +23,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardAdmin a DashboardAdminResponse")
     void toAdminResponse_debeMapearCamposYAlertas() {
-        DashboardAdmin.AlertaItem alerta = DashboardAdmin.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("REVISION")
                 .titulo("Trámite pendiente")
                 .descripcion("Hay trámites pendientes")
@@ -70,7 +70,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardDirector a DashboardDirectorResponse")
     void toDirectorResponse_debeMapearCamposYAlertas() {
-        DashboardDirector.AlertaItem alerta = DashboardDirector.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("INFO")
                 .titulo("Convocatoria activa")
                 .descripcion("Hay convocatoria")
@@ -117,7 +117,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardCoordinador a DashboardCoordinadorResponse")
     void toCoordinadorResponse_debeMapearCamposYAlertas() {
-        DashboardCoordinador.AlertaItem alerta = DashboardCoordinador.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("ALERTA")
                 .titulo("Trámite observado")
                 .descripcion("Hay observaciones")
@@ -168,7 +168,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardDocente a DashboardDocenteResponse")
     void toDocenteResponse_debeMapearCamposYAlertas() {
-        DashboardDocente.AlertaItem alerta = DashboardDocente.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("REVISION")
                 .titulo("Informe pendiente")
                 .descripcion("Tiene informes")
@@ -211,7 +211,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardEvaluador a DashboardEvaluadorResponse")
     void toEvaluadorResponse_debeMapearCamposYAlertas() {
-        DashboardEvaluador.AlertaItem alerta = DashboardEvaluador.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("REVISION")
                 .titulo("Evaluaciones pendientes")
                 .descripcion("Tiene evaluaciones")
@@ -250,7 +250,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardDecano a DashboardDecanoResponse")
     void toDecanoResponse_debeMapearCamposYAlertas() {
-        DashboardDecano.AlertaItem alerta = DashboardDecano.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("INFO")
                 .titulo("Convocatoria activa")
                 .descripcion("Hay convocatoria")
@@ -291,7 +291,7 @@ class DashboardMapperTest {
     @Test
     @DisplayName("Debe mapear DashboardEstudiante a DashboardEstudianteResponse")
     void toEstudianteResponse_debeMapearCamposYAlertas() {
-        DashboardEstudiante.AlertaItem alerta = DashboardEstudiante.AlertaItem.builder()
+        AlertaItem alerta = AlertaItem.builder()
                 .tipo("ALERTA")
                 .titulo("Plan observado")
                 .descripcion("Debe subsanar")

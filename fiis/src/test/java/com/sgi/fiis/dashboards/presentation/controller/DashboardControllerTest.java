@@ -1,5 +1,6 @@
 package com.sgi.fiis.dashboards.presentation.controller;
 
+import com.sgi.fiis.dashboards.application.dto.AlertaItemResponse;
 import com.sgi.fiis.dashboards.application.dto.DashboardAdminResponse;
 import com.sgi.fiis.dashboards.application.dto.DashboardCoordinadorResponse;
 import com.sgi.fiis.dashboards.application.dto.DashboardDecanoResponse;
@@ -91,7 +92,7 @@ class DashboardControllerTest {
                 .tramitesAprobados(2)
                 .tramitesRechazados(3)
                 .alertas(List.of(
-                        DashboardAdminResponse.AlertaItemResponse.builder()
+                        AlertaItemResponse.builder()
                                 .tipo("REVISION")
                                 .titulo("Trámites pendientes")
                                 .descripcion("Hay trámites pendientes")
