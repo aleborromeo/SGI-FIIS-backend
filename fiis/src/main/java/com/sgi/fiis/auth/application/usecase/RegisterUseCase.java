@@ -65,6 +65,7 @@ public class RegisterUseCase {
         }
 
         // Imprimir en consola de desarrollo para pruebas fáciles
-        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", correo, code);
+        String cleanCorreo = correo.replaceAll("[\n\r]", "_");
+        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", cleanCorreo, code);
     }
 }
