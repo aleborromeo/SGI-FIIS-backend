@@ -89,7 +89,7 @@ El inicio de sesión permite autenticar de forma local a usuarios previamente re
 ```mermaid
 flowchart TD
     Start([Inicio]) --> Request[Usuario ingresa correo y contraseña]
-    Request --> Controller[POST /api/v1/auth/login]
+    Request --> Controller["POST /api/v1/auth/login"]
     Controller --> Usecase[LoginUseCase.execute]
     Usecase --> FindUser{¿Usuario existe en BD?}
     FindUser -- No --> BadCreds[Retornar error: Credenciales inválidas]
@@ -122,7 +122,7 @@ El Administrador puede forzar el reinicio de las credenciales de cualquier cuent
 ```mermaid
 flowchart TD
     subgraph Reinicio por Administrador
-        AdminStart([Admin inicia reinicio de contraseña]) --> AdminRequest[PATCH /api/v1/usuarios/{id}/reiniciar-password]
+        AdminStart([Admin inicia reinicio de contraseña]) --> AdminRequest["PATCH /api/v1/usuarios/{id}/reiniciar-password"]
         AdminRequest --> ReiniciarUseCase[ReiniciarPasswordUseCase]
         ReiniciarUseCase --> ResetHash[Establecer hash de contraseña = DNI del usuario]
         ResetHash --> SetMustChange[Marcar must_change_password = true]
@@ -130,7 +130,7 @@ flowchart TD
     end
 
     subgraph Cambio por Usuario
-        UserStart([Usuario inicia cambio de contraseña]) --> UserRequest[POST /api/v1/auth/cambiar-password]
+        UserStart([Usuario inicia cambio de contraseña]) --> UserRequest["POST /api/v1/auth/cambiar-password"]
         UserRequest --> CambiarUseCase[CambiarPasswordUseCase]
         CambiarUseCase --> CheckCurrent{¿Contraseña actual es correcta?}
         CheckCurrent -- No --> ErrorChange[Retornar error: Contraseña actual incorrecta]
