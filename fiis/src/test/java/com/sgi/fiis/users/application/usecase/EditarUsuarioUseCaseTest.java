@@ -101,4 +101,25 @@ class EditarUsuarioUseCaseTest {
         verify(usuarioRepository).findByCorreo("duplicado@unas.edu.pe");
         verifyNoInteractions(rolRepository);
     }
+
+    @Test
+    @DisplayName("Should throw BusinessException when editing user with email that does not end with .edu.pe")
+    void testEditarUsuarioCorreoInvalido() {
+        Usuario usuario = Usuario.builder()
+                .id(1L)
+                .correoInstitucional("juan.perez@unas.edu.pe")
+                .build();
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        com.sgi.fiis.shared.domain.exception.BusinessException exception = assertThrows(
+                com.sgi.fiis.shared.domain.exception.BusinessException.class,
+                () -> editarUsuarioUseCase.execute(1L, null, null, "invalido@gmail.com", null, null)
+        );
+
+        assertEquals("El correo institucional debe pertenecer al dominio .edu.pe", exception.getMessage());
+        verify(usuarioRepository).findById(1L);
+        verifyNoMoreInteractions(usuarioRepository);
+        verifyNoInteractions(rolRepository);
+    }
 }

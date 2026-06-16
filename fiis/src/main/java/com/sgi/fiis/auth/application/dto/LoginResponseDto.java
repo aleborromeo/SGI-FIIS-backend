@@ -17,4 +17,5 @@ public class LoginResponseDto {
     private String apellidos;
     private String rolCodigo;
     private boolean mustChangePassword;
+    private boolean requiresVerification;
 }

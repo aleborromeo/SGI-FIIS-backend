@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.application.usecase;
 
+import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.users.domain.model.Usuario;
@@ -38,6 +39,9 @@ public class EditarUsuarioUseCase {
             usuario.setApellidos(apellidos);
         }
         if (correo != null && !correo.isBlank()) {
+            if (!correo.toLowerCase().endsWith(".edu.pe")) {
+                throw new BusinessException("El correo institucional debe pertenecer al dominio .edu.pe");
+            }
             // Verificar que no exista otro usuario con ese correo
             usuarioRepository.findByCorreo(correo).ifPresent(existente -> {
                 if (!existente.getId().equals(id)) {

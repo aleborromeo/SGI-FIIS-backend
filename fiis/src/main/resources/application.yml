@@ -18,6 +18,19 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  # Java Mail Sender Config
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:tu_correo@unas.edu.pe}
+    password: ${SPRING_MAIL_PASSWORD:tu_contraseña}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   # Microsoft OAuth2 (Entra ID)
   security:
     oauth2:
@@ -36,6 +49,7 @@ spring:
             jwk-set-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID:common}/discovery/v2.0/keys
             user-info-uri: https://graph.microsoft.com/oidc/userinfo
             user-name-attribute: email
+
 
 app:
   jwt:

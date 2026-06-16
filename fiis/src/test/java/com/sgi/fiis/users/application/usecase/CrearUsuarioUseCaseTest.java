@@ -108,4 +108,31 @@ class CrearUsuarioUseCaseTest {
         verify(usuarioRepository).existsByDni("12345678");
         verifyNoMoreInteractions(usuarioRepository, passwordEncoder);
     }
+
+    @Test
+    @DisplayName("Should throw BusinessException when correo does not end with .edu.pe")
+    void testCrearUsuarioCorreoInvalido() {
+        Usuario usuarioInput = Usuario.builder()
+                .dni("12345678")
+                .nombres("Carlos")
+                .apellidos("Santana")
+                .correoInstitucional("carlos@gmail.com")
+                .rolCodigo("DOCENTE_INVESTIGADOR")
+                .build();
+
+        Rol rol = Rol.builder().codigoRol("DOCENTE_INVESTIGADOR").build();
+
+        when(rolRepository.findByCodigo("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(rol));
+        when(usuarioRepository.existsByDni("12345678")).thenReturn(false);
+
+        com.sgi.fiis.shared.domain.exception.BusinessException exception = assertThrows(
+                com.sgi.fiis.shared.domain.exception.BusinessException.class,
+                () -> crearUsuarioUseCase.execute(usuarioInput)
+        );
+
+        assertEquals("El correo institucional debe pertenecer al dominio .edu.pe", exception.getMessage());
+        verify(rolRepository).findByCodigo("DOCENTE_INVESTIGADOR");
+        verify(usuarioRepository).existsByDni("12345678");
+        verifyNoMoreInteractions(usuarioRepository, passwordEncoder);
+    }
 }

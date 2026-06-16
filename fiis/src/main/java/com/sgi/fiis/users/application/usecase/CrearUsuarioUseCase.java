@@ -1,6 +1,7 @@
 package com.sgi.fiis.users.application.usecase;
 
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
+import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.users.domain.model.Usuario;
@@ -44,6 +45,11 @@ public class CrearUsuarioUseCase {
 
         // Generar correo institucional si no se proporcionó (RF-10)
         usuario.generarCorreoInstitucional();
+
+        // Validar que el correo institucional termine con .edu.pe
+        if (usuario.getCorreoInstitucional() == null || !usuario.getCorreoInstitucional().toLowerCase().endsWith(".edu.pe")) {
+            throw new BusinessException("El correo institucional debe pertenecer al dominio .edu.pe");
+        }
 
         // Validar duplicidad de correo (RNF-38)
         if (usuarioRepository.existsByCorreo(usuario.getCorreoInstitucional())) {
