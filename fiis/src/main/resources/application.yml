@@ -7,3 +7,15 @@ spring:
   flyway:
     enabled: false
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB       # Tamaño máximo permitido por cada archivo individual
+      max-request-size: 10MB     # Tamaño máximo total permitido para toda la petición HTTP
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+    tagsSorter: alpha
