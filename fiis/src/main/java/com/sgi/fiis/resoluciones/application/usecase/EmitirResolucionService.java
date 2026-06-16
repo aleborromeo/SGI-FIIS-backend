@@ -54,7 +54,7 @@ public class EmitirResolucionService implements EmitirResolucionUseCase {
                 command.asunto(),
                 command.idTramite(),
                 idDocumento,
-                LocalDateTime.now()
+                LocalDateTime.now(java.time.ZoneId.systemDefault())
         );
 
         // 5. Guardar la resolución

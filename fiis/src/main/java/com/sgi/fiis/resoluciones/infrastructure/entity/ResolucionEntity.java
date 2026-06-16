@@ -34,7 +34,7 @@ public class ResolucionEntity {
     @PrePersist
     protected void onCreate() {
         if (fechaRegistro == null) {
-            fechaRegistro = LocalDateTime.now();
+            fechaRegistro = LocalDateTime.now(java.time.ZoneId.systemDefault());
         }
     }
 

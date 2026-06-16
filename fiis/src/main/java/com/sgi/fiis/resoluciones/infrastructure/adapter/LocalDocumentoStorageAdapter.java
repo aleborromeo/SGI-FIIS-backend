@@ -48,6 +48,6 @@ public class LocalDocumentoStorageAdapter implements DocumentoStoragePort {
         if (keyHolder.getKeys() != null && keyHolder.getKeys().containsKey("id_documento")) {
             return ((Number) keyHolder.getKeys().get("id_documento")).longValue();
         }
-        throw new RuntimeException("Fallo al insertar documento simulado y obtener su ID.");
+        throw new IllegalStateException("Fallo al insertar documento simulado y obtener su ID.");
     }
 }
