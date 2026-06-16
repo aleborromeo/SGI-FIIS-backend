@@ -9,26 +9,15 @@ import java.util.List;
 @Builder
 public class DashboardEvaluador {
 
-    // Métricas del evaluador (RF-93)
     private int evaluacionesAsignadas;
     private int evaluacionesPendientes;
     private int evaluacionesCompletadas;
     private int proyectosAsignados;
     private int planesTesisAsignados;
 
-    // Resultados de evaluaciones
     private int evaluacionesAprobadas;
     private int evaluacionesRechazadas;
     private int evaluacionesConObservaciones;
 
-    // Alertas
     private List<AlertaItem> alertas;
-
-    @Getter
-    @Builder
-    public static class AlertaItem {
-        private String tipo;
-        private String titulo;
-        private String descripcion;
-    }
 }

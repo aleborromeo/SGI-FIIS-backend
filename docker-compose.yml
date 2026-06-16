@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: db_fiis_investigacion
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 72054651
+      POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
     volumes:
@@ -18,13 +18,15 @@ services:
     container_name: sgifiis-backend-api
     ports:
       - "8080:8080"
+    env_file:
+      - ./fiis/.env
     environment:
       # Configuración de conexión que usará Spring Boot
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_fiis:5432/db_fiis_investigacion
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=72054651
+      - SPRING_DATASOURCE_PASSWORD=admin
       # Configuración para que Flyway se ejecute automáticamente al arrancar
-      - SPRING_FLYWAY_ENABLED=false
+      - SPRING_FLYWAY_ENABLED=true
     depends_on:
       - db_fiis
     networks:

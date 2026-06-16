@@ -25,20 +25,8 @@ public class DashboardMapper {
                 .tramitesEnRevision(modelo.getTramitesEnRevision())
                 .tramitesAprobados(modelo.getTramitesAprobados())
                 .tramitesRechazados(modelo.getTramitesRechazados())
-                .alertas(mapAlertasAdmin(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
-    }
-
-    private List<DashboardAdminResponse.AlertaItemResponse> mapAlertasAdmin(
-            List<DashboardAdmin.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
-        return alertas.stream()
-                .map(a -> DashboardAdminResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
-                        .build())
-                .toList();
     }
 
     // =========================================================================
@@ -58,20 +46,8 @@ public class DashboardMapper {
                 .tramitesEnDirector(modelo.getTramitesEnDirector())
                 .tramitesEnDecano(modelo.getTramitesEnDecano())
                 .tramitesFinalizados(modelo.getTramitesFinalizados())
-                .alertas(mapAlertasDirector(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
-    }
-
-    private List<DashboardDirectorResponse.AlertaItemResponse> mapAlertasDirector(
-            List<DashboardDirector.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
-        return alertas.stream()
-                .map(a -> DashboardDirectorResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
-                        .build())
-                .toList();
     }
 
     // =========================================================================
@@ -93,20 +69,8 @@ public class DashboardMapper {
                 .tramitesEnRevision(modelo.getTramitesEnRevision())
                 .tramitesAprobados(modelo.getTramitesAprobados())
                 .tramitesObservados(modelo.getTramitesObservados())
-                .alertas(mapAlertasCoordinador(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
-    }
-
-    private List<DashboardCoordinadorResponse.AlertaItemResponse> mapAlertasCoordinador(
-            List<DashboardCoordinador.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
-        return alertas.stream()
-                .map(a -> DashboardCoordinadorResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
-                        .build())
-                .toList();
     }
 
     // =========================================================================
@@ -124,20 +88,8 @@ public class DashboardMapper {
                 .proyectosAprobados(modelo.getProyectosAprobados())
                 .proyectosEnEjecucion(modelo.getProyectosEnEjecucion())
                 .proyectosFinalizados(modelo.getProyectosFinalizados())
-                .alertas(mapAlertasDocente(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
-    }
-
-    private List<DashboardDocenteResponse.AlertaItemResponse> mapAlertasDocente(
-            List<DashboardDocente.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
-        return alertas.stream()
-                .map(a -> DashboardDocenteResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
-                        .build())
-                .toList();
     }
 
     // =========================================================================
@@ -153,20 +105,8 @@ public class DashboardMapper {
                 .evaluacionesAprobadas(modelo.getEvaluacionesAprobadas())
                 .evaluacionesRechazadas(modelo.getEvaluacionesRechazadas())
                 .evaluacionesConObservaciones(modelo.getEvaluacionesConObservaciones())
-                .alertas(mapAlertasEvaluador(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
-    }
-
-    private List<DashboardEvaluadorResponse.AlertaItemResponse> mapAlertasEvaluador(
-            List<DashboardEvaluador.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
-        return alertas.stream()
-                .map(a -> DashboardEvaluadorResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
-                        .build())
-                .toList();
     }
 
     // =========================================================================
@@ -183,20 +123,8 @@ public class DashboardMapper {
                 .tramitesEnEspera(modelo.getTramitesEnEspera())
                 .tramitesAprobadosMes(modelo.getTramitesAprobadosMes())
                 .tramitesRechazadosMes(modelo.getTramitesRechazadosMes())
-                .alertas(mapAlertasDecano(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
-    }
-
-    private List<DashboardDecanoResponse.AlertaItemResponse> mapAlertasDecano(
-            List<DashboardDecano.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
-        return alertas.stream()
-                .map(a -> DashboardDecanoResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
-                        .build())
-                .toList();
     }
 
     // =========================================================================
@@ -211,18 +139,23 @@ public class DashboardMapper {
                 .convocatoriasAbiertas(modelo.getConvocatoriasAbiertas())
                 .nombreGrupo(modelo.getNombreGrupo())
                 .codigoGrupo(modelo.getCodigoGrupo())
-                .alertas(mapAlertasEstudiante(modelo.getAlertas()))
+                .alertas(mapAlertas(modelo.getAlertas()))
                 .build();
     }
 
-    private List<DashboardEstudianteResponse.AlertaItemResponse> mapAlertasEstudiante(
-            List<DashboardEstudiante.AlertaItem> alertas) {
-        if (alertas == null) return List.of();
+    // =========================================================================
+    // ALERTAS
+    // =========================================================================
+    private List<AlertaItemResponse> mapAlertas(List<AlertaItem> alertas) {
+        if (alertas == null) {
+            return List.of();
+        }
+
         return alertas.stream()
-                .map(a -> DashboardEstudianteResponse.AlertaItemResponse.builder()
-                        .tipo(a.getTipo())
-                        .titulo(a.getTitulo())
-                        .descripcion(a.getDescripcion())
+                .map(alerta -> AlertaItemResponse.builder()
+                        .tipo(alerta.getTipo())
+                        .titulo(alerta.getTitulo())
+                        .descripcion(alerta.getDescripcion())
                         .build())
                 .toList();
     }

@@ -24,12 +24,4 @@ public class DashboardDirectorResponse {
     private int tramitesFinalizados;
 
     private List<AlertaItemResponse> alertas;
-
-    @Getter
-    @Builder
-    public static class AlertaItemResponse {
-        private String tipo;
-        private String titulo;
-        private String descripcion;
-    }
 }

@@ -9,7 +9,6 @@ import java.util.List;
 @Builder
 public class DashboardDocente {
 
-    // Métricas del docente (RF-92)
     private int proyectosComoResponsable;
     private int proyectosComoIntegrante;
     private int tramitesPendientes;
@@ -17,20 +16,10 @@ public class DashboardDocente {
     private int documentosCargados;
     private int resolucionesRecibidas;
 
-    // Estado de proyectos
     private int proyectosPostulados;
     private int proyectosAprobados;
     private int proyectosEnEjecucion;
     private int proyectosFinalizados;
 
-    // Alertas
     private List<AlertaItem> alertas;
-
-    @Getter
-    @Builder
-    public static class AlertaItem {
-        private String tipo;
-        private String titulo;
-        private String descripcion;
-    }
 }

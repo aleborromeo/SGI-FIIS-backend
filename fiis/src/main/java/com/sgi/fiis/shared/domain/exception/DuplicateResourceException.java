@@ -5,7 +5,7 @@ public class DuplicateResourceException extends RuntimeException {
         super(message);
     }
 
-    public DuplicateResourceException(String recurso, String campo, Object valor) {
-        super(String.format("Ya existe un %s con %s: '%s'", recurso, campo, valor));
+    public DuplicateResourceException(String resource, String field, Object value) {
+        super(String.format("Ya existe un %s con %s: '%s'", resource, field, value));
     }
 }
