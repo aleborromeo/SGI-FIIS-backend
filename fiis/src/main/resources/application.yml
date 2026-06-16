@@ -2,7 +2,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/db_fiis_investigacion}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:ADMIN}
+    password: ${SPRING_DATASOURCE_PASSWORD:72054651}
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: false
