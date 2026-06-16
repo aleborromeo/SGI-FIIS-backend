@@ -24,6 +24,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         try {
             http
+                // Deshabilitar CSRF es seguro aquí porque la API es stateless y utiliza tokens JWT
+                // enviados en la cabecera 'Authorization: Bearer <token>', no cookies de sesión,
+                // lo que elimina el riesgo de ataques Cross-Site Request Forgery (CSRF).
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
