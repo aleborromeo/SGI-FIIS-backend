@@ -1,0 +1,50 @@
+package com.sgi.fiis.convocatorias.application.usecases;
+
+import com.sgi.fiis.convocatorias.application.dto.CallResponse;
+import com.sgi.fiis.convocatorias.application.dto.CreateCallRequest;
+import com.sgi.fiis.convocatorias.application.ports.in.CreateCallUseCase;
+import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
+import com.sgi.fiis.convocatorias.domain.model.CallStatus;
+import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CreateCallInteractor implements CreateCallUseCase {
+
+    private final SaveCallPort saveCallPort;
+
+    public CreateCallInteractor(SaveCallPort saveCallPort) {
+        this.saveCallPort = saveCallPort;
+    }
+
+    @Override
+    @Auditable(action = "CREATE_RESEARCH_CALL")
+    public CallResponse execute(CreateCallRequest request) {
+        // Create domain model which executes business rule checks (e.g. endDate is not before startDate)
+        ResearchCall call = new ResearchCall(
+                null,
+                request.getTitle(),
+                request.getStartDate(),
+                request.getEndDate(),
+                CallStatus.OPEN
+        );
+
+        ResearchCall savedCall = saveCallPort.save(call);
+
+        String statusName = "ABIERTA";
+        if (savedCall.getStatus() == CallStatus.CLOSED) {
+            statusName = "CERRADA";
+        } else if (savedCall.getStatus() == CallStatus.FINISHED) {
+            statusName = "FINALIZADA";
+        }
+
+        return new CallResponse(
+                savedCall.getId(),
+                savedCall.getTitle(),
+                savedCall.getStartDate(),
+                savedCall.getEndDate(),
+                statusName
+        );
+    }
+}
