@@ -1,7 +1,7 @@
-package com.sgi.fiis.reportes.application;
+package com.sgi.fiis.reportes.application.service;
 
-import com.sgi.fiis.reportes.domain.TrazabilidadMovimiento;
-import com.sgi.fiis.reportes.infrastructure.persistence.TrazabilidadRepository;
+import com.sgi.fiis.reportes.domain.model.TrazabilidadMovimiento;
+import com.sgi.fiis.reportes.domain.repository.TrazabilidadRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +13,9 @@ import java.util.List;
 @Service
 public class TrazabilidadService {
 
-    private final TrazabilidadRepository repo;
+    private final TrazabilidadRepositoryPort repo;
 
-    public TrazabilidadService(TrazabilidadRepository repo) {
+    public TrazabilidadService(TrazabilidadRepositoryPort repo) {
         this.repo = repo;
     }
 

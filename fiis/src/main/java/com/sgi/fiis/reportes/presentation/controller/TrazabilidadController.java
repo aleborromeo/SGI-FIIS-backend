@@ -1,7 +1,7 @@
-package com.sgi.fiis.reportes.presentation;
+package com.sgi.fiis.reportes.presentation.controller;
 
-import com.sgi.fiis.reportes.application.TrazabilidadService;
-import com.sgi.fiis.reportes.domain.TrazabilidadMovimiento;
+import com.sgi.fiis.reportes.application.service.TrazabilidadService;
+import com.sgi.fiis.reportes.domain.model.TrazabilidadMovimiento;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

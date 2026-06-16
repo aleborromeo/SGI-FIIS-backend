@@ -1,7 +1,7 @@
-package com.sgi.fiis.reportes.presentation;
+package com.sgi.fiis.reportes.presentation.controller;
 
-import com.sgi.fiis.reportes.application.ReporteService;
-import com.sgi.fiis.reportes.domain.*;
+import com.sgi.fiis.reportes.application.service.ReporteService;
+import com.sgi.fiis.reportes.domain.model.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

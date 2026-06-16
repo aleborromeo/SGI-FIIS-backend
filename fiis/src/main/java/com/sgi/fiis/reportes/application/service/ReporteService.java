@@ -1,7 +1,7 @@
-package com.sgi.fiis.reportes.application;
+package com.sgi.fiis.reportes.application.service;
 
-import com.sgi.fiis.reportes.domain.*;
-import com.sgi.fiis.reportes.infrastructure.persistence.ReporteRepository;
+import com.sgi.fiis.reportes.domain.model.*;
+import com.sgi.fiis.reportes.domain.repository.ReporteRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +14,9 @@ import java.util.List;
 @Service
 public class ReporteService {
 
-    private final ReporteRepository repo;
+    private final ReporteRepositoryPort repo;
 
-    public ReporteService(ReporteRepository repo) {
+    public ReporteService(ReporteRepositoryPort repo) {
         this.repo = repo;
     }
 

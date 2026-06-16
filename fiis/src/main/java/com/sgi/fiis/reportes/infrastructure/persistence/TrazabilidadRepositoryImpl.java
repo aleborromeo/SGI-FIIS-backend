@@ -1,6 +1,7 @@
 package com.sgi.fiis.reportes.infrastructure.persistence;
 
-import com.sgi.fiis.reportes.domain.TrazabilidadMovimiento;
+import com.sgi.fiis.reportes.domain.model.TrazabilidadMovimiento;
+import com.sgi.fiis.reportes.domain.repository.TrazabilidadRepositoryPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -8,15 +9,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repositorio para consultar el historial cronológico de movimientos
- * de un trámite (RF-96 a RF-99, RNF-46 a RNF-48).
+ * Implementación JdbcTemplate del repositorio de trazabilidad de trámites
+ * (RF-96 a RF-99, RNF-46 a RNF-48).
  */
 @Repository
-public class TrazabilidadRepository {
+public class TrazabilidadRepositoryImpl implements TrazabilidadRepositoryPort {
 
     private final JdbcTemplate jdbc;
 
-    public TrazabilidadRepository(JdbcTemplate jdbc) {
+    public TrazabilidadRepositoryImpl(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
@@ -43,6 +44,7 @@ public class TrazabilidadRepository {
      * Devuelve todos los movimientos de un trámite en orden cronológico
      * ascendente para mostrar la trazabilidad completa (RF-99).
      */
+    @Override
     public List<TrazabilidadMovimiento> findByIdTramite(Integer idTramite) {
         return jdbc.query(SQL_TRAZABILIDAD, MAPPER, idTramite);
     }

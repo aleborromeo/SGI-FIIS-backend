@@ -1,4 +1,4 @@
-package com.sgi.fiis.reportes.domain;
+package com.sgi.fiis.reportes.domain.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

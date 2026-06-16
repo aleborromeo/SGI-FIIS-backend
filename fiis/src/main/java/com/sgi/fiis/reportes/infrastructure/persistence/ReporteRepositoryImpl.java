@@ -1,27 +1,25 @@
 package com.sgi.fiis.reportes.infrastructure.persistence;
 
-import com.sgi.fiis.reportes.domain.*;
+import com.sgi.fiis.reportes.domain.model.*;
+import com.sgi.fiis.reportes.domain.repository.ReporteRepositoryPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repositorio de reportes institucionales (RF-94, RF-95).
- * Utiliza JdbcTemplate con construcción dinámica de SQL para aplicar
- * filtros combinables sin romper los resultados.
+ * Implementación JdbcTemplate del repositorio de reportes institucionales (RF-94, RF-95).
+ * Utiliza construcción dinámica de SQL para aplicar filtros combinables sin romper los resultados.
  */
 @Repository
-public class ReporteRepository {
+public class ReporteRepositoryImpl implements ReporteRepositoryPort {
 
     private final JdbcTemplate jdbc;
 
-    public ReporteRepository(JdbcTemplate jdbc) {
+    public ReporteRepositoryImpl(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
@@ -51,6 +49,7 @@ public class ReporteRepository {
         LEFT JOIN convocatorias c   ON c.id_convocatoria = p.id_convocatoria
         """;
 
+    @Override
     public List<ReporteProyecto> findProyectos(FiltroReporte f) {
         QueryBuilder qb = buildProyectosWhere(f);
         String sql = SQL_PROYECTOS_BASE + qb.where +
@@ -61,6 +60,7 @@ public class ReporteRepository {
         return jdbc.query(sql, MAPPER_PROYECTO, qb.params.toArray());
     }
 
+    @Override
     public long countProyectos(FiltroReporte f) {
         QueryBuilder qb = buildProyectosWhere(f);
         String sql = "SELECT COUNT(*) FROM proyectos p " +
@@ -125,6 +125,7 @@ public class ReporteRepository {
         JOIN grupos_investigacion g ON g.id_grupo   = t.id_grupo
         """;
 
+    @Override
     public List<ReporteTramite> findTramites(FiltroReporte f) {
         QueryBuilder qb = buildTramitesWhere(f);
         String sql = SQL_TRAMITES_BASE + qb.where +
@@ -135,6 +136,7 @@ public class ReporteRepository {
         return jdbc.query(sql, MAPPER_TRAMITE, qb.params.toArray());
     }
 
+    @Override
     public long countTramites(FiltroReporte f) {
         QueryBuilder qb = buildTramitesWhere(f);
         String sql = "SELECT COUNT(*) FROM tramites t " +
@@ -192,6 +194,7 @@ public class ReporteRepository {
         JOIN usuarios u ON u.id_usuario  = t.id_solicitante
         """;
 
+    @Override
     public List<ReporteResolucion> findResoluciones(FiltroReporte f) {
         QueryBuilder qb = buildResolucionesWhere(f);
         String sql = SQL_RESOLUCIONES_BASE + qb.where +
@@ -202,6 +205,7 @@ public class ReporteRepository {
         return jdbc.query(sql, MAPPER_RESOLUCION, qb.params.toArray());
     }
 
+    @Override
     public long countResoluciones(FiltroReporte f) {
         QueryBuilder qb = buildResolucionesWhere(f);
         String sql = "SELECT COUNT(*) FROM resoluciones r " +
@@ -257,6 +261,7 @@ public class ReporteRepository {
         JOIN grupos_investigacion g ON g.id_grupo    = p.id_grupo
         """;
 
+    @Override
     public List<ReporteInformeAvance> findInformesAvance(FiltroReporte f) {
         QueryBuilder qb = buildInformesWhere(f);
         String sql = SQL_INFORMES_BASE + qb.where +
@@ -267,6 +272,7 @@ public class ReporteRepository {
         return jdbc.query(sql, MAPPER_INFORME, qb.params.toArray());
     }
 
+    @Override
     public long countInformesAvance(FiltroReporte f) {
         QueryBuilder qb = buildInformesWhere(f);
         String sql = "SELECT COUNT(*) FROM informes_avance ia " +
