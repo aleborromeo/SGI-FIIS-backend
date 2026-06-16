@@ -14,13 +14,14 @@ import com.sgi.fiis.dashboards.application.usecase.ObtenerDashboardDirectorUseCa
 import com.sgi.fiis.dashboards.application.usecase.ObtenerDashboardDocenteUseCase;
 import com.sgi.fiis.dashboards.application.usecase.ObtenerDashboardEstudianteUseCase;
 import com.sgi.fiis.dashboards.application.usecase.ObtenerDashboardEvaluadorUseCase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -30,34 +31,49 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(DashboardController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@DisplayName("DashboardController WebMvc Tests")
+@ExtendWith(MockitoExtension.class)
+@DisplayName("DashboardController Unit Tests")
 class DashboardControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardAdminUseCase dashboardAdminUseCase;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardDirectorUseCase dashboardDirectorUseCase;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardCoordinadorUseCase dashboardCoordinadorUseCase;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardDocenteUseCase dashboardDocenteUseCase;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardEvaluadorUseCase dashboardEvaluadorUseCase;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardDecanoUseCase dashboardDecanoUseCase;
 
-    @MockitoBean
+    @Mock
     private ObtenerDashboardEstudianteUseCase dashboardEstudianteUseCase;
+
+    @BeforeEach
+    void setUp() {
+        DashboardController controller = new DashboardController(
+                dashboardAdminUseCase,
+                dashboardDirectorUseCase,
+                dashboardCoordinadorUseCase,
+                dashboardDocenteUseCase,
+                dashboardEvaluadorUseCase,
+                dashboardDecanoUseCase,
+                dashboardEstudianteUseCase
+        );
+
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(controller)
+                .build();
+    }
 
     @Test
     @DisplayName("GET /api/dashboard/admin/{idUsuario} debe retornar dashboard admin")
