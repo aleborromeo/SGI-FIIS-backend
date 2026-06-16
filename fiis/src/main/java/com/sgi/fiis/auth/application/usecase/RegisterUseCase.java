@@ -7,6 +7,9 @@ import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
 import org.springframework.stereotype.Service;
+import java.security.SecureRandom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Caso de uso: Auto-registro de usuarios (Paso 1).
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegisterUseCase {
 
+    private static final Logger log = LoggerFactory.getLogger(RegisterUseCase.class);
+    private final SecureRandom random = new SecureRandom();
     private final UsuarioRepositoryPort usuarioRepository;
     private final PendingRegistrationService pendingRegistrationService;
     private final EmailSenderPort emailSender;
@@ -46,7 +51,7 @@ public class RegisterUseCase {
         }
 
         // 4. Generar código de 6 dígitos aleatorio
-        int num = new java.util.Random().nextInt(900000) + 100000; // 100000 a 999999
+        int num = random.nextInt(900000) + 100000; // 100000 a 999999
         String code = String.valueOf(num);
 
         // 5. Almacenar temporalmente en memoria
@@ -56,14 +61,10 @@ public class RegisterUseCase {
         try {
             emailSender.sendVerificationCode(correo, code);
         } catch (Exception e) {
-            System.err.println("[EMAIL SENDER] Error al enviar código de registro: " + e.getMessage());
+            log.error("[EMAIL SENDER] Error al enviar código de registro: {}", e.getMessage(), e);
         }
 
         // Imprimir en consola de desarrollo para pruebas fáciles
-        System.out.println("\n==================================================");
-        System.out.println("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV):");
-        System.out.println("Usuario: " + correo);
-        System.out.println("Código: " + code);
-        System.out.println("==================================================\n");
+        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", correo, code);
     }
 }
