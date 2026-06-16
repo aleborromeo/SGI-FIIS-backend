@@ -36,7 +36,7 @@ class LoginUseCaseTest {
     private LoginUseCase loginUseCase;
 
     @Test
-    @DisplayName("Should login successfully with correct credentials and return response DTO")
+    @DisplayName("Should successfully login credentials, generate and return JWT directly")
     void testLoginSuccess() {
         Usuario usuario = Usuario.builder()
                 .correoInstitucional("admin@unas.edu.pe")
@@ -50,15 +50,15 @@ class LoginUseCaseTest {
 
         when(usuarioRepository.findByCorreo("admin@unas.edu.pe")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("00000000", "hashed-pass")).thenReturn(true);
-        when(tokenProvider.generateToken("admin@unas.edu.pe", "ADMIN")).thenReturn("mock-jwt-token");
+        when(tokenProvider.generateToken("admin@unas.edu.pe", "ADMIN")).thenReturn("jwt-token");
 
         LoginResponseDto response = loginUseCase.execute("admin@unas.edu.pe", "00000000");
 
         assertNotNull(response);
-        assertEquals("mock-jwt-token", response.getToken());
+        assertEquals("jwt-token", response.getToken());
+        assertEquals("Bearer", response.getTipo());
         assertEquals("admin@unas.edu.pe", response.getCorreo());
-        assertEquals("ADMIN", response.getRolCodigo());
-        assertTrue(response.isMustChangePassword());
+        assertFalse(response.isRequiresVerification());
 
         verify(usuarioRepository).findByCorreo("admin@unas.edu.pe");
         verify(passwordEncoder).matches("00000000", "hashed-pass");

@@ -91,12 +91,17 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- Java Mail Sender (para códigos de verificación) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- OAuth2 Client (Microsoft Login) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
-
 		<!-- Carga automática de .env -->
 		<dependency>
 			<groupId>me.paulschwarz</groupId>
