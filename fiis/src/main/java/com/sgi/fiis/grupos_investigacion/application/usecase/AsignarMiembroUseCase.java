@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class AsignarMiembroUseCase {
@@ -40,7 +41,7 @@ public class AsignarMiembroUseCase {
                 .idGrupo(idGrupo)
                 .idUsuario(idUsuario)
                 .esActivo(true)
-                .fechaInicio(LocalDateTime.now())
+                .fechaInicio(LocalDateTime.now(ZoneId.systemDefault()))
                 .build();
 
         return membresiaRepository.save(membresia);

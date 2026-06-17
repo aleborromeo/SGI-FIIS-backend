@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,11 +27,11 @@ import static org.mockito.Mockito.*;
 class ProjectModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
-    private static final LocalDate FIXED_TODAY     = LocalDate.of(2026, 6, 1);
-    private static final LocalDate FIXED_PAST_1D   = LocalDate.of(2026, 5, 31);
-    private static final LocalDate FIXED_FUTURE_6M = LocalDate.of(2026, 12, 1);
-    private static final LocalDate FIXED_FUTURE_1M = LocalDate.of(2026, 7, 1);
-    private static final LocalDate FIXED_FUTURE_10 = LocalDate.of(2026, 6, 11);
+    private static final LocalDate FIXED_TODAY     = LocalDate.of(2026, Month.JUNE, 1);
+    private static final LocalDate FIXED_PAST_1D   = LocalDate.of(2026, Month.MAY, 31);
+    private static final LocalDate FIXED_FUTURE_6M = LocalDate.of(2026, Month.DECEMBER, 1);
+    private static final LocalDate FIXED_FUTURE_1M = LocalDate.of(2026, Month.JULY, 1);
+    private static final LocalDate FIXED_FUTURE_10 = LocalDate.of(2026, Month.JUNE, 11);
 
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;

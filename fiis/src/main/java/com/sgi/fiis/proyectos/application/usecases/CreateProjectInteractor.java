@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 @Service
 public class CreateProjectInteractor implements CreateProjectUseCase {
@@ -108,21 +108,21 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     public List<ProjectResponse> getProjectsByResponsible(Long responsibleId) {
         return saveProjectPort.findByResponsibleId(responsibleId).stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<ProjectResponse> getProjectsByGroup(Integer groupId) {
         return saveProjectPort.findByGroupId(groupId).stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<ProjectResponse> getAllProjects() {
         return saveProjectPort.findAll().stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

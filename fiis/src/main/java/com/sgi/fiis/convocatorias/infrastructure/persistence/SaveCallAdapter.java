@@ -7,10 +7,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class SaveCallAdapter implements SaveCallPort {
+
+    private static final String STATUS_ABIERTA   = "ABIERTA";
+    private static final String STATUS_CERRADA   = "CERRADA";
+    private static final String STATUS_FINALIZADA = "FINALIZADA";
 
     private final ResearchCallJpaRepository jpaRepository;
 
@@ -32,30 +35,30 @@ public class SaveCallAdapter implements SaveCallPort {
 
     @Override
     public List<ResearchCall> findByStatus(CallStatus status) {
-        String dbStatus = "ABIERTA";
+        String dbStatus = STATUS_ABIERTA;
         if (status == CallStatus.CLOSED) {
-            dbStatus = "CERRADA";
+            dbStatus = STATUS_CERRADA;
         } else if (status == CallStatus.FINISHED) {
-            dbStatus = "FINALIZADA";
+            dbStatus = STATUS_FINALIZADA;
         }
         return jpaRepository.findByStatus(dbStatus).stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<ResearchCall> findAll() {
         return jpaRepository.findAll().stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private ResearchCallEntity toEntity(ResearchCall domain) {
-        String dbStatus = "ABIERTA";
+        String dbStatus = STATUS_ABIERTA;
         if (domain.getStatus() == CallStatus.CLOSED) {
-            dbStatus = "CERRADA";
+            dbStatus = STATUS_CERRADA;
         } else if (domain.getStatus() == CallStatus.FINISHED) {
-            dbStatus = "FINALIZADA";
+            dbStatus = STATUS_FINALIZADA;
         }
 
         return ResearchCallEntity.builder()
@@ -69,9 +72,9 @@ public class SaveCallAdapter implements SaveCallPort {
 
     private ResearchCall toDomain(ResearchCallEntity entity) {
         CallStatus domainStatus = CallStatus.OPEN;
-        if ("CERRADA".equalsIgnoreCase(entity.getStatus())) {
+        if (STATUS_CERRADA.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = CallStatus.CLOSED;
-        } else if ("FINALIZADA".equalsIgnoreCase(entity.getStatus())) {
+        } else if (STATUS_FINALIZADA.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = CallStatus.FINISHED;
         }
 

@@ -95,7 +95,12 @@ public class FileController {
 
         // 3. Save physical file to target directory
         String savedFilename = UUID.randomUUID().toString() + "_" + originalFilename;
-        Path targetPath = Paths.get(uploadDir).resolve(savedFilename).toAbsolutePath();
+        Path targetDir = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path targetPath = targetDir.resolve(savedFilename).normalize();
+
+        if (!targetPath.startsWith(targetDir)) {
+            throw new BusinessRuleValidationException("Filename is invalid or contains path traversal characters.");
+        }
 
         try {
             file.transferTo(targetPath.toFile());

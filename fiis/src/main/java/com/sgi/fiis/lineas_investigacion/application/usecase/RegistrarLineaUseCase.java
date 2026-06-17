@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class RegistrarLineaUseCase {
@@ -23,8 +24,8 @@ public class RegistrarLineaUseCase {
             throw new DuplicateResourceException("LineaInvestigacion", "nombre", linea.getNombreLinea());
         }
         linea.setEsActiva(true);
-        linea.setFechaCreacion(LocalDateTime.now());
-        linea.setFechaActualizacion(LocalDateTime.now());
+        linea.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
+        linea.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
         return lineaRepository.save(linea);
     }
 }

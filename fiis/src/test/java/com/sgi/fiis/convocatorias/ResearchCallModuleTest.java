@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,13 +24,13 @@ import static org.mockito.Mockito.when;
 class ResearchCallModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
-    private static final LocalDate FIXED_TODAY      = LocalDate.of(2026, 6, 1);
-    private static final LocalDate FIXED_PAST_5     = LocalDate.of(2026, 5, 27);
-    private static final LocalDate FIXED_PAST_10    = LocalDate.of(2026, 5, 22);
-    private static final LocalDate FIXED_FUTURE_2M  = LocalDate.of(2026, 8, 1);
-    private static final LocalDate FIXED_FUTURE_5D  = LocalDate.of(2026, 6, 6);
-    private static final LocalDate FIXED_PAST_2D    = LocalDate.of(2026, 5, 30);
-    private static final LocalDate FIXED_FUTURE_10D = LocalDate.of(2026, 6, 11);
+    private static final LocalDate FIXED_TODAY      = LocalDate.of(2026, Month.JUNE, 1);
+    private static final LocalDate FIXED_PAST_5     = LocalDate.of(2026, Month.MAY, 27);
+    private static final LocalDate FIXED_PAST_10    = LocalDate.of(2026, Month.MAY, 22);
+    private static final LocalDate FIXED_FUTURE_2M  = LocalDate.of(2026, Month.AUGUST, 1);
+    private static final LocalDate FIXED_FUTURE_5D  = LocalDate.of(2026, Month.JUNE, 6);
+    private static final LocalDate FIXED_PAST_2D    = LocalDate.of(2026, Month.MAY, 30);
+    private static final LocalDate FIXED_FUTURE_10D = LocalDate.of(2026, Month.JUNE, 11);
 
     private SaveCallPort saveCallPort;
     private CreateCallInteractor createCallInteractor;

@@ -6,6 +6,7 @@ import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "tramites")
@@ -53,12 +54,12 @@ public class ProcedureEntity {
 
     @PrePersist
     protected void onCreate() {
-        sentAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        sentAt = LocalDateTime.now(ZoneId.systemDefault());
+        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
     }
 }

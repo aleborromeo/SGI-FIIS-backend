@@ -30,11 +30,15 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<CallResponse> getCalls(String status) {
-        return execute(status);
+        return findCalls(status);
     }
 
     @Transactional(readOnly = true)
     public List<CallResponse> execute(String status) {
+        return findCalls(status);
+    }
+
+    private List<CallResponse> findCalls(String status) {
         List<ResearchCall> calls;
         if (status != null && !status.trim().isEmpty()) {
             CallStatus callStatus;

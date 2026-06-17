@@ -7,6 +7,7 @@ import com.sgi.fiis.lineas_investigacion.application.usecase.ListarLineasPorGrup
 import com.sgi.fiis.lineas_investigacion.application.dto.LineaInvestigacionResponseDto;
 import com.sgi.fiis.lineas_investigacion.presentation.mapper.LineaInvestigacionMapper;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/grupos-investigacion")
+@RequiredArgsConstructor
 public class GrupoInvestigacionController {
 
     private final CrearGrupoUseCase crearGrupoUseCase;
@@ -27,28 +29,6 @@ public class GrupoInvestigacionController {
     private final ListarLineasPorGrupoUseCase listarLineasPorGrupoUseCase;
     private final GrupoInvestigacionMapper mapper;
     private final LineaInvestigacionMapper lineaMapper;
-
-    public GrupoInvestigacionController(CrearGrupoUseCase crearGrupoUseCase,
-                                        ListarGruposUseCase listarGruposUseCase,
-                                        ObtenerGrupoUseCase obtenerGrupoUseCase,
-                                        AsignarCoordinadorUseCase asignarCoordinadorUseCase,
-                                        AsignarMiembroUseCase asignarMiembroUseCase,
-                                        RetirarMiembroUseCase retirarMiembroUseCase,
-                                        ListarMiembrosUseCase listarMiembrosUseCase,
-                                        ListarLineasPorGrupoUseCase listarLineasPorGrupoUseCase,
-                                        GrupoInvestigacionMapper mapper,
-                                        LineaInvestigacionMapper lineaMapper) {
-        this.crearGrupoUseCase = crearGrupoUseCase;
-        this.listarGruposUseCase = listarGruposUseCase;
-        this.obtenerGrupoUseCase = obtenerGrupoUseCase;
-        this.asignarCoordinadorUseCase = asignarCoordinadorUseCase;
-        this.asignarMiembroUseCase = asignarMiembroUseCase;
-        this.retirarMiembroUseCase = retirarMiembroUseCase;
-        this.listarMiembrosUseCase = listarMiembrosUseCase;
-        this.listarLineasPorGrupoUseCase = listarLineasPorGrupoUseCase;
-        this.mapper = mapper;
-        this.lineaMapper = lineaMapper;
-    }
 
     /** RF-22: Crear grupo de investigación */
     @PostMapping
