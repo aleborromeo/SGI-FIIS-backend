@@ -18,6 +18,9 @@ import org.mockito.Mockito;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Month;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -154,5 +157,45 @@ class ProjectModuleTest {
                 "Place", 3L, 1, "GINSOFT", 1, 1, ProjectStatus.POSTULATED
         );
         assertThrows(BusinessRuleValidationException.class, invalidProject::validateInvariants);
+    }
+
+    @Test
+    void testGetProjectsByResponsible() {
+        Project p = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
+        when(saveProjectPort.findByResponsibleId(3L)).thenReturn(Collections.singletonList(p));
+        List<ProjectResponse> res = createProjectInteractor.getProjectsByResponsible(3L);
+        assertEquals(1, res.size());
+        assertEquals(1, res.get(0).getId());
+        assertEquals("POSTULADO", res.get(0).getStatus());
+    }
+
+    @Test
+    void testGetProjectsByGroup() {
+        Project p = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
+        when(saveProjectPort.findByGroupId(2)).thenReturn(Collections.singletonList(p));
+        List<ProjectResponse> res = createProjectInteractor.getProjectsByGroup(2);
+        assertEquals(1, res.size());
+    }
+
+    @Test
+    void testGetAllProjects() {
+        Project p = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
+        when(saveProjectPort.findAll()).thenReturn(Collections.singletonList(p));
+        List<ProjectResponse> res = createProjectInteractor.getAllProjects();
+        assertEquals(1, res.size());
+    }
+
+    @Test
+    void testGetProjectByIdFound() {
+        Project p = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+        ProjectResponse res = createProjectInteractor.getProjectById(1);
+        assertEquals(1, res.getId());
+    }
+
+    @Test
+    void testGetProjectByIdNotFound() {
+        when(saveProjectPort.findById(99)).thenReturn(Optional.empty());
+        assertThrows(BusinessRuleValidationException.class, () -> createProjectInteractor.getProjectById(99));
     }
 }
