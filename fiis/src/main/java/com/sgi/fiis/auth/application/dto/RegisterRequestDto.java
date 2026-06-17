@@ -39,6 +39,9 @@ public class RegisterRequestDto {
     @Size(min = 6, max = 100, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
+    @NotBlank(message = "La confirmación de contraseña es obligatoria")
+    private String confirmarPassword;
+
     @NotBlank(message = "El código de rol es obligatorio")
     private String rolCodigo;
 }

@@ -33,6 +33,11 @@ public class RegisterUseCase {
     }
 
     public void execute(RegisterRequestDto dto) {
+        // 0. Validar que las contraseñas coincidan
+        if (!dto.getPassword().equals(dto.getConfirmarPassword())) {
+            throw new BusinessException("Las contraseñas no coinciden");
+        }
+
         String correo = dto.getCorreoInstitucional().trim();
 
         // 1. Validar dominio .edu.pe del correo
