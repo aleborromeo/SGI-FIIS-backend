@@ -1,0 +1,64 @@
+package com.sgi.fiis.tramites.infrastructure.persistence;
+
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
+import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "tramites")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ProcedureEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_tramite")
+    private Integer id;
+
+    @Column(name = "codigo_tramite", nullable = false, unique = true, length = 30)
+    private String code;
+
+    @Column(name = "tipo_tramite", nullable = false, length = 30)
+    private String procedureType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_solicitante", nullable = false)
+    private UsuarioEntity applicant;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_grupo", nullable = false)
+    private ResearchGroupEntity group;
+
+    @Column(name = "estado_actual", nullable = false, length = 30)
+    private String status;
+
+    @Column(name = "rol_revisor_actual", nullable = false, length = 30)
+    private String reviewerRole;
+
+    @Column(name = "fecha_envio", nullable = false, updatable = false)
+    private LocalDateTime sentAt;
+
+    @Column(name = "fecha_actualizacion", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_referencia_proyecto")
+    private ProjectEntity projectReference;
+
+    @PrePersist
+    protected void onCreate() {
+        sentAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+}
