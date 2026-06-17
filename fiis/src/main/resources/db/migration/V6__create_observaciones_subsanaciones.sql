@@ -1,5 +1,5 @@
 -- ============================================================================
--- V2__create_observaciones_subsanaciones.sql
+-- V6__create_observaciones_subsanaciones.sql
 -- MÓDULO: OBSERVACIONES Y SUBSANACIONES (RF-60 a RF-64, RF-69, RF-76, RN-07, RN-08)
 -- ============================================================================
 
