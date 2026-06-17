@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component;
 public class SubsanacionMapper {
 
     public Subsanacion toDomain(SubsanacionJpaEntity entity) {
-        return new Subsanacion(
-                entity.getIdSubsanacion(),
-                entity.getIdObservacion(),
-                entity.getIdSolicitante(),
-                entity.getDescripcion(),
-                entity.getIdDocumentoAdjunto(),
-                entity.getFechaRegistro(),
-                entity.getFechaActualizacion()
-        );
+        return Subsanacion.builder()
+                .id(entity.getIdSubsanacion())
+                .idObservacion(entity.getIdObservacion())
+                .idSolicitante(entity.getIdSolicitante())
+                .descripcion(entity.getDescripcion())
+                .idDocumentoAdjunto(entity.getIdDocumentoAdjunto())
+                .fechaRegistro(entity.getFechaRegistro())
+                .fechaActualizacion(entity.getFechaActualizacion())
+                .build();
     }
 
     public SubsanacionJpaEntity toJpa(Subsanacion domain) {

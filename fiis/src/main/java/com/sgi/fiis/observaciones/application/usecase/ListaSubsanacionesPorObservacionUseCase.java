@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Caso de uso: Listar subsanaciones por observación (RF-64 trazabilidad).
@@ -21,7 +20,7 @@ public class ListaSubsanacionesPorObservacionUseCase {
     @Transactional(readOnly = true)
     public List<SubsanacionResponseDTO> execute(Integer idObservacion) {
         return subsanacionRepository.findByIdObservacion(idObservacion).stream()
-                .map(this::toDTO).collect(Collectors.toList());
+                .map(this::toDTO).toList();
     }
 
     private SubsanacionResponseDTO toDTO(Subsanacion s) {

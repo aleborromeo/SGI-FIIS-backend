@@ -49,18 +49,28 @@ class RegistraSubsanacionUseCaseTest {
                 .idDocumentoAdjunto(45)
                 .build();
 
-        LocalDateTime ahora = LocalDateTime.now();
-        Observacion observacionOriginal = new Observacion(
-                idObservacion, 1, 10, TipoObservacion.TECNICA,
-                "Falta la firma en el documento de propuesta técnica",
-                ObservacionEstado.PENDIENTE, "COORDINADOR_GRUPO", ahora, ahora
-        );
+        LocalDateTime fechaFija = LocalDateTime.of(2026, 6, 17, 12, 0);
+        Observacion observacionOriginal = Observacion.builder()
+                .id(idObservacion)
+                .idTramite(1)
+                .idRevisor(10)
+                .tipoObservacion(TipoObservacion.TECNICA)
+                .descripcion("Falta la firma en el documento de propuesta técnica")
+                .estado(ObservacionEstado.PENDIENTE)
+                .rolRevisor("COORDINADOR_GRUPO")
+                .fechaRegistro(fechaFija)
+                .fechaActualizacion(fechaFija)
+                .build();
 
-        Subsanacion subsanacionGuardada = new Subsanacion(
-                200, idObservacion, 5,
-                "He subido el documento firmado correctamente.", 45,
-                ahora, ahora
-        );
+        Subsanacion subsanacionGuardada = Subsanacion.builder()
+                .id(200)
+                .idObservacion(idObservacion)
+                .idSolicitante(5)
+                .descripcion("He subido el documento firmado correctamente.")
+                .idDocumentoAdjunto(45)
+                .fechaRegistro(fechaFija)
+                .fechaActualizacion(fechaFija)
+                .build();
 
         when(observacionRepository.findById(idObservacion)).thenReturn(Optional.of(observacionOriginal));
         when(observacionRepository.save(any(Observacion.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -76,8 +86,8 @@ class RegistraSubsanacionUseCaseTest {
         assertEquals(5, response.getIdSolicitante());
         assertEquals("He subido el documento firmado correctamente.", response.getDescripcion());
         assertEquals(45, response.getIdDocumentoAdjunto());
-        assertEquals(ahora, response.getFechaRegistro());
-        assertEquals(ahora, response.getFechaActualizacion());
+        assertEquals(fechaFija, response.getFechaRegistro());
+        assertEquals(fechaFija, response.getFechaActualizacion());
 
         // Verify that observacion was marked as SUBSANADA and updated
         assertEquals(ObservacionEstado.SUBSANADA, observacionOriginal.getEstado());
@@ -111,12 +121,18 @@ class RegistraSubsanacionUseCaseTest {
                 .descripcion("Test")
                 .build();
 
-        LocalDateTime ahora = LocalDateTime.now();
-        Observacion observacionSubsanada = new Observacion(
-                idObservacion, 1, 10, TipoObservacion.TECNICA,
-                "Falta la firma",
-                ObservacionEstado.SUBSANADA, "COORDINADOR_GRUPO", ahora, ahora
-        );
+        LocalDateTime fechaFija = LocalDateTime.of(2026, 6, 17, 12, 0);
+        Observacion observacionSubsanada = Observacion.builder()
+                .id(idObservacion)
+                .idTramite(1)
+                .idRevisor(10)
+                .tipoObservacion(TipoObservacion.TECNICA)
+                .descripcion("Falta la firma")
+                .estado(ObservacionEstado.SUBSANADA)
+                .rolRevisor("COORDINADOR_GRUPO")
+                .fechaRegistro(fechaFija)
+                .fechaActualizacion(fechaFija)
+                .build();
 
         when(observacionRepository.findById(idObservacion)).thenReturn(Optional.of(observacionSubsanada));
 

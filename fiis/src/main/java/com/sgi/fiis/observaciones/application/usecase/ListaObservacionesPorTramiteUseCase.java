@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Caso de uso: Listar observaciones por trámite (RF-64 trazabilidad).
@@ -21,7 +20,7 @@ public class ListaObservacionesPorTramiteUseCase {
     @Transactional(readOnly = true)
     public List<ObservacionResponseDTO> execute(Integer idTramite) {
         return observacionRepository.findByIdTramite(idTramite).stream()
-                .map(this::toDTO).collect(Collectors.toList());
+                .map(this::toDTO).toList();
     }
 
     private ObservacionResponseDTO toDTO(Observacion o) {

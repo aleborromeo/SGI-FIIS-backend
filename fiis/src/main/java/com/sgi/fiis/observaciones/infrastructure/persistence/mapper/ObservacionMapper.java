@@ -13,17 +13,17 @@ import org.springframework.stereotype.Component;
 public class ObservacionMapper {
 
     public Observacion toDomain(ObservacionJpaEntity entity) {
-        return new Observacion(
-                entity.getIdObservacion(),
-                entity.getIdTramite(),
-                entity.getIdRevisor(),
-                TipoObservacion.valueOf(entity.getTipoObservacion()),
-                entity.getDescripcion(),
-                ObservacionEstado.valueOf(entity.getEstadoObservacion()),
-                entity.getRolRevisor(),
-                entity.getFechaRegistro(),
-                entity.getFechaActualizacion()
-        );
+        return Observacion.builder()
+                .id(entity.getIdObservacion())
+                .idTramite(entity.getIdTramite())
+                .idRevisor(entity.getIdRevisor())
+                .tipoObservacion(TipoObservacion.valueOf(entity.getTipoObservacion()))
+                .descripcion(entity.getDescripcion())
+                .estado(ObservacionEstado.valueOf(entity.getEstadoObservacion()))
+                .rolRevisor(entity.getRolRevisor())
+                .fechaRegistro(entity.getFechaRegistro())
+                .fechaActualizacion(entity.getFechaActualizacion())
+                .build();
     }
 
     public ObservacionJpaEntity toJpa(Observacion domain) {

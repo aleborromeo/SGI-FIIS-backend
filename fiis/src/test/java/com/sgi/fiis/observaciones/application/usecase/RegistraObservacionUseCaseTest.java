@@ -42,12 +42,18 @@ class RegistraObservacionUseCaseTest {
                 .rolRevisor("COORDINADOR_GRUPO")
                 .build();
 
-        LocalDateTime ahora = LocalDateTime.now();
-        Observacion observacionGuardada = new Observacion(
-                100, 1, 10, TipoObservacion.TECNICA,
-                "Falta la firma en el documento de propuesta técnica",
-                ObservacionEstado.PENDIENTE, "COORDINADOR_GRUPO", ahora, ahora
-        );
+        LocalDateTime fechaFija = LocalDateTime.of(2026, 6, 17, 12, 0);
+        Observacion observacionGuardada = Observacion.builder()
+                .id(100)
+                .idTramite(1)
+                .idRevisor(10)
+                .tipoObservacion(TipoObservacion.TECNICA)
+                .descripcion("Falta la firma en el documento de propuesta técnica")
+                .estado(ObservacionEstado.PENDIENTE)
+                .rolRevisor("COORDINADOR_GRUPO")
+                .fechaRegistro(fechaFija)
+                .fechaActualizacion(fechaFija)
+                .build();
 
         when(observacionRepository.save(any(Observacion.class))).thenReturn(observacionGuardada);
 
@@ -63,8 +69,8 @@ class RegistraObservacionUseCaseTest {
         assertEquals("Falta la firma en el documento de propuesta técnica", response.getDescripcion());
         assertEquals("PENDIENTE", response.getEstado());
         assertEquals("COORDINADOR_GRUPO", response.getRolRevisor());
-        assertEquals(ahora, response.getFechaRegistro());
-        assertEquals(ahora, response.getFechaActualizacion());
+        assertEquals(fechaFija, response.getFechaRegistro());
+        assertEquals(fechaFija, response.getFechaActualizacion());
 
         verify(observacionRepository, times(1)).save(any(Observacion.class));
     }

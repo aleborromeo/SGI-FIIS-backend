@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -32,6 +31,6 @@ public class SubsanacionRepositoryImpl implements SubsanacionRepository {
     @Override
     public List<Subsanacion> findByIdObservacion(Integer idObservacion) {
         return jpaRepository.findByIdObservacionOrderByFechaRegistroAsc(idObservacion)
-                .stream().map(mapper::toDomain).collect(Collectors.toList());
+                .stream().map(mapper::toDomain).toList();
     }
 }

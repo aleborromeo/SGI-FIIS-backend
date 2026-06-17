@@ -1,10 +1,15 @@
 package com.sgi.fiis.observaciones.domain.model;
 
+import lombok.Builder;
+import lombok.Getter;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  * Entidad de dominio que representa una observación registrada sobre un trámite.
  */
+@Getter
+@Builder
 public class Observacion {
 
     private Integer id;
@@ -17,27 +22,20 @@ public class Observacion {
     private LocalDateTime fechaRegistro;
     private LocalDateTime fechaActualizacion;
 
-    public Observacion(Integer id, Integer idTramite, Integer idRevisor,
-                       TipoObservacion tipoObservacion, String descripcion,
-                       ObservacionEstado estado, String rolRevisor,
-                       LocalDateTime fechaRegistro, LocalDateTime fechaActualizacion) {
-        this.id = id;
-        this.idTramite = idTramite;
-        this.idRevisor = idRevisor;
-        this.tipoObservacion = tipoObservacion;
-        this.descripcion = descripcion;
-        this.estado = estado;
-        this.rolRevisor = rolRevisor;
-        this.fechaRegistro = fechaRegistro;
-        this.fechaActualizacion = fechaActualizacion;
-    }
-
     public static Observacion crear(Integer idTramite, Integer idRevisor,
                                     TipoObservacion tipoObservacion,
                                     String descripcion, String rolRevisor) {
-        LocalDateTime ahora = LocalDateTime.now();
-        return new Observacion(null, idTramite, idRevisor, tipoObservacion,
-                descripcion, ObservacionEstado.PENDIENTE, rolRevisor, ahora, ahora);
+        LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
+        return Observacion.builder()
+                .idTramite(idTramite)
+                .idRevisor(idRevisor)
+                .tipoObservacion(tipoObservacion)
+                .descripcion(descripcion)
+                .estado(ObservacionEstado.PENDIENTE)
+                .rolRevisor(rolRevisor)
+                .fechaRegistro(ahora)
+                .fechaActualizacion(ahora)
+                .build();
     }
 
     public boolean marcarSubsanada() {
@@ -45,7 +43,7 @@ public class Observacion {
             return false;
         }
         this.estado = ObservacionEstado.SUBSANADA;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(ZoneId.systemDefault());
         return true;
     }
 
@@ -64,14 +62,5 @@ public class Observacion {
     public boolean esSubsanable() {
         return this.estado == ObservacionEstado.PENDIENTE;
     }
-
-    public Integer getId() { return id; }
-    public Integer getIdTramite() { return idTramite; }
-    public Integer getIdRevisor() { return idRevisor; }
-    public TipoObservacion getTipoObservacion() { return tipoObservacion; }
-    public String getDescripcion() { return descripcion; }
-    public ObservacionEstado getEstado() { return estado; }
-    public String getRolRevisor() { return rolRevisor; }
-    public LocalDateTime getFechaRegistro() { return fechaRegistro; }
-    public LocalDateTime getFechaActualizacion() { return fechaActualizacion; }
 }
+

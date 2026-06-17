@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -32,12 +31,12 @@ public class ObservacionRepositoryImpl implements ObservacionRepository {
     @Override
     public List<Observacion> findByIdTramite(Integer idTramite) {
         return jpaRepository.findByIdTramiteOrderByFechaRegistroDesc(idTramite)
-                .stream().map(mapper::toDomain).collect(Collectors.toList());
+                .stream().map(mapper::toDomain).toList();
     }
 
     @Override
     public List<Observacion> findPendientesByIdTramite(Integer idTramite) {
         return jpaRepository.findByIdTramiteAndEstadoObservacion(idTramite, "PENDIENTE")
-                .stream().map(mapper::toDomain).collect(Collectors.toList());
+                .stream().map(mapper::toDomain).toList();
     }
 }

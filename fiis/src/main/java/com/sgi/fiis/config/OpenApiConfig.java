@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -48,6 +47,22 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("Módulo Observaciones")
                 .pathsToMatch("/api/observaciones/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi usuariosApi() {
+        return GroupedOpenApi.builder()
+                .group("Módulo Usuarios y Seguridad")
+                .pathsToMatch("/api/v1/usuarios/**", "/api/v1/roles/**", "/api/v1/auth/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi dashboardsApi() {
+        return GroupedOpenApi.builder()
+                .group("Módulo Dashboards")
+                .pathsToMatch("/api/dashboard/**")
                 .build();
     }
 

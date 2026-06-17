@@ -41,6 +41,8 @@ public class ObservacionController {
     private final ConsultaObservacionUseCase consultaObservacionUseCase;
     private final ListaSubsanacionesPorObservacionUseCase listaSubsanacionesPorObservacionUseCase;
 
+    private static final String ERROR_KEY = "error";
+
     /**
      * Registra una nueva observación sobre un trámite.
      */
@@ -95,18 +97,18 @@ public class ObservacionController {
     @ExceptionHandler(ObservacionNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(ObservacionNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", ex.getMessage()));
+                .body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
     @ExceptionHandler(SubsanacionInvalidaException.class)
     public ResponseEntity<Map<String, String>> handleInvalidSubsanacion(SubsanacionInvalidaException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", ex.getMessage()));
+                .body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", ex.getMessage()));
+                .body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 }
