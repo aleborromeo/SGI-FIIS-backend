@@ -21,6 +21,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @SuppressWarnings("java:S4502") // CSRF deshabilitado de forma segura ya que el API es stateless
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         try {
             http

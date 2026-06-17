@@ -1,0 +1,51 @@
+```toml
+version = 1
+
+# ---------------------------------
+# Tests
+# ---------------------------------
+test_patterns = [
+  "src/test/**",
+  "**/*Test.java",
+  "**/*Tests.java",
+  "**/*IT.java"
+]
+
+# ---------------------------------
+# Excluded files/folders
+# ---------------------------------
+exclude_patterns = [
+  "**/target/**",
+  "**/build/**",
+  "**/.mvn/**",
+  "**/.idea/**",
+  "**/.vscode/**",
+  "**/*.log",
+  "**/coverage/**",
+  "**/generated/**"
+]
+
+# ---------------------------------
+# Java Analyzer
+# ---------------------------------
+[[analyzers]]
+name = "java"
+enabled = true
+
+  [analyzers.meta]
+  runtime_version = "17"
+
+# ---------------------------------
+# Test Coverage (JaCoCo)
+# ---------------------------------
+[[analyzers]]
+name = "test-coverage"
+enabled = true
+
+# ---------------------------------
+# Java Formatting
+# ---------------------------------
+[[transformers]]
+name = "google-java-format"
+enabled = true
+```
