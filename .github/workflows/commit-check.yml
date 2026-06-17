@@ -1,0 +1,16 @@
+name: Commit Message Validation
+
+on:
+  pull_request:
+
+jobs:
+  commitlint:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate Commit Messages
+        uses: wagoid/commitlint-github-action@v6
