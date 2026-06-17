@@ -7,11 +7,17 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_fiis_data:/var/lib/postgresql/data
     networks:
       - sgifiis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_fiis_investigacion"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   api_fiis:
     build: .
@@ -19,14 +25,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Configuración de conexión que usará Spring Boot
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_fiis:5432/db_fiis_investigacion
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=12345
-      # Configuración para que Flyway se ejecute automáticamente al arrancar
-      - SPRING_FLYWAY_ENABLED=false
     depends_on:
-      - db_fiis
+      db_fiis:
+        condition: service_healthy   # Espera a que PostgreSQL esté listo antes de arrancar
     networks:
       - sgifiis-network
 
