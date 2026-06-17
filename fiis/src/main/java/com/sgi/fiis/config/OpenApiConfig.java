@@ -54,7 +54,7 @@ public class OpenApiConfig {
     @Bean
     public GroupedOpenApi healthApi() {
         return GroupedOpenApi.builder()
-                .group("Módulo General/Health")
+                .group("Módulo General - Health")
                 .pathsToMatch("/health")
                 .build();
     }
