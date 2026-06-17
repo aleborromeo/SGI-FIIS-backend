@@ -24,12 +24,7 @@ class DocumentResponseDtoTest {
                         "PDF",
                         2048L,
                         42L,
-                        now,
-                        10L,
-                        20L,
-                        null,
-                        null,
-                        true
+                        now
                 );
 
         // 2. Validación de atributos del record
@@ -39,11 +34,6 @@ class DocumentResponseDtoTest {
         assertEquals(2048L, dto1.sizeBytes());
         assertEquals(42L, dto1.uploadedById());
         assertEquals(now, dto1.uploadDate());
-        assertEquals(10L, dto1.proyectoId());
-        assertEquals(20L, dto1.tramiteId());
-        assertNull(dto1.planTesisId());
-        assertNull(dto1.informeId());
-        assertTrue(dto1.esSubsanacion());
 
         // 3. Cobertura estructural JaCoCo
         DocumentResponseDto dto2 =
@@ -53,12 +43,7 @@ class DocumentResponseDtoTest {
                         "PDF",
                         2048L,
                         42L,
-                        now,
-                        10L,
-                        20L,
-                        null,
-                        null,
-                        true
+                        now
                 );
 
         assertEquals(dto1, dto2);

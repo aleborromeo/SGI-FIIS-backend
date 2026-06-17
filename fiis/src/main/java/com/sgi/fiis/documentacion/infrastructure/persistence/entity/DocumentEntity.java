@@ -33,21 +33,6 @@ public class DocumentEntity {
     @Column(name = "es_activo", nullable = false)
     private boolean active;
 
-    @Column(name = "id_proyecto")
-    private Long proyectoId;
-
-    @Column(name = "id_tramite")
-    private Long tramiteId;
-
-    @Column(name = "id_plan_tesis")
-    private Long planTesisId;
-
-    @Column(name = "id_informe")
-    private Long informeId;
-
-    @Column(name = "es_subsanacion", nullable = false)
-    private boolean esSubsanacion;
-
     /**
      * Constructor por defecto requerido por la especificación de JPA 
      * para la instanciación de entidades mediante reflexión.
@@ -73,14 +58,4 @@ public class DocumentEntity {
     public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
-    public Long getProyectoId() { return proyectoId; }
-    public void setProyectoId(Long proyectoId) { this.proyectoId = proyectoId; }
-    public Long getTramiteId() { return tramiteId; }
-    public void setTramiteId(Long tramiteId) { this.tramiteId = tramiteId; }
-    public Long getPlanTesisId() { return planTesisId; }
-    public void setPlanTesisId(Long planTesisId) { this.planTesisId = planTesisId; }
-    public Long getInformeId() { return informeId; }
-    public void setInformeId(Long informeId) { this.informeId = informeId; }
-    public boolean isEsSubsanacion() { return esSubsanacion; }
-    public void setEsSubsanacion(boolean esSubsanacion) { this.esSubsanacion = esSubsanacion; }
 }

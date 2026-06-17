@@ -102,24 +102,14 @@ class DocumentControllerTest {
                         "PDF",
                         100L,
                         42L,
-                        LocalDateTime.now(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        false
+                        LocalDateTime.now()
                 );
 
         when(uploadDocumentUseCase.execute(
                 any(),
                 eq("manual_investigacion.pdf"),
                 anyLong(),
-                eq(42L),
-                any(),
-                any(),
-                any(),
-                any(),
-                anyBoolean()
+                eq(42L)
         )).thenReturn(simulatedDto);
 
         mockMvc.perform(
@@ -133,60 +123,7 @@ class DocumentControllerTest {
                 .andExpect(jsonPath("$.extension").value("PDF"));
     }
 
-    @Test
-    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
-    @DisplayName("HTTP POST: /api/documents/upload con parametros de asociacion debe retornar 201 Created")
-    void uploadDocument_WithAssociations_HttpSuccess() throws Exception {
 
-        MockMultipartFile mockFile = new MockMultipartFile(
-                "file",
-                "manual_investigacion.pdf",
-                MediaType.APPLICATION_PDF_VALUE,
-                "contenido-binario-de-prueba".getBytes()
-        );
-
-        DocumentResponseDto simulatedDto =
-                new DocumentResponseDto(
-                        1L,
-                        "manual_investigacion.pdf",
-                        "PDF",
-                        100L,
-                        42L,
-                        LocalDateTime.now(),
-                        10L,
-                        20L,
-                        null,
-                        null,
-                        true
-                );
-
-        when(uploadDocumentUseCase.execute(
-                any(),
-                eq("manual_investigacion.pdf"),
-                anyLong(),
-                eq(42L),
-                eq(10L),
-                eq(20L),
-                any(),
-                any(),
-                eq(true)
-        )).thenReturn(simulatedDto);
-
-        mockMvc.perform(
-                        multipart("/api/documents/upload")
-                                .file(mockFile)
-                                .param("proyectoId", "10")
-                                .param("tramiteId", "20")
-                                .param("esSubsanacion", "true")
-                                .principal(createAuth(42L, "ESTUDIANTE"))
-                )
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.originalName").value("manual_investigacion.pdf"))
-                .andExpect(jsonPath("$.proyectoId").value(10))
-                .andExpect(jsonPath("$.tramiteId").value(20))
-                .andExpect(jsonPath("$.esSubsanacion").value(true));
-    }
 
     @Test
     @DisplayName("HTTP POST: /api/documents/upload debe retornar 400 Bad Request si el archivo está vacío")
@@ -219,7 +156,7 @@ class DocumentControllerTest {
         );
 
         // Cambiamos a IllegalArgumentException para que sea un error no verificado compatible con el Servlet de MockMvc
-        when(uploadDocumentUseCase.execute(any(), any(), anyLong(), anyLong(), any(), any(), any(), any(), anyBoolean()))
+        when(uploadDocumentUseCase.execute(any(), any(), anyLong(), anyLong()))
                 .thenThrow(new IllegalArgumentException("Error de lectura física en el sistema de almacenamiento"));
 
         mockMvc.perform(

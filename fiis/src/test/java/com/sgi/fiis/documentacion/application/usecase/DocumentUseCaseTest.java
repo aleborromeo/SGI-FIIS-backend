@@ -72,57 +72,7 @@ class DocumentUseCaseTest {
         verify(documentRepositoryPort, times(1)).save(any(Document.class));
     }
 
-    @Test
-    @DisplayName("RF-65 / RF-69: Carga exitosa de documento con asociaciones y flag de subsanación")
-    void uploadDocument_WithAssociations_Success() {
-        // Arrange
-        InputStream fakeStream = new ByteArrayInputStream("bytes-de-prueba".getBytes());
-        String fileName = "subsanacion_informe.pdf";
-        Long sizeBytes = 1024L;
-        Long userId = 42L;
-        Long proyectoId = 101L;
-        Long tramiteId = 202L;
-        Long planTesisId = null;
-        Long informeId = 303L;
-        boolean esSubsanacion = true;
 
-        String simulatedPath = "/storage/uploads-fiis/unique-uuid_subsanacion_informe.pdf";
-        when(fileStoragePort.store(any(InputStream.class), eq(fileName))).thenReturn(simulatedPath);
-
-        Document simulatedSavedDoc = Document.builder()
-                .id(1L)
-                .originalName(fileName)
-                .storagePath(simulatedPath)
-                .extension("PDF")
-                .sizeBytes(sizeBytes)
-                .uploadedById(userId)
-                .proyectoId(proyectoId)
-                .tramiteId(tramiteId)
-                .planTesisId(planTesisId)
-                .informeId(informeId)
-                .esSubsanacion(esSubsanacion)
-                .active(true)
-                .build();
-        when(documentRepositoryPort.save(any(Document.class))).thenReturn(simulatedSavedDoc);
-
-        // Act
-        DocumentResponseDto result = uploadDocumentUseCase.execute(
-                fakeStream, fileName, sizeBytes, userId, proyectoId, tramiteId, planTesisId, informeId, esSubsanacion
-        );
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1L, result.id());
-        assertEquals("PDF", result.extension());
-        assertEquals(fileName, result.originalName());
-        assertEquals(proyectoId, result.proyectoId());
-        assertEquals(tramiteId, result.tramiteId());
-        assertNull(result.planTesisId());
-        assertEquals(informeId, result.informeId());
-        assertTrue(result.esSubsanacion());
-        verify(fileStoragePort, times(1)).store(fakeStream, fileName);
-        verify(documentRepositoryPort, times(1)).save(any(Document.class));
-    }
 
 
     @Test

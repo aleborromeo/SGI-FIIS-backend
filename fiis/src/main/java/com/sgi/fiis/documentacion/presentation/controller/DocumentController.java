@@ -44,11 +44,6 @@ public class DocumentController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DocumentResponseDto> uploadDocument(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "proyectoId", required = false) Long proyectoId,
-            @RequestParam(value = "tramiteId", required = false) Long tramiteId,
-            @RequestParam(value = "planTesisId", required = false) Long planTesisId,
-            @RequestParam(value = "informeId", required = false) Long informeId,
-            @RequestParam(value = "esSubsanacion", required = false, defaultValue = "false") boolean esSubsanacion,
             Authentication authentication) {
         
         logAuthenticationDetails(authentication);
@@ -74,12 +69,7 @@ public class DocumentController {
                 file.getInputStream(),
                 file.getOriginalFilename(),
                 file.getSize(),
-                userId,
-                proyectoId,
-                tramiteId,
-                planTesisId,
-                informeId,
-                esSubsanacion
+                userId
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IOException | IllegalArgumentException e) {

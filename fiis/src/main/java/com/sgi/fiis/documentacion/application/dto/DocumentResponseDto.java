@@ -8,10 +8,5 @@ public record DocumentResponseDto(
     String extension,
     Long sizeBytes,
     Long uploadedById,
-    LocalDateTime uploadDate,
-    Long proyectoId,
-    Long tramiteId,
-    Long planTesisId,
-    Long informeId,
-    boolean esSubsanacion
+    LocalDateTime uploadDate
 ) {}

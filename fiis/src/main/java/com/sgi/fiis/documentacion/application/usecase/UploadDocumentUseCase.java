@@ -18,11 +18,6 @@ public class UploadDocumentUseCase {
     }
 
     public DocumentResponseDto execute(InputStream fileStream, String originalName, Long sizeBytes, Long userId) {
-        return execute(fileStream, originalName, sizeBytes, userId, null, null, null, null, false);
-    }
-
-    public DocumentResponseDto execute(InputStream fileStream, String originalName, Long sizeBytes, Long userId,
-                                       Long proyectoId, Long tramiteId, Long planTesisId, Long informeId, boolean esSubsanacion) {
         // 1. Extraer la extensión del archivo
         String extension = "";
         int i = originalName.lastIndexOf('.');
@@ -33,7 +28,7 @@ public class UploadDocumentUseCase {
         // 2. Almacenar físicamente el binario en el servidor primero para obtener su ruta real (RF-66)
         String storagePath = fileStoragePort.store(fileStream, originalName);
 
-        // 3. Crear la instancia usando el patrón Builder Estático solucionando las alertas de Sonar
+        // 3. Crear la instancia usando el patrón Builder Estático
         Document document = Document.builder()
                 .originalName(originalName)
                 .storagePath(storagePath)
@@ -42,11 +37,6 @@ public class UploadDocumentUseCase {
                 .uploadedById(userId)
                 .uploadDate(LocalDateTime.now())
                 .active(true)
-                .proyectoId(proyectoId)
-                .tramiteId(tramiteId)
-                .planTesisId(planTesisId)
-                .informeId(informeId)
-                .esSubsanacion(esSubsanacion)
                 .build();
 
         // 4. Persistir los metadatos mapeados en la Base de Datos (RF-66)
@@ -59,12 +49,7 @@ public class UploadDocumentUseCase {
             savedDocument.getExtension(),
             savedDocument.getSizeBytes(),
             savedDocument.getUploadedById(),
-            savedDocument.getUploadDate(),
-            savedDocument.getProyectoId(),
-            savedDocument.getTramiteId(),
-            savedDocument.getPlanTesisId(),
-            savedDocument.getInformeId(),
-            savedDocument.isEsSubsanacion()
+            savedDocument.getUploadDate()
         );
     }
 }
