@@ -45,12 +45,12 @@ public class ProjectController {
     @GetMapping
     @Operation(summary = "List research projects with optional filters")
     public ResponseEntity<List<ProjectResponse>> getProjects(
-            @RequestParam(value = "responsibleId", required = false) Integer responsibleId,
+            @RequestParam(value = "responsibleId", required = false) Long responsibleId,
             @RequestParam(value = "groupId", required = false) Integer groupId) {
         
         List<ProjectResponse> response;
         if (responsibleId != null) {
-            response = createProjectUseCase.getProjectsByResponsible(responsibleId.longValue());
+            response = createProjectUseCase.getProjectsByResponsible(responsibleId);
         } else if (groupId != null) {
             response = createProjectUseCase.getProjectsByGroup(groupId);
         } else {

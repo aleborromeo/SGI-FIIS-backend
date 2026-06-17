@@ -1,6 +1,6 @@
 package com.sgi.fiis.proyectos.presentation.mapper;
 
-import com.sgi.fiis.proyectos.application.dto.CreateProjectRequest;
+
 import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import org.springframework.stereotype.Component;
 

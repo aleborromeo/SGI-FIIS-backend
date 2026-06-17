@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Component
@@ -39,7 +40,7 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
         ResearchGroupEntity group = projectEntity.getGroup();
 
         // 1. Generate unique procedure code (max 30 chars). Format: TRM-YYYY-[UUID-8]
-        String generatedCode = "TRM-" + LocalDateTime.now().getYear() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String generatedCode = "TRM-" + LocalDateTime.now(ZoneId.systemDefault()).getYear() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 2. Create the postulation procedure
         ProcedureEntity procedure = ProcedureEntity.builder()
@@ -49,8 +50,8 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
                 .group(group)
                 .status("PENDING_COORDINATOR")
                 .reviewerRole("COORDINADOR_GRUPO")
-                .sentAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now(ZoneId.systemDefault()))
+                .updatedAt(LocalDateTime.now(ZoneId.systemDefault()))
                 .projectReference(projectEntity)
                 .build();
 
@@ -64,7 +65,7 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
                 .previousState("REGISTERED")
                 .newState("PENDING_COORDINATOR")
                 .comment("PostulaciÃƒÂ³n de proyecto de investigaciÃƒÂ³n registrada automÃƒÂ¡ticamente.")
-                .movementAt(LocalDateTime.now())
+                .movementAt(LocalDateTime.now(ZoneId.systemDefault()))
                 .build();
 
         movementRepository.save(movement);

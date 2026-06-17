@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Data
 @Builder
@@ -24,6 +25,6 @@ public class Membresia {
 
     public void retirar() {
         this.esActivo = false;
-        this.fechaFin = LocalDateTime.now();
+        this.fechaFin = LocalDateTime.now(ZoneId.systemDefault());
     }
 }

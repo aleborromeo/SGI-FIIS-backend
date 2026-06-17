@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Component
 public class SaveProjectAdapter implements SaveProjectPort {
@@ -54,14 +54,14 @@ public class SaveProjectAdapter implements SaveProjectPort {
     public List<Project> findByResponsibleId(Long responsibleId) {
         return projectRepository.findByResponsibleId(responsibleId).stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<Project> findAll() {
         return projectRepository.findAll().stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SaveProjectAdapter implements SaveProjectPort {
     public List<Project> findByGroupId(Integer groupId) {
         return projectRepository.findByGroupId(groupId).stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sgi.fiis.shared.infrastructure.persistence;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "documentos")
@@ -38,6 +39,6 @@ public class DocumentEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now(ZoneId.systemDefault());
     }
 }

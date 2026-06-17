@@ -25,6 +25,13 @@ import static org.mockito.Mockito.*;
 
 class ProjectModuleTest {
 
+    // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
+    private static final LocalDate FIXED_TODAY     = LocalDate.of(2026, 6, 1);
+    private static final LocalDate FIXED_PAST_1D   = LocalDate.of(2026, 5, 31);
+    private static final LocalDate FIXED_FUTURE_6M = LocalDate.of(2026, 12, 1);
+    private static final LocalDate FIXED_FUTURE_1M = LocalDate.of(2026, 7, 1);
+    private static final LocalDate FIXED_FUTURE_10 = LocalDate.of(2026, 6, 11);
+
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
     private CreateProcedurePort createProcedurePort;
@@ -46,8 +53,8 @@ class ProjectModuleTest {
         request.setGeneralObjective("Objective of tech project");
         request.setResearchLineId(1);
         request.setBudget(new BigDecimal("1500.00"));
-        request.setStartDate(LocalDate.now());
-        request.setEndDate(LocalDate.now().plusMonths(6));
+        request.setStartDate(FIXED_TODAY);
+        request.setEndDate(FIXED_FUTURE_6M);
         request.setExecutionPlace("FIIS Lab");
         request.setResponsibleId(3);
         request.setResearchGroupId(2);
@@ -59,12 +66,12 @@ class ProjectModuleTest {
         when(saveProjectPort.getGroupCode(2)).thenReturn(Optional.of("GINSOFT"));
         when(saveProjectPort.getLineName(1)).thenReturn(Optional.of("Computacion"));
 
-        ResearchCall call = new ResearchCall(4, "Call 2026", LocalDate.now().minusDays(1), LocalDate.now().plusMonths(1), CallStatus.OPEN);
+        ResearchCall call = new ResearchCall(4, "Call 2026", FIXED_PAST_1D, FIXED_FUTURE_1M, CallStatus.OPEN);
         when(saveCallPort.findById(4)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(
                 1, "PRJ-2026-XYZ", "New Tech Project", "Summary of tech project", "Objective of tech project",
-                1, "Computacion", new BigDecimal("1500.00"), LocalDate.now(), LocalDate.now().plusMonths(6),
+                1, "Computacion", new BigDecimal("1500.00"), FIXED_TODAY, FIXED_FUTURE_6M,
                 "FIIS Lab", 3L, 2, "GINSOFT", 4, null, ProjectStatus.POSTULATED
         );
         when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
@@ -86,17 +93,16 @@ class ProjectModuleTest {
         request.setGeneralObjective("Objective");
         request.setResearchLineId(1);
         request.setBudget(new BigDecimal("100.00"));
-        request.setStartDate(LocalDate.now());
-        request.setEndDate(LocalDate.now().plusDays(10));
+        request.setStartDate(FIXED_TODAY);
+        request.setEndDate(FIXED_FUTURE_10);
         request.setExecutionPlace("Place");
         request.setResponsibleId(3);
         request.setResearchGroupId(2);
 
         when(saveProjectPort.isGroupActive(2)).thenReturn(false);
 
-        assertThrows(BusinessRuleValidationException.class, () -> {
-            createProjectInteractor.execute(request);
-        });
+        assertThrows(BusinessRuleValidationException.class,
+                () -> createProjectInteractor.execute(request));
     }
 
     @Test
@@ -107,8 +113,8 @@ class ProjectModuleTest {
         request.setGeneralObjective("Objective");
         request.setResearchLineId(1);
         request.setBudget(new BigDecimal("100.00"));
-        request.setStartDate(LocalDate.now());
-        request.setEndDate(LocalDate.now().plusDays(10));
+        request.setStartDate(FIXED_TODAY);
+        request.setEndDate(FIXED_FUTURE_10);
         request.setExecutionPlace("Place");
         request.setResponsibleId(3);
         request.setResearchGroupId(2);
@@ -116,22 +122,19 @@ class ProjectModuleTest {
         when(saveProjectPort.isGroupActive(2)).thenReturn(true);
         when(saveProjectPort.isUserMemberOfGroup(3L, 2)).thenReturn(false);
 
-        assertThrows(BusinessRuleValidationException.class, () -> {
-            createProjectInteractor.execute(request);
-        });
+        assertThrows(BusinessRuleValidationException.class,
+                () -> createProjectInteractor.execute(request));
     }
 
     @Test
     void shouldFailWhenBudgetIsZeroOrNegative() {
         Project project = new Project(
                 1, "PRJ-X", "Title", "Summary", "Objective",
-                1, "Computacion", new BigDecimal("0.00"), LocalDate.now(), LocalDate.now().plusDays(10),
+                1, "Computacion", new BigDecimal("0.00"), FIXED_TODAY, FIXED_FUTURE_10,
                 "Place", 3L, 1, "GINSOFT", 1, 1, ProjectStatus.POSTULATED
         );
 
-        assertThrows(BusinessRuleValidationException.class, () -> {
-            project.validateInvariants();
-        });
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
     }
 
     @Test
@@ -139,16 +142,16 @@ class ProjectModuleTest {
         // GINSOFT group restricts to 'Computacion' or 'Ingenieria de software'
         Project validProject = new Project(
                 1, "PRJ-X", "Title", "Summary", "Objective",
-                1, "Computacion", new BigDecimal("500.00"), LocalDate.now(), LocalDate.now().plusDays(10),
+                1, "Computacion", new BigDecimal("500.00"), FIXED_TODAY, FIXED_FUTURE_10,
                 "Place", 3L, 1, "GINSOFT", 1, 1, ProjectStatus.POSTULATED
         );
-        assertDoesNotThrow(() -> validProject.validateInvariants());
+        assertDoesNotThrow(validProject::validateInvariants);
 
         Project invalidProject = new Project(
                 1, "PRJ-Y", "Title", "Summary", "Objective",
-                1, "Ciberseguridad", new BigDecimal("500.00"), LocalDate.now(), LocalDate.now().plusDays(10),
+                1, "Ciberseguridad", new BigDecimal("500.00"), FIXED_TODAY, FIXED_FUTURE_10,
                 "Place", 3L, 1, "GINSOFT", 1, 1, ProjectStatus.POSTULATED
         );
-        assertThrows(BusinessRuleValidationException.class, () -> invalidProject.validateInvariants());
+        assertThrows(BusinessRuleValidationException.class, invalidProject::validateInvariants);
     }
 }

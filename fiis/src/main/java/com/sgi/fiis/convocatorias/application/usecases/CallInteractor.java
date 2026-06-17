@@ -12,10 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
+
+    private static final String STATUS_ABIERTA = "ABIERTA";
+    private static final String STATUS_CERRADA = "CERRADA";
+    private static final String STATUS_FINALIZADA = "FINALIZADA";
 
     private final SaveCallPort saveCallPort;
 
@@ -36,11 +39,11 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
         if (status != null && !status.trim().isEmpty()) {
             CallStatus callStatus;
             try {
-                if ("ABIERTA".equalsIgnoreCase(status)) {
+                if (STATUS_ABIERTA.equalsIgnoreCase(status)) {
                     callStatus = CallStatus.OPEN;
-                } else if ("CERRADA".equalsIgnoreCase(status)) {
+                } else if (STATUS_CERRADA.equalsIgnoreCase(status)) {
                     callStatus = CallStatus.CLOSED;
-                } else if ("FINALIZADA".equalsIgnoreCase(status)) {
+                } else if (STATUS_FINALIZADA.equalsIgnoreCase(status)) {
                     callStatus = CallStatus.FINISHED;
                 } else {
                     callStatus = CallStatus.valueOf(status.toUpperCase());
@@ -55,7 +58,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
 
         return calls.stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -75,11 +78,11 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
 
         CallStatus callStatus;
         try {
-            if ("ABIERTA".equalsIgnoreCase(status)) {
+            if (STATUS_ABIERTA.equalsIgnoreCase(status)) {
                 callStatus = CallStatus.OPEN;
-            } else if ("CERRADA".equalsIgnoreCase(status)) {
+            } else if (STATUS_CERRADA.equalsIgnoreCase(status)) {
                 callStatus = CallStatus.CLOSED;
-            } else if ("FINALIZADA".equalsIgnoreCase(status)) {
+            } else if (STATUS_FINALIZADA.equalsIgnoreCase(status)) {
                 callStatus = CallStatus.FINISHED;
             } else {
                 callStatus = CallStatus.valueOf(status.toUpperCase());
@@ -94,11 +97,11 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
     }
 
     private CallResponse mapToResponse(ResearchCall call) {
-        String statusName = "ABIERTA";
+        String statusName = STATUS_ABIERTA;
         if (call.getStatus() == CallStatus.CLOSED) {
-            statusName = "CERRADA";
+            statusName = STATUS_CERRADA;
         } else if (call.getStatus() == CallStatus.FINISHED) {
-            statusName = "FINALIZADA";
+            statusName = STATUS_FINALIZADA;
         }
 
         return new CallResponse(
