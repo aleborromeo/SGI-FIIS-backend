@@ -20,8 +20,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -69,8 +69,8 @@ class ProjectControllerTest {
         request.setGeneralObjective("Obj");
         request.setResearchLineId(1);
         request.setBudget(new BigDecimal("100"));
-        request.setStartDate(LocalDate.of(2026, 6, 17));
-        request.setEndDate(LocalDate.of(2026, 6, 27));
+        request.setStartDate(LocalDate.of(2026, Month.JUNE, 17));
+        request.setEndDate(LocalDate.of(2026, Month.JUNE, 27));
         request.setExecutionPlace("Place");
         request.setResearchGroupId(2);
         request.setCallId(1);

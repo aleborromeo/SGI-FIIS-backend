@@ -169,19 +169,39 @@ class ProjectModuleTest {
     }
 
     @Test
-    void testGetProjectsByGroup() {
-        Project p = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
-        when(saveProjectPort.findByGroupId(2)).thenReturn(Collections.singletonList(p));
-        List<ProjectResponse> res = createProjectInteractor.getProjectsByGroup(2);
-        assertEquals(1, res.size());
+    void getProjectsByGroup_Success() {
+        Project project = Project.builder()
+                .id(2)
+                .status(ProjectStatus.APPROVED)
+                .build();
+        when(saveProjectPort.findByGroupId(5)).thenReturn(Collections.singletonList(project));
+        
+        List<ProjectResponse> responses = createProjectInteractor.getProjectsByGroup(5);
+        assertEquals(1, responses.size());
+        assertEquals("APROBADO", responses.get(0).getStatus());
     }
 
     @Test
-    void testGetAllProjects() {
-        Project p = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
-        when(saveProjectPort.findAll()).thenReturn(Collections.singletonList(p));
-        List<ProjectResponse> res = createProjectInteractor.getAllProjects();
-        assertEquals(1, res.size());
+    void getAllProjects_Success() {
+        Project project1 = Project.builder()
+                .id(3)
+                .status(ProjectStatus.REJECTED)
+                .build();
+        Project project2 = Project.builder()
+                .id(4)
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project project3 = Project.builder()
+                .id(5)
+                .status(ProjectStatus.COMPLETED)
+                .build();
+        when(saveProjectPort.findAll()).thenReturn(List.of(project1, project2, project3));
+        
+        List<ProjectResponse> responses = createProjectInteractor.getAllProjects();
+        assertEquals(3, responses.size());
+        assertEquals("RECHAZADO", responses.get(0).getStatus());
+        assertEquals("EN_EJECUCION", responses.get(1).getStatus());
+        assertEquals("FINALIZADO", responses.get(2).getStatus());
     }
 
     @Test
@@ -203,8 +223,8 @@ class ProjectModuleTest {
         Project project = Project.builder()
                 .title("Test")
                 .budget(BigDecimal.ZERO)
-                .startDate(LocalDate.of(2026, 1, 1))
-                .endDate(LocalDate.of(2026, 1, 10))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
                 .build();
         assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
     }
@@ -214,8 +234,8 @@ class ProjectModuleTest {
         Project project = Project.builder()
                 .title("Test")
                 .budget(new BigDecimal("100"))
-                .startDate(LocalDate.of(2026, 1, 10))
-                .endDate(LocalDate.of(2026, 1, 1))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 10))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 1))
                 .build();
         assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
     }
@@ -225,8 +245,8 @@ class ProjectModuleTest {
         Project project = Project.builder()
                 .title("  ")
                 .budget(new BigDecimal("100"))
-                .startDate(LocalDate.of(2026, 1, 1))
-                .endDate(LocalDate.of(2026, 1, 10))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
                 .build();
         assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
     }
@@ -236,8 +256,8 @@ class ProjectModuleTest {
         Project project = Project.builder()
                 .title("Test")
                 .budget(new BigDecimal("100"))
-                .startDate(LocalDate.of(2026, 1, 1))
-                .endDate(LocalDate.of(2026, 1, 10))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
                 .researchGroupCode("GINSOFT")
                 .researchLineName("Telecomunicaciones")
                 .build();
@@ -249,8 +269,8 @@ class ProjectModuleTest {
         Project project = Project.builder()
                 .title("Test")
                 .budget(new BigDecimal("100"))
-                .startDate(LocalDate.of(2026, 1, 1))
-                .endDate(LocalDate.of(2026, 1, 10))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
                 .researchGroupCode("GINSOFT")
                 .researchLineName("Computacion")
                 .build();
