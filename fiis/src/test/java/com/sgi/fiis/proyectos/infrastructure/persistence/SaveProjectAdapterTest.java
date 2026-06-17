@@ -11,13 +11,11 @@ import com.sgi.fiis.users.infrastructure.persistence.SpringDataUsuarioRepository
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
 
+import java.math.BigDecimal;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
-import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

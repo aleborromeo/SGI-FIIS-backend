@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -197,5 +196,64 @@ class ProjectModuleTest {
     void testGetProjectByIdNotFound() {
         when(saveProjectPort.findById(99)).thenReturn(Optional.empty());
         assertThrows(BusinessRuleValidationException.class, () -> createProjectInteractor.getProjectById(99));
+    }
+    
+    @Test
+    void validateInvariants_WhenBudgetIsZero_ThrowsException() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(BigDecimal.ZERO)
+                .startDate(LocalDate.of(2026, 1, 1))
+                .endDate(LocalDate.of(2026, 1, 10))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenStartDateAfterEndDate_ThrowsException() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(new BigDecimal("100"))
+                .startDate(LocalDate.of(2026, 1, 10))
+                .endDate(LocalDate.of(2026, 1, 1))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenTitleIsEmpty_ThrowsException() {
+        Project project = Project.builder()
+                .title("  ")
+                .budget(new BigDecimal("100"))
+                .startDate(LocalDate.of(2026, 1, 1))
+                .endDate(LocalDate.of(2026, 1, 10))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenGinsoftInvalidLine_ThrowsException() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(new BigDecimal("100"))
+                .startDate(LocalDate.of(2026, 1, 1))
+                .endDate(LocalDate.of(2026, 1, 10))
+                .researchGroupCode("GINSOFT")
+                .researchLineName("Telecomunicaciones")
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenGinsoftValidLine_Success() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(new BigDecimal("100"))
+                .startDate(LocalDate.of(2026, 1, 1))
+                .endDate(LocalDate.of(2026, 1, 10))
+                .researchGroupCode("GINSOFT")
+                .researchLineName("Computacion")
+                .build();
+        assertDoesNotThrow(project::validateInvariants);
     }
 }
