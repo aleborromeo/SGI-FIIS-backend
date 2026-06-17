@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ProjectModuleTest {
+class ProjectModuleTest {
 
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
@@ -31,7 +31,7 @@ public class ProjectModuleTest {
     private CreateProjectInteractor createProjectInteractor;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         saveProjectPort = Mockito.mock(SaveProjectPort.class);
         saveCallPort = Mockito.mock(SaveCallPort.class);
         createProcedurePort = Mockito.mock(CreateProcedurePort.class);
@@ -39,7 +39,7 @@ public class ProjectModuleTest {
     }
 
     @Test
-    public void shouldCreateProjectSuccessfully() {
+    void shouldCreateProjectSuccessfully() {
         CreateProjectRequest request = new CreateProjectRequest();
         request.setTitle("New Tech Project");
         request.setSummary("Summary of tech project");
@@ -79,7 +79,7 @@ public class ProjectModuleTest {
     }
 
     @Test
-    public void shouldFailWhenResearchGroupNotActive() {
+    void shouldFailWhenResearchGroupNotActive() {
         CreateProjectRequest request = new CreateProjectRequest();
         request.setTitle("Title");
         request.setSummary("Summary");
@@ -100,7 +100,7 @@ public class ProjectModuleTest {
     }
 
     @Test
-    public void shouldFailWhenResponsibleNotMemberOfGroup() {
+    void shouldFailWhenResponsibleNotMemberOfGroup() {
         CreateProjectRequest request = new CreateProjectRequest();
         request.setTitle("Title");
         request.setSummary("Summary");
@@ -122,7 +122,7 @@ public class ProjectModuleTest {
     }
 
     @Test
-    public void shouldFailWhenBudgetIsZeroOrNegative() {
+    void shouldFailWhenBudgetIsZeroOrNegative() {
         Project project = new Project(
                 1, "PRJ-X", "Title", "Summary", "Objective",
                 1, "Computacion", new BigDecimal("0.00"), LocalDate.now(), LocalDate.now().plusDays(10),
@@ -135,7 +135,7 @@ public class ProjectModuleTest {
     }
 
     @Test
-    public void shouldApplyGinsoftLineRestrictionCorrectly() {
+    void shouldApplyGinsoftLineRestrictionCorrectly() {
         // GINSOFT group restricts to 'Computacion' or 'Ingenieria de software'
         Project validProject = new Project(
                 1, "PRJ-X", "Title", "Summary", "Objective",

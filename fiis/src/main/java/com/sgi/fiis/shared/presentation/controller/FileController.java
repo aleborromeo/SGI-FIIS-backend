@@ -133,40 +133,7 @@ public class FileController {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new BusinessRuleValidationException("Document not found with ID: " + id));
 
-        // Security check
-        boolean isAuthorized = false;
-
-        // Check Roles
-        boolean isAdminOrDirectorOrDecano = currentUser.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") ||
-                               a.getAuthority().equals("ROLE_DIRECTOR_INVESTIGACION") ||
-                               a.getAuthority().equals("ROLE_DECANO"));
-
-        if (isAdminOrDirectorOrDecano) {
-            isAuthorized = true;
-        } else if (document.getCreatorId().equals(currentUser.getId())) {
-            isAuthorized = true;
-        } else {
-            // Check if document is linked to a project where the user is responsible or group coordinator
-            Optional<ProjectEntity> projectOpt = projectRepository.findByDocumentId(id);
-            if (projectOpt.isPresent()) {
-                ProjectEntity project = projectOpt.get();
-                if (project.getResponsible().getId().equals(currentUser.getId())) {
-                    isAuthorized = true;
-                } else {
-                    boolean isCoordinator = currentUser.getAuthorities().stream()
-                            .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR_GRUPO"));
-                    if (isCoordinator) {
-                        Optional<GroupMembershipEntity> membershipOpt = membershipRepository.findByUserIdAndActiveTrue(currentUser.getId());
-                        if (membershipOpt.isPresent() && membershipOpt.get().getGroup().getId().equals(project.getGroup().getId())) {
-                            isAuthorized = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!isAuthorized) {
+        if (!isAuthorizedToDownload(document, id, currentUser)) {
             return ResponseEntity.status(403).build();
         }
 
@@ -174,25 +141,70 @@ public class FileController {
             Path filePath = Paths.get(document.getStoragePath()).toAbsolutePath().normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
-            if (resource.exists() && resource.isReadable()) {
-                String contentType = "application/octet-stream";
-                if (document.getFileExtension().equalsIgnoreCase("PDF")) {
-                    contentType = "application/pdf";
-                } else if (document.getFileExtension().equalsIgnoreCase("DOC")) {
-                    contentType = "application/msword";
-                } else if (document.getFileExtension().equalsIgnoreCase("DOCX")) {
-                    contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                }
-
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getOriginalName() + "\"")
-                        .body(resource);
-            } else {
+            if (!resource.exists() || !resource.isReadable()) {
                 throw new BusinessRuleValidationException("File not found on disk.");
             }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(resolveContentType(document.getFileExtension())))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getOriginalName() + "\"")
+                    .body(resource);
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error reading physical file", e);
         }
     }
+
+    // --- Private helpers to reduce cyclomatic complexity (JAVA-R1000) ---
+
+    private boolean isAuthorizedToDownload(DocumentEntity document, Integer documentId, CustomUserDetails currentUser) {
+        if (isPrivilegedRole(currentUser)) {
+            return true;
+        }
+        if (document.getCreatorId().equals(currentUser.getId())) {
+            return true;
+        }
+        return isOwnerOrCoordinatorOfLinkedProject(documentId, currentUser);
+    }
+
+    private boolean isPrivilegedRole(CustomUserDetails currentUser) {
+        return currentUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_DIRECTOR_INVESTIGACION")
+                        || a.getAuthority().equals("ROLE_DECANO"));
+    }
+
+    private boolean isOwnerOrCoordinatorOfLinkedProject(Integer documentId, CustomUserDetails currentUser) {
+        Optional<ProjectEntity> projectOpt = projectRepository.findByDocumentId(documentId);
+        if (projectOpt.isEmpty()) {
+            return false;
+        }
+        ProjectEntity project = projectOpt.get();
+        if (project.getResponsible().getId().equals(currentUser.getId())) {
+            return true;
+        }
+        return isGroupCoordinatorOfProject(project, currentUser);
+    }
+
+    private boolean isGroupCoordinatorOfProject(ProjectEntity project, CustomUserDetails currentUser) {
+        boolean isCoordinator = currentUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR_GRUPO"));
+        if (!isCoordinator) {
+            return false;
+        }
+        Optional<GroupMembershipEntity> membershipOpt = membershipRepository.findByUserIdAndActiveTrue(currentUser.getId());
+        return membershipOpt.isPresent()
+                && membershipOpt.get().getGroup().getId().equals(project.getGroup().getId());
+    }
+
+    private String resolveContentType(String extension) {
+        if (extension.equalsIgnoreCase("PDF")) {
+            return "application/pdf";
+        } else if (extension.equalsIgnoreCase("DOC")) {
+            return "application/msword";
+        } else if (extension.equalsIgnoreCase("DOCX")) {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        }
+        return "application/octet-stream";
+    }
 }
+

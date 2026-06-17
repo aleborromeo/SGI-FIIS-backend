@@ -21,21 +21,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-public class ResearchCallModuleTest {
+class ResearchCallModuleTest {
 
     private SaveCallPort saveCallPort;
     private CreateCallInteractor createCallInteractor;
     private CallInteractor callInteractor;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         saveCallPort = Mockito.mock(SaveCallPort.class);
         createCallInteractor = new CreateCallInteractor(saveCallPort);
         callInteractor = new CallInteractor(saveCallPort);
     }
 
     @Test
-    public void shouldCreateCallSuccessfully() {
+    void shouldCreateCallSuccessfully() {
         CreateCallRequest request = new CreateCallRequest();
         request.setTitle("Call 2026");
         request.setStartDate(LocalDate.now());
@@ -53,7 +53,7 @@ public class ResearchCallModuleTest {
     }
 
     @Test
-    public void shouldValidateDatesCorrectlyOnSubmission() {
+    void shouldValidateDatesCorrectlyOnSubmission() {
         // Active open call
         ResearchCall openCall = new ResearchCall(1, "Call 1", LocalDate.now().minusDays(5), LocalDate.now().plusDays(5), CallStatus.OPEN);
         assertDoesNotThrow(() -> openCall.validateCanSubmitProject(LocalDate.now()));
@@ -68,7 +68,7 @@ public class ResearchCallModuleTest {
     }
 
     @Test
-    public void shouldListCallsFilteredByStatus() {
+    void shouldListCallsFilteredByStatus() {
         ResearchCall call1 = new ResearchCall(1, "Call 1", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.OPEN);
         ResearchCall call2 = new ResearchCall(2, "Call 2", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.CLOSED);
 
