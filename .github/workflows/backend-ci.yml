@@ -53,4 +53,5 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: 12345
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: false
+          JWT_SECRET: ci-test-secret-key-for-jwt-signing-min-32-characters-long
         run: ./mvnw clean verify
