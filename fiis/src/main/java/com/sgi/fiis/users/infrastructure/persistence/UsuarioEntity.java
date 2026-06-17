@@ -38,14 +38,14 @@ public class UsuarioEntity {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column(name = "es_activo", nullable = false)
     private boolean activo;
 
     @Column(name = "must_change_password", nullable = false)
     private boolean mustChangePassword;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_rol", nullable = false)
+    @JoinColumn(name = "id_rol_principal", nullable = false)
     private RolEntity rol;
 
     @Column(name = "oauth_provider", length = 50)

@@ -29,22 +29,22 @@ CREATE TABLE usuarios (
     correo_institucional  VARCHAR(150)  NOT NULL UNIQUE,
     telefono              VARCHAR(20),
     password_hash         VARCHAR(255)  NOT NULL,
-    activo                BOOLEAN       NOT NULL DEFAULT TRUE,
+    es_activo             BOOLEAN       NOT NULL DEFAULT TRUE,
     must_change_password  BOOLEAN       NOT NULL DEFAULT TRUE,
-    id_rol                BIGINT        NOT NULL REFERENCES roles(id_rol),
+    id_rol_principal      BIGINT        NOT NULL REFERENCES roles(id_rol),
     fecha_creacion        TIMESTAMP     NOT NULL DEFAULT NOW(),
     fecha_actualizacion   TIMESTAMP     NOT NULL DEFAULT NOW()
 );
 
 -- Índices para búsquedas frecuentes
-CREATE INDEX idx_usuarios_rol ON usuarios(id_rol);
-CREATE INDEX idx_usuarios_activo ON usuarios(activo);
+CREATE INDEX idx_usuarios_rol ON usuarios(id_rol_principal);
+CREATE INDEX idx_usuarios_activo ON usuarios(es_activo);
 CREATE INDEX idx_usuarios_dni ON usuarios(dni);
 CREATE INDEX idx_usuarios_correo ON usuarios(correo_institucional);
 
 -- Usuario administrador inicial
 -- Contraseña: 00000000 (DNI por defecto, hasheada con BCrypt)
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '00000000',
     'Admin',
