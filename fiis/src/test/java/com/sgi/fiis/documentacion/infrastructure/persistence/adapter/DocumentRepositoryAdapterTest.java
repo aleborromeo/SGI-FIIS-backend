@@ -37,7 +37,7 @@ class DocumentRepositoryAdapterTest {
                 .storagePath("/local/storage/file.docx")
                 .extension("DOCX")
                 .sizeBytes(2048L)
-                .uploadedById(15)
+                .uploadedById(15L)
                 .active(true)
                 .build();
 
@@ -47,7 +47,7 @@ class DocumentRepositoryAdapterTest {
         savedEntity.setStoragePath("/local/storage/file.docx");
         savedEntity.setExtension("DOCX");
         savedEntity.setSizeBytes(2048L);
-        savedEntity.setUploadedById(15);
+        savedEntity.setUploadedById(15L);
         savedEntity.setUploadDate(LocalDateTime.now());
         savedEntity.setActive(true);
 
@@ -63,7 +63,7 @@ class DocumentRepositoryAdapterTest {
         DocumentEntity capturedEntity = entityCaptor.getValue();
         assertEquals("informe_avance.docx", capturedEntity.getOriginalName());
         assertEquals("DOCX", capturedEntity.getExtension());
-        assertEquals(15, capturedEntity.getUploadedById());
+        assertEquals(15L, capturedEntity.getUploadedById());
         
         assertNotNull(resultDomain);
         assertEquals(100L, resultDomain.getId());
@@ -80,7 +80,7 @@ class DocumentRepositoryAdapterTest {
         entity.setStoragePath("/local/anexo.pdf");
         entity.setExtension("PDF");
         entity.setSizeBytes(5000L);
-        entity.setUploadedById(1);
+        entity.setUploadedById(1L);
         entity.setUploadDate(LocalDateTime.now());
         entity.setActive(true);
 

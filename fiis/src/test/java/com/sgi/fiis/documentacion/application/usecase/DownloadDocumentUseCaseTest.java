@@ -45,7 +45,7 @@ class DownloadDocumentUseCaseTest {
                 .extension("PDF")
                 .sizeBytes(2048L)
                 .storagePath("/ruta/archivo.pdf")
-                .uploadedById(42)
+                .uploadedById(42L)
                 .active(true)
                 .build();
 
@@ -60,14 +60,16 @@ class DownloadDocumentUseCaseTest {
         when(fileStoragePort.load("/ruta/archivo.pdf"))
                 .thenReturn(fakeStream);
 
-        InputStream result =
+        DocumentDownloadResult result =
                 downloadDocumentUseCase.execute(
                         1L,
-                        42,
+                        42L,
                         "ESTUDIANTE"
                 );
 
         assertNotNull(result);
+        assertEquals("tesis.pdf", result.getOriginalName());
+        assertNotNull(result.getInputStream());
 
         verify(fileStoragePort)
                 .load("/ruta/archivo.pdf");
@@ -83,7 +85,7 @@ class DownloadDocumentUseCaseTest {
                 .extension("PDF")
                 .sizeBytes(2048L)
                 .storagePath("/ruta/autoridad.pdf")
-                .uploadedById(10)
+                .uploadedById(10L)
                 .active(true)
                 .build();
 
@@ -98,14 +100,16 @@ class DownloadDocumentUseCaseTest {
         when(fileStoragePort.load("/ruta/autoridad.pdf"))
                 .thenReturn(fakeStream);
 
-        InputStream result =
+        DocumentDownloadResult result =
                 downloadDocumentUseCase.execute(
                         1L,
-                        99,
+                        99L,
                         "ADMIN"
                 );
 
         assertNotNull(result);
+        assertEquals("autoridad.pdf", result.getOriginalName());
+        assertNotNull(result.getInputStream());
 
         verify(fileStoragePort)
                 .load("/ruta/autoridad.pdf");
@@ -123,7 +127,7 @@ class DownloadDocumentUseCaseTest {
                         DocumentNotFoundException.class,
                         () -> downloadDocumentUseCase.execute(
                                 1L,
-                                42,
+                                42L,
                                 "ESTUDIANTE"
                         )
                 );
@@ -144,7 +148,7 @@ class DownloadDocumentUseCaseTest {
                 .extension("PDF")
                 .sizeBytes(2048L)
                 .storagePath("/ruta/inactivo.pdf")
-                .uploadedById(42)
+                .uploadedById(42L)
                 .active(false)
                 .build();
 
@@ -156,7 +160,7 @@ class DownloadDocumentUseCaseTest {
                         DocumentAccessDeniedException.class,
                         () -> downloadDocumentUseCase.execute(
                                 1L,
-                                42,
+                                42L,
                                 "ESTUDIANTE"
                         )
                 );
@@ -177,7 +181,7 @@ class DownloadDocumentUseCaseTest {
                 .extension("PDF")
                 .sizeBytes(2048L)
                 .storagePath("/ruta/prohibido.pdf")
-                .uploadedById(10)
+                .uploadedById(10L)
                 .active(true)
                 .build();
 
@@ -189,7 +193,7 @@ class DownloadDocumentUseCaseTest {
                         DocumentAccessDeniedException.class,
                         () -> downloadDocumentUseCase.execute(
                                 1L,
-                                99,
+                                99L,
                                 "ESTUDIANTE"
                         )
                 );

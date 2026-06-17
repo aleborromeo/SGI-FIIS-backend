@@ -17,7 +17,7 @@ public class DownloadDocumentUseCase {
         this.fileStoragePort = fileStoragePort;
     }
 
-    public InputStream execute(Long documentId, Integer currentUserId, String currentUserRol) {
+    public DocumentDownloadResult execute(Long documentId, Long currentUserId, String currentUserRol) {
         Document document = documentRepositoryPort.findById(documentId)
                 .orElseThrow(() -> new DocumentNotFoundException("El documento no existe."));
 
@@ -36,6 +36,7 @@ public class DownloadDocumentUseCase {
             throw new DocumentAccessDeniedException("Acceso denegado: No posee permisos sobre este archivo.");
         }
 
-        return fileStoragePort.load(document.getStoragePath());
+        InputStream stream = fileStoragePort.load(document.getStoragePath());
+        return new DocumentDownloadResult(stream, document.getOriginalName());
     }
 }

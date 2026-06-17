@@ -15,7 +15,7 @@ public class DeactivateDocumentUseCase {
         this.documentRepositoryPort = documentRepositoryPort;
     }
 
-    public void execute(Long documentId, Integer currentUserId, String currentUserRol) {
+    public void execute(Long documentId, Long currentUserId, String currentUserRol) {
 
         // 1. Buscar el documento en la BD
         Document document = documentRepositoryPort.findById(documentId)

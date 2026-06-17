@@ -1,5 +1,6 @@
 package com.sgi.fiis.documentacion.presentation.controller;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.documentacion.application.dto.DocumentResponseDto;
 import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedException;
 import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundException;
@@ -7,11 +8,14 @@ import com.sgi.fiis.documentacion.application.usecase.DeactivateDocumentUseCase;
 import com.sgi.fiis.documentacion.application.usecase.DownloadDocumentUseCase;
 import com.sgi.fiis.documentacion.application.usecase.UploadDocumentUseCase;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import com.sgi.fiis.documentacion.application.usecase.DocumentDownloadResult;
+import org.springframework.http.HttpHeaders;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -25,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +38,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -53,7 +61,30 @@ class DocumentControllerTest {
     @MockitoBean
     private DeactivateDocumentUseCase deactivateDocumentUseCase;
 
+    @MockitoBean
+    private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
+
+    @MockitoBean
+    private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
+
+    /**
+     * Crea un Authentication simulado con CustomUserDetails como principal mockeado.
+     */
+    private UsernamePasswordAuthenticationToken createAuth(Long userId, String role) {
+        CustomUserDetails userDetails = org.mockito.Mockito.mock(CustomUserDetails.class);
+        org.mockito.Mockito.when(userDetails.getId()).thenReturn(userId);
+        org.mockito.Mockito.when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
+        org.mockito.Mockito.when(userDetails.getAuthorities())
+                .thenReturn((java.util.Collection) List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        );
+    }
+
     @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
     @DisplayName("HTTP POST: /api/documents/upload debe retornar 201 Created ante archivo válido")
     void uploadDocument_HttpSuccess() throws Exception {
 
@@ -70,26 +101,91 @@ class DocumentControllerTest {
                         "manual_investigacion.pdf",
                         "PDF",
                         100L,
-                        42,
-                        LocalDateTime.now()
+                        42L,
+                        LocalDateTime.now(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        false
                 );
 
         when(uploadDocumentUseCase.execute(
                 any(),
                 eq("manual_investigacion.pdf"),
                 anyLong(),
-                eq(42)
+                eq(42L),
+                any(),
+                any(),
+                any(),
+                any(),
+                anyBoolean()
         )).thenReturn(simulatedDto);
 
         mockMvc.perform(
                         multipart("/api/documents/upload")
                                 .file(mockFile)
-                                .param("userId", "42")
+                                .principal(createAuth(42L, "ESTUDIANTE"))
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.originalName").value("manual_investigacion.pdf"))
                 .andExpect(jsonPath("$.extension").value("PDF"));
+    }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP POST: /api/documents/upload con parametros de asociacion debe retornar 201 Created")
+    void uploadDocument_WithAssociations_HttpSuccess() throws Exception {
+
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "manual_investigacion.pdf",
+                MediaType.APPLICATION_PDF_VALUE,
+                "contenido-binario-de-prueba".getBytes()
+        );
+
+        DocumentResponseDto simulatedDto =
+                new DocumentResponseDto(
+                        1L,
+                        "manual_investigacion.pdf",
+                        "PDF",
+                        100L,
+                        42L,
+                        LocalDateTime.now(),
+                        10L,
+                        20L,
+                        null,
+                        null,
+                        true
+                );
+
+        when(uploadDocumentUseCase.execute(
+                any(),
+                eq("manual_investigacion.pdf"),
+                anyLong(),
+                eq(42L),
+                eq(10L),
+                eq(20L),
+                any(),
+                any(),
+                eq(true)
+        )).thenReturn(simulatedDto);
+
+        mockMvc.perform(
+                        multipart("/api/documents/upload")
+                                .file(mockFile)
+                                .param("proyectoId", "10")
+                                .param("tramiteId", "20")
+                                .param("esSubsanacion", "true")
+                                .principal(createAuth(42L, "ESTUDIANTE"))
+                )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.originalName").value("manual_investigacion.pdf"))
+                .andExpect(jsonPath("$.proyectoId").value(10))
+                .andExpect(jsonPath("$.tramiteId").value(20))
+                .andExpect(jsonPath("$.esSubsanacion").value(true));
     }
 
     @Test
@@ -106,7 +202,7 @@ class DocumentControllerTest {
         mockMvc.perform(
                         multipart("/api/documents/upload")
                                 .file(emptyFile)
-                                .param("userId", "42")
+                                .principal(createAuth(42L, "ESTUDIANTE"))
                 )
                 .andExpect(status().isBadRequest());
     }
@@ -123,24 +219,25 @@ class DocumentControllerTest {
         );
 
         // Cambiamos a IllegalArgumentException para que sea un error no verificado compatible con el Servlet de MockMvc
-        when(uploadDocumentUseCase.execute(any(), any(), anyLong(), anyInt()))
+        when(uploadDocumentUseCase.execute(any(), any(), anyLong(), anyLong(), any(), any(), any(), any(), anyBoolean()))
                 .thenThrow(new IllegalArgumentException("Error de lectura física en el sistema de almacenamiento"));
 
         mockMvc.perform(
                         multipart("/api/documents/upload")
                                 .file(mockFile)
-                                .param("userId", "42")
+                                .principal(createAuth(42L, "ESTUDIANTE"))
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("X-Error-Cause", "Error de lectura física en el sistema de almacenamiento"));
     }
 
     @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
     @DisplayName("HTTP GET download retorna 200")
     void downloadDocument_HttpSuccess() throws Exception {
 
         Long documentId = 1L;
-        Integer userId = 42;
+        Long userId = 42L;
         String role = "ESTUDIANTE";
 
         ByteArrayInputStream fakeInputStream =
@@ -152,15 +249,15 @@ class DocumentControllerTest {
                 eq(documentId),
                 eq(userId),
                 eq(role)
-        )).thenReturn(fakeInputStream);
+        )).thenReturn(new DocumentDownloadResult(fakeInputStream, "tesis_descarga.pdf"));
 
         mockMvc.perform(
                         get("/api/documents/download/{id}", documentId)
-                                .param("userId", userId.toString())
-                                .param("userRole", role)
+                                .principal(createAuth(userId, role))
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tesis_descarga.pdf\""));
     }
 
     @Test
@@ -168,7 +265,7 @@ class DocumentControllerTest {
     void downloadDocument_HttpForbidden() throws Exception {
 
         Long documentId = 1L;
-        Integer intruderId = 99;
+        Long intruderId = 99L;
         String role = "ESTUDIANTE";
 
         when(downloadDocumentUseCase.execute(
@@ -183,8 +280,7 @@ class DocumentControllerTest {
 
         mockMvc.perform(
                         get("/api/documents/download/{id}", documentId)
-                                .param("userId", intruderId.toString())
-                                .param("userRole", role)
+                                .principal(createAuth(intruderId, role))
                 )
                 .andExpect(status().isForbidden());
     }
@@ -196,18 +292,18 @@ class DocumentControllerTest {
         Long nonExistentId = 404L;
 
         // Se usa una excepción del paquete para garantizar la inyección correcta
-        when(downloadDocumentUseCase.execute(any(), any(), any()))
+        when(downloadDocumentUseCase.execute(anyLong(), anyLong(), anyString()))
                 .thenThrow(new DocumentNotFoundException("El documento solicitado no existe."));
 
         mockMvc.perform(
                         get("/api/documents/download/{id}", nonExistentId)
-                                .param("userId", "42")
-                                .param("userRole", "ESTUDIANTE")
+                                .principal(createAuth(42L, "ESTUDIANTE"))
                 )
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
     @DisplayName("HTTP DELETE deactivate retorna 204")
     void deactivateDocument_HttpSuccess() throws Exception {
 
@@ -215,13 +311,12 @@ class DocumentControllerTest {
 
         doNothing().when(deactivateDocumentUseCase)
                 .execute(eq(documentId),
-                        eq(42),
+                        eq(42L),
                         eq("ADMIN"));
 
         mockMvc.perform(
                         delete("/api/documents/deactivate/{id}", documentId)
-                                .param("userId", "42")
-                                .param("userRole", "ADMIN")
+                                .principal(createAuth(42L, "ADMIN"))
                 )
                 .andExpect(status().isNoContent());
     }
@@ -234,12 +329,11 @@ class DocumentControllerTest {
 
         doThrow(new DocumentAccessDeniedException("No tiene permisos para deshabilitar este documento."))
                 .when(deactivateDocumentUseCase)
-                .execute(eq(documentId), any(Integer.class), any(String.class));
+                .execute(eq(documentId), anyLong(), anyString());
 
         mockMvc.perform(
                         delete("/api/documents/deactivate/{id}", documentId)
-                                .param("userId", "42")
-                                .param("userRole", "ESTUDIANTE")
+                                .principal(createAuth(42L, "ESTUDIANTE"))
                 )
                 .andExpect(status().isForbidden());
     }
@@ -255,13 +349,12 @@ class DocumentControllerTest {
         ))
                 .when(deactivateDocumentUseCase)
                 .execute(eq(nonExistentId),
-                        any(Integer.class),
-                        any(String.class));
+                        anyLong(),
+                        anyString());
 
         mockMvc.perform(
                         delete("/api/documents/deactivate/{id}", nonExistentId)
-                                .param("userId", "42")
-                                .param("userRole", "ADMIN")
+                                .principal(createAuth(42L, "ADMIN"))
                 )
                 .andExpect(status().isNotFound());
     }

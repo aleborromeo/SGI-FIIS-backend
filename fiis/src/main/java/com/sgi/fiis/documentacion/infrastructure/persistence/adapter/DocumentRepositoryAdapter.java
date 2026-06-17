@@ -39,6 +39,11 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
         entity.setUploadedById(domain.getUploadedById());
         entity.setUploadDate(domain.getUploadDate());
         entity.setActive(domain.isActive());
+        entity.setProyectoId(domain.getProyectoId());
+        entity.setTramiteId(domain.getTramiteId());
+        entity.setPlanTesisId(domain.getPlanTesisId());
+        entity.setInformeId(domain.getInformeId());
+        entity.setEsSubsanacion(domain.isEsSubsanacion());
         return entity;
     }
 
@@ -52,6 +57,11 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
                 .uploadedById(entity.getUploadedById())
                 .uploadDate(entity.getUploadDate())
                 .active(entity.isActive())
+                .proyectoId(entity.getProyectoId())
+                .tramiteId(entity.getTramiteId())
+                .planTesisId(entity.getPlanTesisId())
+                .informeId(entity.getInformeId())
+                .esSubsanacion(entity.isEsSubsanacion())
                 .build();
     }
 }

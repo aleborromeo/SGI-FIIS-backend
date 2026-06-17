@@ -7,6 +7,11 @@ public record DocumentResponseDto(
     String originalName,
     String extension,
     Long sizeBytes,
-    Integer uploadedById,
-    LocalDateTime uploadDate
+    Long uploadedById,
+    LocalDateTime uploadDate,
+    Long proyectoId,
+    Long tramiteId,
+    Long planTesisId,
+    Long informeId,
+    boolean esSubsanacion
 ) {}

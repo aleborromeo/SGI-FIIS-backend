@@ -44,7 +44,7 @@ class DocumentUseCaseTest {
         InputStream fakeStream = new ByteArrayInputStream("bytes-de-prueba".getBytes());
         String fileName = "tesis_sistema_fiis.pdf";
         Long sizeBytes = 1024L;
-        Integer userId = 42;
+        Long userId = 42L;
 
         String simulatedPath = "/storage/uploads-fiis/unique-uuid_tesis_sistema_fiis.pdf";
         when(fileStoragePort.store(any(InputStream.class), eq(fileName))).thenReturn(simulatedPath);
@@ -73,13 +73,66 @@ class DocumentUseCaseTest {
     }
 
     @Test
+    @DisplayName("RF-65 / RF-69: Carga exitosa de documento con asociaciones y flag de subsanación")
+    void uploadDocument_WithAssociations_Success() {
+        // Arrange
+        InputStream fakeStream = new ByteArrayInputStream("bytes-de-prueba".getBytes());
+        String fileName = "subsanacion_informe.pdf";
+        Long sizeBytes = 1024L;
+        Long userId = 42L;
+        Long proyectoId = 101L;
+        Long tramiteId = 202L;
+        Long planTesisId = null;
+        Long informeId = 303L;
+        boolean esSubsanacion = true;
+
+        String simulatedPath = "/storage/uploads-fiis/unique-uuid_subsanacion_informe.pdf";
+        when(fileStoragePort.store(any(InputStream.class), eq(fileName))).thenReturn(simulatedPath);
+
+        Document simulatedSavedDoc = Document.builder()
+                .id(1L)
+                .originalName(fileName)
+                .storagePath(simulatedPath)
+                .extension("PDF")
+                .sizeBytes(sizeBytes)
+                .uploadedById(userId)
+                .proyectoId(proyectoId)
+                .tramiteId(tramiteId)
+                .planTesisId(planTesisId)
+                .informeId(informeId)
+                .esSubsanacion(esSubsanacion)
+                .active(true)
+                .build();
+        when(documentRepositoryPort.save(any(Document.class))).thenReturn(simulatedSavedDoc);
+
+        // Act
+        DocumentResponseDto result = uploadDocumentUseCase.execute(
+                fakeStream, fileName, sizeBytes, userId, proyectoId, tramiteId, planTesisId, informeId, esSubsanacion
+        );
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1L, result.id());
+        assertEquals("PDF", result.extension());
+        assertEquals(fileName, result.originalName());
+        assertEquals(proyectoId, result.proyectoId());
+        assertEquals(tramiteId, result.tramiteId());
+        assertNull(result.planTesisId());
+        assertEquals(informeId, result.informeId());
+        assertTrue(result.esSubsanacion());
+        verify(fileStoragePort, times(1)).store(fakeStream, fileName);
+        verify(documentRepositoryPort, times(1)).save(any(Document.class));
+    }
+
+
+    @Test
     @DisplayName("RNF-07: Intento de carga fallida debido a extensión inválida o maliciosa")
     void uploadDocument_InvalidExtension_ThrowsException() {
         // Arrange
         InputStream fakeStream = new ByteArrayInputStream("bytes".getBytes());
         String fileName = "script_malicioso.exe";
         Long sizeBytes = 500L;
-        Integer userId = 42;
+        Long userId = 42L;
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -95,7 +148,7 @@ class DocumentUseCaseTest {
     void downloadDocument_AsOwner_Success() {
         // Arrange
         Long docId = 10L;
-        Integer userId = 77;
+        Long userId = 77L;
         String userRole = "ESTUDIANTE";
 
         Document stubDoc = Document.builder()
@@ -111,10 +164,12 @@ class DocumentUseCaseTest {
         when(fileStoragePort.load(stubDoc.getStoragePath())).thenReturn(new ByteArrayInputStream("contenido".getBytes()));
 
         // Act
-        InputStream resultStream = downloadDocumentUseCase.execute(docId, userId, userRole);
+        DocumentDownloadResult result = downloadDocumentUseCase.execute(docId, userId, userRole);
 
         // Assert
-        assertNotNull(resultStream);
+        assertNotNull(result);
+        assertNotNull(result.getInputStream());
+        assertEquals("plan_de_tesis.docx", result.getOriginalName());
         verify(fileStoragePort, times(1)).load(stubDoc.getStoragePath());
     }
 
@@ -123,8 +178,8 @@ class DocumentUseCaseTest {
     void downloadDocument_UnauthorizedUser_ThrowsException() {
         // Arrange
         Long docId = 10L;
-        Integer ownerId = 77;
-        Integer foreignUserId = 99; // Usuario ajeno
+        Long ownerId = 77L;
+        Long foreignUserId = 99L; // Usuario ajeno
         String foreignUserRole = "DOCENTE_INVESTIGADOR"; // No es autoridad central (Director/Decano)
 
         Document stubDoc = Document.builder()
@@ -151,8 +206,8 @@ class DocumentUseCaseTest {
     void downloadDocument_AsAuthority_Success() {
         // Arrange
         Long docId = 15L;
-        Integer ownerId = 11;
-        Integer directorUserId = 2; // ID del Director
+        Long ownerId = 11L;
+        Long directorUserId = 2L; // ID del Director
         String directorRole = "DIRECTOR_INVESTIGACION"; // Rol con privilegios institucionales
 
         Document stubDoc = Document.builder()
@@ -168,10 +223,12 @@ class DocumentUseCaseTest {
         when(fileStoragePort.load(stubDoc.getStoragePath())).thenReturn(new ByteArrayInputStream("datos".getBytes()));
 
         // Act
-        InputStream resultStream = downloadDocumentUseCase.execute(docId, directorUserId, directorRole);
+        DocumentDownloadResult result = downloadDocumentUseCase.execute(docId, directorUserId, directorRole);
 
         // Assert
-        assertNotNull(resultStream);
+        assertNotNull(result);
+        assertNotNull(result.getInputStream());
+        assertEquals("proyecto_confidencial.pdf", result.getOriginalName());
         verify(fileStoragePort, times(1)).load(stubDoc.getStoragePath());
     }
 }

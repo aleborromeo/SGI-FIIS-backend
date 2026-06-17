@@ -20,7 +20,7 @@ class DocumentTest {
                 .storagePath("/uploads/tesis_sistemas.pdf")
                 .extension("PDF")
                 .sizeBytes(1024L)
-                .uploadedById(42)
+                .uploadedById(42L)
                 .uploadDate(now)
                 .active(true)
                 .build();
@@ -31,7 +31,7 @@ class DocumentTest {
         assertEquals("/uploads/tesis_sistemas.pdf", doc1.getStoragePath());
         assertEquals("PDF", doc1.getExtension());
         assertEquals(1024L, doc1.getSizeBytes());
-        assertEquals(42, doc1.getUploadedById());
+        assertEquals(42L, doc1.getUploadedById());
         assertEquals(now, doc1.getUploadDate());
         assertTrue(doc1.isActive());
 
@@ -42,7 +42,7 @@ class DocumentTest {
         doc2.setStoragePath("/uploads/anexo.docx");
         doc2.setExtension("DOCX");
         doc2.setSizeBytes(512L);
-        doc2.setUploadedById(10);
+        doc2.setUploadedById(10L);
         doc2.setUploadDate(now);
         doc2.setActive(true);
 

@@ -17,7 +17,12 @@ public class UploadDocumentUseCase {
         this.fileStoragePort = fileStoragePort;
     }
 
-    public DocumentResponseDto execute(InputStream fileStream, String originalName, Long sizeBytes, Integer userId) {
+    public DocumentResponseDto execute(InputStream fileStream, String originalName, Long sizeBytes, Long userId) {
+        return execute(fileStream, originalName, sizeBytes, userId, null, null, null, null, false);
+    }
+
+    public DocumentResponseDto execute(InputStream fileStream, String originalName, Long sizeBytes, Long userId,
+                                       Long proyectoId, Long tramiteId, Long planTesisId, Long informeId, boolean esSubsanacion) {
         // 1. Extraer la extensión del archivo
         String extension = "";
         int i = originalName.lastIndexOf('.');
@@ -37,6 +42,11 @@ public class UploadDocumentUseCase {
                 .uploadedById(userId)
                 .uploadDate(LocalDateTime.now())
                 .active(true)
+                .proyectoId(proyectoId)
+                .tramiteId(tramiteId)
+                .planTesisId(planTesisId)
+                .informeId(informeId)
+                .esSubsanacion(esSubsanacion)
                 .build();
 
         // 4. Persistir los metadatos mapeados en la Base de Datos (RF-66)
@@ -49,7 +59,12 @@ public class UploadDocumentUseCase {
             savedDocument.getExtension(),
             savedDocument.getSizeBytes(),
             savedDocument.getUploadedById(),
-            savedDocument.getUploadDate()
+            savedDocument.getUploadDate(),
+            savedDocument.getProyectoId(),
+            savedDocument.getTramiteId(),
+            savedDocument.getPlanTesisId(),
+            savedDocument.getInformeId(),
+            savedDocument.isEsSubsanacion()
         );
     }
 }

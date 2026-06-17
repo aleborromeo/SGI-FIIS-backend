@@ -1,17 +1,22 @@
 package com.sgi.fiis.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.Contact;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
 public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
                         .title("SGI-FIIS: Sistema de Gestión Institucional")
@@ -19,10 +24,28 @@ public class OpenApiConfig {
                         .description("Documentación global interactiva de todas las APIs REST del sistema de la facultad (FIIS).")
                         .contact(new Contact()
                                 .name("Soporte FIIS")
-                                .email("soporte.fiis@unas.edu.pe")));
+                                .email("soporte.fiis@unas.edu.pe")))
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+                .components(new Components()
+                        .addSecuritySchemes(securitySchemeName,
+                                new SecurityScheme()
+                                        .name(securitySchemeName)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")));
     }
 
     // --- MÓDULOS DEL CORE ---
+
+    // Todo el Backend Unificado (Auth, Users, Documentos)
+    @Bean
+    public GroupedOpenApi allApi() {
+        return GroupedOpenApi.builder()
+                .group("all-apis")
+                .pathsToMatch("/api/**")
+                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion")
+                .build();
+    }
 
     // Gestión Documental
     @Bean
@@ -30,6 +53,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("documents")
                 .pathsToMatch("/api/documents/**")
+                .packagesToScan("com.sgi.fiis.documentacion")
                 .build();
     }
 
@@ -39,6 +63,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("auth-users")
                 .pathsToMatch("/api/auth/**", "/api/users/**")
+                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users")
                 .build();
     }
 

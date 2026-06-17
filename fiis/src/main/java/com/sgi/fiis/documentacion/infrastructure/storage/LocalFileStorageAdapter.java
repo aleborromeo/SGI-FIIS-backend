@@ -28,13 +28,24 @@ public class LocalFileStorageAdapter implements FileStoragePort {
     @Override
     public String store(InputStream fileStream, String fileName) {
         try {
-            if (fileName == null || fileName.contains("..")) {
+            if (fileName == null) {
+                throw new IllegalArgumentException("Nombre de archivo no válido o intento de Path Traversal.");
+            }
+            
+            // Extraer únicamente el nombre base del archivo para evitar inyección de directorios/rutas absolutas
+            String cleanedFileName = Paths.get(fileName).getFileName().toString();
+            if (cleanedFileName.contains("..") || cleanedFileName.isEmpty() || fileName.contains("..")) {
                 throw new IllegalArgumentException("Nombre de archivo no válido o intento de Path Traversal.");
             }
             
             // Renombrar con UUID para evitar que un alumno sobreescriba el archivo de otro si se llaman igual
-            String uniqueName = UUID.randomUUID().toString() + "_" + fileName;
+            String uniqueName = UUID.randomUUID().toString() + "_" + cleanedFileName;
             Path destinationFile = this.rootLocation.resolve(Paths.get(uniqueName)).normalize().toAbsolutePath();
+            
+            // Verificación defensiva adicional de que el archivo final sigue estando dentro de la raíz de almacenamiento
+            if (!destinationFile.startsWith(this.rootLocation.toAbsolutePath())) {
+                throw new IllegalArgumentException("Nombre de archivo no válido o intento de Path Traversal.");
+            }
             
             Files.copy(fileStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             return destinationFile.toString(); // Esta ruta física absoluta se guarda en la tupla de la BD

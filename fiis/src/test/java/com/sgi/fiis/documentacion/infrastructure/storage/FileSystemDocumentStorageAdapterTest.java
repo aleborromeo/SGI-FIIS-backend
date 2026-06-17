@@ -61,4 +61,25 @@ class LocalFileStorageAdapterTest {
 
         retrievedStream.close();
     }
+
+    @Test
+    @DisplayName("Debe lanzar IllegalArgumentException ante intento de Path Traversal o filename nulo")
+    void testStorageOperations_PathTraversal() {
+        String rootPath = sharedTempDir.toAbsolutePath().toString();
+        LocalFileStorageAdapter storageAdapter = new LocalFileStorageAdapter(rootPath);
+        
+        ByteArrayInputStream mockStream = new ByteArrayInputStream("bytes-de-prueba".getBytes());
+        
+        assertThrows(IllegalArgumentException.class, () -> 
+            storageAdapter.store(mockStream, "../traversal.pdf")
+        );
+        
+        assertThrows(IllegalArgumentException.class, () -> 
+            storageAdapter.store(mockStream, "traversal/../test.pdf")
+        );
+        
+        assertThrows(IllegalArgumentException.class, () -> 
+            storageAdapter.store(mockStream, null)
+        );
+    }
 }

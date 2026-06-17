@@ -31,7 +31,7 @@ class DeactivateDocumentUseCaseTest {
     void deactivateDocument_AsOwner_Success() {
         // Arrange
         Long docId = 1L;
-        Integer ownerId = 42;
+        Long ownerId = 42L;
         String role = "DOCENTE_INVESTIGADOR";
 
         // CORRECCIÓN: Se añade .extension("PDF") para que el dominio no lance excepción
@@ -63,8 +63,8 @@ class DeactivateDocumentUseCaseTest {
     void deactivateDocument_AsAdmin_Success() {
         // Arrange
         Long docId = 5L;
-        Integer ownerId = 12;
-        Integer adminId = 99;
+        Long ownerId = 12L;
+        Long adminId = 99L;
         String role = "ADMIN";
 
         // CORRECCIÓN: Se añade .extension("PDF")
@@ -94,8 +94,8 @@ class DeactivateDocumentUseCaseTest {
     void deactivateDocument_UnauthorizedUser_ThrowsException() {
         // Arrange
         Long docId = 1L;
-        Integer ownerId = 42;
-        Integer strangerId = 88;
+        Long ownerId = 42L;
+        Long strangerId = 88L;
         String role = "ESTUDIANTE";
 
         // CORRECCIÓN: Se añade .extension("DOCX")
@@ -128,7 +128,7 @@ class DeactivateDocumentUseCaseTest {
 
         // Act & Assert
         assertThrows(DocumentNotFoundException.class, () -> {
-            deactivateDocumentUseCase.execute(nonExistentId, 1, "ADMIN");
+            deactivateDocumentUseCase.execute(nonExistentId, 1L, "ADMIN");
         });
     }
 }
