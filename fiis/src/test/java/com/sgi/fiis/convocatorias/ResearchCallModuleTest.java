@@ -93,4 +93,60 @@ class ResearchCallModuleTest {
         List<CallResponse> allCalls = callInteractor.getCalls(null);
         assertEquals(2, allCalls.size());
     }
+
+    @Test
+    void shouldFindCallsWithEmptyStatus() {
+        ResearchCall call = new ResearchCall(1, "Call 1", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN);
+        when(saveCallPort.findAll()).thenReturn(Arrays.asList(call));
+
+        List<CallResponse> allCalls = callInteractor.execute("   ");
+        assertEquals(1, allCalls.size());
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidStatus() {
+        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.getCalls("INVALID_STATUS"));
+    }
+
+    @Test
+    void shouldGetCallByIdSuccessfully() {
+        ResearchCall call = new ResearchCall(1, "Call 1", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.CLOSED);
+        when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
+
+        CallResponse response = callInteractor.getCallById(1);
+        assertEquals(1, response.getId());
+        assertEquals("CERRADA", response.getStatus());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenGetCallByIdNotFound() {
+        when(saveCallPort.findById(99)).thenReturn(java.util.Optional.empty());
+        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.getCallById(99));
+    }
+
+    @Test
+    void shouldUpdateStatusSuccessfully() {
+        ResearchCall call = new ResearchCall(1, "Call 1", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN);
+        when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
+        
+        ResearchCall updatedCall = new ResearchCall(1, "Call 1", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.FINISHED);
+        when(saveCallPort.save(any())).thenReturn(updatedCall);
+
+        CallResponse response = callInteractor.updateStatus(1, "FINALIZADA");
+        assertEquals("FINALIZADA", response.getStatus());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateStatusInvalid() {
+        ResearchCall call = new ResearchCall(1, "Call 1", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN);
+        when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
+        
+        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(1, "INVALID_STATUS"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateStatusNotFound() {
+        when(saveCallPort.findById(99)).thenReturn(java.util.Optional.empty());
+        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(99, "CERRADA"));
+    }
 }
