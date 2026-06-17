@@ -35,7 +35,7 @@ public class UploadDocumentUseCase {
                 .extension(extension)
                 .sizeBytes(sizeBytes)
                 .uploadedById(userId)
-                .uploadDate(LocalDateTime.now())
+                .uploadDate(LocalDateTime.now(java.time.ZoneId.systemDefault()))
                 .active(true)
                 .build();
 

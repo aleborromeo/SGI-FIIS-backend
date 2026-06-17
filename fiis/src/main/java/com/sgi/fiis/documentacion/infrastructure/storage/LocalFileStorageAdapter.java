@@ -21,7 +21,7 @@ public class LocalFileStorageAdapter implements FileStoragePort {
             // Crea la carpeta automáticamente si no existe al levantar el sistema
             Files.createDirectories(rootLocation);
         } catch (IOException e) {
-            throw new RuntimeException("No se pudo inicializar la carpeta de almacenamiento local de la FIIS", e);
+            throw new IllegalStateException("No se pudo inicializar la carpeta de almacenamiento local de la FIIS", e);
         }
     }
 
@@ -50,7 +50,7 @@ public class LocalFileStorageAdapter implements FileStoragePort {
             Files.copy(fileStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             return destinationFile.toString(); // Esta ruta física absoluta se guarda en la tupla de la BD
         } catch (IOException e) {
-            throw new RuntimeException("Fallo crítico al escribir el archivo en el disco del servidor.", e);
+            throw new IllegalStateException("Fallo crítico al escribir el archivo en el disco del servidor.", e);
         }
     }
 
@@ -61,10 +61,10 @@ public class LocalFileStorageAdapter implements FileStoragePort {
             if (Files.exists(file) && Files.isReadable(file)) {
                 return Files.newInputStream(file);
             } else {
-                throw new RuntimeException("El archivo físico no existe en la ruta registrada o no se puede leer.");
+                throw new IllegalStateException("El archivo físico no existe en la ruta registrada o no se puede leer.");
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error al abrir el flujo de lectura del archivo.", e);
+            throw new IllegalStateException("Error al abrir el flujo de lectura del archivo.", e);
         }
     }
 }

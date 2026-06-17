@@ -37,7 +37,7 @@ public class OpenApiConfig {
 
     // --- MÓDULOS DEL CORE ---
 
-    // Todo el Backend Unificado (Auth, Users, Documentos)
+    // El Backend Unificado al completo (Auth, Users, Documentos)
     @Bean
     public GroupedOpenApi allApi() {
         return GroupedOpenApi.builder()

@@ -9,9 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DocumentTest {
 
     @Test
-    @DisplayName("Debe validar la construcción por Builder, getters, setters y borrado lógico (RN-10)")
     void testDocumentDomainOperations() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.of(2026, 6, 17, 10, 0);
 
         // 1. Probar el patrón Builder Estático real de tu código
         Document doc1 = Document.builder()
@@ -58,12 +57,8 @@ class DocumentTest {
     @Test
     @DisplayName("Debe lanzar IllegalArgumentException si la extensión no es PDF, DOC o DOCX")
     void testDocumentInvalidExtension() {
-        // Forzamos el lanzamiento de la excepción para cubrir las ramas del IF de validación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            Document.builder()
-                    .extension("EXE") // Extensión inválida
-                    .build();
-        });
+        Document.Builder builder = Document.builder().extension("EXE"); // Extensión inválida
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 
         assertEquals("Extensión de archivo no permitida. Solo se admite PDF, DOC o DOCX.", exception.getMessage());
     }

@@ -18,19 +18,24 @@ public class SwaggerSecurityConfig {
 
     @Bean
     @Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain localSwaggerSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher(
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html",
-                "/swagger-resources/**",
-                "/webjars/**",
-                "/api/auth/login"
-            )
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+    @SuppressWarnings("java:S4502") // CSRF deshabilitado de forma segura ya que el API es stateless
+    public SecurityFilterChain localSwaggerSecurityFilterChain(HttpSecurity http) {
+        try {
+            http
+                .securityMatcher(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/swagger-resources/**",
+                    "/webjars/**",
+                    "/api/auth/login"
+                )
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
-        return http.build();
+            return http.build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Fallo al configurar la cadena de filtrado de Swagger", e);
+        }
     }
 }

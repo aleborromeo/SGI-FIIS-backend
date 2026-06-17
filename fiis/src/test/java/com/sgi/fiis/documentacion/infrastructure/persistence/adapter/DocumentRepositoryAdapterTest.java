@@ -48,7 +48,7 @@ class DocumentRepositoryAdapterTest {
         savedEntity.setExtension("DOCX");
         savedEntity.setSizeBytes(2048L);
         savedEntity.setUploadedById(15L);
-        savedEntity.setUploadDate(LocalDateTime.now());
+        savedEntity.setUploadDate(LocalDateTime.of(2026, 6, 17, 10, 0));
         savedEntity.setActive(true);
 
         when(jpaDocumentRepository.save(any(DocumentEntity.class))).thenReturn(savedEntity);
@@ -81,7 +81,7 @@ class DocumentRepositoryAdapterTest {
         entity.setExtension("PDF");
         entity.setSizeBytes(5000L);
         entity.setUploadedById(1L);
-        entity.setUploadDate(LocalDateTime.now());
+        entity.setUploadDate(LocalDateTime.of(2026, 6, 17, 10, 0));
         entity.setActive(true);
 
         when(jpaDocumentRepository.findById(searchId)).thenReturn(Optional.of(entity));

@@ -19,7 +19,6 @@ import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedExce
 import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundException;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -133,12 +132,12 @@ public class DocumentController {
     // --- Métodos auxiliares para extraer identidad del contexto de seguridad ---
 
     private void logAuthenticationDetails(Authentication authentication) {
-        log.info("[DOCUMENTOS-AUTH-CHECK] ¿Petición Autenticada?: " + (authentication != null));
+        log.info("[DOCUMENTOS-AUTH-CHECK] ¿Petición Autenticada?: {}", authentication != null);
         if (authentication != null) {
-            log.info("[DOCUMENTOS-AUTH-CHECK] Usuario (Subject): " + authentication.getName());
-            log.info("[DOCUMENTOS-AUTH-CHECK] Autorizaciones / Roles: " + authentication.getAuthorities());
+            log.info("[DOCUMENTOS-AUTH-CHECK] Usuario (Subject): {}", authentication.getName());
+            log.info("[DOCUMENTOS-AUTH-CHECK] Autorizaciones / Roles: {}", authentication.getAuthorities());
             Long userId = extractUserId(authentication);
-            log.info("[DOCUMENTOS-AUTH-CHECK] ID de usuario resuelto: " + userId);
+            log.info("[DOCUMENTOS-AUTH-CHECK] ID de usuario resuelto: {}", userId);
         }
     }
 

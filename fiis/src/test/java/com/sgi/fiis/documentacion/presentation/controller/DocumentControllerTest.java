@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -102,7 +101,7 @@ class DocumentControllerTest {
                         "PDF",
                         100L,
                         42L,
-                        LocalDateTime.now()
+                        LocalDateTime.of(2026, 6, 17, 10, 0)
                 );
 
         when(uploadDocumentUseCase.execute(
@@ -183,9 +182,9 @@ class DocumentControllerTest {
                 );
 
         when(downloadDocumentUseCase.execute(
-                eq(documentId),
-                eq(userId),
-                eq(role)
+                documentId,
+                userId,
+                role
         )).thenReturn(new DocumentDownloadResult(fakeInputStream, "tesis_descarga.pdf"));
 
         mockMvc.perform(
@@ -206,9 +205,9 @@ class DocumentControllerTest {
         String role = "ESTUDIANTE";
 
         when(downloadDocumentUseCase.execute(
-                eq(documentId),
-                eq(intruderId),
-                eq(role)
+                documentId,
+                intruderId,
+                role
         )).thenThrow(
                 new DocumentAccessDeniedException(
                         "Acceso denegado"
@@ -247,9 +246,9 @@ class DocumentControllerTest {
         Long documentId = 1L;
 
         doNothing().when(deactivateDocumentUseCase)
-                .execute(eq(documentId),
-                        eq(42L),
-                        eq("ADMIN"));
+                .execute(documentId,
+                        42L,
+                        "ADMIN");
 
         mockMvc.perform(
                         delete("/api/documents/deactivate/{id}", documentId)
