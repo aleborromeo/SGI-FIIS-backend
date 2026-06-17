@@ -57,6 +57,14 @@ app:
     expiration-ms: 86400000
   frontend-url: ${APP_FRONTEND_URL:http://localhost:3000}
 
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha
+    tagsSorter: alpha
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
 # Debug logging para OAuth2 (quitar en producción)
 logging:
   level:
