@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,7 +43,7 @@ class RegistraObservacionUseCaseTest {
                 .rolRevisor("COORDINADOR_GRUPO")
                 .build();
 
-        LocalDateTime fechaFija = LocalDateTime.of(2026, 6, 17, 12, 0);
+        LocalDateTime fechaFija = LocalDateTime.of(2026, Month.JUNE, 17, 12, 0);
         Observacion observacionGuardada = Observacion.builder()
                 .id(100)
                 .idTramite(1)

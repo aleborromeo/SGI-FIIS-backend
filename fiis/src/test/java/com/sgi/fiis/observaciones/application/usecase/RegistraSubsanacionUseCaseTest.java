@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +50,7 @@ class RegistraSubsanacionUseCaseTest {
                 .idDocumentoAdjunto(45)
                 .build();
 
-        LocalDateTime fechaFija = LocalDateTime.of(2026, 6, 17, 12, 0);
+        LocalDateTime fechaFija = LocalDateTime.of(2026, Month.JUNE, 17, 12, 0);
         Observacion observacionOriginal = Observacion.builder()
                 .id(idObservacion)
                 .idTramite(1)
@@ -121,7 +122,7 @@ class RegistraSubsanacionUseCaseTest {
                 .descripcion("Test")
                 .build();
 
-        LocalDateTime fechaFija = LocalDateTime.of(2026, 6, 17, 12, 0);
+        LocalDateTime fechaFija = LocalDateTime.of(2026, Month.JUNE, 17, 12, 0);
         Observacion observacionSubsanada = Observacion.builder()
                 .id(idObservacion)
                 .idTramite(1)
