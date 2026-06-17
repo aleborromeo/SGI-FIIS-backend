@@ -12,6 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Aspect
 @Component
@@ -47,7 +48,7 @@ public class AuditingAspect {
                 "INSERT INTO auditoria_general (usuario, accion, fecha, ip_origen) VALUES (?, ?, ?, ?)",
                 username,
                 auditable.action(),
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.systemDefault()),
                 ipAddress
         );
     }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,11 +66,11 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                     .orElseThrow(() -> new BusinessRuleValidationException("Research call not found with ID: " + request.getCallId()));
             
             // Validate that call is open and current date is within range
-            call.validateCanSubmitProject(LocalDate.now());
+            call.validateCanSubmitProject(LocalDate.now(ZoneId.systemDefault()));
         }
 
         // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
-        String generatedCode = "PRJ-" + LocalDate.now().getYear() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String generatedCode = "PRJ-" + LocalDate.now(ZoneId.systemDefault()).getYear() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 7. Create domain model
         Project project = new Project(

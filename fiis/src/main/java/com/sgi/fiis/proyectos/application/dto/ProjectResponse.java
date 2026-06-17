@@ -2,7 +2,13 @@ package com.sgi.fiis.proyectos.application.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProjectResponse {
 
     private Integer id;
@@ -23,28 +29,7 @@ public class ProjectResponse {
     private Integer documentId;
     private String status;
 
-    public ProjectResponse(Integer id, String code, String title, String summary, String generalObjective,
-                           Integer researchLineId, String researchLineName, BigDecimal budget, LocalDate startDate,
-                           LocalDate endDate, String executionPlace, Long responsibleId, Integer researchGroupId,
-                           String researchGroupCode, Integer callId, Integer documentId, String status) {
-        this.id = id;
-        this.code = code;
-        this.title = title;
-        this.summary = summary;
-        this.generalObjective = generalObjective;
-        this.researchLineId = researchLineId;
-        this.researchLineName = researchLineName;
-        this.budget = budget;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.executionPlace = executionPlace;
-        this.responsibleId = responsibleId;
-        this.researchGroupId = researchGroupId;
-        this.researchGroupCode = researchGroupCode;
-        this.callId = callId;
-        this.documentId = documentId;
-        this.status = status;
-    }
+
 
     // Getters and Setters
     public Integer getId() {

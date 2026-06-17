@@ -3,7 +3,13 @@ package com.sgi.fiis.proyectos.domain.model;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Project {
 
     private Integer id;
@@ -24,28 +30,7 @@ public class Project {
     private Integer documentId;
     private ProjectStatus status;
 
-    public Project(Integer id, String code, String title, String summary, String generalObjective,
-                   Integer researchLineId, String researchLineName, BigDecimal budget, LocalDate startDate,
-                   LocalDate endDate, String executionPlace, Long responsibleId, Integer researchGroupId,
-                   String researchGroupCode, Integer callId, Integer documentId, ProjectStatus status) {
-        this.id = id;
-        this.code = code;
-        this.title = title;
-        this.summary = summary;
-        this.generalObjective = generalObjective;
-        this.researchLineId = researchLineId;
-        this.researchLineName = researchLineName;
-        this.budget = budget;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.executionPlace = executionPlace;
-        this.responsibleId = responsibleId;
-        this.researchGroupId = researchGroupId;
-        this.researchGroupCode = researchGroupCode;
-        this.callId = callId;
-        this.documentId = documentId;
-        this.status = status;
-    }
+
 
     public void validateInvariants() {
         if (budget == null || budget.compareTo(BigDecimal.ZERO) <= 0) {
