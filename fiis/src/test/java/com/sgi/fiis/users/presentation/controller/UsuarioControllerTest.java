@@ -44,7 +44,6 @@ class UsuarioControllerTest {
     private ObtenerUsuarioUseCase obtenerUsuarioUseCase;
 
     @Test
-    @WithMockUser(username = "admin@unas.edu.pe", roles = {"ADMIN"})
     @DisplayName("Should successfully create a user when authenticated as ADMIN")
     void testCrearUsuarioSuccess() throws Exception {
         UsuarioRequestDto request = UsuarioRequestDto.builder()
@@ -71,6 +70,7 @@ class UsuarioControllerTest {
         when(crearUsuarioUseCase.execute(any(Usuario.class))).thenReturn(userDomain);
 
         mockMvc.perform(post("/api/v1/usuarios")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -81,7 +81,6 @@ class UsuarioControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "student@unas.edu.pe", roles = {"ESTUDIANTE"})
     @DisplayName("Should return 403 Forbidden when trying to create user as ESTUDIANTE")
     void testCrearUsuarioForbidden() throws Exception {
         UsuarioRequestDto request = UsuarioRequestDto.builder()
@@ -94,6 +93,7 @@ class UsuarioControllerTest {
                 .build();
 
         mockMvc.perform(post("/api/v1/usuarios")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("student@unas.edu.pe").roles("ESTUDIANTE"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -118,7 +118,6 @@ class UsuarioControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin@unas.edu.pe", roles = {"ADMIN"})
     @DisplayName("Should successfully list users when authenticated as ADMIN")
     void testListarUsuariosSuccess() throws Exception {
         Usuario userDomain = Usuario.builder()
@@ -133,7 +132,8 @@ class UsuarioControllerTest {
 
         when(listarUsuariosUseCase.execute(null)).thenReturn(Collections.singletonList(userDomain));
 
-        mockMvc.perform(get("/api/v1/usuarios"))
+        mockMvc.perform(get("/api/v1/usuarios")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].correoInstitucional").value("admin@unas.edu.pe"))
                 .andExpect(jsonPath("$[0].rolCodigo").value("ADMIN"));

@@ -7,7 +7,7 @@
 -- Hash: $2a$10$woQ5pX6m6t.KeVMOTNiZwuOJz6wsR.oM30jwUQ2EdUwEpoEN66ZYO
 
 -- Estudiante / Tesista
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '11111111',
     'Juan',
@@ -20,7 +20,7 @@ VALUES (
 );
 
 -- Docente Investigador
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '22222222',
     'Maria',
@@ -33,7 +33,7 @@ VALUES (
 );
 
 -- Coordinador de Grupo de Investigación
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '33333333',
     'Carlos',
@@ -46,7 +46,7 @@ VALUES (
 );
 
 -- Director de Investigación
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '44444444',
     'Ana',
@@ -59,7 +59,7 @@ VALUES (
 );
 
 -- Decano de la Facultad
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '55555555',
     'Luis',
@@ -72,7 +72,7 @@ VALUES (
 );
 
 -- Evaluador de proyectos
-INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, activo, must_change_password, id_rol)
+INSERT INTO usuarios (dni, nombres, apellidos, correo_institucional, password_hash, es_activo, must_change_password, id_rol_principal)
 VALUES (
     '66666666',
     'Jorge',

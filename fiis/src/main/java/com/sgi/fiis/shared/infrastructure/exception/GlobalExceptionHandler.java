@@ -52,6 +52,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(org.springframework.mail.MailException.class)
+    public ResponseEntity<Map<String, Object>> handleMailException(org.springframework.mail.MailException ex) {
+        String detail = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+        return buildResponse(HttpStatus.BAD_GATEWAY, "Error al enviar correo (SMTP): " + detail);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");

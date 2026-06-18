@@ -33,6 +33,11 @@ public class RegisterUseCase {
     }
 
     public void execute(RegisterRequestDto dto) {
+        // 0. Validar que las contraseñas coincidan
+        if (!dto.getPassword().equals(dto.getConfirmarPassword())) {
+            throw new BusinessException("Las contraseñas no coinciden");
+        }
+
         String correo = dto.getCorreoInstitucional().trim();
 
         // 1. Validar dominio .edu.pe del correo
@@ -58,13 +63,10 @@ public class RegisterUseCase {
         pendingRegistrationService.register(correo, dto, code);
 
         // 6. Enviar código por correo electrónico
-        try {
-            emailSender.sendVerificationCode(correo, code);
-        } catch (Exception e) {
-            log.error("[EMAIL SENDER] Error al enviar código de registro: {}", e.getMessage(), e);
-        }
+        emailSender.sendVerificationCode(correo, code);
 
         // Imprimir en consola de desarrollo para pruebas fáciles
-        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", correo, code);
+        String cleanCorreo = correo.replaceAll("[\n\r]", "_");
+        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", cleanCorreo, code);
     }
 }

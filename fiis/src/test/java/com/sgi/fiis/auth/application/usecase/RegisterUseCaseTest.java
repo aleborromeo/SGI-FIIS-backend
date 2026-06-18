@@ -42,6 +42,7 @@ class RegisterUseCaseTest {
                 .correoInstitucional("juan.perez@unas.edu.pe")
                 .telefono("999888777")
                 .password("password123")
+                .confirmarPassword("password123")
                 .rolCodigo("DOCENTE")
                 .build();
 
@@ -68,6 +69,7 @@ class RegisterUseCaseTest {
                 .correoInstitucional("juan.perez@gmail.com")
                 .telefono("999888777")
                 .password("password123")
+                .confirmarPassword("password123")
                 .rolCodigo("DOCENTE")
                 .build();
 
@@ -87,6 +89,7 @@ class RegisterUseCaseTest {
                 .correoInstitucional("juan.perez@unas.edu.pe")
                 .telefono("999888777")
                 .password("password123")
+                .confirmarPassword("password123")
                 .rolCodigo("DOCENTE")
                 .build();
 
@@ -109,6 +112,7 @@ class RegisterUseCaseTest {
                 .correoInstitucional("juan.perez@unas.edu.pe")
                 .telefono("999888777")
                 .password("password123")
+                .confirmarPassword("password123")
                 .rolCodigo("DOCENTE")
                 .build();
 
@@ -120,5 +124,25 @@ class RegisterUseCaseTest {
         verify(usuarioRepository).existsByDni("12345678");
         verify(usuarioRepository).existsByCorreo("juan.perez@unas.edu.pe");
         verifyNoInteractions(pendingRegistrationService, emailSender);
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when passwords do not match")
+    void testRegisterPasswordMismatch() {
+        RegisterRequestDto dto = RegisterRequestDto.builder()
+                .dni("12345678")
+                .nombres("Juan")
+                .apellidos("Perez")
+                .correoInstitucional("juan.perez@unas.edu.pe")
+                .telefono("999888777")
+                .password("password123")
+                .confirmarPassword("password_diferente")
+                .rolCodigo("DOCENTE")
+                .build();
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> registerUseCase.execute(dto));
+        assertEquals("Las contraseñas no coinciden", ex.getMessage());
+
+        verifyNoInteractions(usuarioRepository, pendingRegistrationService, emailSender);
     }
 }

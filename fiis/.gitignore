@@ -35,3 +35,19 @@ build/
 
 ### Variables de entorno (secretos) ###
 .env
+
+### LaTeX temporary/auxiliary files ###
+*.aux
+*.bcf
+*.log
+*.out
+*.run.xml
+*.toc
+*.synctex.gz
+*.blg
+*.bbl
+
+### Skills directory ###
+docs/skills/
+
+
