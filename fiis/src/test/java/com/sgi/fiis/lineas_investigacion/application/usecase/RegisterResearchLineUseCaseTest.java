@@ -1,7 +1,7 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,45 +16,45 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RegistrarLineaUseCaseTest {
+class RegisterResearchLineUseCaseTest {
 
     @Mock
-    private LineaInvestigacionRepositoryPort lineaRepository;
+    private ResearchLineRepositoryPort repository;
 
     @InjectMocks
-    private RegistrarLineaUseCase useCase;
+    private RegisterResearchLineUseCase useCase;
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoNombreYaExiste() {
-        LineaInvestigacion input = LineaInvestigacion.builder().nombreLinea("IA Aplicada").build();
-        given(lineaRepository.existsByNombre("IA Aplicada")).willReturn(true);
+    void execute_shouldThrowException_whenNameAlreadyExists() {
+        ResearchLine input = ResearchLine.builder().lineName("IA Aplicada").build();
+        given(repository.existsByName("IA Aplicada")).willReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(input))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessageContaining("IA Aplicada");
 
-        then(lineaRepository).should(never()).save(any());
+        then(repository).should(never()).save(any());
     }
 
     @Test
-    void execute_deberiaGuardarLinea_conEstadoActivoYFechas() {
-        LineaInvestigacion input = LineaInvestigacion.builder().nombreLinea("Robótica").build();
-        LineaInvestigacion saved = LineaInvestigacion.builder()
+    void execute_shouldSaveLine_withActiveStatusAndDates() {
+        ResearchLine input = ResearchLine.builder().lineName("Robótica").build();
+        ResearchLine saved = ResearchLine.builder()
                 .id(1)
-                .nombreLinea("Robótica")
-                .esActiva(true)
-                .fechaCreacion(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .lineName("Robótica")
+                .active(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
-        given(lineaRepository.existsByNombre("Robótica")).willReturn(false);
-        given(lineaRepository.save(any())).willReturn(saved);
+        given(repository.existsByName("Robótica")).willReturn(false);
+        given(repository.save(any())).willReturn(saved);
 
-        LineaInvestigacion result = useCase.execute(input);
+        ResearchLine result = useCase.execute(input);
 
-        assertThat(result.isEsActiva()).isTrue();
-        assertThat(result.getFechaCreacion()).isNotNull();
-        assertThat(result.getFechaActualizacion()).isNotNull();
-        then(lineaRepository).should().save(any(LineaInvestigacion.class));
+        assertThat(result.isActive()).isTrue();
+        assertThat(result.getCreatedAt()).isNotNull();
+        assertThat(result.getUpdatedAt()).isNotNull();
+        then(repository).should().save(any(ResearchLine.class));
     }
 }

@@ -33,10 +33,10 @@ public class EditUserUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         if (firstName != null && !firstName.isBlank()) {
-            user.setFirstName(firstName);
+            user.setFirstNames(firstName);
         }
         if (lastName != null && !lastName.isBlank()) {
-            user.setLastName(lastName);
+            user.setLastNames(lastName);
         }
         if (email != null && !email.isBlank()) {
             if (!email.toLowerCase().endsWith(".edu.pe")) {

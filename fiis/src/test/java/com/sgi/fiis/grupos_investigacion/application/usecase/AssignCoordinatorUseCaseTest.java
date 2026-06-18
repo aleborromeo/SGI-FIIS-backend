@@ -1,7 +1,7 @@
 package com.sgi.fiis.grupos_investigacion.application.usecase;
 
-import com.sgi.fiis.grupos_investigacion.domain.model.GrupoInvestigacion;
-import com.sgi.fiis.grupos_investigacion.domain.port.GrupoInvestigacionRepositoryPort;
+import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
+import com.sgi.fiis.grupos_investigacion.domain.port.ResearchGroupRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -17,17 +17,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AsignarCoordinadorUseCaseTest {
+class AssignCoordinatorUseCaseTest {
 
     @Mock
-    private GrupoInvestigacionRepositoryPort grupoRepository;
+    private ResearchGroupRepositoryPort repository;
 
     @InjectMocks
-    private AsignarCoordinadorUseCase useCase;
+    private AssignCoordinatorUseCase useCase;
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoGrupoNoExiste() {
-        given(grupoRepository.findById(99)).willReturn(Optional.empty());
+    void execute_shouldThrowException_whenGroupDoesNotExist() {
+        given(repository.findById(99)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(99, 1))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -35,10 +35,10 @@ class AsignarCoordinadorUseCaseTest {
     }
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoUsuarioNoActivo() {
-        GrupoInvestigacion grupo = GrupoInvestigacion.builder().id(1).codigoGrupo("GI-001").build();
-        given(grupoRepository.findById(1)).willReturn(Optional.of(grupo));
-        given(grupoRepository.existeUsuarioActivo(5)).willReturn(false);
+    void execute_shouldThrowException_whenUserNotActive() {
+        ResearchGroup group = ResearchGroup.builder().id(1).groupCode("GI-001").build();
+        given(repository.findById(1)).willReturn(Optional.of(group));
+        given(repository.existsActiveUser(5)).willReturn(false);
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(BusinessException.class)
@@ -46,21 +46,21 @@ class AsignarCoordinadorUseCaseTest {
     }
 
     @Test
-    void execute_deberiaAsignarCoordinador_cuandoDatosValidos() {
-        GrupoInvestigacion grupo = GrupoInvestigacion.builder()
-                .id(1).codigoGrupo("GI-001").nombreGrupo("Grupo A").esActivo(true).build();
-        GrupoInvestigacion actualizado = GrupoInvestigacion.builder()
-                .id(1).codigoGrupo("GI-001").nombreGrupo("Grupo A")
-                .idCoordinadorActual(3).coordinadorNombres("Juan").coordinadorApellidos("Perez")
-                .esActivo(true).build();
+    void execute_shouldAssignCoordinator_whenDataIsValid() {
+        ResearchGroup group = ResearchGroup.builder()
+                .id(1).groupCode("GI-001").groupName("Grupo A").active(true).build();
+        ResearchGroup updated = ResearchGroup.builder()
+                .id(1).groupCode("GI-001").groupName("Grupo A")
+                .currentCoordinatorId(3).coordinatorFirstNames("Juan").coordinatorLastNames("Perez")
+                .active(true).build();
 
-        given(grupoRepository.findById(1)).willReturn(Optional.of(grupo));
-        given(grupoRepository.existeUsuarioActivo(3)).willReturn(true);
-        given(grupoRepository.save(any())).willReturn(actualizado);
+        given(repository.findById(1)).willReturn(Optional.of(group));
+        given(repository.existsActiveUser(3)).willReturn(true);
+        given(repository.save(any())).willReturn(updated);
 
-        GrupoInvestigacion result = useCase.execute(1, 3);
+        ResearchGroup result = useCase.execute(1, 3);
 
-        assertThat(result.getIdCoordinadorActual()).isEqualTo(3);
-        assertThat(result.getCoordinadorNombres()).isEqualTo("Juan");
+        assertThat(result.getCurrentCoordinatorId()).isEqualTo(3);
+        assertThat(result.getCoordinatorFirstNames()).isEqualTo("Juan");
     }
 }

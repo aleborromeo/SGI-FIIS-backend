@@ -1,9 +1,9 @@
 package com.sgi.fiis.grupos_investigacion.application.usecase;
 
-import com.sgi.fiis.grupos_investigacion.domain.model.GrupoInvestigacion;
-import com.sgi.fiis.grupos_investigacion.domain.model.Membresia;
-import com.sgi.fiis.grupos_investigacion.domain.port.GrupoInvestigacionRepositoryPort;
-import com.sgi.fiis.grupos_investigacion.domain.port.MembresiaRepositoryPort;
+import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
+import com.sgi.fiis.grupos_investigacion.domain.model.Membership;
+import com.sgi.fiis.grupos_investigacion.domain.port.ResearchGroupRepositoryPort;
+import com.sgi.fiis.grupos_investigacion.domain.port.MembershipRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -20,30 +20,30 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AsignarMiembroUseCaseTest {
+class AssignMemberUseCaseTest {
 
     @Mock
-    private GrupoInvestigacionRepositoryPort grupoRepository;
+    private ResearchGroupRepositoryPort groupRepository;
 
     @Mock
-    private MembresiaRepositoryPort membresiaRepository;
+    private MembershipRepositoryPort membershipRepository;
 
     @InjectMocks
-    private AsignarMiembroUseCase useCase;
+    private AssignMemberUseCase useCase;
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoGrupoNoExiste() {
-        given(grupoRepository.findById(99)).willReturn(Optional.empty());
+    void execute_shouldThrowException_whenGroupDoesNotExist() {
+        given(groupRepository.findById(99)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(99, 1))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoUsuarioNoActivo() {
-        given(grupoRepository.findById(1)).willReturn(Optional.of(
-                GrupoInvestigacion.builder().id(1).build()));
-        given(grupoRepository.existeUsuarioActivo(5)).willReturn(false);
+    void execute_shouldThrowException_whenUserNotActive() {
+        given(groupRepository.findById(1)).willReturn(Optional.of(
+                ResearchGroup.builder().id(1).build()));
+        given(groupRepository.existsActiveUser(5)).willReturn(false);
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(BusinessException.class)
@@ -51,11 +51,11 @@ class AsignarMiembroUseCaseTest {
     }
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoUsuarioYaTieneMembresia_RF21() {
-        given(grupoRepository.findById(1)).willReturn(Optional.of(
-                GrupoInvestigacion.builder().id(1).build()));
-        given(grupoRepository.existeUsuarioActivo(2)).willReturn(true);
-        given(membresiaRepository.existsActivaByUsuario(2)).willReturn(true);
+    void execute_shouldThrowException_whenUserAlreadyHasMembership_RF21() {
+        given(groupRepository.findById(1)).willReturn(Optional.of(
+                ResearchGroup.builder().id(1).build()));
+        given(groupRepository.existsActiveUser(2)).willReturn(true);
+        given(membershipRepository.existsActiveByUser(2)).willReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(1, 2))
                 .isInstanceOf(BusinessException.class)
@@ -63,22 +63,22 @@ class AsignarMiembroUseCaseTest {
     }
 
     @Test
-    void execute_deberiaCrearMembresia_cuandoDatosValidos() {
-        Membresia saved = Membresia.builder()
-                .id(10).idGrupo(1).idUsuario(2).esActivo(true)
-                .fechaInicio(LocalDateTime.now()).build();
+    void execute_shouldCreateMembership_whenDataIsValid() {
+        Membership saved = Membership.builder()
+                .id(10).groupId(1).userId(2).active(true)
+                .startDate(LocalDateTime.now()).build();
 
-        given(grupoRepository.findById(1)).willReturn(Optional.of(
-                GrupoInvestigacion.builder().id(1).build()));
-        given(grupoRepository.existeUsuarioActivo(2)).willReturn(true);
-        given(membresiaRepository.existsActivaByUsuario(2)).willReturn(false);
-        given(membresiaRepository.save(any())).willReturn(saved);
+        given(groupRepository.findById(1)).willReturn(Optional.of(
+                ResearchGroup.builder().id(1).build()));
+        given(groupRepository.existsActiveUser(2)).willReturn(true);
+        given(membershipRepository.existsActiveByUser(2)).willReturn(false);
+        given(membershipRepository.save(any())).willReturn(saved);
 
-        Membresia result = useCase.execute(1, 2);
+        Membership result = useCase.execute(1, 2);
 
-        assertThat(result.isEsActivo()).isTrue();
-        assertThat(result.getIdGrupo()).isEqualTo(1);
-        assertThat(result.getIdUsuario()).isEqualTo(2);
-        assertThat(result.getFechaInicio()).isNotNull();
+        assertThat(result.isActive()).isTrue();
+        assertThat(result.getGroupId()).isEqualTo(1);
+        assertThat(result.getUserId()).isEqualTo(2);
+        assertThat(result.getStartDate()).isNotNull();
     }
 }

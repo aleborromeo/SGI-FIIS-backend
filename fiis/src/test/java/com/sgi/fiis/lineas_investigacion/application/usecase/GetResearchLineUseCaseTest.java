@@ -1,7 +1,7 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,28 +15,28 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ObtenerLineaUseCaseTest {
+class GetResearchLineUseCaseTest {
 
     @Mock
-    private LineaInvestigacionRepositoryPort lineaRepository;
+    private ResearchLineRepositoryPort repository;
 
     @InjectMocks
-    private ObtenerLineaUseCase useCase;
+    private GetResearchLineUseCase useCase;
 
     @Test
-    void execute_deberiaRetornarLinea_cuandoExiste() {
-        LineaInvestigacion linea = LineaInvestigacion.builder().id(1).nombreLinea("IA").build();
-        given(lineaRepository.findById(1)).willReturn(Optional.of(linea));
+    void execute_shouldReturnLine_whenExists() {
+        ResearchLine line = ResearchLine.builder().id(1).lineName("IA").build();
+        given(repository.findById(1)).willReturn(Optional.of(line));
 
-        LineaInvestigacion result = useCase.execute(1);
+        ResearchLine result = useCase.execute(1);
 
         assertThat(result.getId()).isEqualTo(1);
-        assertThat(result.getNombreLinea()).isEqualTo("IA");
+        assertThat(result.getLineName()).isEqualTo("IA");
     }
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoNoExiste() {
-        given(lineaRepository.findById(99)).willReturn(Optional.empty());
+    void execute_shouldThrowException_whenDoesNotExist() {
+        given(repository.findById(99)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(99))
                 .isInstanceOf(ResourceNotFoundException.class)

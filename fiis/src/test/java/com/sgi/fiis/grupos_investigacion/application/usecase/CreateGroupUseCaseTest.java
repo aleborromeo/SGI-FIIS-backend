@@ -1,7 +1,7 @@
 package com.sgi.fiis.grupos_investigacion.application.usecase;
 
-import com.sgi.fiis.grupos_investigacion.domain.model.GrupoInvestigacion;
-import com.sgi.fiis.grupos_investigacion.domain.port.GrupoInvestigacionRepositoryPort;
+import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
+import com.sgi.fiis.grupos_investigacion.domain.port.ResearchGroupRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,41 +14,41 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CrearGrupoUseCaseTest {
+class CreateGroupUseCaseTest {
 
     @Mock
-    private GrupoInvestigacionRepositoryPort grupoRepository;
+    private ResearchGroupRepositoryPort repository;
 
     @InjectMocks
-    private CrearGrupoUseCase useCase;
+    private CreateGroupUseCase useCase;
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoCodigoYaExiste() {
-        GrupoInvestigacion input = GrupoInvestigacion.builder()
-                .codigoGrupo("GI-001").nombreGrupo("Grupo Test").build();
-        given(grupoRepository.existsByCodigo("GI-001")).willReturn(true);
+    void execute_shouldThrowException_whenCodeAlreadyExists() {
+        ResearchGroup input = ResearchGroup.builder()
+                .groupCode("GI-001").groupName("Grupo Test").build();
+        given(repository.existsByCode("GI-001")).willReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(input))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessageContaining("GI-001");
 
-        then(grupoRepository).should(never()).save(any());
+        then(repository).should(never()).save(any());
     }
 
     @Test
-    void execute_deberiaGuardarGrupo_conEstadoActivo() {
-        GrupoInvestigacion input = GrupoInvestigacion.builder()
-                .codigoGrupo("GI-002").nombreGrupo("Nuevo Grupo").build();
-        GrupoInvestigacion saved = GrupoInvestigacion.builder()
-                .id(1).codigoGrupo("GI-002").nombreGrupo("Nuevo Grupo").esActivo(true).build();
+    void execute_shouldSaveGroup_withActiveStatus() {
+        ResearchGroup input = ResearchGroup.builder()
+                .groupCode("GI-002").groupName("Nuevo Grupo").build();
+        ResearchGroup saved = ResearchGroup.builder()
+                .id(1).groupCode("GI-002").groupName("Nuevo Grupo").active(true).build();
 
-        given(grupoRepository.existsByCodigo("GI-002")).willReturn(false);
-        given(grupoRepository.save(any())).willReturn(saved);
+        given(repository.existsByCode("GI-002")).willReturn(false);
+        given(repository.save(any())).willReturn(saved);
 
-        GrupoInvestigacion result = useCase.execute(input);
+        ResearchGroup result = useCase.execute(input);
 
-        assertThat(result.isEsActivo()).isTrue();
+        assertThat(result.isActive()).isTrue();
         assertThat(result.getId()).isEqualTo(1);
-        then(grupoRepository).should().save(any(GrupoInvestigacion.class));
+        then(repository).should().save(any(ResearchGroup.class));
     }
 }

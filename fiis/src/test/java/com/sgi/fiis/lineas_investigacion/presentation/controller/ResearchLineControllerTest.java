@@ -1,11 +1,11 @@
 package com.sgi.fiis.lineas_investigacion.presentation.controller;
 
 import tools.jackson.databind.ObjectMapper;
-import com.sgi.fiis.lineas_investigacion.application.dto.LineaInvestigacionRequestDto;
-import com.sgi.fiis.lineas_investigacion.application.dto.LineaInvestigacionResponseDto;
+import com.sgi.fiis.lineas_investigacion.application.dto.ResearchLineRequestDto;
+import com.sgi.fiis.lineas_investigacion.application.dto.ResearchLineResponseDto;
 import com.sgi.fiis.lineas_investigacion.application.usecase.*;
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.presentation.mapper.LineaInvestigacionMapper;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.presentation.mapper.ResearchLineMapper;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
@@ -26,10 +26,10 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(LineaInvestigacionController.class)
+@WebMvcTest(ResearchLineController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
-class LineaInvestigacionControllerTest {
+class ResearchLineControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,25 +38,19 @@ class LineaInvestigacionControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private RegistrarLineaUseCase registrarLineaUseCase;
+    private RegisterResearchLineUseCase registerResearchLineUseCase;
 
     @MockitoBean
-    private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
+    private ListResearchLinesUseCase listResearchLinesUseCase;
 
     @MockitoBean
-    private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
+    private GetResearchLineUseCase getResearchLineUseCase;
 
     @MockitoBean
-    private ListarLineasUseCase listarLineasUseCase;
+    private ChangeResearchLineStatusUseCase changeResearchLineStatusUseCase;
 
     @MockitoBean
-    private ObtenerLineaUseCase obtenerLineaUseCase;
-
-    @MockitoBean
-    private CambiarEstadoLineaUseCase cambiarEstadoLineaUseCase;
-
-    @MockitoBean
-    private LineaInvestigacionMapper mapper;
+    private ResearchLineMapper mapper;
 
     @MockitoBean
     private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
@@ -65,88 +59,88 @@ class LineaInvestigacionControllerTest {
     private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
 
     @Test
-    void registrar_deberiaRetornar201_cuandoDatosValidos() throws Exception {
-        LineaInvestigacionRequestDto request = new LineaInvestigacionRequestDto("Inteligencia Artificial");
-        LineaInvestigacion domain = LineaInvestigacion.builder().id(1).nombreLinea("Inteligencia Artificial").esActiva(true).build();
-        LineaInvestigacionResponseDto response = LineaInvestigacionResponseDto.builder()
-                .id(1).nombreLinea("Inteligencia Artificial").esActiva(true).build();
+    void register_shouldReturn201_whenDataIsValid() throws Exception {
+        ResearchLineRequestDto request = new ResearchLineRequestDto("Inteligencia Artificial");
+        ResearchLine domain = ResearchLine.builder().id(1).lineName("Inteligencia Artificial").active(true).build();
+        ResearchLineResponseDto response = ResearchLineResponseDto.builder()
+                .id(1).lineName("Inteligencia Artificial").active(true).build();
 
         given(mapper.toDomain(any())).willReturn(domain);
-        given(registrarLineaUseCase.execute(any())).willReturn(domain);
+        given(registerResearchLineUseCase.execute(any())).willReturn(domain);
         given(mapper.toResponseDto(any())).willReturn(response);
 
-        mockMvc.perform(post("/api/v1/lineas-investigacion")
+        mockMvc.perform(post("/api/v1/research-lines")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombreLinea").value("Inteligencia Artificial"))
-                .andExpect(jsonPath("$.esActiva").value(true));
+                .andExpect(jsonPath("$.lineName").value("Inteligencia Artificial"))
+                .andExpect(jsonPath("$.active").value(true));
     }
 
     @Test
-    void registrar_deberiaRetornar400_cuandoNombreVacio() throws Exception {
-        LineaInvestigacionRequestDto request = new LineaInvestigacionRequestDto("");
+    void register_shouldReturn400_whenNameIsEmpty() throws Exception {
+        ResearchLineRequestDto request = new ResearchLineRequestDto("");
 
-        mockMvc.perform(post("/api/v1/lineas-investigacion")
+        mockMvc.perform(post("/api/v1/research-lines")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void registrar_deberiaRetornar409_cuandoNombreDuplicado() throws Exception {
-        LineaInvestigacionRequestDto request = new LineaInvestigacionRequestDto("IA Duplicada");
+    void register_shouldReturn409_whenNameIsDuplicated() throws Exception {
+        ResearchLineRequestDto request = new ResearchLineRequestDto("IA Duplicada");
 
-        given(mapper.toDomain(any())).willReturn(LineaInvestigacion.builder().nombreLinea("IA Duplicada").build());
-        given(registrarLineaUseCase.execute(any()))
-                .willThrow(new DuplicateResourceException("LineaInvestigacion", "nombreLinea", "IA Duplicada"));
+        given(mapper.toDomain(any())).willReturn(ResearchLine.builder().lineName("IA Duplicada").build());
+        given(registerResearchLineUseCase.execute(any()))
+                .willThrow(new DuplicateResourceException("ResearchLine", "lineName", "IA Duplicada"));
 
-        mockMvc.perform(post("/api/v1/lineas-investigacion")
+        mockMvc.perform(post("/api/v1/research-lines")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    void listar_deberiaRetornar200_conListaDeLineas() throws Exception {
-        List<LineaInvestigacion> dominios = List.of(
-                LineaInvestigacion.builder().id(1).nombreLinea("IA").esActiva(true).build()
+    void list_shouldReturn200_withLinesList() throws Exception {
+        List<ResearchLine> domains = List.of(
+                ResearchLine.builder().id(1).lineName("IA").active(true).build()
         );
-        LineaInvestigacionResponseDto dto = LineaInvestigacionResponseDto.builder()
-                .id(1).nombreLinea("IA").esActiva(true).build();
+        ResearchLineResponseDto dto = ResearchLineResponseDto.builder()
+                .id(1).lineName("IA").active(true).build();
 
-        given(listarLineasUseCase.execute(anyBoolean())).willReturn(dominios);
+        given(listResearchLinesUseCase.execute(anyBoolean())).willReturn(domains);
         given(mapper.toResponseDto(any())).willReturn(dto);
 
-        mockMvc.perform(get("/api/v1/lineas-investigacion"))
+        mockMvc.perform(get("/api/v1/research-lines"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].nombreLinea").value("IA"));
+                .andExpect(jsonPath("$[0].lineName").value("IA"));
     }
 
     @Test
-    void obtener_deberiaRetornar404_cuandoNoExiste() throws Exception {
-        given(obtenerLineaUseCase.execute(99))
-                .willThrow(new ResourceNotFoundException("LineaInvestigacion", "id", 99));
+    void get_shouldReturn404_whenDoesNotExist() throws Exception {
+        given(getResearchLineUseCase.execute(99))
+                .willThrow(new ResourceNotFoundException("ResearchLine", "id", 99));
 
-        mockMvc.perform(get("/api/v1/lineas-investigacion/99"))
+        mockMvc.perform(get("/api/v1/research-lines/99"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void cambiarEstado_deberiaRetornar200_cuandoActivaLinea() throws Exception {
-        LineaInvestigacion linea = LineaInvestigacion.builder().id(1).esActiva(true).build();
-        LineaInvestigacionResponseDto response = LineaInvestigacionResponseDto.builder()
-                .id(1).esActiva(true).build();
+    void changeStatus_shouldReturn200_whenActivatesLine() throws Exception {
+        ResearchLine line = ResearchLine.builder().id(1).active(true).build();
+        ResearchLineResponseDto response = ResearchLineResponseDto.builder()
+                .id(1).active(true).build();
 
-        given(cambiarEstadoLineaUseCase.execute(1, true)).willReturn(linea);
+        given(changeResearchLineStatusUseCase.execute(1, true)).willReturn(line);
         given(mapper.toResponseDto(any())).willReturn(response);
 
-        mockMvc.perform(patch("/api/v1/lineas-investigacion/1/estado")
+        mockMvc.perform(patch("/api/v1/research-lines/1/status")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"esActiva\": true}"))
+                        .content("{\"active\": true}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.esActiva").value(true));
+                .andExpect(jsonPath("$.active").value(true));
     }
 }

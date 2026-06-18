@@ -1,21 +1,21 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ObtenerLineaUseCase {
+public class GetResearchLineUseCase {
 
-    private final LineaInvestigacionRepositoryPort lineaRepository;
+    private final ResearchLineRepositoryPort repository;
 
-    public ObtenerLineaUseCase(LineaInvestigacionRepositoryPort lineaRepository) {
-        this.lineaRepository = lineaRepository;
+    public GetResearchLineUseCase(ResearchLineRepositoryPort repository) {
+        this.repository = repository;
     }
 
-    public LineaInvestigacion execute(Integer id) {
-        return lineaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("LineaInvestigacion", "id", id));
+    public ResearchLine execute(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ResearchLine", "id", id));
     }
 }

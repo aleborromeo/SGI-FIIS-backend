@@ -1,7 +1,7 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,40 +14,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ListarLineasUseCaseTest {
+class ListResearchLinesUseCaseTest {
 
     @Mock
-    private LineaInvestigacionRepositoryPort lineaRepository;
+    private ResearchLineRepositoryPort repository;
 
     @InjectMocks
-    private ListarLineasUseCase useCase;
+    private ListResearchLinesUseCase useCase;
 
     @Test
-    void execute_deberiaDevolverSoloActivas_cuandoFlagEsTrue() {
-        List<LineaInvestigacion> activas = List.of(
-                LineaInvestigacion.builder().id(1).nombreLinea("IA").esActiva(true).build()
+    void execute_shouldReturnOnlyActive_whenFlagIsTrue() {
+        List<ResearchLine> activeLines = List.of(
+                ResearchLine.builder().id(1).lineName("IA").active(true).build()
         );
-        given(lineaRepository.findAllActivas()).willReturn(activas);
+        given(repository.findAllActive()).willReturn(activeLines);
 
-        List<LineaInvestigacion> result = useCase.execute(true);
+        List<ResearchLine> result = useCase.execute(true);
 
-        assertThat(result).hasSize(1).allMatch(LineaInvestigacion::isEsActiva);
-        then(lineaRepository).should().findAllActivas();
-        then(lineaRepository).should(never()).findAll();
+        assertThat(result).hasSize(1).allMatch(ResearchLine::isActive);
+        then(repository).should().findAllActive();
+        then(repository).should(never()).findAll();
     }
 
     @Test
-    void execute_deberiaDevolverTodas_cuandoFlagEsFalse() {
-        List<LineaInvestigacion> todas = List.of(
-                LineaInvestigacion.builder().id(1).nombreLinea("IA").esActiva(true).build(),
-                LineaInvestigacion.builder().id(2).nombreLinea("Antigua").esActiva(false).build()
+    void execute_shouldReturnAll_whenFlagIsFalse() {
+        List<ResearchLine> allLines = List.of(
+                ResearchLine.builder().id(1).lineName("IA").active(true).build(),
+                ResearchLine.builder().id(2).lineName("Antigua").active(false).build()
         );
-        given(lineaRepository.findAll()).willReturn(todas);
+        given(repository.findAll()).willReturn(allLines);
 
-        List<LineaInvestigacion> result = useCase.execute(false);
+        List<ResearchLine> result = useCase.execute(false);
 
         assertThat(result).hasSize(2);
-        then(lineaRepository).should().findAll();
-        then(lineaRepository).should(never()).findAllActivas();
+        then(repository).should().findAll();
+        then(repository).should(never()).findAllActive();
     }
 }

@@ -1,29 +1,29 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CambiarEstadoLineaUseCase {
+public class ChangeResearchLineStatusUseCase {
 
-    private final LineaInvestigacionRepositoryPort lineaRepository;
+    private final ResearchLineRepositoryPort repository;
 
-    public CambiarEstadoLineaUseCase(LineaInvestigacionRepositoryPort lineaRepository) {
-        this.lineaRepository = lineaRepository;
+    public ChangeResearchLineStatusUseCase(ResearchLineRepositoryPort repository) {
+        this.repository = repository;
     }
 
     @Transactional
-    public LineaInvestigacion execute(Integer id, boolean activar) {
-        LineaInvestigacion linea = lineaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("LineaInvestigacion", "id", id));
-        if (activar) {
-            linea.activar();
+    public ResearchLine execute(Integer id, boolean active) {
+        ResearchLine line = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ResearchLine", "id", id));
+        if (active) {
+            line.activate();
         } else {
-            linea.desactivar();
+            line.deactivate();
         }
-        return lineaRepository.save(linea);
+        return repository.save(line);
     }
 }

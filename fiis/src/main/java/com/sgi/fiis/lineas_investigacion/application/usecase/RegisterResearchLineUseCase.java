@@ -1,7 +1,7 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,22 +9,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service
-public class RegistrarLineaUseCase {
+public class RegisterResearchLineUseCase {
 
-    private final LineaInvestigacionRepositoryPort lineaRepository;
+    private final ResearchLineRepositoryPort repository;
 
-    public RegistrarLineaUseCase(LineaInvestigacionRepositoryPort lineaRepository) {
-        this.lineaRepository = lineaRepository;
+    public RegisterResearchLineUseCase(ResearchLineRepositoryPort repository) {
+        this.repository = repository;
     }
 
     @Transactional
-    public LineaInvestigacion execute(LineaInvestigacion linea) {
-        if (lineaRepository.existsByNombre(linea.getNombreLinea())) {
-            throw new DuplicateResourceException("LineaInvestigacion", "nombre", linea.getNombreLinea());
+    public ResearchLine execute(ResearchLine line) {
+        if (repository.existsByName(line.getLineName())) {
+            throw new DuplicateResourceException("ResearchLine", "name", line.getLineName());
         }
-        linea.setEsActiva(true);
-        linea.setFechaCreacion(LocalDateTime.now());
-        linea.setFechaActualizacion(LocalDateTime.now());
-        return lineaRepository.save(linea);
+        line.setActive(true);
+        line.setCreatedAt(LocalDateTime.now());
+        line.setUpdatedAt(LocalDateTime.now());
+        return repository.save(line);
     }
 }

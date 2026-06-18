@@ -1,7 +1,7 @@
 package com.sgi.fiis.grupos_investigacion.application.usecase;
 
-import com.sgi.fiis.grupos_investigacion.domain.model.Membresia;
-import com.sgi.fiis.grupos_investigacion.domain.port.MembresiaRepositoryPort;
+import com.sgi.fiis.grupos_investigacion.domain.model.Membership;
+import com.sgi.fiis.grupos_investigacion.domain.port.MembershipRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,34 +17,34 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RetirarMiembroUseCaseTest {
+class RemoveMemberUseCaseTest {
 
     @Mock
-    private MembresiaRepositoryPort membresiaRepository;
+    private MembershipRepositoryPort repository;
 
     @InjectMocks
-    private RetirarMiembroUseCase useCase;
+    private RemoveMemberUseCase useCase;
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoMembresiaActivaNoExiste() {
-        given(membresiaRepository.findActivaByUsuarioEnGrupo(5, 1)).willReturn(Optional.empty());
+    void execute_shouldThrowException_whenActiveMembershipDoesNotExist() {
+        given(repository.findActiveByUserInGroup(5, 1)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void execute_deberiaRetirarMiembro_conFechaFinYEstadoFalso() {
-        Membresia membresia = Membresia.builder()
-                .id(10).idGrupo(1).idUsuario(5)
-                .esActivo(true).fechaInicio(LocalDateTime.now()).build();
+    void execute_shouldRemoveMember_withEndDateAndActiveFalse() {
+        Membership membership = Membership.builder()
+                .id(10).groupId(1).userId(5)
+                .active(true).startDate(LocalDateTime.now()).build();
 
-        given(membresiaRepository.findActivaByUsuarioEnGrupo(5, 1)).willReturn(Optional.of(membresia));
-        given(membresiaRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+        given(repository.findActiveByUserInGroup(5, 1)).willReturn(Optional.of(membership));
+        given(repository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
-        Membresia result = useCase.execute(1, 5);
+        Membership result = useCase.execute(1, 5);
 
-        assertThat(result.isEsActivo()).isFalse();
-        assertThat(result.getFechaFin()).isNotNull();
+        assertThat(result.isActive()).isFalse();
+        assertThat(result.getEndDate()).isNotNull();
     }
 }

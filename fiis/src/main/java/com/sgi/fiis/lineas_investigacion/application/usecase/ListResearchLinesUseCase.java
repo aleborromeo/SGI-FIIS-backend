@@ -1,24 +1,24 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class ListarLineasUseCase {
+public class ListResearchLinesUseCase {
 
-    private final LineaInvestigacionRepositoryPort lineaRepository;
+    private final ResearchLineRepositoryPort repository;
 
-    public ListarLineasUseCase(LineaInvestigacionRepositoryPort lineaRepository) {
-        this.lineaRepository = lineaRepository;
+    public ListResearchLinesUseCase(ResearchLineRepositoryPort repository) {
+        this.repository = repository;
     }
 
-    public List<LineaInvestigacion> execute(boolean soloActivas) {
-        if (soloActivas) {
-            return lineaRepository.findAllActivas();
+    public List<ResearchLine> execute(boolean onlyActive) {
+        if (onlyActive) {
+            return repository.findAllActive();
         }
-        return lineaRepository.findAll();
+        return repository.findAll();
     }
 }

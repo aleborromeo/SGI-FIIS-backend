@@ -1,7 +1,7 @@
 package com.sgi.fiis.lineas_investigacion.application.usecase;
 
-import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
-import com.sgi.fiis.lineas_investigacion.domain.port.LineaInvestigacionRepositoryPort;
+import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
+import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,41 +16,41 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CambiarEstadoLineaUseCaseTest {
+class ChangeResearchLineStatusUseCaseTest {
 
     @Mock
-    private LineaInvestigacionRepositoryPort lineaRepository;
+    private ResearchLineRepositoryPort repository;
 
     @InjectMocks
-    private CambiarEstadoLineaUseCase useCase;
+    private ChangeResearchLineStatusUseCase useCase;
 
     @Test
-    void execute_deberiaActivarLinea() {
-        LineaInvestigacion linea = LineaInvestigacion.builder().id(1).nombreLinea("IA").esActiva(false).build();
-        given(lineaRepository.findById(1)).willReturn(Optional.of(linea));
-        given(lineaRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+    void execute_shouldActivateLine() {
+        ResearchLine line = ResearchLine.builder().id(1).lineName("IA").active(false).build();
+        given(repository.findById(1)).willReturn(Optional.of(line));
+        given(repository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
-        LineaInvestigacion result = useCase.execute(1, true);
+        ResearchLine result = useCase.execute(1, true);
 
-        assertThat(result.isEsActiva()).isTrue();
-        assertThat(result.getFechaActualizacion()).isNotNull();
+        assertThat(result.isActive()).isTrue();
+        assertThat(result.getUpdatedAt()).isNotNull();
     }
 
     @Test
-    void execute_deberiaDesactivarLinea() {
-        LineaInvestigacion linea = LineaInvestigacion.builder().id(1).nombreLinea("IA").esActiva(true).build();
-        given(lineaRepository.findById(1)).willReturn(Optional.of(linea));
-        given(lineaRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+    void execute_shouldDeactivateLine() {
+        ResearchLine line = ResearchLine.builder().id(1).lineName("IA").active(true).build();
+        given(repository.findById(1)).willReturn(Optional.of(line));
+        given(repository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
-        LineaInvestigacion result = useCase.execute(1, false);
+        ResearchLine result = useCase.execute(1, false);
 
-        assertThat(result.isEsActiva()).isFalse();
-        assertThat(result.getFechaActualizacion()).isNotNull();
+        assertThat(result.isActive()).isFalse();
+        assertThat(result.getUpdatedAt()).isNotNull();
     }
 
     @Test
-    void execute_deberiaLanzarExcepcion_cuandoLineaNoExiste() {
-        given(lineaRepository.findById(99)).willReturn(Optional.empty());
+    void execute_shouldThrowException_whenLineDoesNotExist() {
+        given(repository.findById(99)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(99, true))
                 .isInstanceOf(ResourceNotFoundException.class);

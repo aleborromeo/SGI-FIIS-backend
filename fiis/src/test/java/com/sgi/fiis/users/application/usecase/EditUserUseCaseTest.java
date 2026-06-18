@@ -39,13 +39,13 @@ class EditUserUseCaseTest {
         User user = User.builder()
                 .id(1L)
                 .dni("12345678")
-                .firstName("Juan")
-                .lastName("Perez")
+                .firstNames("Juan")
+                .lastNames("Perez")
                 .institutionalEmail("juan.perez@unas.edu.pe")
                 .roleCode("ESTUDIANTE")
                 .build();
 
-        Role role = Role.builder().roleCode("DOCENTE_INVESTIGADOR").build();
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
@@ -55,8 +55,8 @@ class EditUserUseCaseTest {
                 "jc.perez@unas.edu.pe", "999888777", "DOCENTE_INVESTIGADOR");
 
         assertNotNull(result);
-        assertEquals("Juan Carlos", result.getFirstName());
-        assertEquals("Perez Gomez", result.getLastName());
+        assertEquals("Juan Carlos", result.getFirstNames());
+        assertEquals("Perez Gomez", result.getLastNames());
         assertEquals("jc.perez@unas.edu.pe", result.getInstitutionalEmail());
         assertEquals("999888777", result.getPhone());
         assertEquals("DOCENTE_INVESTIGADOR", result.getRoleCode());
