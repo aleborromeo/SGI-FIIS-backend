@@ -7,85 +7,85 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/dashboard")
+@RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private final ObtenerDashboardAdminUseCase dashboardAdminUseCase;
-    private final ObtenerDashboardDirectorUseCase dashboardDirectorUseCase;
-    private final ObtenerDashboardCoordinadorUseCase dashboardCoordinadorUseCase;
-    private final ObtenerDashboardDocenteUseCase dashboardDocenteUseCase;
-    private final ObtenerDashboardEvaluadorUseCase dashboardEvaluadorUseCase;
-    private final ObtenerDashboardDecanoUseCase dashboardDecanoUseCase;
-    private final ObtenerDashboardEstudianteUseCase dashboardEstudianteUseCase;
+    private final GetAdminDashboardUseCase adminDashboardUseCase;
+    private final GetDirectorDashboardUseCase directorDashboardUseCase;
+    private final GetCoordinatorDashboardUseCase coordinatorDashboardUseCase;
+    private final GetTeacherDashboardUseCase teacherDashboardUseCase;
+    private final GetEvaluatorDashboardUseCase evaluatorDashboardUseCase;
+    private final GetDeanDashboardUseCase deanDashboardUseCase;
+    private final GetStudentDashboardUseCase studentDashboardUseCase;
 
     /**
-     * RF-88: Dashboard para el Administrador del Sistema.
-     * Visión global: usuarios, grupos, proyectos, trámites y resoluciones.
+     * RF-88: Dashboard for the System Administrator.
+     * Global view: users, groups, projects, procedures and resolutions.
      */
-    @GetMapping("/admin/{idUsuario}")
-    public ResponseEntity<DashboardAdminResponse> getDashboardAdmin(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardAdminUseCase.ejecutar(idUsuario));
+    @GetMapping("/admin/{userId}")
+    public ResponseEntity<DashboardAdminResponse> getAdminDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(adminDashboardUseCase.execute(userId));
     }
 
     /**
-     * RF-89: Dashboard institucional para el Director de Investigación.
-     * Visión de proyectos, trámites por etapa, informes y convocatorias.
+     * RF-89: Institutional dashboard for the Research Director.
+     * View of projects, procedures by stage, reports and calls for applications.
      */
-    @GetMapping("/director/{idUsuario}")
-    public ResponseEntity<DashboardDirectorResponse> getDashboardDirector(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardDirectorUseCase.ejecutar(idUsuario));
+    @GetMapping("/director/{userId}")
+    public ResponseEntity<DashboardDirectorResponse> getDirectorDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(directorDashboardUseCase.execute(userId));
     }
 
     /**
-     * RF-90, RF-91: Dashboard para el Coordinador de Grupo.
-     * Solo muestra datos de su propio grupo: miembros, proyectos, trámites e informes.
+     * RF-90, RF-91: Dashboard for the Group Coordinator.
+     * Shows only data for their own group: members, projects, procedures and reports.
      */
-    @GetMapping("/coordinador/{idUsuario}")
-    public ResponseEntity<DashboardCoordinadorResponse> getDashboardCoordinador(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardCoordinadorUseCase.ejecutar(idUsuario));
+    @GetMapping("/coordinator/{userId}")
+    public ResponseEntity<DashboardCoordinatorResponse> getCoordinatorDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(coordinatorDashboardUseCase.execute(userId));
     }
 
     /**
-     * RF-92: Dashboard para el Docente Investigador.
-     * Proyectos propios, documentos, trámites e informes de avance.
+     * RF-92: Dashboard for the Research Teacher.
+     * Own projects, documents, procedures and progress reports.
      */
-    @GetMapping("/docente/{idUsuario}")
-    public ResponseEntity<DashboardDocenteResponse> getDashboardDocente(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardDocenteUseCase.ejecutar(idUsuario));
+    @GetMapping("/teacher/{userId}")
+    public ResponseEntity<DashboardTeacherResponse> getTeacherDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(teacherDashboardUseCase.execute(userId));
     }
 
     /**
-     * RF-93: Dashboard para el Evaluador.
-     * Proyectos y planes de tesis asignados para evaluación.
+     * RF-93: Dashboard for the Evaluator.
+     * Assigned projects and thesis plans for evaluation.
      */
-    @GetMapping("/evaluador/{idUsuario}")
-    public ResponseEntity<DashboardEvaluadorResponse> getDashboardEvaluador(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardEvaluadorUseCase.ejecutar(idUsuario));
+    @GetMapping("/evaluator/{userId}")
+    public ResponseEntity<DashboardEvaluatorResponse> getEvaluatorDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(evaluatorDashboardUseCase.execute(userId));
     }
 
     /**
-     * Dashboard para el Decano.
-     * Visión facultad: trámites pendientes de firma, resoluciones y convocatorias.
+     * Dashboard for the Dean.
+     * Faculty view: procedures pending signature, resolutions and calls for applications.
      */
-    @GetMapping("/decano/{idUsuario}")
-    public ResponseEntity<DashboardDecanoResponse> getDashboardDecano(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardDecanoUseCase.ejecutar(idUsuario));
+    @GetMapping("/dean/{userId}")
+    public ResponseEntity<DashboardDeanResponse> getDeanDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(deanDashboardUseCase.execute(userId));
     }
 
     /**
-     * Dashboard para el Estudiante / Tesista.
-     * Estado de su plan de tesis, grupo, trámites y convocatorias activas.
+     * Dashboard for the Student / Thesis candidate.
+     * Status of their thesis plan, group, procedures and active calls.
      */
-    @GetMapping("/estudiante/{idUsuario}")
-    public ResponseEntity<DashboardEstudianteResponse> getDashboardEstudiante(
-            @PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(dashboardEstudianteUseCase.ejecutar(idUsuario));
+    @GetMapping("/student/{userId}")
+    public ResponseEntity<DashboardStudentResponse> getStudentDashboard(
+            @PathVariable Integer userId) {
+        return ResponseEntity.ok(studentDashboardUseCase.execute(userId));
     }
 }
