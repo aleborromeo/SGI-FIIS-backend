@@ -18,6 +18,9 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
 
     @Override
     public ResearchLine save(ResearchLine line) {
+        if (line == null) {
+            return null;
+        }
         return toDomain(springDataRepository.save(toEntity(line)));
     }
 
