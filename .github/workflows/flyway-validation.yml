@@ -21,38 +21,47 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      # 1. Creamos el archivo usando la ruta explícita con punto barra (./)
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.DOTENV_FILE }}" > ./fiis/.env
+
+      # 2. Correr los test unitarios
       - name: Run unit tests
         working-directory: ./fiis
         run: mvn clean test
 
-      - name: Create .env file
-        run: cp .env.example fiis/.env
-
+      # 3. Docker Compose Build
       - name: Build containers
         run: docker compose build
 
+      # 4. Levantar la base de datos y la API
       - name: Start containers
         run: docker compose up -d
 
+      # 5. Esperar a que los healthchecks determinen que todo inició
       - name: Wait for backend startup
         run: |
-          echo "Esperando que Spring Boot arranque..."
-          sleep 60
+          echo "Esperando que los servicios arranquen y Flyway valide..."
+          sleep 30
 
+      # 6. Verificar el estado del backend
       - name: Verify backend container
         run: |
           docker ps
-
           if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api)" != "true" ]; then
             echo "El contenedor backend no está ejecutándose."
             docker logs sgifiis-backend-api
             exit 1
           fi
 
+      # 7. Si algo falla, expone los logs de Spring
       - name: Show backend logs
         if: failure()
         run: docker logs sgifiis-backend-api
 
+      # 8. Limpieza absoluta (Le añadimos la ruta explícita del archivo para evitar el error de 'stat')
       - name: Stop containers
         if: always()
-        run: docker compose down -v
+        run: docker compose --env-file ./fiis/.env down -v
+        
