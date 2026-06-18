@@ -1,5 +1,5 @@
 -- ============================================================
--- V8: Creación de tablas para el módulo de Resoluciones
+-- V9: Creación de tablas para el módulo de Resoluciones
 -- y tabla de documentos para almacenar los adjuntos
 -- ============================================================
 

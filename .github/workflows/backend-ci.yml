@@ -54,4 +54,12 @@ jobs:
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: false
           JWT_SECRET: ci-test-secret-key-for-jwt-signing-min-32-characters-long
-        run: ./mvnw clean verify
+          AZURE_CLIENT_ID: ci-dummy-client-id
+          AZURE_CLIENT_SECRET: ci-dummy-client-secret
+          AZURE_TENANT_ID: common
+          APP_FRONTEND_URL: http://localhost:3000
+          SPRING_MAIL_HOST: smtp.test.com
+          SPRING_MAIL_PORT: 587
+          SPRING_MAIL_USERNAME: ci@test.com
+          SPRING_MAIL_PASSWORD: ci-dummy-password
+        run: ./mvnw clean verify -Djdk.attach.allowAttachSelf=true

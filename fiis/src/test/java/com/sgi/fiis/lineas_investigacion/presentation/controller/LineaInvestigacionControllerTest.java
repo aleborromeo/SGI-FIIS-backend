@@ -51,6 +51,10 @@ class LineaInvestigacionControllerTest {
 
     @MockitoBean
     private LineaInvestigacionMapper mapper;
+    
+    // Mocks requeridos por la configuración de seguridad y JwtAuthenticationFilter
+    @MockitoBean private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
+    @MockitoBean private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
 
     @Test
     void registrar_deberiaRetornar201_cuandoDatosValidos() throws Exception {
