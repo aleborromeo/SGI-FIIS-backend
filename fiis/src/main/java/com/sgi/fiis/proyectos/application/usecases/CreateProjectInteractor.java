@@ -7,7 +7,9 @@ import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import com.sgi.fiis.proyectos.application.ports.in.CreateProjectUseCase;
 import com.sgi.fiis.proyectos.application.ports.out.CreateProcedurePort;
 import com.sgi.fiis.proyectos.application.ports.out.SaveProjectPort;
+import com.sgi.fiis.proyectos.application.dto.MemberRequest;
 import com.sgi.fiis.proyectos.domain.model.Project;
+import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
@@ -102,6 +104,14 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         // 10. Trigger procedure workflow (RF-40 & RF-41)
         createProcedurePort.createPostulationProcedure(savedProject);
 
+        // 11. Save project team members if provided (RF-36)
+        if (request.getMembers() != null && !request.getMembers().isEmpty()) {
+            List<ProjectMember> members = request.getMembers().stream()
+                    .map(m -> new ProjectMember(null, savedProject.getId(), m.getUserId(), m.getRole() != null ? m.getRole() : "INVESTIGADOR"))
+                    .toList();
+            saveProjectPort.saveMembers(savedProject.getId(), members);
+        }
+
         return mapToResponse(savedProject);
     }
 
@@ -127,6 +137,35 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     @Override
+    @Transactional
+    @Auditable(action = "UPDATE_PROJECT_STATUS")
+    public ProjectResponse updateStatus(Integer id, String status) {
+        Project project = saveProjectPort.findById(id)
+                .orElseThrow(() -> new BusinessRuleValidationException("Project not found with ID: " + id));
+
+        ProjectStatus newStatus;
+        try {
+            newStatus = mapStatusFromString(status);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessRuleValidationException("Invalid status value: " + status);
+        }
+
+        project.setStatus(newStatus);
+        Project updatedProject = saveProjectPort.save(project);
+        return mapToResponse(updatedProject);
+    }
+
+    private ProjectStatus mapStatusFromString(String status) {
+        if ("POSTULADO".equalsIgnoreCase(status)) return ProjectStatus.POSTULATED;
+        if ("OBSERVADO".equalsIgnoreCase(status)) return ProjectStatus.OBSERVED;
+        if ("APROBADO".equalsIgnoreCase(status)) return ProjectStatus.APPROVED;
+        if ("RECHAZADO".equalsIgnoreCase(status)) return ProjectStatus.REJECTED;
+        if ("EN_EJECUCION".equalsIgnoreCase(status)) return ProjectStatus.IN_PROGRESS;
+        if ("FINALIZADO".equalsIgnoreCase(status)) return ProjectStatus.COMPLETED;
+        return ProjectStatus.valueOf(status.toUpperCase());
+    }
+
+    @Override
     public ProjectResponse getProjectById(Integer id) {
         return saveProjectPort.findById(id)
                 .map(this::mapToResponse)
@@ -147,6 +186,13 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
             dbStatus = "FINALIZADO";
         }
 
+        List<com.sgi.fiis.proyectos.application.dto.MemberResponse> members = null;
+        if (project.getId() != null) {
+            members = saveProjectPort.findMembersByProjectId(project.getId()).stream()
+                    .map(m -> new com.sgi.fiis.proyectos.application.dto.MemberResponse(m.getId(), m.getUserId(), m.getRole()))
+                    .toList();
+        }
+
         return new ProjectResponse(
                 project.getId(),
                 project.getCode(),
@@ -164,7 +210,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 project.getResearchGroupCode(),
                 project.getCallId(),
                 project.getDocumentId(),
-                dbStatus
+                dbStatus,
+                members
         );
     }
 }

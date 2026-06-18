@@ -10,10 +10,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -35,7 +37,7 @@ public class ProjectController {
             @Valid @RequestBody CreateProjectRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         
-        // Associate the project with the logged-in user as the responsible investigator
+        // RF-39: Associate the project with the logged-in user as the responsible investigator
         request.setResponsibleId(currentUser.getId().intValue());
         
         ProjectResponse response = createProjectUseCase.execute(request);
@@ -44,28 +46,71 @@ public class ProjectController {
 
     @GetMapping
     @Operation(summary = "List research projects with optional filters")
+    @ApiResponse(responseCode = "200", description = "List of projects retrieved successfully")
     public ResponseEntity<List<ProjectResponse>> getProjects(
             @RequestParam(value = "responsibleId", required = false) Long responsibleId,
-            @RequestParam(value = "groupId", required = false) Integer groupId) {
-        
+            @RequestParam(value = "groupId", required = false) Integer groupId,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+
+        String role = currentUser.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("");
+
         List<ProjectResponse> response;
-        if (responsibleId != null) {
+
+        // RF-43 / RN-05 / RNF-19: Enforce role-based filtering
+        if ("DOCENTE_INVESTIGADOR".equals(role)) {
+            // Docente can only see their own projects
+            response = createProjectUseCase.getProjectsByResponsible(currentUser.getId());
+        } else if (responsibleId != null) {
             response = createProjectUseCase.getProjectsByResponsible(responsibleId);
         } else if (groupId != null) {
             response = createProjectUseCase.getProjectsByGroup(groupId);
         } else {
             response = createProjectUseCase.getAllProjects();
         }
-        
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get project details by ID")
     @ApiResponse(responseCode = "200", description = "Details retrieved successfully")
+    @ApiResponse(responseCode = "403", description = "Forbidden - not your project")
     @ApiResponse(responseCode = "404", description = "Project not found")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable("id") Integer id) {
-        ProjectResponse response = createProjectUseCase.getProjectById(id);
+    public ResponseEntity<ProjectResponse> getProjectById(
+            @PathVariable("id") Integer id,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        
+        ProjectResponse project = createProjectUseCase.getProjectById(id);
+
+        // RF-43 / RN-05: Docentes can only see their own projects
+        String role = currentUser.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("");
+
+        if ("DOCENTE_INVESTIGADOR".equals(role) && !project.getResponsibleId().equals(currentUser.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(project);
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
+    @Operation(summary = "Update project status", description = "Updates the status of a research project.")
+    @ApiResponse(responseCode = "200", description = "Status updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid status value")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Project not found")
+    public ResponseEntity<ProjectResponse> updateProjectStatus(
+            @PathVariable("id") Integer id,
+            @RequestBody Map<String, String> body) {
+        String status = body.get("status");
+        ProjectResponse response = createProjectUseCase.updateStatus(id, status);
         return ResponseEntity.ok(response);
     }
+
 }

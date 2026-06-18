@@ -2,6 +2,8 @@ package com.sgi.fiis.convocatorias.infrastructure.persistence;
 
 import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
+import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
+import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,20 +20,25 @@ import static org.mockito.Mockito.*;
 class SaveCallAdapterTest {
 
     private ResearchCallJpaRepository jpaRepository;
+    private DocumentJpaRepository documentJpaRepository;
+    private ResearchLineJpaRepository lineJpaRepository;
     private SaveCallAdapter adapter;
 
     @BeforeEach
     void setUp() {
         jpaRepository = Mockito.mock(ResearchCallJpaRepository.class);
-        adapter = new SaveCallAdapter(jpaRepository);
+        documentJpaRepository = Mockito.mock(DocumentJpaRepository.class);
+        lineJpaRepository = Mockito.mock(ResearchLineJpaRepository.class);
+        adapter = new SaveCallAdapter(jpaRepository, documentJpaRepository, lineJpaRepository);
     }
 
     @Test
     void shouldSaveCallOpen() {
-        ResearchCall domain = new ResearchCall(1, "Call Open", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.OPEN);
+        ResearchCall domain = new ResearchCall(1, "Call Open", "Description", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.OPEN, null, null);
         ResearchCallEntity entity = ResearchCallEntity.builder()
                 .id(1)
                 .title("Call Open")
+                .description("Description")
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status("ABIERTA")
@@ -48,10 +55,11 @@ class SaveCallAdapterTest {
 
     @Test
     void shouldSaveCallClosed() {
-        ResearchCall domain = new ResearchCall(1, "Call Closed", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.CLOSED);
+        ResearchCall domain = new ResearchCall(1, "Call Closed", "Description", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.CLOSED, null, null);
         ResearchCallEntity entity = ResearchCallEntity.builder()
                 .id(1)
                 .title("Call Closed")
+                .description("Description")
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status("CERRADA")
@@ -65,10 +73,11 @@ class SaveCallAdapterTest {
 
     @Test
     void shouldSaveCallFinished() {
-        ResearchCall domain = new ResearchCall(1, "Call Finished", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.FINISHED);
+        ResearchCall domain = new ResearchCall(1, "Call Finished", "Description", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.FINISHED, null, null);
         ResearchCallEntity entity = ResearchCallEntity.builder()
                 .id(1)
                 .title("Call Finished")
+                .description("Description")
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status("FINALIZADA")
@@ -85,6 +94,7 @@ class SaveCallAdapterTest {
         ResearchCallEntity entity = ResearchCallEntity.builder()
                 .id(2)
                 .title("Some Call")
+                .description("Description")
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(10))
                 .status("CERRADA")
@@ -107,9 +117,9 @@ class SaveCallAdapterTest {
 
     @Test
     void shouldFindByStatus() {
-        ResearchCallEntity openEntity = ResearchCallEntity.builder().id(1).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
-        ResearchCallEntity closedEntity = ResearchCallEntity.builder().id(2).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
-        ResearchCallEntity finishedEntity = ResearchCallEntity.builder().id(3).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("FINALIZADA").build();
+        ResearchCallEntity openEntity = ResearchCallEntity.builder().id(1).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
+        ResearchCallEntity closedEntity = ResearchCallEntity.builder().id(2).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
+        ResearchCallEntity finishedEntity = ResearchCallEntity.builder().id(3).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("FINALIZADA").build();
 
         when(jpaRepository.findByStatus("ABIERTA")).thenReturn(Arrays.asList(openEntity));
         when(jpaRepository.findByStatus("CERRADA")).thenReturn(Arrays.asList(closedEntity));
@@ -130,8 +140,8 @@ class SaveCallAdapterTest {
 
     @Test
     void shouldFindAll() {
-        ResearchCallEntity entity1 = ResearchCallEntity.builder().id(1).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
-        ResearchCallEntity entity2 = ResearchCallEntity.builder().id(2).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
+        ResearchCallEntity entity1 = ResearchCallEntity.builder().id(1).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
+        ResearchCallEntity entity2 = ResearchCallEntity.builder().id(2).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
         when(jpaRepository.findAll()).thenReturn(Arrays.asList(entity1, entity2));
 
         List<ResearchCall> result = adapter.findAll();

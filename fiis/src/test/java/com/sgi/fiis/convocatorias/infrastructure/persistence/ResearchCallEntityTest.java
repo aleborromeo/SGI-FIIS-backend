@@ -26,8 +26,8 @@ class ResearchCallEntityTest {
         LocalDate endDate = LocalDate.of(2025, 3, 31);
 
         ResearchCallEntity entity = new ResearchCallEntity(
-                1, "Convocatoria 2025-I", startDate, endDate,
-                "ABIERTA", null
+                1, "Convocatoria 2025-I", "Description", startDate, endDate,
+                "ABIERTA", null, null, null, null
         );
 
         assertEquals(1, entity.getId());
@@ -47,6 +47,7 @@ class ResearchCallEntityTest {
         ResearchCallEntity entity = ResearchCallEntity.builder()
                 .id(2)
                 .title("Convocatoria 2025-II")
+                .description("Description")
                 .startDate(startDate)
                 .endDate(endDate)
                 .status("CERRADA")
@@ -112,10 +113,10 @@ class ResearchCallEntityTest {
         LocalDate endDate = LocalDate.of(2025, 3, 31);
 
         ResearchCallEntity entity1 = new ResearchCallEntity(
-                1, "Test", startDate, endDate, "ABIERTA", null
+                1, "Test", "Description", startDate, endDate, "ABIERTA", null, null, null, null
         );
         ResearchCallEntity entity2 = new ResearchCallEntity(
-                1, "Test", startDate, endDate, "ABIERTA", null
+                1, "Test", "Description", startDate, endDate, "ABIERTA", null, null, null, null
         );
 
         assertEquals(entity1, entity2);

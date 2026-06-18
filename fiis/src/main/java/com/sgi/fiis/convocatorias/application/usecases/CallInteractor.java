@@ -111,9 +111,12 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
         return new CallResponse(
                 call.getId(),
                 call.getTitle(),
+                call.getDescription(),
                 call.getStartDate(),
                 call.getEndDate(),
-                statusName
+                statusName,
+                call.getDocumentId(),
+                call.getResearchLineIds()
         );
     }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -50,4 +51,6 @@ public class CreateProjectRequest {
     private Integer callId; // Optional if registered outside call
 
     private Integer documentId; // Optional file metadata ID
+
+    private List<MemberRequest> members; // Optional team members
 }

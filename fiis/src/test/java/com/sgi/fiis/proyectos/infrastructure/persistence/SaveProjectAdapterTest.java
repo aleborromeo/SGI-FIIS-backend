@@ -32,6 +32,7 @@ class SaveProjectAdapterTest {
     private SpringDataUsuarioRepository userRepository;
     private ResearchCallJpaRepository callRepository;
     private GroupMembershipJpaRepository membershipRepository;
+    private ProjectMemberJpaRepository projectMemberRepository;
     private SaveProjectAdapter adapter;
 
     private ProjectEntity createValidEntity(int id, String status) {
@@ -70,8 +71,9 @@ class SaveProjectAdapterTest {
         userRepository = Mockito.mock(SpringDataUsuarioRepository.class);
         callRepository = Mockito.mock(ResearchCallJpaRepository.class);
         membershipRepository = Mockito.mock(GroupMembershipJpaRepository.class);
+        projectMemberRepository = Mockito.mock(ProjectMemberJpaRepository.class);
         
-        adapter = new SaveProjectAdapter(jpaRepository, lineRepository, groupRepository, userRepository, callRepository, membershipRepository);
+        adapter = new SaveProjectAdapter(jpaRepository, lineRepository, groupRepository, userRepository, callRepository, membershipRepository, projectMemberRepository);
     }
 
     @Test

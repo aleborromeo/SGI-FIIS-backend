@@ -3,6 +3,10 @@ package com.sgi.fiis.convocatorias.infrastructure.persistence;
 import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
 import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
+import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
+import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
+import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
+import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,9 +20,15 @@ public class SaveCallAdapter implements SaveCallPort {
     private static final String STATUS_FINALIZADA = "FINALIZADA";
 
     private final ResearchCallJpaRepository jpaRepository;
+    private final DocumentJpaRepository documentRepository;
+    private final ResearchLineJpaRepository lineRepository;
 
-    public SaveCallAdapter(ResearchCallJpaRepository jpaRepository) {
+    public SaveCallAdapter(ResearchCallJpaRepository jpaRepository,
+                           DocumentJpaRepository documentRepository,
+                           ResearchLineJpaRepository lineRepository) {
         this.jpaRepository = jpaRepository;
+        this.documentRepository = documentRepository;
+        this.lineRepository = lineRepository;
     }
 
     @Override
@@ -47,6 +57,18 @@ public class SaveCallAdapter implements SaveCallPort {
     }
 
     @Override
+    public boolean areLinesActive(List<Integer> lineIds) {
+        if (lineIds == null || lineIds.isEmpty()) {
+            return false;
+        }
+        long activeCount = lineIds.stream()
+                .map(id -> lineRepository.findById(id))
+                .filter(opt -> opt.isPresent() && opt.get().isActive())
+                .count();
+        return activeCount == lineIds.size();
+    }
+
+    @Override
     public List<ResearchCall> findAll() {
         return jpaRepository.findAll().stream()
                 .map(this::toDomain)
@@ -61,12 +83,28 @@ public class SaveCallAdapter implements SaveCallPort {
             dbStatus = STATUS_FINALIZADA;
         }
 
+        DocumentEntity doc = null;
+        if (domain.getDocumentId() != null) {
+            doc = documentRepository.findById(domain.getDocumentId()).orElse(null);
+        }
+
+        List<ResearchLineEntity> lines = null;
+        if (domain.getResearchLineIds() != null) {
+            lines = domain.getResearchLineIds().stream()
+                    .map(id -> lineRepository.findById(id).orElse(null))
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+        }
+
         return ResearchCallEntity.builder()
                 .id(domain.getId())
                 .title(domain.getTitle())
+                .description(domain.getDescription())
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status(dbStatus)
+                .document(doc)
+                .researchLines(lines)
                 .build();
     }
 
@@ -78,12 +116,22 @@ public class SaveCallAdapter implements SaveCallPort {
             domainStatus = CallStatus.FINISHED;
         }
 
+        List<Integer> lineIds = null;
+        if (entity.getResearchLines() != null) {
+            lineIds = entity.getResearchLines().stream()
+                    .map(ResearchLineEntity::getId)
+                    .toList();
+        }
+
         return new ResearchCall(
                 entity.getId(),
                 entity.getTitle(),
+                entity.getDescription(),
                 entity.getStartDate(),
                 entity.getEndDate(),
-                domainStatus
+                domainStatus,
+                entity.getDocument() != null ? entity.getDocument().getId() : null,
+                lineIds
         );
     }
 }

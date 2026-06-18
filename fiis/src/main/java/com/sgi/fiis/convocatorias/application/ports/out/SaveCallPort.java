@@ -10,4 +10,5 @@ public interface SaveCallPort {
     Optional<ResearchCall> findById(Integer id);
     List<ResearchCall> findByStatus(CallStatus status);
     List<ResearchCall> findAll();
+    boolean areLinesActive(List<Integer> lineIds);
 }

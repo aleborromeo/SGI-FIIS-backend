@@ -10,4 +10,5 @@ public interface CreateProjectUseCase {
     List<ProjectResponse> getProjectsByGroup(Integer groupId);
     List<ProjectResponse> getAllProjects();
     ProjectResponse getProjectById(Integer id);
+    ProjectResponse updateStatus(Integer id, String status);
 }

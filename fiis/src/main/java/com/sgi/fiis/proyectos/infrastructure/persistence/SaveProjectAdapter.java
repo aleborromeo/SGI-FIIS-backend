@@ -10,6 +10,7 @@ import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLine
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
 import com.sgi.fiis.proyectos.application.ports.out.SaveProjectPort;
 import com.sgi.fiis.proyectos.domain.model.Project;
+import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUsuarioRepository;
@@ -28,19 +29,22 @@ public class SaveProjectAdapter implements SaveProjectPort {
     private final SpringDataUsuarioRepository userRepository;
     private final ResearchCallJpaRepository callRepository;
     private final GroupMembershipJpaRepository membershipRepository;
+    private final ProjectMemberJpaRepository projectMemberRepository;
 
     public SaveProjectAdapter(ProjectJpaRepository projectRepository,
                               ResearchLineJpaRepository lineRepository,
                               ResearchGroupJpaRepository groupRepository,
                               SpringDataUsuarioRepository userRepository,
                               ResearchCallJpaRepository callRepository,
-                              GroupMembershipJpaRepository membershipRepository) {
+                              GroupMembershipJpaRepository membershipRepository,
+                              ProjectMemberJpaRepository projectMemberRepository) {
         this.projectRepository = projectRepository;
         this.lineRepository = lineRepository;
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.callRepository = callRepository;
         this.membershipRepository = membershipRepository;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     @Override
@@ -101,6 +105,32 @@ public class SaveProjectAdapter implements SaveProjectPort {
         return groupRepository.findById(groupId)
                 .map(ResearchGroupEntity::isActive)
                 .orElse(false);
+    }
+
+    @Override
+    public void saveMembers(Integer projectId, List<ProjectMember> members) {
+        projectMemberRepository.deleteByProjectId(projectId);
+        ProjectEntity projectEntity = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found with ID: " + projectId));
+
+        for (ProjectMember member : members) {
+            UsuarioEntity user = userRepository.findById(member.getUserId().longValue())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + member.getUserId()));
+
+            ProjectMemberEntity entity = ProjectMemberEntity.builder()
+                    .project(projectEntity)
+                    .user(user)
+                    .role(member.getRole() != null ? member.getRole() : "INVESTIGADOR")
+                    .build();
+            projectMemberRepository.save(entity);
+        }
+    }
+
+    @Override
+    public List<ProjectMember> findMembersByProjectId(Integer projectId) {
+        return projectMemberRepository.findByProjectId(projectId).stream()
+                .map(e -> new ProjectMember(e.getId(), projectId, e.getUser().getId().intValue(), e.getRole()))
+                .toList();
     }
 
     @Override

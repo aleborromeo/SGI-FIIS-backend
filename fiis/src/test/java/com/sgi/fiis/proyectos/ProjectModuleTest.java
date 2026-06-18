@@ -69,7 +69,7 @@ class ProjectModuleTest {
         when(saveProjectPort.getGroupCode(2)).thenReturn(Optional.of("GINSOFT"));
         when(saveProjectPort.getLineName(1)).thenReturn(Optional.of("Computacion"));
 
-        ResearchCall call = new ResearchCall(4, "Call 2026", FIXED_PAST_1D, FIXED_FUTURE_1M, CallStatus.OPEN);
+        ResearchCall call = new ResearchCall(4, "Call 2026", "Description", FIXED_PAST_1D, FIXED_FUTURE_1M, CallStatus.OPEN, null, null);
         when(saveCallPort.findById(4)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(
