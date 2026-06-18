@@ -1,11 +1,18 @@
 package com.sgi.fiis.resoluciones.infrastructure.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "resoluciones")
+@Getter
+@Setter
+@NoArgsConstructor
 public class ResolucionEntity {
 
     @Id
@@ -36,63 +43,5 @@ public class ResolucionEntity {
         if (fechaRegistro == null) {
             fechaRegistro = LocalDateTime.now(java.time.ZoneId.systemDefault());
         }
-    }
-
-    // Getters and Setters
-
-    public Long getIdResolucion() {
-        return idResolucion;
-    }
-
-    public void setIdResolucion(Long idResolucion) {
-        this.idResolucion = idResolucion;
-    }
-
-    public String getNumeroResolucion() {
-        return numeroResolucion;
-    }
-
-    public void setNumeroResolucion(String numeroResolucion) {
-        this.numeroResolucion = numeroResolucion;
-    }
-
-    public LocalDate getFechaEmision() {
-        return fechaEmision;
-    }
-
-    public void setFechaEmision(LocalDate fechaEmision) {
-        this.fechaEmision = fechaEmision;
-    }
-
-    public String getAsunto() {
-        return asunto;
-    }
-
-    public void setAsunto(String asunto) {
-        this.asunto = asunto;
-    }
-
-    public Long getIdTramite() {
-        return idTramite;
-    }
-
-    public void setIdTramite(Long idTramite) {
-        this.idTramite = idTramite;
-    }
-
-    public Long getIdDocumentoAdjunto() {
-        return idDocumentoAdjunto;
-    }
-
-    public void setIdDocumentoAdjunto(Long idDocumentoAdjunto) {
-        this.idDocumentoAdjunto = idDocumentoAdjunto;
-    }
-
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
-
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
     }
 }

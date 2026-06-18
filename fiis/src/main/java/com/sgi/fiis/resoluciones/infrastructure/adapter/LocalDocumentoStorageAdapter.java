@@ -29,19 +29,18 @@ public class LocalDocumentoStorageAdapter implements DocumentoStoragePort {
         long tamanoBytes = archivoBytes != null ? archivoBytes.length : 0;
         
         // id_usuario_subida = 1 (simulando que el Decano es el usuario ID 1 por ahora)
-        String sql = "INSERT INTO documentos (nombre_original, nombre_almacenamiento, ruta_archivo, " +
-                     "tipo_contenido, tamano_bytes, id_usuario_subida) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO documentos (nombre_original, ruta_almacenamiento, " +
+                     "tipo_extension, tamano_bytes, id_usuario_subio) VALUES (?, ?, ?, ?, ?)";
                      
         KeyHolder keyHolder = new GeneratedKeyHolder();
         
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, nombreArchivo);
-            ps.setString(2, "STUB_" + nombreArchivo);
-            ps.setString(3, rutaSimulada);
-            ps.setString(4, tipoContenido != null ? tipoContenido : "application/pdf");
-            ps.setLong(5, tamanoBytes);
-            ps.setLong(6, 1L); // Asumiendo que el Decano / Administrador tiene ID 1
+            ps.setString(2, rutaSimulada);
+            ps.setString(3, "pdf"); // Stub: asumiendo extensión corta
+            ps.setLong(4, tamanoBytes);
+            ps.setLong(5, 1L); // Asumiendo que el Decano / Administrador tiene ID 1
             return ps;
         }, keyHolder);
         

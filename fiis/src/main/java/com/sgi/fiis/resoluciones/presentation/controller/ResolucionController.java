@@ -44,13 +44,13 @@ public class ResolucionController {
         Resolucion resolucion = emitirResolucionUseCase.emitir(command);
 
         ResolucionResponseDTO response = new ResolucionResponseDTO(
-                resolucion.getIdResolucion(),
-                resolucion.getNumeroResolucion(),
-                resolucion.getFechaEmision(),
-                resolucion.getAsunto(),
-                resolucion.getIdTramite(),
-                resolucion.getIdDocumentoAdjunto(),
-                resolucion.getFechaRegistro()
+                resolucion.idResolucion(),
+                resolucion.numeroResolucion(),
+                resolucion.fechaEmision(),
+                resolucion.asunto(),
+                resolucion.idTramite(),
+                resolucion.idDocumentoAdjunto(),
+                resolucion.fechaRegistro()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

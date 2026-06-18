@@ -23,13 +23,13 @@ public class ResolucionMapper {
     public ResolucionEntity toEntity(Resolucion domain) {
         if (domain == null) return null;
         ResolucionEntity entity = new ResolucionEntity();
-        entity.setIdResolucion(domain.getIdResolucion());
-        entity.setNumeroResolucion(domain.getNumeroResolucion());
-        entity.setFechaEmision(domain.getFechaEmision());
-        entity.setAsunto(domain.getAsunto());
-        entity.setIdTramite(domain.getIdTramite());
-        entity.setIdDocumentoAdjunto(domain.getIdDocumentoAdjunto());
-        entity.setFechaRegistro(domain.getFechaRegistro());
+        entity.setIdResolucion(domain.idResolucion());
+        entity.setNumeroResolucion(domain.numeroResolucion());
+        entity.setFechaEmision(domain.fechaEmision());
+        entity.setAsunto(domain.asunto());
+        entity.setIdTramite(domain.idTramite());
+        entity.setIdDocumentoAdjunto(domain.idDocumentoAdjunto());
+        entity.setFechaRegistro(domain.fechaRegistro());
         return entity;
     }
 }
