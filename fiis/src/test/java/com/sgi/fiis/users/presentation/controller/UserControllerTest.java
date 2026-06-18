@@ -28,23 +28,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("UserController Integration Tests")
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockitoBean
-    private CreateUserUseCase createUserUseCase;
+        @MockitoBean
+        private CreateUserUseCase createUserUseCase;
 
-    @MockitoBean
-    private ListUsersUseCase listUsersUseCase;
+        @MockitoBean
+        private ListUsersUseCase listUsersUseCase;
 
-    @MockitoBean
-    private GetUserUseCase getUserUseCase;
+        @MockitoBean
+        private GetUserUseCase getUserUseCase;
 
     @Test
-    @WithMockUser(username = "admin@unas.edu.pe", roles = {"ADMIN"})
     @DisplayName("Should successfully create a user when authenticated as ADMIN")
     void testCreateUserSuccess() throws Exception {
         UserRequestDto request = UserRequestDto.builder()
@@ -70,7 +69,12 @@ class UserControllerTest {
 
         when(createUserUseCase.execute(any(User.class))).thenReturn(userDomain);
 
+<<<<<<< HEAD:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UserControllerTest.java
         mockMvc.perform(post("/api/v1/users")
+=======
+        mockMvc.perform(post("/api/v1/usuarios")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN"))
+>>>>>>> a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UsuarioControllerTest.java
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -81,7 +85,6 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "student@unas.edu.pe", roles = {"ESTUDIANTE"})
     @DisplayName("Should return 403 Forbidden when trying to create user as ESTUDIANTE")
     void testCreateUserForbidden() throws Exception {
         UserRequestDto request = UserRequestDto.builder()
@@ -93,32 +96,36 @@ class UserControllerTest {
                 .roleCode("ESTUDIANTE")
                 .build();
 
+<<<<<<< HEAD:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UserControllerTest.java
         mockMvc.perform(post("/api/v1/users")
+=======
+        mockMvc.perform(post("/api/v1/usuarios")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("student@unas.edu.pe").roles("ESTUDIANTE"))
+>>>>>>> a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UsuarioControllerTest.java
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @DisplayName("Should return 401 Unauthorized when not authenticated")
-    void testCreateUserUnauthorized() throws Exception {
-        UserRequestDto request = UserRequestDto.builder()
-                .dni("12345678")
-                .firstNames("Maria")
-                .lastNames("Gomez")
-                .institutionalEmail("maria.gomez@unas.edu.pe")
-                .phone("999888777")
-                .roleCode("ESTUDIANTE")
-                .build();
+        @Test
+        @DisplayName("Should return 401 Unauthorized when not authenticated")
+        void testCreateUserUnauthorized() throws Exception {
+                UserRequestDto request = UserRequestDto.builder()
+                                .dni("12345678")
+                                .firstNames("Maria")
+                                .lastNames("Gomez")
+                                .institutionalEmail("maria.gomez@unas.edu.pe")
+                                .phone("999888777")
+                                .roleCode("ESTUDIANTE")
+                                .build();
 
-        mockMvc.perform(post("/api/v1/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-    }
+                mockMvc.perform(post("/api/v1/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isUnauthorized());
+        }
 
     @Test
-    @WithMockUser(username = "admin@unas.edu.pe", roles = {"ADMIN"})
     @DisplayName("Should successfully list users when authenticated as ADMIN")
     void testListUsersSuccess() throws Exception {
         User userDomain = User.builder()
@@ -133,7 +140,12 @@ class UserControllerTest {
 
         when(listUsersUseCase.execute(null)).thenReturn(Collections.singletonList(userDomain));
 
+<<<<<<< HEAD:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UserControllerTest.java
         mockMvc.perform(get("/api/v1/users"))
+=======
+        mockMvc.perform(get("/api/v1/usuarios")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN")))
+>>>>>>> a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UsuarioControllerTest.java
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].institutionalEmail").value("admin@unas.edu.pe"))
                 .andExpect(jsonPath("$[0].roleCode").value("ADMIN"));
