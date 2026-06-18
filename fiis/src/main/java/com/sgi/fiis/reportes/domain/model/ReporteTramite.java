@@ -18,7 +18,9 @@ public class ReporteTramite {
     private LocalDateTime fechaEnvio;
     private LocalDateTime fechaActualizacion;
 
-    public ReporteTramite() {}
+    public ReporteTramite() {
+        // requerido por JdbcTemplate RowMapper
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters

@@ -18,7 +18,9 @@ public class TrazabilidadMovimiento {
     private String        observacion;
     private LocalDateTime fechaMovimiento;
 
-    public TrazabilidadMovimiento() {}
+    public TrazabilidadMovimiento() {
+        // requerido por JdbcTemplate RowMapper
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters

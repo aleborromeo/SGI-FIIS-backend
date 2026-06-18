@@ -24,7 +24,9 @@ public class ReporteProyecto {
     private LocalDate     fechaFin;
     private LocalDateTime fechaCreacion;
 
-    public ReporteProyecto() {}
+    public ReporteProyecto() {
+        // requerido por JdbcTemplate RowMapper
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters

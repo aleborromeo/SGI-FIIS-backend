@@ -116,6 +116,36 @@ class ReporteServiceTest {
         assertThat(respuesta.getTotal()).isZero();
     }
 
+    @Test
+    @DisplayName("Debe retornar lista vacía cuando no hay resoluciones")
+    void generarReporteResoluciones_sinDatos_retornaListaVacia() {
+        // arrange
+        when(repo.findResoluciones(any())).thenReturn(Collections.emptyList());
+        when(repo.countResoluciones(any())).thenReturn(0L);
+
+        // act
+        PaginatedResponse<ReporteResolucion> respuesta = service.generarReporteResoluciones(filtro);
+
+        // assert
+        assertThat(respuesta.getData()).isEmpty();
+        assertThat(respuesta.getTotal()).isZero();
+    }
+
+    @Test
+    @DisplayName("Debe retornar lista vacía cuando no hay informes de avance")
+    void generarReporteInformes_sinDatos_retornaListaVacia() {
+        // arrange
+        when(repo.findInformesAvance(any())).thenReturn(Collections.emptyList());
+        when(repo.countInformesAvance(any())).thenReturn(0L);
+
+        // act
+        PaginatedResponse<ReporteInformeAvance> respuesta = service.generarReporteInformes(filtro);
+
+        // assert
+        assertThat(respuesta.getData()).isEmpty();
+        assertThat(respuesta.getTotal()).isZero();
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Reporte de resoluciones
     // ─────────────────────────────────────────────────────────────────────────

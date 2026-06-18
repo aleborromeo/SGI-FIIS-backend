@@ -19,7 +19,9 @@ public class ReporteInformeAvance {
     private String        nombreGrupo;
     private LocalDateTime fechaRegistro;
 
-    public ReporteInformeAvance() {}
+    public ReporteInformeAvance() {
+        // requerido por JdbcTemplate RowMapper
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters

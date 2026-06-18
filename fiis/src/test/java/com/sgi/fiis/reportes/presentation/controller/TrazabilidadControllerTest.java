@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,7 +59,7 @@ class TrazabilidadControllerTest {
         mov.setAccion("CREACION");
         mov.setEstadoNuevo("PENDIENTE");
         mov.setObservacion("Trámite creado");
-        mov.setFechaMovimiento(LocalDateTime.of(2024, 1, 15, 9, 0));
+        mov.setFechaMovimiento(LocalDateTime.of(2024, Month.JANUARY, 15, 9, 0));
 
         when(trazabilidadService.consultarTrazabilidad(10)).thenReturn(List.of(mov));
 
@@ -112,7 +113,7 @@ class TrazabilidadControllerTest {
         mov1.setIdTramite(10);
         mov1.setAccion("CREACION");
         mov1.setEstadoNuevo("PENDIENTE");
-        mov1.setFechaMovimiento(LocalDateTime.of(2024, 1, 15, 9, 0));
+        mov1.setFechaMovimiento(LocalDateTime.of(2024, Month.JANUARY, 15, 9, 0));
 
         TrazabilidadMovimiento mov2 = new TrazabilidadMovimiento();
         mov2.setIdMovimiento(2);
@@ -120,7 +121,7 @@ class TrazabilidadControllerTest {
         mov2.setAccion("APROBACION");
         mov2.setEstadoAnterior("PENDIENTE");
         mov2.setEstadoNuevo("APROBADO");
-        mov2.setFechaMovimiento(LocalDateTime.of(2024, 1, 16, 14, 30));
+        mov2.setFechaMovimiento(LocalDateTime.of(2024, Month.JANUARY, 16, 14, 30));
 
         when(trazabilidadService.consultarTrazabilidad(10)).thenReturn(List.of(mov1, mov2));
 

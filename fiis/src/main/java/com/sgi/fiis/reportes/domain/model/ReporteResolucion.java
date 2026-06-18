@@ -18,7 +18,9 @@ public class ReporteResolucion {
     private String        nombreSolicitante;
     private LocalDateTime fechaRegistro;
 
-    public ReporteResolucion() {}
+    public ReporteResolucion() {
+        // requerido por JdbcTemplate RowMapper
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters

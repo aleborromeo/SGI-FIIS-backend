@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +46,7 @@ class TrazabilidadServiceTest {
         movimiento1.setEstadoAnterior(null);
         movimiento1.setEstadoNuevo("PENDIENTE");
         movimiento1.setObservacion("Trámite creado");
-        movimiento1.setFechaMovimiento(LocalDateTime.of(2024, 1, 15, 9, 0));
+        movimiento1.setFechaMovimiento(LocalDateTime.of(2024, Month.JANUARY, 15, 9, 0));
 
         movimiento2 = new TrazabilidadMovimiento();
         movimiento2.setIdMovimiento(2);
@@ -56,7 +57,7 @@ class TrazabilidadServiceTest {
         movimiento2.setEstadoAnterior("PENDIENTE");
         movimiento2.setEstadoNuevo("APROBADO");
         movimiento2.setObservacion("Revisado y aprobado");
-        movimiento2.setFechaMovimiento(LocalDateTime.of(2024, 1, 16, 14, 30));
+        movimiento2.setFechaMovimiento(LocalDateTime.of(2024, Month.JANUARY, 16, 14, 30));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -138,7 +139,7 @@ class TrazabilidadServiceTest {
         assertThat(mov.getEstadoAnterior()).isNull();
         assertThat(mov.getEstadoNuevo()).isEqualTo("PENDIENTE");
         assertThat(mov.getObservacion()).isEqualTo("Trámite creado");
-        assertThat(mov.getFechaMovimiento()).isEqualTo(LocalDateTime.of(2024, 1, 15, 9, 0));
+        assertThat(mov.getFechaMovimiento()).isEqualTo(LocalDateTime.of(2024, Month.JANUARY, 15, 9, 0));
     }
 
     // ─────────────────────────────────────────────────────────────────────────

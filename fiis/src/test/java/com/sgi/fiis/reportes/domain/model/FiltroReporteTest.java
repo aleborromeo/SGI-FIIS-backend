@@ -2,8 +2,12 @@ package com.sgi.fiis.reportes.domain.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -71,8 +75,21 @@ class FiltroReporteTest {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Validación de setSize
+    // Validación de setSize — parametrizado (S1: reemplaza 4 tests duplicados)
     // ─────────────────────────────────────────────────────────────────────────
+
+    static Stream<Integer> sizeInvalidos() {
+        return Stream.of(0, -1, -10, 101, 200, Integer.MAX_VALUE);
+    }
+
+    @ParameterizedTest(name = "setSize({0}) debe caer al default 20")
+    @MethodSource("sizeInvalidos")
+    @DisplayName("setSize con valor inválido debe usar default 20")
+    void setSize_conValorInvalido_debeUsarDefault(int sizeInvalido) {
+        FiltroReporte f = new FiltroReporte();
+        f.setSize(sizeInvalido);
+        assertThat(f.getSize()).isEqualTo(20);
+    }
 
     @Test
     @DisplayName("setSize con valor válido (1-100) debe asignarse")
@@ -80,30 +97,6 @@ class FiltroReporteTest {
         FiltroReporte f = new FiltroReporte();
         f.setSize(50);
         assertThat(f.getSize()).isEqualTo(50);
-    }
-
-    @Test
-    @DisplayName("setSize con 0 debe caer al default 20")
-    void setSize_conCero_debeUsarDefault() {
-        FiltroReporte f = new FiltroReporte();
-        f.setSize(0);
-        assertThat(f.getSize()).isEqualTo(20);
-    }
-
-    @Test
-    @DisplayName("setSize con valor negativo debe caer al default 20")
-    void setSize_conNegativo_debeUsarDefault() {
-        FiltroReporte f = new FiltroReporte();
-        f.setSize(-10);
-        assertThat(f.getSize()).isEqualTo(20);
-    }
-
-    @Test
-    @DisplayName("setSize con valor mayor a 100 debe caer al default 20")
-    void setSize_conMasDe100_debeUsarDefault() {
-        FiltroReporte f = new FiltroReporte();
-        f.setSize(200);
-        assertThat(f.getSize()).isEqualTo(20);
     }
 
     @Test
@@ -144,8 +137,8 @@ class FiltroReporteTest {
     @DisplayName("Getters y setters de campos opcionales deben funcionar correctamente")
     void settersYGettersOpcionales_debenFuncionar() {
         FiltroReporte f = new FiltroReporte();
-        LocalDate desde = LocalDate.of(2024, 1, 1);
-        LocalDate hasta = LocalDate.of(2024, 12, 31);
+        LocalDate desde = LocalDate.of(2024, Month.JANUARY, 1);
+        LocalDate hasta = LocalDate.of(2024, Month.DECEMBER, 31);
 
         f.setIdGrupo(1);
         f.setEstado("APROBADO");

@@ -76,7 +76,9 @@ class PaginatedResponseTest {
         PaginatedResponse<String> respuesta =
                 new PaginatedResponse<>(List.of("a"), 1L, 0, 20);
 
-        assertThatThrownBy(() -> respuesta.getData().add("b"))
+        // S5778: una sola invocación que puede lanzar la excepción
+        List<String> data = respuesta.getData();
+        assertThatThrownBy(() -> data.add("b"))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -86,7 +88,9 @@ class PaginatedResponseTest {
         PaginatedResponse<String> respuesta =
                 new PaginatedResponse<>(new ArrayList<>(List.of("a", "b")), 2L, 0, 20);
 
-        assertThatThrownBy(() -> respuesta.getData().remove(0))
+        // S5778: una sola invocación que puede lanzar la excepción
+        List<String> data = respuesta.getData();
+        assertThatThrownBy(() -> data.remove(0))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 

@@ -19,6 +19,9 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
 
     private final JdbcTemplate jdbc;
 
+    /** Nombre de columna reutilizado en múltiples RowMappers. */
+    private static final String COL_NOMBRE_GRUPO = "nombre_grupo";
+
     public ReporteRepositoryImpl(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
@@ -50,6 +53,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         """;
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public List<ReporteProyecto> findProyectos(FiltroReporte f) {
         QueryBuilder qb = buildProyectosWhere(f);
         String sql = SQL_PROYECTOS_BASE + qb.where +
@@ -61,6 +65,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public long countProyectos(FiltroReporte f) {
         QueryBuilder qb = buildProyectosWhere(f);
         String sql = "SELECT COUNT(*) FROM proyectos p " +
@@ -90,7 +95,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         r.setCodigoProyecto(rs.getString("codigo_proyecto"));
         r.setTituloProyecto(rs.getString("titulo_proyecto"));
         r.setEstadoProyecto(rs.getString("estado_proyecto"));
-        r.setNombreGrupo(rs.getString("nombre_grupo"));
+        r.setNombreGrupo(rs.getString(COL_NOMBRE_GRUPO));
         r.setNombreLinea(rs.getString("nombre_linea"));
         r.setNombreResponsable(rs.getString("nombre_responsable"));
         r.setTituloConvocatoria(rs.getString("titulo_convocatoria"));
@@ -126,6 +131,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         """;
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public List<ReporteTramite> findTramites(FiltroReporte f) {
         QueryBuilder qb = buildTramitesWhere(f);
         String sql = SQL_TRAMITES_BASE + qb.where +
@@ -137,6 +143,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public long countTramites(FiltroReporte f) {
         QueryBuilder qb = buildTramitesWhere(f);
         String sql = "SELECT COUNT(*) FROM tramites t " +
@@ -166,7 +173,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         r.setNombreSolicitante(rs.getString("nombre_solicitante"));
         r.setEstadoActual(rs.getString("estado_actual"));
         r.setRolRevisorActual(rs.getString("rol_revisor_actual"));
-        r.setNombreGrupo(rs.getString("nombre_grupo"));
+        r.setNombreGrupo(rs.getString(COL_NOMBRE_GRUPO));
         java.sql.Timestamp fe = rs.getTimestamp("fecha_envio");
         if (fe != null) r.setFechaEnvio(fe.toLocalDateTime());
         java.sql.Timestamp fa = rs.getTimestamp("fecha_actualizacion");
@@ -195,6 +202,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         """;
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public List<ReporteResolucion> findResoluciones(FiltroReporte f) {
         QueryBuilder qb = buildResolucionesWhere(f);
         String sql = SQL_RESOLUCIONES_BASE + qb.where +
@@ -206,6 +214,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public long countResoluciones(FiltroReporte f) {
         QueryBuilder qb = buildResolucionesWhere(f);
         String sql = "SELECT COUNT(*) FROM resoluciones r " +
@@ -262,6 +271,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         """;
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public List<ReporteInformeAvance> findInformesAvance(FiltroReporte f) {
         QueryBuilder qb = buildInformesWhere(f);
         String sql = SQL_INFORMES_BASE + qb.where +
@@ -273,6 +283,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("java:S2077") // SQL dinámico seguro: los valores se pasan como parámetros posicionales a JdbcTemplate
     public long countInformesAvance(FiltroReporte f) {
         QueryBuilder qb = buildInformesWhere(f);
         String sql = "SELECT COUNT(*) FROM informes_avance ia " +
@@ -302,7 +313,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         r.setPeriodo(rs.getString("periodo"));
         r.setPorcentajeAvance(rs.getBigDecimal("porcentaje_avance"));
         r.setEstadoInforme(rs.getString("estado_informe"));
-        r.setNombreGrupo(rs.getString("nombre_grupo"));
+        r.setNombreGrupo(rs.getString(COL_NOMBRE_GRUPO));
         java.sql.Timestamp fr = rs.getTimestamp("fecha_registro");
         if (fr != null) r.setFechaRegistro(fr.toLocalDateTime());
         return r;

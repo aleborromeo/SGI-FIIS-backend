@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Collections;
 
@@ -169,7 +170,7 @@ class ReporteControllerTest {
         r.setIdResolucion(3);
         r.setNumeroResolucion("RES-001-2024");
         r.setAsunto("Aprobación de proyecto");
-        r.setFechaEmision(LocalDate.of(2024, 4, 10));
+        r.setFechaEmision(LocalDate.of(2024, Month.APRIL, 10));
 
         PaginatedResponse<ReporteResolucion> respuesta =
                 new PaginatedResponse<>(List.of(r), 1L, 0, 20);
