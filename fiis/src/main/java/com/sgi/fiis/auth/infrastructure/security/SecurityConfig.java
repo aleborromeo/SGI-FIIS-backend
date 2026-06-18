@@ -35,7 +35,7 @@ public class SecurityConfig {
                     .requestMatchers("/health").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                     // Rutas protegidas por rol
-                    .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
                     // Cualquier otra petición requiere autenticación
                     .anyRequest().authenticated()
