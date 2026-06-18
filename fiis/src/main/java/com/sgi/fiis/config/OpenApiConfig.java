@@ -76,7 +76,7 @@ public class OpenApiConfig {
                 .build();
     }
 
-    //Convocatorias y Proyectos de Investigación
+    // Convocatorias y Proyectos de Investigación
     @Bean
     public GroupedOpenApi projectsApi() {
         return GroupedOpenApi.builder()
@@ -121,7 +121,7 @@ public class OpenApiConfig {
                 .build();
     }
 
-    //Evaluaciones
+    // Evaluaciones
     @Bean
     public GroupedOpenApi evaluationsApi() {
         return GroupedOpenApi.builder()
@@ -135,7 +135,7 @@ public class OpenApiConfig {
     public GroupedOpenApi observationsApi() {
         return GroupedOpenApi.builder()
                 .group("observations")
-                .pathsToMatch("/api/observations/**")
+                .pathsToMatch("/api/observations/**", "/api/observaciones/**")
                 .build();
     }
 
@@ -144,7 +144,7 @@ public class OpenApiConfig {
     public GroupedOpenApi dashboardsApi() {
         return GroupedOpenApi.builder()
                 .group("dashboards")
-                .pathsToMatch("/api/dashboards/**")
+                .pathsToMatch("/api/dashboards/**", "/api/dashboard/**")
                 .build();
     }
 

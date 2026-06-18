@@ -34,6 +34,7 @@ public class SecurityConfig {
                     // Rutas públicas
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/health").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                     // Rutas protegidas por rol
                     .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
@@ -58,5 +59,13 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> jwtAuthenticationFilterRegistration(JwtAuthenticationFilter filter) {
+        org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 }
