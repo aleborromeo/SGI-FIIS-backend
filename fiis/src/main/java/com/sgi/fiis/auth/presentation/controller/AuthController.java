@@ -4,10 +4,12 @@ import com.sgi.fiis.auth.application.dto.CambiarPasswordDto;
 import com.sgi.fiis.auth.application.dto.LoginRequestDto;
 import com.sgi.fiis.auth.application.dto.LoginResponseDto;
 import com.sgi.fiis.auth.application.dto.RegisterRequestDto;
+import com.sgi.fiis.auth.application.dto.ResendCodeRequestDto;
 import com.sgi.fiis.auth.application.dto.VerifyRegistrationRequestDto;
 import com.sgi.fiis.auth.application.usecase.CambiarPasswordUseCase;
 import com.sgi.fiis.auth.application.usecase.LoginUseCase;
 import com.sgi.fiis.auth.application.usecase.RegisterUseCase;
+import com.sgi.fiis.auth.application.usecase.ResendCodeUseCase;
 import com.sgi.fiis.auth.application.usecase.VerifyRegistrationUseCase;
 import com.sgi.fiis.users.application.dto.UsuarioResponseDto;
 import com.sgi.fiis.users.domain.model.Usuario;
@@ -27,6 +29,7 @@ public class AuthController {
     private final LoginUseCase loginUseCase;
     private final RegisterUseCase registerUseCase;
     private final VerifyRegistrationUseCase verifyRegistrationUseCase;
+    private final ResendCodeUseCase resendCodeUseCase;
     private final CambiarPasswordUseCase cambiarPasswordUseCase;
     private final UsuarioRepositoryPort usuarioRepository;
     private final UsuarioMapper usuarioMapper;
@@ -34,12 +37,14 @@ public class AuthController {
     public AuthController(LoginUseCase loginUseCase,
                           RegisterUseCase registerUseCase,
                           VerifyRegistrationUseCase verifyRegistrationUseCase,
+                          ResendCodeUseCase resendCodeUseCase,
                           CambiarPasswordUseCase cambiarPasswordUseCase,
                           UsuarioRepositoryPort usuarioRepository,
                           UsuarioMapper usuarioMapper) {
         this.loginUseCase = loginUseCase;
         this.registerUseCase = registerUseCase;
         this.verifyRegistrationUseCase = verifyRegistrationUseCase;
+        this.resendCodeUseCase = resendCodeUseCase;
         this.cambiarPasswordUseCase = cambiarPasswordUseCase;
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
@@ -57,6 +62,13 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequestDto dto) {
         registerUseCase.execute(dto);
         return ResponseEntity.ok(Map.of("message", "Código de verificación enviado al correo institucional. Complete el registro en el paso 2."));
+    }
+
+    /** Auto-registro: Reenviar código */
+    @PostMapping("/resend-code")
+    public ResponseEntity<Map<String, String>> resendCode(@Valid @RequestBody ResendCodeRequestDto dto) {
+        resendCodeUseCase.execute(dto);
+        return ResponseEntity.ok(Map.of("message", "Código de verificación reenviado exitosamente al correo institucional."));
     }
 
     /** Auto-registro: Paso 2 (verifica código y guarda usuario) */

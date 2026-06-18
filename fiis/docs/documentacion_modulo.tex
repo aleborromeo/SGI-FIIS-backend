@@ -112,9 +112,9 @@
 
 % --- RESUMEN ---
 \section*{Resumen}
-El presente documento describe el diseño, la arquitectura y el proceso de implementación del módulo de Autenticación y Gestión de Usuarios para el Sistema de Gestión de Investigación de la Facultad de Ingeniería en Informática y Sistemas (SGI-FIIS). Este módulo constituye la base de seguridad y autorización del sistema, posibilitando el control de acceso de todos los actores involucrados en la investigación de la facultad (estudiantes, docentes, coordinadores, directores, decanos y administradores). La implementación técnica se ha desarrollado utilizando la plataforma Java con el framework Spring Boot, adoptando un diseño arquitectónico basado en la Arquitectura Limpia (Clean Architecture) para separar rigurosamente las reglas de negocio de la infraestructura tecnológica. Asimismo, el módulo integra autenticación local por medio de JSON Web Tokens (JWT) y autenticación federada mediante el protocolo OAuth2/OIDC con el proveedor institucional de Microsoft (Azure AD / Entra ID), garantizando un inicio de sesión unificado y seguro. La persistencia de datos se realiza en un motor PostgreSQL mediante Spring Data JPA, utilizando migraciones versionadas con la herramienta Flyway.
+El presente documento describe el diseño, la arquitectura y el proceso de implementación del módulo de Autenticación y Gestión de Usuarios para el Sistema de Gestión de Investigación de la Facultad de Ingeniería en Informática y Sistemas (SGI-FIIS). Este módulo constituye la base de seguridad y autorización del sistema, posibilitando el control de acceso de todos los actores involucrados en la investigación de la facultad (estudiantes, docentes, coordinadores, directores, decanos y administradores). La implementación técnica se ha desarrollado utilizando la plataforma Java con el framework Spring Boot, adoptando un diseño arquitectónico basado en la Arquitectura Limpia (Clean Architecture) para separar rigurosamente las reglas de negocio de la infraestructura tecnológica. Asimismo, el módulo integra autenticación local por medio de JSON Web Tokens (JWT) y un mecanismo seguro de auto-registro con verificación por código enviado a la bandeja de correo institucional, garantizando un registro controlado y un inicio de sesión seguro. La persistencia de datos se realiza en un motor PostgreSQL mediante Spring Data JPA, utilizando migraciones versionadas con la herramienta Flyway.
 
-\textbf{Palabras clave:} Autenticación, Gestión de Usuarios, JWT, OAuth2, Microsoft Entra ID, Clean Architecture, Spring Boot, PostgreSQL, Flyway.
+\textbf{Palabras clave:} Autenticación, Gestión de Usuarios, JWT, Auto-registro, Clean Architecture, Spring Boot, PostgreSQL, Flyway.
 
 \newpage
 
@@ -122,13 +122,13 @@ El presente documento describe el diseño, la arquitectura y el proceso de imple
 \section{Introducción}
 El desarrollo científico y la gestión académica en las facultades de ingeniería demandan herramientas informáticas que automaticen los procesos de registro, evaluación y seguimiento de proyectos, tesis y publicaciones. El Sistema de Gestión de Investigación de la Facultad de Ingeniería en Informática y Sistemas (SGI-FIIS) ha sido concebido para cubrir esta necesidad. Sin embargo, para que un sistema administrativo de esta envergadura funcione adecuadamente, es imperativo contar con un sólido sistema de control de acceso y seguridad.
 
-El módulo de Autenticación y Gestión de Usuarios representa la piedra angular de esta plataforma. Su objetivo fundamental es asegurar que cada usuario que interactúe con el sistema posea una identidad digital verificada y los permisos estrictamente necesarios para desempeñar su función. A través de este módulo se controlan las operaciones críticas de registro de investigadores, validación de credenciales institucionales, aprovisionamiento automático de cuentas de estudiantes mediante el login de Microsoft, y el control de accesos basados en roles.
+El módulo de Autenticación y Gestión de Usuarios representa la piedra angular de esta plataforma. Su objetivo fundamental es asegurar que cada usuario que interactúe con el sistema posea una identidad digital verificada y los permisos estrictamente necesarios para desempeñar su función. A través de este módulo se controlan las operaciones críticas de registro de investigadores, validación de credenciales institucionales, auto-registro de estudiantes mediante validación por correo electrónico institucional y el control de accesos basados en roles.
 
 \subsection{Objetivos del Módulo}
-El desarrollo del módulo persigue dos objetivos centrales. Por un lado, busca automatizar la administración del ciclo de vida de los usuarios dentro del sistema, permitiendo su registro, edición, desactivación temporal y el reinicio de credenciales. Por otro lado, busca proveer una pasarela de autenticación flexible y robusta que unifique el inicio de sesión convencional con el ecosistema de productividad institucional basado en cuentas de correo de Microsoft.
+El desarrollo del módulo persigue dos objetivos centrales. Por un lado, busca automatizar la administración del ciclo de vida de los usuarios dentro del sistema, permitiendo su registro, edición, desactivación temporal y el reinicio de credenciales. Por otro lado, busca proveer un mecanismo seguro y controlado de auto-registro por correo para la comunidad estudiantil, permitiéndoles crear sus propias cuentas de manera autónoma y segura.
 
 \subsection{Justificación de la Solución}
-La elección de integrar tanto la autenticación por contraseña tradicional como el inicio de sesión federado responde a la diversidad de usuarios finales del sistema. Mientras que el personal administrativo y los gestores de investigación requieren credenciales específicas para mantener un control granular de sus acciones, los estudiantes y docentes investigadores pueden acceder de manera ágil utilizando las cuentas asignadas por la universidad. Esta dualidad no solo mejora la experiencia de usuario, sino que reduce significativamente la carga administrativa de recuperación de contraseñas.
+La elección de integrar tanto el registro por administración centralizada como el auto-registro guiado por verificación de correo institucional responde a la diversidad de usuarios finales del sistema. Mientras que el personal administrativo y los docentes de investigación se gestionan administrativamente, los estudiantes y tesistas pueden auto-registrarse de manera ágil utilizando sus cuentas institucionales verificadas por código en un proceso en dos pasos.
 
 \newpage
 
@@ -157,7 +157,7 @@ Esta organización y el flujo de dependencias unidireccional hacia el núcleo de
 \end{figure}
 
 \subsection{Arquitectura de Despliegue e Infraestructura}
-Para garantizar que la aplicación backend sea fácilmente desplegable en entornos de staging y producción, el sistema se encuentra completamente contenedorizado mediante Docker y orquestado a través de Docker Compose. La infraestructura lógica del módulo se compone de cuatro nodos fundamentales: el navegador del cliente (Frontend Web), el servicio de backend Spring Boot empaquetado, la base de datos PostgreSQL y la API externa de Microsoft Entra ID para la federación de identidades.
+Para garantizar que la aplicación backend sea fácilmente desplegable en entornos de staging y producción, el sistema se encuentra completamente contenedorizado mediante Docker y orquestado a través de Docker Compose. La infraestructura lógica del módulo se compone de cuatro nodos fundamentales: el navegador del cliente (Frontend Web), el servicio de backend Spring Boot empaquetado, la base de datos PostgreSQL y el servidor SMTP de correo para el envío de códigos de verificación.
 
 Esta distribución física de componentes y los flujos de comunicación a través de HTTPS/REST, JDBC y protocolos de autenticación se detalla en la Figura~\ref{fig:arquitectura_despliegue}.
 
@@ -178,10 +178,10 @@ La base de datos relacional PostgreSQL sirve como motor de almacenamiento primar
 La seguridad del sistema se fundamenta en un modelo de control de acceso basado en roles (RBAC - Role-Based Access Control) soportado por dos tablas principales:
 \begin{itemize}
     \item \textbf{roles:} Almacena la definición de los diferentes perfiles autorizados en el sistema. Los roles predefinidos corresponden a: ADMIN, ESTUDIANTE, DOCENTE\_INVESTIGADOR, COORDINADOR\_GRUPO, DIRECTOR\_INVESTIGACION, DECANO y EVALUADOR.
-    \item \textbf{usuarios:} Contiene la información de perfil y las credenciales de seguridad de los usuarios registrados. Soporta tanto el login tradicional mediante campos de contraseña hasheada como el login federado por medio del campo identificador del proveedor OAuth.
+    \item \textbf{usuarios:} Contiene la información de perfil y las credenciales de seguridad de los usuarios registrados. Soporta tanto el login tradicional mediante campos de contraseña hasheada como el campo oauth\_provider reservado para auditoría o integraciones futuras.
 \end{itemize}
 
-El campo \texttt{must\_change\_password} es un indicador booleano que obliga al usuario a actualizar su contraseña de forma mandatoria en el primer inicio de sesión. Por otro lado, la columna \texttt{oauth\_provider} almacena el nombre del proveedor externo (por ejemplo, ``microsoft'') si el usuario se registró a través de inicio de sesión federado, permitiendo obviar la autenticación local.
+El campo \texttt{must\_change\_password} es un indicador booleano que obliga al usuario a actualizar su contraseña de forma mandatoria en el primer inicio de sesión. Por otro lado, la columna \texttt{oauth\_provider} puede almacenar información de proveedor externo en el caso de migraciones, aunque la autenticación actual del sistema se gestiona de manera puramente local y segura.
 
 Las relaciones de cardinalidad, llaves primarias, llaves foráneas y tipos de datos físicos del esquema de persistencia se presentan de forma gráfica en la Figura~\ref{fig:modelo_relacional}.
 
@@ -234,7 +234,7 @@ Las restricciones de integridad aseguran la unicidad del DNI y del correo instit
 
 % --- ESPECIFICACIÓN FUNCIONAL Y FLUJOS ---
 \section{Especificación Funcional y Flujos de Control}
-El comportamiento operativo del módulo abarca el inicio de sesión convencional con JWT, la sincronización de cuentas a través del inicio de sesión de Microsoft, el ciclo de cambio de contraseñas y la administración general de cuentas de usuario por parte de los administradores.
+El comportamiento operativo del módulo abarca el inicio de sesión convencional con JWT, el auto-registro con verificación por código por correo, el ciclo de cambio de contraseñas y la administración general de cuentas de usuario por parte de los administradores.
 
 Para modelar y estructurar el comportamiento del sistema, la interacción de los distintos actores con las funcionalidades de seguridad y administración se representa de forma segmentada y clara mediante diagramas de casos de uso UML específicos por cada uno de los siete roles del sistema. Esta organización individualizada previene el cruce de líneas y la sobrecarga visual en la documentación.
 
@@ -247,7 +247,7 @@ La Figura~\ref{fig:casos_uso_admin} ilustra las acciones de administración téc
     \label{fig:casos_uso_admin}
 \end{figure}
 
-Por otro lado, la interacción del Estudiante o Tesista con el inicio de sesión federado de Microsoft, el registro de planes de tesis y la subsanación de observaciones se representa en la Figura~\ref{fig:casos_uso_estudiante}.
+Por otro lado, la interacción del Estudiante o Tesista con el auto-registro, inicio de sesión local, el registro de planes de tesis y la subsanación de observaciones se representa en la Figura~\ref{fig:casos_uso_estudiante}.
 
 \begin{figure}[htbp]
     \centering
@@ -313,19 +313,12 @@ El flujo operativo descrito anteriormente y las transacciones de validación de 
     \label{fig:login_local}
 \end{figure}
 
-\subsection{Autenticación Federada con Microsoft}
-El inicio de sesión federado aprovecha el protocolo OAuth2/OIDC. Spring Security intercepta el flujo de redirecciones hacia los servidores de identidad de Microsoft. Cuando el usuario confirma su cuenta en el portal de Microsoft Entra ID, es devuelto a nuestro servidor de backend. El backend extrae el correo electrónico institucional de los claims OIDC y busca si la cuenta existe en la base de datos de usuarios de la FIIS.
+\subsection{Auto-registro de Estudiantes con Verificación por Correo}
+El auto-registro de nuevos estudiantes o tesistas se gestiona mediante un flujo en dos pasos. El usuario envía sus datos iniciales (incluyendo su DNI, nombres, apellidos y correo institucional) al endpoint de registro. El sistema valida que el dominio del correo sea institucional (\texttt{.edu.pe}), verifica la inexistencia de duplicados en la base de datos y genera un código de verificación aleatorio de 6 dígitos que guarda temporalmente en memoria con un tiempo de expiración de 5 minutos.
 
-Si el usuario existe en base de datos, se permite el acceso directo y se genera el JWT del sistema. Si el usuario no existe en la base de datos local del sistema, se asume que se trata de un nuevo estudiante que ingresa por primera vez. El sistema procede con la creación dinámica (aprovisionamiento automático) del registro del usuario utilizando datos devueltos por Microsoft (correo y nombre completo), generando un DNI temporal (prefijo \texttt{OA-}) y asignándole por defecto el rol de \texttt{ESTUDIANTE}. Posteriormente, genera el JWT para el usuario recién creado y lo redirige a la aplicación frontend.
+En el segundo paso, el estudiante ingresa el código recibido en su correo electrónico. Si la clave temporal es válida y no ha expirado, el sistema cifra su contraseña con \texttt{BCrypt}, persiste su cuenta directamente en la base de datos física (asignándole el rol por defecto \texttt{ESTUDIANTE}), elimina los datos temporales en memoria y le provee un JWT firmado digitalmente para iniciar sesión de forma inmediata.
 
-El proceso de redireccionamiento OIDC, intercambio de códigos de autorización y el aprovisionamiento automatizado del estudiante en la base de datos se ilustra de manera detallada en la Figura~\ref{fig:login_microsoft}.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth]{login_microsoft}
-    \caption{Diagrama de secuencia de autenticación federada con Microsoft Azure AD.}
-    \label{fig:login_microsoft}
-\end{figure}
+Este flujo de registro y verificación por código en memoria temporal se describe técnicamente en detalle en el archivo de especificación de flujos del sistema.
 
 \subsection{Flujo de Cambio de Contraseña Obligatoria}
 Para prevenir problemas de seguridad derivados del aprovisionamiento manual de cuentas por el administrador, el sistema exige que todos los usuarios que cuenten con inicio de sesión local cambien su contraseña por defecto al ingresar por primera vez. Si el indicador \texttt{must\_change\_password} está establecido en verdadero (\texttt{true}), el filtro de seguridad y el backend restringirán el acceso a los recursos comunes y guiarán al usuario hacia el formulario de actualización de contraseña. Tras un cambio exitoso, el indicador se establece en falso (\texttt{false}), liberando el acceso regular del usuario.
@@ -385,9 +378,9 @@ La materialización del módulo en Spring Boot se rige por la estructuración de
 El archivo \texttt{JwtAuthenticationFilter.java} hereda de \texttt{OncePerRequestFilter} para interceptar cada petición HTTP que entra al servidor. Se encarga de extraer la cabecera \texttt{Authorization}, extraer el token JWT, verificar su firma con la clave secreta y poblar el contexto de seguridad de Spring Security (\texttt{SecurityContextHolder}) si el token es válido. Esto permite aplicar directivas de seguridad a nivel de rutas y controladores de forma transparente.
 
 \subsection{Configuración de Seguridad}
-La configuración general de seguridad se define en \texttt{SecurityConfig.java}. Este componente acopla tanto el soporte para JWT como el flujo federado de inicio de sesión con Microsoft. A continuación, se presenta un extracto de este código:
+La configuración general de seguridad se define en \texttt{SecurityConfig.java}. Este componente acopla el soporte para tokens JWT locales, obligando a que toda comunicación REST sea completamente stateless. A continuación, se presenta este código:
 
-\begin{lstlisting}[caption={Configuración de Spring Security para el soporte híbrido JWT y OAuth2.}]
+\begin{lstlisting}[caption={Configuración de Spring Security para JWT.}]
 package com.sgi.fiis.auth.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
@@ -395,6 +388,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -403,42 +398,46 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final OAuth2FailureHandler oAuth2FailureHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
-                          OAuth2SuccessHandler oAuth2SuccessHandler,
-                          OAuth2FailureHandler oAuth2FailureHandler) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-        this.oAuth2FailureHandler = oAuth2FailureHandler;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/health").permitAll()
-                .requestMatchers("/login/**", "/oauth2/**").permitAll()
-                .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .oauth2Login(oauth -> oauth
-                .successHandler(oAuth2SuccessHandler)
-                .failureHandler(oAuth2FailureHandler)
-            );
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        try {
+            http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/health").permitAll()
+                    .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptions -> exceptions
+                    .defaultAuthenticationEntryPointFor(
+                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
+                        org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern("/api/**")
+                    )
+                );
 
-        return http.build();
+            return http.build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to configure security filter chain", e);
+        }
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
 \end{lstlisting}
 
-Esta configuración establece una arquitectura sin estado (\texttt{Stateless}) para las peticiones HTTP regulares que llevan cabeceras de autorización de tipo Bearer, pero habilita sesiones temporales e intermedias (\texttt{IF\_REQUIRED}) con el único fin de soportar el flujo de redirecciones e intercambio de códigos del protocolo OAuth2 de Microsoft, el cual requiere resguardar estados temporales en el servidor web durante las transacciones de validación de identidad.
+Esta configuración establece una arquitectura sin estado (\texttt{Stateless}) para todas las peticiones HTTP regulares que llevan cabeceras de autorización de tipo Bearer, eliminando completamente las sesiones en el servidor backend y disminuyendo riesgos de inyecciones y ataques CSRF.
 
 \newpage
 
@@ -447,11 +446,11 @@ Esta configuración establece una arquitectura sin estado (\texttt{Stateless}) p
 La construcción e implementación del módulo de seguridad para el SGI-FIIS aporta las siguientes conclusiones:
 \begin{itemize}
     \item La adopción de la Arquitectura Limpia (Clean Architecture) reduce sustancialmente el acoplamiento del núcleo de la aplicación, facilitando la adición de futuros proveedores de identidad o cambios en el motor de base de datos sin afectar las reglas de negocio establecidas para los usuarios y los roles.
-    \item El mecanismo híbrido de autenticación que soporta tokens JWT locales y federación basada en Microsoft Entra ID responde eficientemente al contexto universitario, promoviendo el aprovisionamiento automatizado y ágil de cuentas estudiantiles bajo un entorno de seguridad administrado.
+    \item El mecanismo de auto-registro local con verificación por código por correo institucional responde eficientemente al contexto universitario, promoviendo el aprovisionamiento automatizado y ágil de cuentas estudiantiles bajo un entorno de seguridad administrado.
     \item La inclusión del cambio de contraseña mandatorio y la deshabilitación lógica de cuentas en lugar de eliminaciones físicas garantizan la trazabilidad histórica de los trámites y proyectos en los cuales los usuarios participaron, mitigando riesgos de inconsistencia referencial en la base de datos del sistema de investigación.
 \end{itemize}
 
-Se recomienda ampliar la auditoría mediante el registro detallado de las direcciones IP de procedencia de las peticiones OAuth2 e implementar políticas rigurosas de expiración periódica de tokens JWT para fortalecer la integridad del sistema ante posibles fugas de credenciales locales en las terminales físicas de los usuarios de la facultad.
+Se recomienda implementar políticas rigurosas de expiración periódica de tokens JWT para fortalecer la integridad del sistema ante posibles fugas de credenciales locales en las terminales físicas de los usuarios de la facultad.
 
 \newpage
 
@@ -463,7 +462,7 @@ Beck, K. (2003). \textit{Test-Driven Development: By Example}. Addison-Wesley Pr
 
 Martin, R. C. (2018). \textit{Clean Architecture: A Craftsman's Guide to Software Structure and Design}. Prentice Hall.
 
-Microsoft. (2026). \textit{Microsoft Entra ID documentation}. Microsoft Learn. \url{https://learn.microsoft.com/entra/}
+% Referencia de Microsoft removida ya que se cambio a auto-registro local.
 
 Spring Projects. (2026). \textit{Spring Security Reference}. VMware Tanzu. \url{https://docs.spring.io/spring-security/reference/}
 \end{hangparas}

@@ -58,11 +58,7 @@ public class RegisterUseCase {
         pendingRegistrationService.register(correo, dto, code);
 
         // 6. Enviar código por correo electrónico
-        try {
-            emailSender.sendVerificationCode(correo, code);
-        } catch (Exception e) {
-            log.error("[EMAIL SENDER] Error al enviar código de registro: {}", e.getMessage(), e);
-        }
+        emailSender.sendVerificationCode(correo, code);
 
         // Imprimir en consola de desarrollo para pruebas fáciles
         String cleanCorreo = correo.replaceAll("[\n\r]", "_");

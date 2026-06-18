@@ -4,6 +4,7 @@ import com.sgi.fiis.auth.domain.port.EmailSenderPort;
 import tools.jackson.databind.ObjectMapper;
 import com.sgi.fiis.auth.application.dto.LoginRequestDto;
 import com.sgi.fiis.auth.application.dto.RegisterRequestDto;
+import com.sgi.fiis.auth.application.dto.ResendCodeRequestDto;
 import com.sgi.fiis.auth.application.dto.VerifyRegistrationRequestDto;
 import com.sgi.fiis.auth.application.service.PendingRegistrationService;
 import com.sgi.fiis.users.domain.model.Usuario;
@@ -183,6 +184,66 @@ class AuthIntegrationTest {
         
         // Assert memory storage is cleaned
         assertNull(pendingRegistrationService.get("jose.evaristo@unas.edu.pe"));
+    }
+
+    @Test
+    @DisplayName("Should successfully resend verification code when pending registration exists")
+    void testResendCodeSuccess() throws Exception {
+        RegisterRequestDto registerDto = RegisterRequestDto.builder()
+                .dni("87654321")
+                .nombres("Maria")
+                .apellidos("Del Carmen")
+                .correoInstitucional("maria.carmen@unas.edu.pe")
+                .telefono("999111222")
+                .password("securePassword123")
+                .rolCodigo("DOCENTE")
+                .build();
+
+        when(usuarioRepositoryPort.existsByDni("87654321")).thenReturn(false);
+        when(usuarioRepositoryPort.existsByCorreo("maria.carmen@unas.edu.pe")).thenReturn(false);
+        doNothing().when(emailSenderPort).sendVerificationCode(eq("maria.carmen@unas.edu.pe"), anyString());
+
+        // 1. Post to register endpoint
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDto)))
+                .andExpect(status().isOk());
+
+        // Get initial code
+        PendingRegistrationService.PendingRegistration initialPending = pendingRegistrationService.get("maria.carmen@unas.edu.pe");
+        assertNotNull(initialPending);
+        String initialCode = initialPending.getCode();
+
+        // 2. Post to resend endpoint
+        ResendCodeRequestDto resendDto = new ResendCodeRequestDto("maria.carmen@unas.edu.pe");
+
+        mockMvc.perform(post("/api/v1/auth/resend-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resendDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Código de verificación reenviado exitosamente al correo institucional."));
+
+        // Get new code and assert it is updated
+        PendingRegistrationService.PendingRegistration updatedPending = pendingRegistrationService.get("maria.carmen@unas.edu.pe");
+        assertNotNull(updatedPending);
+        String updatedCode = updatedPending.getCode();
+        assertNotNull(updatedCode);
+        assertEquals(6, updatedCode.length());
+
+        // Cleanup
+        pendingRegistrationService.remove("maria.carmen@unas.edu.pe");
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when resending code for non-existent pending registration")
+    void testResendCodeNotFound() throws Exception {
+        ResendCodeRequestDto resendDto = new ResendCodeRequestDto("nonexistent@unas.edu.pe");
+
+        mockMvc.perform(post("/api/v1/auth/resend-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resendDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("No se encontró ningún registro pendiente para el correo especificado"));
     }
 }
 
