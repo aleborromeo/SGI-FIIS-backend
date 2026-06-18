@@ -52,6 +52,8 @@ class GrupoInvestigacionControllerTest {
     @MockitoBean private ListarLineasPorGrupoUseCase listarLineasPorGrupoUseCase;
     @MockitoBean private GrupoInvestigacionMapper mapper;
     @MockitoBean private LineaInvestigacionMapper lineaMapper;
+    @MockitoBean private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
+    @MockitoBean private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
 
     @Test
     void crear_deberiaRetornar201_cuandoDatosValidos() throws Exception {
