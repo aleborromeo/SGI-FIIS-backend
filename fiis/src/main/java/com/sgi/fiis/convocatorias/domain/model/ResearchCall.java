@@ -3,7 +3,6 @@ package com.sgi.fiis.convocatorias.domain.model;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,8 +46,8 @@ public class ResearchCall {
         this.status = status;
         this.documentId = documentId;
         this.researchLineIds = researchLineIds != null
-                ? Collections.unmodifiableList(new ArrayList<>(researchLineIds))
-                : Collections.emptyList();
+                ? new ArrayList<>(researchLineIds)
+                : new ArrayList<>();
     }
 
     /**
@@ -94,12 +93,12 @@ public class ResearchCall {
     }
 
     /**
-     * Returns an unmodifiable list of research line identifiers.
+     * Returns a defensive copy of the research line identifiers.
      *
-     * @return unmodifiable list of research line IDs
+     * @return list of research line IDs
      */
     public List<Integer> getResearchLineIds() {
-        return Collections.unmodifiableList(researchLineIds);
+        return new ArrayList<>(researchLineIds);
     }
 
     /** Returns the start date of the submission period. */
