@@ -29,7 +29,7 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_fiis:5432/db_fiis_investigacion
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=12345
+      - SPRING_DATASOURCE_PASSWORD=admin
     depends_on:
       db_fiis:
         condition: service_healthy   # Espera a que PostgreSQL esté listo antes de arrancar
