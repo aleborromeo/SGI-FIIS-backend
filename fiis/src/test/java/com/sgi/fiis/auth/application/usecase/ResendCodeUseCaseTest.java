@@ -39,6 +39,7 @@ class ResendCodeUseCaseTest {
                 .correoInstitucional(email)
                 .telefono("999888777")
                 .password("password123")
+                .confirmarPassword("password123")
                 .rolCodigo("DOCENTE")
                 .build();
 

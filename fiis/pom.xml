@@ -128,7 +128,6 @@
             <scope>runtime</scope>
         </dependency>
 
-
         <!-- Validación de DTOs -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

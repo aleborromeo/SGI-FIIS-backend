@@ -136,6 +136,7 @@ class AuthIntegrationTest {
                 .correoInstitucional("jose.evaristo@unas.edu.pe")
                 .telefono("999888777")
                 .password("securePassword123")
+                .confirmarPassword("securePassword123")
                 .rolCodigo("DOCENTE")
                 .build();
 
@@ -196,6 +197,7 @@ class AuthIntegrationTest {
                 .correoInstitucional("maria.carmen@unas.edu.pe")
                 .telefono("999111222")
                 .password("securePassword123")
+                .confirmarPassword("securePassword123")
                 .rolCodigo("DOCENTE")
                 .build();
 

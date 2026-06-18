@@ -7,14 +7,15 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_fiis_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d db_fiis_investigacion"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
     networks:
       - sgifiis-network
 
@@ -46,4 +47,4 @@ volumes:
 
 networks:
   sgifiis-network:
-    driver: bridge
+    driver: bridge

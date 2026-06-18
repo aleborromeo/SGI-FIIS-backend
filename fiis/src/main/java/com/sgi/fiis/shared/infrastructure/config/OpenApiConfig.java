@@ -1,16 +1,15 @@
 package com.sgi.fiis.shared.infrastructure.config;
 
-import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import jakarta.annotation.PostConstruct;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuración de Swagger / OpenAPI 3.
@@ -30,7 +29,6 @@ public class OpenApiConfig {
 
     @Value("${app.mail.mock:true}")
     private boolean mailMock;
-
     @PostConstruct
     public void printMailConfig() {
         System.out.println("=================================================");
@@ -101,7 +99,7 @@ public class OpenApiConfig {
                 .build();
     }
 
-    //Convocatorias y Proyectos de Investigación
+    // Convocatorias y Proyectos de Investigación
     @Bean
     public GroupedOpenApi projectsApi() {
         return GroupedOpenApi.builder()
@@ -146,7 +144,7 @@ public class OpenApiConfig {
                 .build();
     }
 
-    //Evaluaciones
+    // Evaluaciones
     @Bean
     public GroupedOpenApi evaluationsApi() {
         return GroupedOpenApi.builder()
@@ -160,7 +158,7 @@ public class OpenApiConfig {
     public GroupedOpenApi observationsApi() {
         return GroupedOpenApi.builder()
                 .group("observations")
-                .pathsToMatch("/api/observations/**")
+                .pathsToMatch("/api/observations/**", "/api/observaciones/**")
                 .build();
     }
 
@@ -169,7 +167,7 @@ public class OpenApiConfig {
     public GroupedOpenApi dashboardsApi() {
         return GroupedOpenApi.builder()
                 .group("dashboards")
-                .pathsToMatch("/api/dashboards/**")
+                .pathsToMatch("/api/dashboards/**", "/api/dashboard/**")
                 .build();
     }
 
@@ -182,4 +180,3 @@ public class OpenApiConfig {
                 .build();
     }
 }
-

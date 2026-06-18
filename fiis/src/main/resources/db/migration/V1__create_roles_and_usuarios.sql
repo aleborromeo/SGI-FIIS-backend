@@ -55,4 +55,3 @@ VALUES (
     TRUE,
     (SELECT id_rol FROM roles WHERE codigo_rol = 'ADMIN')
 );
-
