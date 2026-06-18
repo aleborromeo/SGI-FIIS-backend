@@ -1,6 +1,8 @@
 package com.sgi.fiis.config;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailException;
@@ -21,7 +23,16 @@ import java.io.InputStream;
  * Todas las operaciones de envío son no-operativas (no-op).
  */
 @Configuration
+@ConditionalOnProperty(name = "app.mail.mock", havingValue = "true", matchIfMissing = true)
 public class MailMockConfig {
+
+    @PostConstruct
+    public void init() {
+        System.out.println("=================================================");
+        System.out.println("[MAIL CONFIG] ¡ATENCIÓN! Modo MOCK de correo activo.");
+        System.out.println("Los correos no se enviarán a bandejas reales.");
+        System.out.println("=================================================");
+    }
 
     @Bean
     public JavaMailSender javaMailSender() {
