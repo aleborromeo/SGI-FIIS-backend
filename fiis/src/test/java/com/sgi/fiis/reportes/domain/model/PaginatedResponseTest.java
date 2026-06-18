@@ -90,7 +90,7 @@ class PaginatedResponseTest {
 
         // S5778: una sola invocación que puede lanzar la excepción
         List<String> data = respuesta.getData();
-        assertThatThrownBy(() -> data.remove(0))
+        assertThatThrownBy(() -> data.remove("a"))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
