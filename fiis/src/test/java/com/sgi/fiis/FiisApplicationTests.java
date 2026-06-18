@@ -11,8 +11,4 @@ class FiisApplicationTests {
     @Test
     void contextLoads() {
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> a16a689 (Agregado de Testing)
 }
