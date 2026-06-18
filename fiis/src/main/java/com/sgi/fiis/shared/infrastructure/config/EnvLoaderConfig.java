@@ -14,6 +14,16 @@ public class EnvLoaderConfig {
 
     static {
         try {
+            // Asegurar que las variables de Azure no estén vacías para evitar fallos de inicialización
+            String azureClientId = System.getenv("AZURE_CLIENT_ID");
+            if (azureClientId == null || azureClientId.trim().isEmpty()) {
+                System.setProperty("AZURE_CLIENT_ID", "dummy-client-id");
+            }
+            String azureClientSecret = System.getenv("AZURE_CLIENT_SECRET");
+            if (azureClientSecret == null || azureClientSecret.trim().isEmpty()) {
+                System.setProperty("AZURE_CLIENT_SECRET", "dummy-client-secret");
+            }
+
             // Buscar .env en el directorio actual o en el directorio padre
             java.nio.file.Path path = java.nio.file.Paths.get(".env");
             if (!java.nio.file.Files.exists(path)) {
@@ -38,6 +48,9 @@ public class EnvLoaderConfig {
                             val = val.substring(1, val.length() - 1);
                         } else if (val.startsWith("'") && val.endsWith("'") && val.length() >= 2) {
                             val = val.substring(1, val.length() - 1);
+                        }
+                        if (val.isEmpty() && !key.toLowerCase().contains("password")) {
+                            continue;
                         }
                         System.setProperty(key, val);
                         count++;
