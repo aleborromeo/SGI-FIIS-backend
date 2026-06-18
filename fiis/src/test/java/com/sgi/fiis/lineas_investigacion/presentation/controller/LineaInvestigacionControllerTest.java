@@ -41,6 +41,12 @@ class LineaInvestigacionControllerTest {
     private RegistrarLineaUseCase registrarLineaUseCase;
 
     @MockitoBean
+    private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
+
+    @MockitoBean
+    private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
     private ListarLineasUseCase listarLineasUseCase;
 
     @MockitoBean

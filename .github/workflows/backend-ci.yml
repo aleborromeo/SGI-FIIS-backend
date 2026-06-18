@@ -1,19 +1,8 @@
-name: SGI-FIIS Backend CI
-
-on:
-  push:
-    branches:
-      - develop
-      - main
-
-  pull_request:
-    branches:
-      - develop
-      - main
-
 jobs:
   build:
+    ...
 
+  flyway-validation:
     runs-on: ubuntu-latest
 
     services:
@@ -26,32 +15,21 @@ jobs:
         ports:
           - 5432:5432
 
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Grant Maven Wrapper Permission
-        run: chmod +x fiis/mvnw
+      - run: chmod +x fiis/mvnw
 
-      - name: Build Spring Boot
+      - name: Execute Flyway migrations
         working-directory: ./fiis
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/db_fiis_investigacion
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: 12345
-          SPRING_JPA_HIBERNATE_DDL_AUTO: update
-          SPRING_FLYWAY_ENABLED: false
-          JWT_SECRET: ci-test-secret-key-for-jwt-signing-min-32-characters-long
-        run: ./mvnw clean verify
+          SPRING_FLYWAY_ENABLED: true
+        run: ./mvnw spring-boot:run
