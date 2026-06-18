@@ -13,7 +13,7 @@ public class DuplicateResourceException extends RuntimeException {
     }
 
     public DuplicateResourceException(String resource, String field, Object value) {
-        super("exception.duplicate-resource");
+        super(String.format("Ya existe un %s con %s: '%s'", resource, field, value));
         this.resource = resource;
         this.field = field;
         this.value = value;
