@@ -17,7 +17,7 @@ class RoleMapperTest {
     void testToResponseDto() {
         Role domain = Role.builder()
                 .id(1L)
-                .roleCode("ADMIN")
+                .code("ADMIN")
                 .description("Administrador")
                 .build();
 
@@ -25,7 +25,7 @@ class RoleMapperTest {
 
         assertNotNull(dto);
         assertEquals(1L, dto.getId());
-        assertEquals("ADMIN", dto.getRoleCode());
+        assertEquals("ADMIN", dto.getCode());
         assertEquals("Administrador", dto.getDescription());
     }
 

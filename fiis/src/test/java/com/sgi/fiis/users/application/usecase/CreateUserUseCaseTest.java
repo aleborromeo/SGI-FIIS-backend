@@ -1,7 +1,6 @@
 package com.sgi.fiis.users.application.usecase;
 
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
-import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.users.domain.model.Role;
@@ -39,15 +38,15 @@ class CreateUserUseCaseTest {
 
     @Test
     @DisplayName("Should successfully create a new user and hash their password using DNI")
-    void testCrearUsuarioExito() {
-        User user = User.builder()
+    void testCreateUserSuccess() {
+        User userInput = User.builder()
                 .dni("12345678")
-                .firstName("Carlos")
-                .lastName("Santana")
+                .firstNames("Carlos")
+                .lastNames("Santana")
                 .roleCode("DOCENTE_INVESTIGADOR")
                 .build();
 
-        Role role = Role.builder().roleCode("DOCENTE_INVESTIGADOR").description("Docente").build();
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").description("Docente").build();
 
         when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
         when(userRepository.existsByDni("12345678")).thenReturn(false);
@@ -55,7 +54,7 @@ class CreateUserUseCaseTest {
         when(passwordEncoder.encode("12345678")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User result = createUserUseCase.execute(user);
+        User result = createUserUseCase.execute(userInput);
 
         assertNotNull(result);
         assertEquals("carlos.santana@unas.edu.pe", result.getInstitutionalEmail());
@@ -72,17 +71,17 @@ class CreateUserUseCaseTest {
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when role does not exist")
-    void testCrearUsuarioRolNoExiste() {
-        User user = User.builder()
+    void testCreateUserRoleDoesNotExist() {
+        User userInput = User.builder()
                 .dni("12345678")
-                .firstName("Carlos")
-                .lastName("Santana")
+                .firstNames("Carlos")
+                .lastNames("Santana")
                 .roleCode("ROL_INEXISTENTE")
                 .build();
 
         when(roleRepository.findByCode("ROL_INEXISTENTE")).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> createUserUseCase.execute(user));
+        assertThrows(ResourceNotFoundException.class, () -> createUserUseCase.execute(userInput));
 
         verify(roleRepository).findByCode("ROL_INEXISTENTE");
         verifyNoInteractions(userRepository, passwordEncoder);
@@ -90,20 +89,20 @@ class CreateUserUseCaseTest {
 
     @Test
     @DisplayName("Should throw DuplicateResourceException when DNI already exists")
-    void testCrearUsuarioDniDuplicado() {
-        User user = User.builder()
+    void testCreateUserDniDuplicate() {
+        User userInput = User.builder()
                 .dni("12345678")
-                .firstName("Carlos")
-                .lastName("Santana")
+                .firstNames("Carlos")
+                .lastNames("Santana")
                 .roleCode("DOCENTE_INVESTIGADOR")
                 .build();
 
-        Role role = Role.builder().roleCode("DOCENTE_INVESTIGADOR").build();
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").build();
 
         when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
         when(userRepository.existsByDni("12345678")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> createUserUseCase.execute(user));
+        assertThrows(DuplicateResourceException.class, () -> createUserUseCase.execute(userInput));
 
         verify(roleRepository).findByCode("DOCENTE_INVESTIGADOR");
         verify(userRepository).existsByDni("12345678");
@@ -112,26 +111,26 @@ class CreateUserUseCaseTest {
 
     @Test
     @DisplayName("Should throw BusinessException when email does not end with .edu.pe")
-    void testCrearUsuarioCorreoInvalido() {
-        User user = User.builder()
+    void testCreateUserEmailInvalid() {
+        User userInput = User.builder()
                 .dni("12345678")
-                .firstName("Carlos")
-                .lastName("Santana")
+                .firstNames("Carlos")
+                .lastNames("Santana")
                 .institutionalEmail("carlos@gmail.com")
                 .roleCode("DOCENTE_INVESTIGADOR")
                 .build();
 
-        Role role = Role.builder().roleCode("DOCENTE_INVESTIGADOR").build();
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").build();
 
         when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
         when(userRepository.existsByDni("12345678")).thenReturn(false);
 
-        BusinessException exception = assertThrows(
-                BusinessException.class,
-                () -> createUserUseCase.execute(user)
+        com.sgi.fiis.shared.domain.exception.BusinessException exception = assertThrows(
+                com.sgi.fiis.shared.domain.exception.BusinessException.class,
+                () -> createUserUseCase.execute(userInput)
         );
 
-        assertEquals("The institutional email must belong to the .edu.pe domain", exception.getMessage());
+        assertEquals("El correo institucional debe pertenecer al dominio .edu.pe", exception.getMessage());
         verify(roleRepository).findByCode("DOCENTE_INVESTIGADOR");
         verify(userRepository).existsByDni("12345678");
         verifyNoMoreInteractions(userRepository, passwordEncoder);

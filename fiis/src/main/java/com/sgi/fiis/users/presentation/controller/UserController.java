@@ -20,23 +20,23 @@ import java.util.Map;
 public class UserController {
 
     private final CreateUserUseCase createUserUseCase;
-    private final EditUserUseCase editUserUseCase;
-    private final ChangeUserStatusUseCase changeUserStatusUseCase;
+    private final UpdateUserUseCase updateUserUseCase;
+    private final ToggleUserStatusUseCase toggleUserStatusUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final ListUsersUseCase listUsersUseCase;
     private final GetUserUseCase getUserUseCase;
     private final UserMapper mapper;
 
     public UserController(CreateUserUseCase createUserUseCase,
-                          EditUserUseCase editUserUseCase,
-                          ChangeUserStatusUseCase changeUserStatusUseCase,
+                          UpdateUserUseCase updateUserUseCase,
+                          ToggleUserStatusUseCase toggleUserStatusUseCase,
                           ResetPasswordUseCase resetPasswordUseCase,
                           ListUsersUseCase listUsersUseCase,
                           GetUserUseCase getUserUseCase,
                           UserMapper mapper) {
         this.createUserUseCase = createUserUseCase;
-        this.editUserUseCase = editUserUseCase;
-        this.changeUserStatusUseCase = changeUserStatusUseCase;
+        this.updateUserUseCase = updateUserUseCase;
+        this.toggleUserStatusUseCase = toggleUserStatusUseCase;
         this.resetPasswordUseCase = resetPasswordUseCase;
         this.listUsersUseCase = listUsersUseCase;
         this.getUserUseCase = getUserUseCase;
@@ -53,10 +53,10 @@ public class UserController {
 
     /** RF-08: Edit user */
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> edit(@PathVariable Long id,
-                                                 @Valid @RequestBody UserUpdateDto dto) {
-        User updated = editUserUseCase.execute(
-                id, dto.getFirstName(), dto.getLastName(),
+    public ResponseEntity<UserResponseDto> update(@PathVariable Long id,
+                                                     @Valid @RequestBody UserUpdateDto dto) {
+        User updated = updateUserUseCase.execute(
+                id, dto.getFirstNames(), dto.getLastNames(),
                 dto.getInstitutionalEmail(), dto.getPhone(), dto.getRoleCode()
         );
         return ResponseEntity.ok(mapper.toResponseDto(updated));
@@ -81,7 +81,7 @@ public class UserController {
 
     /** RF-11: Activate or deactivate user */
     @PatchMapping("/{id}/status")
-    public ResponseEntity<UserResponseDto> changeStatus(
+    public ResponseEntity<UserResponseDto> toggleStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> body) {
         boolean activate = body.getOrDefault("active", true);
@@ -90,7 +90,7 @@ public class UserController {
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             authenticatedUserId = customUserDetails.getId();
         }
-        User updated = changeUserStatusUseCase.execute(id, activate, authenticatedUserId);
+        User updated = toggleUserStatusUseCase.execute(id, activate, authenticatedUserId);
         return ResponseEntity.ok(mapper.toResponseDto(updated));
     }
 
@@ -98,6 +98,6 @@ public class UserController {
     @PatchMapping("/{id}/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id) {
         resetPasswordUseCase.execute(id);
-        return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+        return ResponseEntity.ok(Map.of("message", "Contraseña reiniciada exitosamente"));
     }
 }

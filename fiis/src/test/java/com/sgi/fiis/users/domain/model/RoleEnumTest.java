@@ -10,7 +10,7 @@ class RoleEnumTest {
 
     @Test
     @DisplayName("Should return correct description for each role")
-    void testGetDescripcion() {
+    void testGetDescription() {
         assertEquals("Administrador del sistema", RoleEnum.ADMIN.getDescription());
         assertEquals("Estudiante / Tesista", RoleEnum.ESTUDIANTE.getDescription());
         assertEquals("Docente Investigador", RoleEnum.DOCENTE_INVESTIGADOR.getDescription());

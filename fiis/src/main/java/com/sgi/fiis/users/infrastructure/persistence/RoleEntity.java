@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * JPA Entity mapped to 'roles' table.
+ * JPA Entity mapped to the 'roles' table.
  */
 @Entity
 @Table(name = "roles")
@@ -19,7 +19,7 @@ public class RoleEntity {
     private Long id;
 
     @Column(name = "codigo_rol", nullable = false, unique = true, length = 50)
-    private String roleCode;
+    private String code;
 
     @Column(name = "descripcion", length = 255)
     private String description;

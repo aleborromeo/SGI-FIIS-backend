@@ -32,7 +32,7 @@ class ResetPasswordUseCaseTest {
 
     @Test
     @DisplayName("Should successfully reset password to user DNI")
-    void testReiniciarPasswordExito() {
+    void testResetPasswordSuccess() {
         User user = User.builder()
                 .id(1L)
                 .dni("87654321")
@@ -56,7 +56,7 @@ class ResetPasswordUseCaseTest {
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when user does not exist")
-    void testReiniciarPasswordNotFound() {
+    void testResetPasswordNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> resetPasswordUseCase.execute(1L));

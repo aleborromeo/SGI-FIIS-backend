@@ -1,8 +1,8 @@
 package com.sgi.fiis.users.domain.model;
 
 /**
- * Enum with the system roles.
- * Each value corresponds to the role code in the database.
+ * Enum with system roles (RF-09).
+ * Each value corresponds to the code in the 'roles' table.
  */
 public enum RoleEnum {
     ADMIN("Administrador del sistema"),

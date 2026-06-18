@@ -9,6 +9,6 @@ import java.util.Optional;
  * Domain port for Role persistence operations.
  */
 public interface RoleRepositoryPort {
-    Optional<Role> findByCode(String roleCode);
+    Optional<Role> findByCode(String code);
     List<Role> findAll();
 }

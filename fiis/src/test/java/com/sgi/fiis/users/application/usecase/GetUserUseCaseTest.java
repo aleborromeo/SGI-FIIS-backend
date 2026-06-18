@@ -27,20 +27,20 @@ class GetUserUseCaseTest {
 
     @Test
     @DisplayName("Should successfully return user by id")
-    void testObtenerUsuarioExito() {
-        User user = User.builder().id(1L).firstName("Juan").build();
+    void testGetUserSuccess() {
+        User user = User.builder().id(1L).firstNames("Juan").build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User result = getUserUseCase.execute(1L);
         assertNotNull(result);
-        assertEquals("Juan", result.getFirstName());
+        assertEquals("Juan", result.getFirstNames());
 
         verify(userRepository).findById(1L);
     }
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when user by id does not exist")
-    void testObtenerUsuarioNotFound() {
+    void testGetUserNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> getUserUseCase.execute(1L));

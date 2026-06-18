@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Use Case: Reset user password (RF-12).
- * Password is reset to the user's DNI.
+ * Use case: Reset a user's password (RF-12).
+ * The password is reset to the user's DNI.
  */
 @Service
 public class ResetPasswordUseCase {
@@ -26,10 +26,10 @@ public class ResetPasswordUseCase {
     @Transactional
     public void execute(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
         user.setPasswordHash(passwordEncoder.encode(user.getDni()));
-        user.markChangePasswordRequired();
+        user.markPasswordChangeRequired();
 
         userRepository.save(user);
     }

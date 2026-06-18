@@ -14,10 +14,9 @@ public interface SpringDataUserRepository extends JpaRepository<UserEntity, Long
     boolean existsByInstitutionalEmail(String institutionalEmail);
 
     @Query("SELECT u FROM UserEntity u WHERE " +
-           "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(u.institutionalEmail) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "u.dni LIKE CONCAT('%', :query, '%') OR " +
-           "LOWER(u.role.roleCode) LIKE LOWER(CONCAT('%', :query, '%'))")
+            "LOWER(u.dni) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(u.firstNames) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(u.lastNames) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(u.institutionalEmail) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<UserEntity> search(@Param("query") String query);
 }

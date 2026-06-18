@@ -9,13 +9,10 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public User toDomain(UserRequestDto dto) {
-        if (dto == null) {
-            return null;
-        }
         return User.builder()
                 .dni(dto.getDni())
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
+                .firstNames(dto.getFirstNames())
+                .lastNames(dto.getLastNames())
                 .institutionalEmail(dto.getInstitutionalEmail())
                 .phone(dto.getPhone())
                 .roleCode(dto.getRoleCode())
@@ -29,8 +26,8 @@ public class UserMapper {
         return UserResponseDto.builder()
                 .id(domain.getId())
                 .dni(domain.getDni())
-                .firstName(domain.getFirstName())
-                .lastName(domain.getLastName())
+                .firstNames(domain.getFirstNames())
+                .lastNames(domain.getLastNames())
                 .institutionalEmail(domain.getInstitutionalEmail())
                 .phone(domain.getPhone())
                 .active(domain.isActive())

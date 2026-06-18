@@ -31,7 +31,7 @@ class UserRepositoryAdapterTest {
     private RoleEntity getTestRoleEntity() {
         RoleEntity role = new RoleEntity();
         role.setId(1L);
-        role.setRoleCode("ADMIN");
+        role.setCode("ADMIN");
         role.setDescription("Administrador");
         return role;
     }
@@ -40,8 +40,8 @@ class UserRepositoryAdapterTest {
         UserEntity user = new UserEntity();
         user.setId(1L);
         user.setDni("12345678");
-        user.setFirstName("Juan");
-        user.setLastName("Perez");
+        user.setFirstNames("Juan");
+        user.setLastNames("Perez");
         user.setInstitutionalEmail("juan.perez@unas.edu.pe");
         user.setRole(getTestRoleEntity());
         user.setActive(true);
@@ -53,8 +53,8 @@ class UserRepositoryAdapterTest {
         return User.builder()
                 .id(1L)
                 .dni("12345678")
-                .firstName("Juan")
-                .lastName("Perez")
+                .firstNames("Juan")
+                .lastNames("Perez")
                 .institutionalEmail("juan.perez@unas.edu.pe")
                 .roleCode("ADMIN")
                 .active(true)
@@ -68,14 +68,14 @@ class UserRepositoryAdapterTest {
         User domain = getTestUser();
         UserEntity entity = getTestUserEntity();
 
-        when(roleRepository.findByRoleCode("ADMIN")).thenReturn(Optional.of(getTestRoleEntity()));
+        when(roleRepository.findByCode("ADMIN")).thenReturn(Optional.of(getTestRoleEntity()));
         when(springDataRepository.save(any(UserEntity.class))).thenReturn(entity);
 
         User result = adapter.save(domain);
 
         assertNotNull(result);
         assertEquals(domain.getDni(), result.getDni());
-        verify(roleRepository).findByRoleCode("ADMIN");
+        verify(roleRepository).findByCode("ADMIN");
         verify(springDataRepository).save(any(UserEntity.class));
     }
 
@@ -83,10 +83,10 @@ class UserRepositoryAdapterTest {
     @DisplayName("Should throw Exception when saving user with non-existent role")
     void testSaveRoleNotFound() {
         User domain = getTestUser();
-        when(roleRepository.findByRoleCode("ADMIN")).thenReturn(Optional.empty());
+        when(roleRepository.findByCode("ADMIN")).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> adapter.save(domain));
-        verify(roleRepository).findByRoleCode("ADMIN");
+        verify(roleRepository).findByCode("ADMIN");
         verifyNoInteractions(springDataRepository);
     }
 
@@ -118,7 +118,7 @@ class UserRepositoryAdapterTest {
 
     @Test
     @DisplayName("Should find user by email")
-    void testFindByCorreo() {
+    void testFindByEmail() {
         UserEntity entity = getTestUserEntity();
         when(springDataRepository.findByInstitutionalEmail("juan.perez@unas.edu.pe")).thenReturn(Optional.of(entity));
 
@@ -166,7 +166,7 @@ class UserRepositoryAdapterTest {
 
     @Test
     @DisplayName("Should check if user exists by email")
-    void testExistsByCorreo() {
+    void testExistsByEmail() {
         when(springDataRepository.existsByInstitutionalEmail("juan.perez@unas.edu.pe")).thenReturn(true);
 
         assertTrue(adapter.existsByEmail("juan.perez@unas.edu.pe"));

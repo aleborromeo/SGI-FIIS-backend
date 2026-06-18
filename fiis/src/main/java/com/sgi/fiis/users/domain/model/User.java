@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 public class User {
     private Long id;
     private String dni;
-    private String firstName;
-    private String lastName;
+    private String firstNames;
+    private String lastNames;
     private String institutionalEmail;
     private String phone;
     private String passwordHash;
@@ -35,7 +35,7 @@ public class User {
     // ========== Business Logic ==========
 
     /**
-     * Activates the user.
+     * Activates the user (RF-11).
      */
     public void activate() {
         this.active = true;
@@ -43,7 +43,7 @@ public class User {
     }
 
     /**
-     * Deactivates the user without deleting their record.
+     * Deactivates the user without deleting their record (RF-11).
      */
     public void deactivate() {
         this.active = false;
@@ -51,16 +51,16 @@ public class User {
     }
 
     /**
-     * Automatically generates the institutional email.
+     * Generates the institutional email automatically (RF-10).
      * Format: first_name.first_lastname@unas.edu.pe
      */
     public void generateInstitutionalEmail() {
         if (this.institutionalEmail != null && !this.institutionalEmail.isBlank()) {
-            return; // Email already assigned manually
+            return; // Already manually assigned
         }
 
-        String firstFirstName = this.firstName.trim().split("\\s+")[0].toLowerCase();
-        String firstLastName = this.lastName.trim().split("\\s+")[0].toLowerCase();
+        String firstFirstName = this.firstNames.trim().split("\\s+")[0].toLowerCase();
+        String firstLastName = this.lastNames.trim().split("\\s+")[0].toLowerCase();
 
         // Normalize special characters (ñ, accents)
         firstFirstName = normalizeText(firstFirstName);
@@ -70,9 +70,9 @@ public class User {
     }
 
     /**
-     * Marks that the user must change their password.
+     * Marks that the user must change their password (RF-06).
      */
-    public void markChangePasswordRequired() {
+    public void markPasswordChangeRequired() {
         this.mustChangePassword = true;
         this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }

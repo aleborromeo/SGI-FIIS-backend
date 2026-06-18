@@ -13,7 +13,7 @@ public class RoleMapper {
         }
         return RoleResponseDto.builder()
                 .id(domain.getId())
-                .roleCode(domain.getRoleCode())
+                .code(domain.getCode())
                 .description(domain.getDescription())
                 .build();
     }

@@ -27,31 +27,31 @@ class RoleRepositoryAdapterTest {
 
     @Test
     @DisplayName("Should find role by code")
-    void testFindByCodigo() {
+    void testFindByCode() {
         RoleEntity entity = new RoleEntity();
         entity.setId(1L);
-        entity.setRoleCode("ADMIN");
+        entity.setCode("ADMIN");
         entity.setDescription("Administrador");
 
-        when(springDataRepository.findByRoleCode("ADMIN")).thenReturn(Optional.of(entity));
+        when(springDataRepository.findByCode("ADMIN")).thenReturn(Optional.of(entity));
 
         Optional<Role> result = adapter.findByCode("ADMIN");
 
         assertTrue(result.isPresent());
-        assertEquals("ADMIN", result.get().getRoleCode());
+        assertEquals("ADMIN", result.get().getCode());
         assertEquals("Administrador", result.get().getDescription());
-        verify(springDataRepository).findByRoleCode("ADMIN");
+        verify(springDataRepository).findByCode("ADMIN");
     }
 
     @Test
     @DisplayName("Should return empty optional when role by code is not found")
-    void testFindByCodigoNotFound() {
-        when(springDataRepository.findByRoleCode("GUEST")).thenReturn(Optional.empty());
+    void testFindByCodeNotFound() {
+        when(springDataRepository.findByCode("GUEST")).thenReturn(Optional.empty());
 
         Optional<Role> result = adapter.findByCode("GUEST");
 
         assertFalse(result.isPresent());
-        verify(springDataRepository).findByRoleCode("GUEST");
+        verify(springDataRepository).findByCode("GUEST");
     }
 
     @Test
@@ -59,7 +59,7 @@ class RoleRepositoryAdapterTest {
     void testFindAll() {
         RoleEntity entity = new RoleEntity();
         entity.setId(1L);
-        entity.setRoleCode("ADMIN");
+        entity.setCode("ADMIN");
         entity.setDescription("Administrador");
 
         when(springDataRepository.findAll()).thenReturn(Collections.singletonList(entity));
@@ -67,7 +67,7 @@ class RoleRepositoryAdapterTest {
         List<Role> result = adapter.findAll();
 
         assertEquals(1, result.size());
-        assertEquals("ADMIN", result.get(0).getRoleCode());
+        assertEquals("ADMIN", result.get(0).getCode());
         verify(springDataRepository).findAll();
     }
 }

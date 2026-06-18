@@ -27,13 +27,13 @@ class ListUsersUseCaseTest {
 
     @Test
     @DisplayName("Should call findAll when query is null or blank")
-    void testListarTodos() {
-        User user = User.builder().id(1L).firstName("Juan").build();
+    void testListAll() {
+        User user = User.builder().id(1L).firstNames("Juan").build();
         when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
 
         List<User> result = listUsersUseCase.execute(null);
         assertEquals(1, result.size());
-        assertEquals("Juan", result.get(0).getFirstName());
+        assertEquals("Juan", result.get(0).getFirstNames());
 
         List<User> resultBlank = listUsersUseCase.execute("   ");
         assertEquals(1, resultBlank.size());
@@ -44,13 +44,13 @@ class ListUsersUseCaseTest {
 
     @Test
     @DisplayName("Should call search with trimmed query when query is valid")
-    void testBuscarConQuery() {
-        User user = User.builder().id(1L).firstName("Juan").build();
+    void testSearchWithQuery() {
+        User user = User.builder().id(1L).firstNames("Juan").build();
         when(userRepository.search("Juan")).thenReturn(Collections.singletonList(user));
 
         List<User> result = listUsersUseCase.execute(" Juan  ");
         assertEquals(1, result.size());
-        assertEquals("Juan", result.get(0).getFirstName());
+        assertEquals("Juan", result.get(0).getFirstNames());
 
         verify(userRepository).search("Juan");
         verifyNoMoreInteractions(userRepository);

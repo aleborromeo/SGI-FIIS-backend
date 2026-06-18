@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Use Case: List and search users with filters (RF-14).
+ * Use case: List and search users with filters (RF-14).
  */
 @Service
 public class ListUsersUseCase {

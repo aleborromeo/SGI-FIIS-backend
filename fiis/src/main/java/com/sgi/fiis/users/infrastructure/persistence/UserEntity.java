@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * JPA Entity mapped to 'usuarios' table.
+ * JPA Entity mapped to the 'usuarios' table.
  */
 @Entity
 @Table(name = "usuarios")
@@ -20,14 +20,14 @@ public class UserEntity {
     @Column(name = "id_usuario")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 8)
+    @Column(name = "dni", nullable = false, unique = true, length = 8)
     private String dni;
 
     @Column(name = "nombres", nullable = false, length = 100)
-    private String firstName;
+    private String firstNames;
 
     @Column(name = "apellidos", nullable = false, length = 100)
-    private String lastName;
+    private String lastNames;
 
     @Column(name = "correo_institucional", nullable = false, unique = true, length = 150)
     private String institutionalEmail;
@@ -41,14 +41,14 @@ public class UserEntity {
     @Column(name = "es_activo", nullable = false)
     private boolean active;
 
-    @Column(name = "must_change_password", nullable = false)
+    @Column(name="must_change_password",nullable=false)
     private boolean mustChangePassword;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_rol_principal", nullable = false)
     private RoleEntity role;
 
-    @Column(name = "oauth_provider", length = 50)
+    @Column(name="oauth_provider",length=50)
     private String oauthProvider;
 
     @Column(name = "fecha_creacion", nullable = false)

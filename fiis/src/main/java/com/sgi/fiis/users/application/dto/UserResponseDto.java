@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Output DTO for user responses.
+ * Output DTO for User responses.
  */
 @Data
 @Builder
@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class UserResponseDto {
     private Long id;
     private String dni;
-    private String firstName;
-    private String lastName;
+    private String firstNames;
+    private String lastNames;
     private String institutionalEmail;
     private String phone;
     private boolean active;

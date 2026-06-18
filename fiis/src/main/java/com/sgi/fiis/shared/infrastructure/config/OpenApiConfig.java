@@ -153,12 +153,12 @@ public class OpenApiConfig {
                 .build();
     }
 
-    // Observaciones y Subsanaciones
+    // Observations and Remedies
     @Bean
     public GroupedOpenApi observationsApi() {
         return GroupedOpenApi.builder()
                 .group("observations")
-                .pathsToMatch("/api/observations/**", "/api/observaciones/**")
+                .pathsToMatch("/api/observations/**")
                 .build();
     }
 

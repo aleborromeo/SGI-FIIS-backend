@@ -71,14 +71,14 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         return User.builder()
                 .id(entity.getId())
                 .dni(entity.getDni())
-                .firstName(entity.getFirstName())
-                .lastName(entity.getLastName())
+                .firstNames(entity.getFirstNames())
+                .lastNames(entity.getLastNames())
                 .institutionalEmail(entity.getInstitutionalEmail())
                 .phone(entity.getPhone())
                 .passwordHash(entity.getPasswordHash())
                 .active(entity.isActive())
                 .mustChangePassword(entity.isMustChangePassword())
-                .roleCode(entity.getRole().getRoleCode())
+                .roleCode(entity.getRole().getCode())
                 .roleDescription(entity.getRole().getDescription())
                 .oauthProvider(entity.getOauthProvider())
                 .createdAt(entity.getCreatedAt())
@@ -90,8 +90,8 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         UserEntity entity = new UserEntity();
         entity.setId(domain.getId());
         entity.setDni(domain.getDni());
-        entity.setFirstName(domain.getFirstName());
-        entity.setLastName(domain.getLastName());
+        entity.setFirstNames(domain.getFirstNames());
+        entity.setLastNames(domain.getLastNames());
         entity.setInstitutionalEmail(domain.getInstitutionalEmail());
         entity.setPhone(domain.getPhone());
         entity.setPasswordHash(domain.getPasswordHash());
@@ -101,8 +101,8 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getUpdatedAt());
 
-        // Find role entity by code
-        RoleEntity roleEntity = roleRepository.findByRoleCode(domain.getRoleCode())
+        // Find the role entity by code
+        RoleEntity roleEntity = roleRepository.findByCode(domain.getRoleCode())
                 .orElseThrow(() -> new RuntimeException("Role not found: " + domain.getRoleCode()));
         entity.setRole(roleEntity);
 

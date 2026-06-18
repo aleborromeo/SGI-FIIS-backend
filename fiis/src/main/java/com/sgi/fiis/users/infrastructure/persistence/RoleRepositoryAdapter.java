@@ -17,8 +17,8 @@ public class RoleRepositoryAdapter implements RoleRepositoryPort {
     }
 
     @Override
-    public Optional<Role> findByCode(String roleCode) {
-        return springDataRepository.findByRoleCode(roleCode)
+    public Optional<Role> findByCode(String code) {
+        return springDataRepository.findByCode(code)
                 .map(this::toDomain);
     }
 
@@ -32,7 +32,7 @@ public class RoleRepositoryAdapter implements RoleRepositoryPort {
     private Role toDomain(RoleEntity entity) {
         return Role.builder()
                 .id(entity.getId())
-                .roleCode(entity.getRoleCode())
+                .code(entity.getCode())
                 .description(entity.getDescription())
                 .build();
     }

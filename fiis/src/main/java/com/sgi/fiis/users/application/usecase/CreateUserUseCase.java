@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Use Case: Create user (RF-07).
+ * Use case: Create user (RF-07).
  * - Generates institutional email automatically if not provided (RF-10).
- * - The initial password is the user's DNI, hashed with BCrypt.
+ * - Initial password is the user's DNI, hashed with BCrypt.
  */
 @Service
 public class CreateUserUseCase {
@@ -36,24 +36,24 @@ public class CreateUserUseCase {
     public User execute(User user) {
         // Validate that the role exists
         roleRepository.findByCode(user.getRoleCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Role", "code", user.getRoleCode()));
+                .orElseThrow(() -> new ResourceNotFoundException("Rol", "codigo", user.getRoleCode()));
 
-        // Validate DNI duplicate (RNF-38)
+        // Validate DNI uniqueness (RNF-38)
         if (userRepository.existsByDni(user.getDni())) {
-            throw new DuplicateResourceException("User", "DNI", user.getDni());
+            throw new DuplicateResourceException("Usuario", "DNI", user.getDni());
         }
 
         // Generate institutional email if not provided (RF-10)
         user.generateInstitutionalEmail();
 
-        // Validate that institutional email ends with .edu.pe
+        // Validate that the institutional email ends with .edu.pe
         if (user.getInstitutionalEmail() == null || !user.getInstitutionalEmail().toLowerCase().endsWith(".edu.pe")) {
-            throw new BusinessException("The institutional email must belong to the .edu.pe domain");
+            throw new BusinessException("El correo institucional debe pertenecer al dominio .edu.pe");
         }
 
-        // Validate email duplicate (RNF-38)
+        // Validate email uniqueness (RNF-38)
         if (userRepository.existsByEmail(user.getInstitutionalEmail())) {
-            throw new DuplicateResourceException("User", "email", user.getInstitutionalEmail());
+            throw new DuplicateResourceException("Usuario", "correo", user.getInstitutionalEmail());
         }
 
         // Initial password = hashed DNI

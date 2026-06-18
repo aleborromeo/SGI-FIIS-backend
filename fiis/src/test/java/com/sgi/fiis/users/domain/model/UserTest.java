@@ -10,10 +10,10 @@ class UserTest {
 
     @Test
     @DisplayName("Should generate correct institutional email for normal names")
-    void testGenerarCorreoInstitucionalNormal() {
+    void testGenerateInstitutionalEmailNormal() {
         User user = User.builder()
-                .firstName("Juan Carlos")
-                .lastName("Perez Gomez")
+                .firstNames("Juan Carlos")
+                .lastNames("Perez Gomez")
                 .build();
 
         user.generateInstitutionalEmail();
@@ -23,10 +23,10 @@ class UserTest {
 
     @Test
     @DisplayName("Should normalize accents and ñ when generating institutional email")
-    void testGenerarCorreoInstitucionalNormalizacion() {
+    void testGenerateInstitutionalEmailNormalization() {
         User user = User.builder()
-                .firstName("María José")
-                .lastName("Nuñez Díaz")
+                .firstNames("María José")
+                .lastNames("Nuñez Díaz")
                 .build();
 
         user.generateInstitutionalEmail();
@@ -36,10 +36,10 @@ class UserTest {
 
     @Test
     @DisplayName("Should not overwrite existing institutional email")
-    void testGenerarCorreoInstitucionalNoSobreEscribe() {
+    void testGenerateInstitutionalEmailDoesNotOverwrite() {
         User user = User.builder()
-                .firstName("Pedro")
-                .lastName("Alba")
+                .firstNames("Pedro")
+                .lastNames("Alba")
                 .institutionalEmail("pedro.alba.personal@gmail.com")
                 .build();
 
@@ -49,8 +49,8 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("Should active and deactivate user correctly")
-    void testActivarYDesactivar() {
+    @DisplayName("Should activate and deactivate user correctly")
+    void testActivateAndDeactivate() {
         User user = User.builder()
                 .active(false)
                 .build();
@@ -65,12 +65,12 @@ class UserTest {
 
     @Test
     @DisplayName("Should handle change password flows")
-    void testCambioPasswordFlow() {
+    void testPasswordChangeFlow() {
         User user = User.builder()
                 .mustChangePassword(false)
                 .build();
 
-        user.markChangePasswordRequired();
+        user.markPasswordChangeRequired();
         assertTrue(user.isMustChangePassword());
 
         user.confirmPasswordChange();

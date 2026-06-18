@@ -6,7 +6,7 @@ import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 
 /**
- * Use Case: Get user by ID.
+ * Use case: Get user by ID.
  */
 @Service
 public class GetUserUseCase {
@@ -19,6 +19,6 @@ public class GetUserUseCase {
 
     public User execute(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
     }
 }

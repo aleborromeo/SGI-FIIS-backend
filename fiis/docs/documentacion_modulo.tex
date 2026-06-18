@@ -354,13 +354,13 @@ Además, la seguridad y el principio de mínimo privilegio en el sistema se gobi
 \hline
 \textbf{API Endpoint / Recurso} & \textbf{ADM} & \textbf{EST} & \textbf{DOC} & \textbf{COOR} & \textbf{DIR} & \textbf{DEC} & \textbf{EVA} \\ \hline
 \texttt{POST /api/v1/auth/login} & Permitir & Permitir & Permitir & Permitir & Permitir & Permitir & Permitir \\ \hline
-\texttt{POST /api/v1/auth/cambiar-password} & Permitir & Permitir & Permitir & Permitir & Permitir & Permitir & Permitir \\ \hline
-\texttt{POST /api/v1/usuarios} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
-\texttt{GET /api/v1/usuarios} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
-\texttt{GET /api/v1/usuarios/\{id\}} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
-\texttt{PUT /api/v1/usuarios/\{id\}} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
-\texttt{PATCH /api/v1/usuarios/\{id\}/estado} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
-\texttt{POST /api/v1/usuarios/\{id\}/reset} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
+\texttt{POST /api/v1/auth/change-password} & Permitir & Permitir & Permitir & Permitir & Permitir & Permitir & Permitir \\ \hline
+\texttt{POST /api/v1/users} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
+\texttt{GET /api/v1/users} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
+\texttt{GET /api/v1/users/\{id\}} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
+\texttt{PUT /api/v1/users/\{id\}} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
+\texttt{PATCH /api/v1/users/\{id\}/status} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
+\texttt{PATCH /api/v1/users/\{id\}/reset-password} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
 \texttt{GET /api/v1/roles} & Permitir & Denegar & Denegar & Denegar & Denegar & Denegar & Denegar \\ \hline
 \end{tabular}%
 }
@@ -412,7 +412,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/health").permitAll()
-                    .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 )
