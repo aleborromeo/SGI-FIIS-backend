@@ -2,6 +2,7 @@ package com.sgi.fiis.convocatorias.domain.model;
 
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ public class ResearchCall {
     private LocalDate endDate;
     private CallStatus status;
     private Integer documentId;
-    private List<Integer> researchLineIds;
+    private final List<Integer> researchLineIds;
 
     /**
      * Constructs a ResearchCall with the given parameters.
@@ -71,41 +72,51 @@ public class ResearchCall {
         }
     }
 
+    /** Returns the unique identifier of the call. */
     public Integer getId() {
         return id;
     }
 
+    /** Returns the title of the call. */
     public String getTitle() {
         return title;
     }
 
+    /** Returns the description of the call. */
     public String getDescription() {
         return description;
     }
 
+    /** Returns the associated document identifier. */
     public Integer getDocumentId() {
         return documentId;
     }
 
     /**
-     * Returns an unmodifiable view of the research line identifiers.
+     * Returns an unmodifiable list of research line identifiers.
+     *
+     * @return unmodifiable list of research line IDs
      */
     public List<Integer> getResearchLineIds() {
-        return researchLineIds;
+        return Collections.unmodifiableList(researchLineIds);
     }
 
+    /** Returns the start date of the submission period. */
     public LocalDate getStartDate() {
         return startDate;
     }
 
+    /** Returns the end date of the submission period. */
     public LocalDate getEndDate() {
         return endDate;
     }
 
+    /** Returns the current status of the call. */
     public CallStatus getStatus() {
         return status;
     }
 
+    /** Updates the status of the call. */
     public void setStatus(CallStatus status) {
         this.status = status;
     }
