@@ -2,6 +2,7 @@ package com.sgi.fiis.convocatorias.domain.model;
 
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,8 +47,8 @@ public class ResearchCall {
         this.status = status;
         this.documentId = documentId;
         this.researchLineIds = researchLineIds != null
-                ? List.copyOf(researchLineIds)
-                : List.of();
+                ? Collections.unmodifiableList(new ArrayList<>(researchLineIds))
+                : Collections.emptyList();
     }
 
     /**
