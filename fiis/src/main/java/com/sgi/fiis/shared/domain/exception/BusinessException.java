@@ -10,10 +10,10 @@ public class BusinessException extends RuntimeException {
 
     public BusinessException(String message, Object[] args) {
         super(message);
-        this.args = args;
+        this.args = args != null ? args.clone() : null;
     }
 
     public Object[] getArgs() {
-        return args;
+        return args != null ? args.clone() : null;
     }
 }

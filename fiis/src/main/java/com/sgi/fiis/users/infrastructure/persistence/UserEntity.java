@@ -38,20 +38,15 @@ public class UserEntity {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    <<<<<<<HEAD:fiis/src/main/java/com/sgi/fiis/users/infrastructure/persistence/UserEntity.java @Column(name="activo",nullable=false)
-    private boolean active;=======
     @Column(name = "es_activo", nullable = false)
-    private boolean activo;>>>>>>>a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/main/java/com/sgi/fiis/users/infrastructure/persistence/UsuarioEntity.java
+    private boolean active;
 
     @Column(name="must_change_password",nullable=false)
     private boolean mustChangePassword;
 
     @ManyToOne(fetch = FetchType.EAGER)
-<<<<<<< HEAD:fiis/src/main/java/com/sgi/fiis/users/infrastructure/persistence/UserEntity.java
-    @JoinColumn(name = "id_rol", nullable = false)
-    private RoleEntity role;=======
     @JoinColumn(name = "id_rol_principal", nullable = false)
-    private RolEntity rol;>>>>>>>a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/main/java/com/sgi/fiis/users/infrastructure/persistence/UsuarioEntity.java
+    private RoleEntity role;
 
     @Column(name="oauth_provider",length=50)
     private String oauthProvider;

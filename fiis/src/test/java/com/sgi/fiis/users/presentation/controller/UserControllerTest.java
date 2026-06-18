@@ -69,12 +69,8 @@ class UserControllerTest {
 
         when(createUserUseCase.execute(any(User.class))).thenReturn(userDomain);
 
-<<<<<<< HEAD:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UserControllerTest.java
         mockMvc.perform(post("/api/v1/users")
-=======
-        mockMvc.perform(post("/api/v1/usuarios")
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN"))
->>>>>>> a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UsuarioControllerTest.java
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -96,12 +92,8 @@ class UserControllerTest {
                 .roleCode("ESTUDIANTE")
                 .build();
 
-<<<<<<< HEAD:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UserControllerTest.java
         mockMvc.perform(post("/api/v1/users")
-=======
-        mockMvc.perform(post("/api/v1/usuarios")
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("student@unas.edu.pe").roles("ESTUDIANTE"))
->>>>>>> a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UsuarioControllerTest.java
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -140,12 +132,8 @@ class UserControllerTest {
 
         when(listUsersUseCase.execute(null)).thenReturn(Collections.singletonList(userDomain));
 
-<<<<<<< HEAD:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UserControllerTest.java
-        mockMvc.perform(get("/api/v1/users"))
-=======
-        mockMvc.perform(get("/api/v1/usuarios")
+        mockMvc.perform(get("/api/v1/users")
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN")))
->>>>>>> a4bad9fb32129f77cb3f6e8651296e2d5ff91ec0:fiis/src/test/java/com/sgi/fiis/users/presentation/controller/UsuarioControllerTest.java
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].institutionalEmail").value("admin@unas.edu.pe"))
                 .andExpect(jsonPath("$[0].roleCode").value("ADMIN"));

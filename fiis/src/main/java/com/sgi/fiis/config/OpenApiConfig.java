@@ -3,6 +3,8 @@ package com.sgi.fiis.config;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import jakarta.annotation.PostConstruct;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -13,6 +15,25 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
 public class OpenApiConfig {
+
+    @Value("${spring.mail.host}")
+    private String mailHost;
+
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
+    @Value("${spring.mail.password}")
+    private String mailPassword;
+
+    @PostConstruct
+    public void printMailConfig() {
+        System.out.println("=================================================");
+        System.out.println("DEBUG MAIL CONFIGURATION ON STARTUP:");
+        System.out.println("Host: " + mailHost);
+        System.out.println("Username: " + mailUsername);
+        System.out.println("Password length: " + (mailPassword != null ? mailPassword.length() : "null"));
+        System.out.println("=================================================");
+    }
 
     @Bean
     public OpenAPI customOpenAPI() {
