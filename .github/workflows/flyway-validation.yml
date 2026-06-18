@@ -1,0 +1,54 @@
+name: Flyway Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  flyway-validation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Run unit tests
+        run: mvn clean test
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Start containers
+        run: docker compose up -d
+
+      - name: Wait for backend startup
+        run: |
+          echo "Esperando que Spring Boot arranque..."
+          sleep 60
+
+      - name: Verify backend container
+        run: |
+          docker ps
+
+          if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api)" != "true" ]; then
+            echo "El contenedor backend no está ejecutándose."
+            docker logs sgifiis-backend-api
+            exit 1
+          fi
+
+      - name: Show backend logs
+        if: failure()
+        run: docker logs sgifiis-backend-api
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
