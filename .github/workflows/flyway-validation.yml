@@ -22,7 +22,11 @@ jobs:
           java-version: 21
 
       - name: Run unit tests
+        working-directory: ./fiis
         run: mvn clean test
+
+      - name: Create .env file
+        run: cp .env.example fiis/.env
 
       - name: Build containers
         run: docker compose build
