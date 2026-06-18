@@ -1,0 +1,13 @@
+# Variables de entorno y secretos
+.env
+fiis/.env
+
+# IDEs y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Maven builds (si se ejecutan en raíz, aunque están en fiis/)
+fiis/target/
+fiis/build/
