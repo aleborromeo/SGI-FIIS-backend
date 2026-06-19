@@ -25,7 +25,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ./fiis/.env
+      - .env
     environment:
       # Configuración de conexión que usará Spring Boot dinámicamente desde el .env
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db_fiis:5432/${DB_NAME}

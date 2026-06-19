@@ -21,31 +21,31 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      # 1. Creamos el archivo usando la ruta explícita con punto barra (./)
+      # 1. Crear el archivo .env en la RAÍZ del proyecto
       - name: Create .env file
         run: |
-          echo "${{ secrets.DOTENV_FILE }}" > ./fiis/.env
+          echo "${{ secrets.DOTENV_FILE }}" > .env
 
-      # 2. Correr los test unitarios
-      - name: Run unit tests
-        working-directory: ./fiis
-        run: mvn clean test
-
-      # 3. Docker Compose Build
+      # 2. Construir los contenedores
       - name: Build containers
         run: docker compose build
 
-      # 4. Levantar la base de datos y la API
+      # 3. Levantar la base de datos y la API
       - name: Start containers
         run: docker compose up -d
 
-      # 5. Esperar a que los healthchecks determinen que todo inició
-      - name: Wait for backend startup
+      # 4. Esperar a que la base de datos inicie por completo
+      - name: Wait for database startup
         run: |
-          echo "Esperando que los servicios arranquen y Flyway valide..."
+          echo "Esperando que la base de datos y los servicios estén listos..."
           sleep 30
 
-      # 6. Verificar el estado del backend
+      # 5. Ejecutar los tests unitarios e integrados dentro de la carpeta fiis
+      - name: Run unit and integration tests
+        working-directory: ./fiis
+        run: mvn clean test
+
+      # 6. Verificar que el contenedor backend siga vivo
       - name: Verify backend container
         run: |
           docker ps
@@ -55,13 +55,12 @@ jobs:
             exit 1
           fi
 
-      # 7. Si algo falla, expone los logs de Spring
+      # 7. Si algo falla en los tests, muestra los logs de Spring
       - name: Show backend logs
         if: failure()
         run: docker logs sgifiis-backend-api
 
-      # 8. Limpieza absoluta (Le añadimos la ruta explícita del archivo para evitar el error de 'stat')
+      # 8. Limpieza absoluta (Corregido: docker compose lee el .env de la raíz automáticamente)
       - name: Stop containers
         if: always()
-        run: docker compose --env-file ./fiis/.env down -v
-        
+        run: docker compose down -v
