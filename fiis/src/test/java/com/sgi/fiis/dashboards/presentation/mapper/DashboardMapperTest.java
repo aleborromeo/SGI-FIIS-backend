@@ -21,307 +21,307 @@ class DashboardMapperTest {
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardAdmin a DashboardAdminResponse")
-    void toAdminResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("REVISION")
-                .titulo("Trámite pendiente")
-                .descripcion("Hay trámites pendientes")
+    @DisplayName("Should map DashboardAdmin to DashboardAdminResponse")
+    void toAdminResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("REVIEW")
+                .title("Pending procedure")
+                .description("There are pending procedures")
                 .build();
 
-        DashboardAdmin modelo = DashboardAdmin.builder()
-                .totalUsuarios(10)
-                .totalUsuariosActivos(8)
-                .totalGrupos(5)
-                .totalGruposActivos(4)
-                .totalProyectos(20)
-                .proyectosActivos(12)
-                .tramitesPendientes(3)
-                .resolucionesEmitidas(7)
-                .tramitesEnRevision(2)
-                .tramitesAprobados(9)
-                .tramitesRechazados(1)
-                .alertas(List.of(alerta))
+        DashboardAdmin model = DashboardAdmin.builder()
+                .totalUsers(10)
+                .totalActiveUsers(8)
+                .totalGroups(5)
+                .totalActiveGroups(4)
+                .totalProjects(20)
+                .activeProjects(12)
+                .pendingProcedures(3)
+                .issuedResolutions(7)
+                .proceduresUnderReview(2)
+                .approvedProcedures(9)
+                .rejectedProcedures(1)
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardAdminResponse response = mapper.toAdminResponse(modelo);
+        DashboardAdminResponse response = mapper.toAdminResponse(model);
 
-        assertEquals(10, response.getTotalUsuarios());
-        assertEquals(8, response.getTotalUsuariosActivos());
-        assertEquals(5, response.getTotalGrupos());
-        assertEquals(4, response.getTotalGruposActivos());
-        assertEquals(20, response.getTotalProyectos());
-        assertEquals(12, response.getProyectosActivos());
-        assertEquals(3, response.getTramitesPendientes());
-        assertEquals(7, response.getResolucionesEmitidas());
-        assertEquals(2, response.getTramitesEnRevision());
-        assertEquals(9, response.getTramitesAprobados());
-        assertEquals(1, response.getTramitesRechazados());
+        assertEquals(10, response.getTotalUsers());
+        assertEquals(8, response.getTotalActiveUsers());
+        assertEquals(5, response.getTotalGroups());
+        assertEquals(4, response.getTotalActiveGroups());
+        assertEquals(20, response.getTotalProjects());
+        assertEquals(12, response.getActiveProjects());
+        assertEquals(3, response.getPendingProcedures());
+        assertEquals(7, response.getIssuedResolutions());
+        assertEquals(2, response.getProceduresUnderReview());
+        assertEquals(9, response.getApprovedProcedures());
+        assertEquals(1, response.getRejectedProcedures());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("REVISION", response.getAlertas().get(0).getTipo());
-        assertEquals("Trámite pendiente", response.getAlertas().get(0).getTitulo());
-        assertEquals("Hay trámites pendientes", response.getAlertas().get(0).getDescripcion());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("REVIEW", response.getAlerts().get(0).getType());
+        assertEquals("Pending procedure", response.getAlerts().get(0).getTitle());
+        assertEquals("There are pending procedures", response.getAlerts().get(0).getDescription());
 
-        DashboardAdmin sinAlertas = DashboardAdmin.builder().alertas(null).build();
-        assertTrue(mapper.toAdminResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardAdmin noAlerts = DashboardAdmin.builder().alerts(null).build();
+        assertTrue(mapper.toAdminResponse(noAlerts).getAlerts().isEmpty());
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardDirector a DashboardDirectorResponse")
-    void toDirectorResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("INFO")
-                .titulo("Convocatoria activa")
-                .descripcion("Hay convocatoria")
+    @DisplayName("Should map DashboardDirector to DashboardDirectorResponse")
+    void toDirectorResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("INFO")
+                .title("Active call")
+                .description("There is an active call")
                 .build();
 
-        DashboardDirector modelo = DashboardDirector.builder()
-                .totalProyectos(10)
-                .proyectosActivos(6)
-                .proyectosPostulados(3)
-                .proyectosObservados(1)
-                .tramitesPendientesRevision(4)
-                .informesPorVencer(2)
-                .resolucionesEmitidas(9)
-                .convocatoriasAbiertas(1)
-                .tramitesEnCoordinador(2)
-                .tramitesEnDirector(3)
-                .tramitesEnDecano(4)
-                .tramitesFinalizados(5)
-                .alertas(List.of(alerta))
+        DashboardDirector model = DashboardDirector.builder()
+                .totalProjects(10)
+                .activeProjects(6)
+                .submittedProjects(3)
+                .observedProjects(1)
+                .pendingReviewProcedures(4)
+                .reportsNearingDeadline(2)
+                .issuedResolutions(9)
+                .openCallsForApplication(1)
+                .proceduresWithCoordinator(2)
+                .proceduresWithDirector(3)
+                .proceduresWithDean(4)
+                .completedProcedures(5)
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardDirectorResponse response = mapper.toDirectorResponse(modelo);
+        DashboardDirectorResponse response = mapper.toDirectorResponse(model);
 
-        assertEquals(10, response.getTotalProyectos());
-        assertEquals(6, response.getProyectosActivos());
-        assertEquals(3, response.getProyectosPostulados());
-        assertEquals(1, response.getProyectosObservados());
-        assertEquals(4, response.getTramitesPendientesRevision());
-        assertEquals(2, response.getInformesPorVencer());
-        assertEquals(9, response.getResolucionesEmitidas());
-        assertEquals(1, response.getConvocatoriasAbiertas());
-        assertEquals(2, response.getTramitesEnCoordinador());
-        assertEquals(3, response.getTramitesEnDirector());
-        assertEquals(4, response.getTramitesEnDecano());
-        assertEquals(5, response.getTramitesFinalizados());
+        assertEquals(10, response.getTotalProjects());
+        assertEquals(6, response.getActiveProjects());
+        assertEquals(3, response.getSubmittedProjects());
+        assertEquals(1, response.getObservedProjects());
+        assertEquals(4, response.getPendingReviewProcedures());
+        assertEquals(2, response.getReportsNearingDeadline());
+        assertEquals(9, response.getIssuedResolutions());
+        assertEquals(1, response.getOpenCallsForApplication());
+        assertEquals(2, response.getProceduresWithCoordinator());
+        assertEquals(3, response.getProceduresWithDirector());
+        assertEquals(4, response.getProceduresWithDean());
+        assertEquals(5, response.getCompletedProcedures());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("INFO", response.getAlertas().get(0).getTipo());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("INFO", response.getAlerts().get(0).getType());
 
-        DashboardDirector sinAlertas = DashboardDirector.builder().alertas(null).build();
-        assertTrue(mapper.toDirectorResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardDirector noAlerts = DashboardDirector.builder().alerts(null).build();
+        assertTrue(mapper.toDirectorResponse(noAlerts).getAlerts().isEmpty());
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardCoordinador a DashboardCoordinadorResponse")
-    void toCoordinadorResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("ALERTA")
-                .titulo("Trámite observado")
-                .descripcion("Hay observaciones")
+    @DisplayName("Should map DashboardCoordinator to DashboardCoordinatorResponse")
+    void toCoordinatorResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("ALERT")
+                .title("Observed procedure")
+                .description("There are observations")
                 .build();
 
-        DashboardCoordinador modelo = DashboardCoordinador.builder()
-                .idGrupo(1)
-                .nombreGrupo("Grupo FIIS")
-                .codigoGrupo("GI-FIIS")
-                .totalMiembros(10)
-                .miembrosActivos(8)
-                .totalProyectosGrupo(4)
-                .proyectosActivosGrupo(3)
-                .tramitesPendientesGrupo(2)
-                .informesAvanceGrupo(5)
-                .planesTesisGrupo(6)
-                .tramitesPostulados(1)
-                .tramitesEnRevision(2)
-                .tramitesAprobados(3)
-                .tramitesObservados(4)
-                .alertas(List.of(alerta))
+        DashboardCoordinator model = DashboardCoordinator.builder()
+                .groupId(1)
+                .groupName("Grupo FIIS")
+                .groupCode("GI-FIIS")
+                .totalMembers(10)
+                .activeMembers(8)
+                .totalGroupProjects(4)
+                .activeGroupProjects(3)
+                .pendingGroupProcedures(2)
+                .groupProgressReports(5)
+                .groupThesisPlans(6)
+                .submittedProcedures(1)
+                .proceduresUnderReview(2)
+                .approvedProcedures(3)
+                .observedProcedures(4)
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardCoordinadorResponse response = mapper.toCoordinadorResponse(modelo);
+        DashboardCoordinatorResponse response = mapper.toCoordinatorResponse(model);
 
-        assertEquals(1, response.getIdGrupo());
-        assertEquals("Grupo FIIS", response.getNombreGrupo());
-        assertEquals("GI-FIIS", response.getCodigoGrupo());
-        assertEquals(10, response.getTotalMiembros());
-        assertEquals(8, response.getMiembrosActivos());
-        assertEquals(4, response.getTotalProyectosGrupo());
-        assertEquals(3, response.getProyectosActivosGrupo());
-        assertEquals(2, response.getTramitesPendientesGrupo());
-        assertEquals(5, response.getInformesAvanceGrupo());
-        assertEquals(6, response.getPlanesTesisGrupo());
-        assertEquals(1, response.getTramitesPostulados());
-        assertEquals(2, response.getTramitesEnRevision());
-        assertEquals(3, response.getTramitesAprobados());
-        assertEquals(4, response.getTramitesObservados());
+        assertEquals(1, response.getGroupId());
+        assertEquals("Grupo FIIS", response.getGroupName());
+        assertEquals("GI-FIIS", response.getGroupCode());
+        assertEquals(10, response.getTotalMembers());
+        assertEquals(8, response.getActiveMembers());
+        assertEquals(4, response.getTotalGroupProjects());
+        assertEquals(3, response.getActiveGroupProjects());
+        assertEquals(2, response.getPendingGroupProcedures());
+        assertEquals(5, response.getGroupProgressReports());
+        assertEquals(6, response.getGroupThesisPlans());
+        assertEquals(1, response.getSubmittedProcedures());
+        assertEquals(2, response.getProceduresUnderReview());
+        assertEquals(3, response.getApprovedProcedures());
+        assertEquals(4, response.getObservedProcedures());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("ALERTA", response.getAlertas().get(0).getTipo());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("ALERT", response.getAlerts().get(0).getType());
 
-        DashboardCoordinador sinAlertas = DashboardCoordinador.builder().alertas(null).build();
-        assertTrue(mapper.toCoordinadorResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardCoordinator noAlerts = DashboardCoordinator.builder().alerts(null).build();
+        assertTrue(mapper.toCoordinatorResponse(noAlerts).getAlerts().isEmpty());
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardDocente a DashboardDocenteResponse")
-    void toDocenteResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("REVISION")
-                .titulo("Informe pendiente")
-                .descripcion("Tiene informes")
+    @DisplayName("Should map DashboardTeacher to DashboardTeacherResponse")
+    void toTeacherResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("REVIEW")
+                .title("Pending report")
+                .description("You have pending reports")
                 .build();
 
-        DashboardDocente modelo = DashboardDocente.builder()
-                .proyectosComoResponsable(2)
-                .proyectosComoIntegrante(3)
-                .tramitesPendientes(4)
-                .informesAvancePendientes(5)
-                .documentosCargados(6)
-                .resolucionesRecibidas(7)
-                .proyectosPostulados(1)
-                .proyectosAprobados(2)
-                .proyectosEnEjecucion(3)
-                .proyectosFinalizados(4)
-                .alertas(List.of(alerta))
+        DashboardTeacher model = DashboardTeacher.builder()
+                .projectsAsLead(2)
+                .projectsAsMember(3)
+                .pendingProcedures(4)
+                .pendingProgressReports(5)
+                .uploadedDocuments(6)
+                .receivedResolutions(7)
+                .submittedProjects(1)
+                .approvedProjects(2)
+                .projectsInExecution(3)
+                .completedProjects(4)
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardDocenteResponse response = mapper.toDocenteResponse(modelo);
+        DashboardTeacherResponse response = mapper.toTeacherResponse(model);
 
-        assertEquals(2, response.getProyectosComoResponsable());
-        assertEquals(3, response.getProyectosComoIntegrante());
-        assertEquals(4, response.getTramitesPendientes());
-        assertEquals(5, response.getInformesAvancePendientes());
-        assertEquals(6, response.getDocumentosCargados());
-        assertEquals(7, response.getResolucionesRecibidas());
-        assertEquals(1, response.getProyectosPostulados());
-        assertEquals(2, response.getProyectosAprobados());
-        assertEquals(3, response.getProyectosEnEjecucion());
-        assertEquals(4, response.getProyectosFinalizados());
+        assertEquals(2, response.getProjectsAsLead());
+        assertEquals(3, response.getProjectsAsMember());
+        assertEquals(4, response.getPendingProcedures());
+        assertEquals(5, response.getPendingProgressReports());
+        assertEquals(6, response.getUploadedDocuments());
+        assertEquals(7, response.getReceivedResolutions());
+        assertEquals(1, response.getSubmittedProjects());
+        assertEquals(2, response.getApprovedProjects());
+        assertEquals(3, response.getProjectsInExecution());
+        assertEquals(4, response.getCompletedProjects());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("REVISION", response.getAlertas().get(0).getTipo());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("REVIEW", response.getAlerts().get(0).getType());
 
-        DashboardDocente sinAlertas = DashboardDocente.builder().alertas(null).build();
-        assertTrue(mapper.toDocenteResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardTeacher noAlerts = DashboardTeacher.builder().alerts(null).build();
+        assertTrue(mapper.toTeacherResponse(noAlerts).getAlerts().isEmpty());
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardEvaluador a DashboardEvaluadorResponse")
-    void toEvaluadorResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("REVISION")
-                .titulo("Evaluaciones pendientes")
-                .descripcion("Tiene evaluaciones")
+    @DisplayName("Should map DashboardEvaluator to DashboardEvaluatorResponse")
+    void toEvaluatorResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("REVIEW")
+                .title("Pending evaluations")
+                .description("You have pending evaluations")
                 .build();
 
-        DashboardEvaluador modelo = DashboardEvaluador.builder()
-                .evaluacionesAsignadas(10)
-                .evaluacionesPendientes(3)
-                .evaluacionesCompletadas(7)
-                .proyectosAsignados(4)
-                .planesTesisAsignados(5)
-                .evaluacionesAprobadas(2)
-                .evaluacionesRechazadas(1)
-                .evaluacionesConObservaciones(6)
-                .alertas(List.of(alerta))
+        DashboardEvaluator model = DashboardEvaluator.builder()
+                .assignedEvaluations(10)
+                .pendingEvaluations(3)
+                .completedEvaluations(7)
+                .assignedProjects(4)
+                .assignedThesisPlans(5)
+                .approvedEvaluations(2)
+                .rejectedEvaluations(1)
+                .evaluationsWithObservations(6)
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardEvaluadorResponse response = mapper.toEvaluadorResponse(modelo);
+        DashboardEvaluatorResponse response = mapper.toEvaluatorResponse(model);
 
-        assertEquals(10, response.getEvaluacionesAsignadas());
-        assertEquals(3, response.getEvaluacionesPendientes());
-        assertEquals(7, response.getEvaluacionesCompletadas());
-        assertEquals(4, response.getProyectosAsignados());
-        assertEquals(5, response.getPlanesTesisAsignados());
-        assertEquals(2, response.getEvaluacionesAprobadas());
-        assertEquals(1, response.getEvaluacionesRechazadas());
-        assertEquals(6, response.getEvaluacionesConObservaciones());
+        assertEquals(10, response.getAssignedEvaluations());
+        assertEquals(3, response.getPendingEvaluations());
+        assertEquals(7, response.getCompletedEvaluations());
+        assertEquals(4, response.getAssignedProjects());
+        assertEquals(5, response.getAssignedThesisPlans());
+        assertEquals(2, response.getApprovedEvaluations());
+        assertEquals(1, response.getRejectedEvaluations());
+        assertEquals(6, response.getEvaluationsWithObservations());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("REVISION", response.getAlertas().get(0).getTipo());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("REVIEW", response.getAlerts().get(0).getType());
 
-        DashboardEvaluador sinAlertas = DashboardEvaluador.builder().alertas(null).build();
-        assertTrue(mapper.toEvaluadorResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardEvaluator noAlerts = DashboardEvaluator.builder().alerts(null).build();
+        assertTrue(mapper.toEvaluatorResponse(noAlerts).getAlerts().isEmpty());
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardDecano a DashboardDecanoResponse")
-    void toDecanoResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("INFO")
-                .titulo("Convocatoria activa")
-                .descripcion("Hay convocatoria")
+    @DisplayName("Should map DashboardDean to DashboardDeanResponse")
+    void toDeanResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("INFO")
+                .title("Active call")
+                .description("There is an active call")
                 .build();
 
-        DashboardDecano modelo = DashboardDecano.builder()
-                .totalProyectosFacultad(20)
-                .proyectosActivos(12)
-                .tramitesPendientesFirma(4)
-                .resolucionesEmitidas(9)
-                .convocatoriasActivas(2)
-                .totalGruposActivos(6)
-                .tramitesEnEspera(3)
-                .tramitesAprobadosMes(5)
-                .tramitesRechazadosMes(1)
-                .alertas(List.of(alerta))
+        DashboardDean model = DashboardDean.builder()
+                .totalFacultyProjects(20)
+                .activeProjects(12)
+                .pendingSignatureProcedures(4)
+                .issuedResolutions(9)
+                .activeCallsForApplication(2)
+                .totalActiveGroups(6)
+                .waitingProcedures(3)
+                .approvedProceduresThisMonth(5)
+                .rejectedProceduresThisMonth(1)
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardDecanoResponse response = mapper.toDecanoResponse(modelo);
+        DashboardDeanResponse response = mapper.toDeanResponse(model);
 
-        assertEquals(20, response.getTotalProyectosFacultad());
-        assertEquals(12, response.getProyectosActivos());
-        assertEquals(4, response.getTramitesPendientesFirma());
-        assertEquals(9, response.getResolucionesEmitidas());
-        assertEquals(2, response.getConvocatoriasActivas());
-        assertEquals(6, response.getTotalGruposActivos());
-        assertEquals(3, response.getTramitesEnEspera());
-        assertEquals(5, response.getTramitesAprobadosMes());
-        assertEquals(1, response.getTramitesRechazadosMes());
+        assertEquals(20, response.getTotalFacultyProjects());
+        assertEquals(12, response.getActiveProjects());
+        assertEquals(4, response.getPendingSignatureProcedures());
+        assertEquals(9, response.getIssuedResolutions());
+        assertEquals(2, response.getActiveCallsForApplication());
+        assertEquals(6, response.getTotalActiveGroups());
+        assertEquals(3, response.getWaitingProcedures());
+        assertEquals(5, response.getApprovedProceduresThisMonth());
+        assertEquals(1, response.getRejectedProceduresThisMonth());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("INFO", response.getAlertas().get(0).getTipo());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("INFO", response.getAlerts().get(0).getType());
 
-        DashboardDecano sinAlertas = DashboardDecano.builder().alertas(null).build();
-        assertTrue(mapper.toDecanoResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardDean noAlerts = DashboardDean.builder().alerts(null).build();
+        assertTrue(mapper.toDeanResponse(noAlerts).getAlerts().isEmpty());
     }
 
     @Test
-    @DisplayName("Debe mapear DashboardEstudiante a DashboardEstudianteResponse")
-    void toEstudianteResponse_debeMapearCamposYAlertas() {
-        AlertaItem alerta = AlertaItem.builder()
-                .tipo("ALERTA")
-                .titulo("Plan observado")
-                .descripcion("Debe subsanar")
+    @DisplayName("Should map DashboardStudent to DashboardStudentResponse")
+    void toStudentResponse_shouldMapFieldsAndAlerts() {
+        AlertItem alert = AlertItem.builder()
+                .type("ALERT")
+                .title("Observed plan")
+                .description("You must address observations")
                 .build();
 
-        DashboardEstudiante modelo = DashboardEstudiante.builder()
-                .planesTesisPresentados(1)
-                .estadoPlanActual("OBSERVADO")
-                .tramitesPendientes(2)
-                .documentosCargados(3)
-                .convocatoriasAbiertas(4)
-                .nombreGrupo("Grupo Tesis")
-                .codigoGrupo("GT-01")
-                .alertas(List.of(alerta))
+        DashboardStudent model = DashboardStudent.builder()
+                .submittedThesisPlans(1)
+                .currentPlanStatus("OBSERVADO")
+                .pendingProcedures(2)
+                .uploadedDocuments(3)
+                .openCallsForApplication(4)
+                .groupName("Grupo Tesis")
+                .groupCode("GT-01")
+                .alerts(List.of(alert))
                 .build();
 
-        DashboardEstudianteResponse response = mapper.toEstudianteResponse(modelo);
+        DashboardStudentResponse response = mapper.toStudentResponse(model);
 
-        assertEquals(1, response.getPlanesTesisPresentados());
-        assertEquals("OBSERVADO", response.getEstadoPlanActual());
-        assertEquals(2, response.getTramitesPendientes());
-        assertEquals(3, response.getDocumentosCargados());
-        assertEquals(4, response.getConvocatoriasAbiertas());
-        assertEquals("Grupo Tesis", response.getNombreGrupo());
-        assertEquals("GT-01", response.getCodigoGrupo());
+        assertEquals(1, response.getSubmittedThesisPlans());
+        assertEquals("OBSERVADO", response.getCurrentPlanStatus());
+        assertEquals(2, response.getPendingProcedures());
+        assertEquals(3, response.getUploadedDocuments());
+        assertEquals(4, response.getOpenCallsForApplication());
+        assertEquals("Grupo Tesis", response.getGroupName());
+        assertEquals("GT-01", response.getGroupCode());
 
-        assertEquals(1, response.getAlertas().size());
-        assertEquals("ALERTA", response.getAlertas().get(0).getTipo());
+        assertEquals(1, response.getAlerts().size());
+        assertEquals("ALERT", response.getAlerts().get(0).getType());
 
-        DashboardEstudiante sinAlertas = DashboardEstudiante.builder().alertas(null).build();
-        assertTrue(mapper.toEstudianteResponse(sinAlertas).getAlertas().isEmpty());
+        DashboardStudent noAlerts = DashboardStudent.builder().alerts(null).build();
+        assertTrue(mapper.toStudentResponse(noAlerts).getAlerts().isEmpty());
     }
 }

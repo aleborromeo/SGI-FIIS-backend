@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para la petición de reenvío de código de verificación.
+ * DTO for resending verification code.
  */
 @Data
 @Builder
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResendCodeRequestDto {
 
-    @NotBlank(message = "El correo es obligatorio")
-    @Size(max = 150, message = "El correo no debe exceder 150 caracteres")
-    private String correo;
+    @NotBlank(message = "{validation.correo.required}")
+    @Size(max = 150, message = "{validation.correo.size}")
+    private String email;
 }

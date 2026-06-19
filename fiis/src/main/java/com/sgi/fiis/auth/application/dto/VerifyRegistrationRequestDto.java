@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para la petición de verificación de registro.
+ * DTO for verification registration request.
  */
 @Data
 @Builder
@@ -16,10 +16,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VerifyRegistrationRequestDto {
 
-    @NotBlank(message = "El correo es obligatorio")
-    private String correo;
+    @NotBlank(message = "{validation.correo.required}")
+    private String email;
 
-    @NotBlank(message = "El código es obligatorio")
-    @Size(min = 6, max = 6, message = "El código debe tener exactamente 6 dígitos")
-    private String codigo;
+    @NotBlank(message = "{validation.codigo.required}")
+    @Size(min = 6, max = 6, message = "{validation.codigo.size}")
+    private String code;
 }

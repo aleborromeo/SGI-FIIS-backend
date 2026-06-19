@@ -67,10 +67,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // En producción se recomienda usar cookies HttpOnly en lugar de query params
         String redirectUrl = frontendUrl + "/auth/callback"
                 + "?token=" + URLEncoder.encode(result.getToken(), StandardCharsets.UTF_8)
-                + "&correo=" + URLEncoder.encode(result.getCorreo(), StandardCharsets.UTF_8)
-                + "&nombres=" + URLEncoder.encode(result.getNombres(), StandardCharsets.UTF_8)
-                + "&apellidos=" + URLEncoder.encode(result.getApellidos(), StandardCharsets.UTF_8)
-                + "&rolCodigo=" + URLEncoder.encode(result.getRolCodigo(), StandardCharsets.UTF_8);
+                + "&email=" + URLEncoder.encode(result.getEmail(), StandardCharsets.UTF_8)
+                + "&firstNames=" + URLEncoder.encode(result.getFirstNames(), StandardCharsets.UTF_8)
+                + "&lastNames=" + URLEncoder.encode(result.getLastNames(), StandardCharsets.UTF_8)
+                + "&roleCode=" + URLEncoder.encode(result.getRoleCode(), StandardCharsets.UTF_8);
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
