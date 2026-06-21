@@ -12,8 +12,8 @@ import com.sgi.fiis.proyectos.application.ports.out.SaveProjectPort;
 import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
-import com.sgi.fiis.users.infrastructure.persistence.SpringDataUsuarioRepository;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,15 +26,15 @@ public class SaveProjectAdapter implements SaveProjectPort {
     private final ProjectJpaRepository projectRepository;
     private final ResearchLineJpaRepository lineRepository;
     private final ResearchGroupJpaRepository groupRepository;
-    private final SpringDataUsuarioRepository userRepository;
+    private final SpringDataUserRepository userRepository;
     private final ResearchCallJpaRepository callRepository;
     private final GroupMembershipJpaRepository membershipRepository;
     private final ProjectMemberJpaRepository projectMemberRepository;
 
     public SaveProjectAdapter(ProjectJpaRepository projectRepository,
-                              ResearchLineJpaRepository lineRepository,
-                              ResearchGroupJpaRepository groupRepository,
-                              SpringDataUsuarioRepository userRepository,
+                               ResearchLineJpaRepository lineRepository,
+                               ResearchGroupJpaRepository groupRepository,
+                               SpringDataUserRepository userRepository,
                               ResearchCallJpaRepository callRepository,
                               GroupMembershipJpaRepository membershipRepository,
                               ProjectMemberJpaRepository projectMemberRepository) {
@@ -114,7 +114,7 @@ public class SaveProjectAdapter implements SaveProjectPort {
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with ID: " + projectId));
 
         for (ProjectMember member : members) {
-            UsuarioEntity user = userRepository.findById(member.getUserId().longValue())
+            UserEntity user = userRepository.findById(member.getUserId().longValue())
                     .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + member.getUserId()));
 
             ProjectMemberEntity entity = ProjectMemberEntity.builder()
@@ -147,7 +147,7 @@ public class SaveProjectAdapter implements SaveProjectPort {
         ResearchGroupEntity group = groupRepository.findById(domain.getResearchGroupId())
                 .orElseThrow(() -> new IllegalArgumentException("Research group not found with ID: " + domain.getResearchGroupId()));
 
-        UsuarioEntity responsible = userRepository.findById(domain.getResponsibleId())
+        UserEntity responsible = userRepository.findById(domain.getResponsibleId())
                 .orElseThrow(() -> new IllegalArgumentException("Responsible user not found with ID: " + domain.getResponsibleId()));
 
         ResearchCallEntity call = null;

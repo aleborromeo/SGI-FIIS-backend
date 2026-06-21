@@ -2,73 +2,73 @@ package com.sgi.fiis.auth.infrastructure.security;
 
 import com.sgi.fiis.auth.domain.port.OAuthUserHandlerPort;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
-import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Adaptador que implementa OAuthUserHandlerPort.
- * Busca un usuario existente por correo institucional;
- * si no existe, crea uno nuevo con datos mínimos del proveedor OAuth.
+ * Adapter that implements OAuthUserHandlerPort.
+ * Finds an existing user by institutional email;
+ * if it doesn't exist, creates a new one with minimum details from the OAuth provider.
  */
 @Component
 public class OAuthUserHandlerAdapter implements OAuthUserHandlerPort {
 
-    private final UsuarioRepositoryPort usuarioRepository;
+    private final UserRepositoryPort userRepository;
     private final PasswordEncoderPort passwordEncoder;
 
-    public OAuthUserHandlerAdapter(UsuarioRepositoryPort usuarioRepository,
+    public OAuthUserHandlerAdapter(UserRepositoryPort userRepository,
                                    PasswordEncoderPort passwordEncoder) {
-        this.usuarioRepository = usuarioRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public Usuario findOrCreateFromOAuth(String email, String name, String provider) {
-        return usuarioRepository.findByCorreo(email)
+    public User findOrCreateFromOAuth(String email, String name, String provider) {
+        return userRepository.findByEmail(email)
                 .orElseGet(() -> createOAuthUser(email, name, provider));
     }
 
     /**
-     * Crea un usuario nuevo a partir de datos OAuth.
-     * - DNI: placeholder "OA-" + UUID corto (máximo 8 caracteres)
-     * - Password: UUID aleatorio hasheado (no se usará para login)
-     * - Rol: ESTUDIANTE por defecto
-     * - activo: true
-     * - mustChangePassword: false (no aplica para OAuth)
+     * Creates a new user from OAuth details.
+     * - DNI: placeholder "OA" + short UUID (maximum 8 characters)
+     * - Password: random hashed UUID (will not be used for login)
+     * - Role: ESTUDIANTE by default
+     * - active: true
+     * - mustChangePassword: false (does not apply to OAuth)
      */
-    private Usuario createOAuthUser(String email, String name, String provider) {
-        // Generar DNI placeholder único (8 caracteres máximo por constraint de BD)
+    private User createOAuthUser(String email, String name, String provider) {
+        // Generate placeholder DNI (8 chars max by DB constraint)
         String dniPlaceholder = "OA" + UUID.randomUUID().toString()
                 .replace("-", "").substring(0, 6).toUpperCase();
 
-        // Password placeholder hasheado (el usuario no la usará)
+        // Password placeholder hashed (user won't use it)
         String passwordPlaceholder = passwordEncoder.encode(UUID.randomUUID().toString());
 
-        // Separar nombre y apellido del nombre completo
+        // Split first and last name
         String[] parts = name.trim().split("\\s+", 2);
-        String nombres = parts[0];
-        String apellidos = parts.length > 1 ? parts[1] : "";
+        String firstNames = parts[0];
+        String lastNames = parts.length > 1 ? parts[1] : "";
 
         LocalDateTime now = LocalDateTime.now(java.time.ZoneId.systemDefault());
 
-        Usuario nuevoUsuario = Usuario.builder()
+        User newUser = User.builder()
                 .dni(dniPlaceholder)
-                .nombres(nombres)
-                .apellidos(apellidos)
-                .correoInstitucional(email)
+                .firstNames(firstNames)
+                .lastNames(lastNames)
+                .institutionalEmail(email)
                 .passwordHash(passwordPlaceholder)
-                .activo(true)
+                .active(true)
                 .mustChangePassword(false)
-                .rolCodigo("ESTUDIANTE")
+                .roleCode("ESTUDIANTE")
                 .oauthProvider(provider)
-                .fechaCreacion(now)
-                .fechaActualizacion(now)
+                .createdAt(now)
+                .updatedAt(now)
                 .build();
 
-        return usuarioRepository.save(nuevoUsuario);
+        return userRepository.save(newUser);
     }
 }

@@ -21,6 +21,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @SuppressWarnings("java:S4502") // CSRF deshabilitado de forma segura ya que el API es stateless
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         try {
             http
@@ -33,8 +34,9 @@ public class SecurityConfig {
                     // Rutas públicas
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/health").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                     // Rutas protegidas por rol
-                    .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
                     // Cualquier otra petición requiere autenticación
                     .anyRequest().authenticated()
@@ -57,5 +59,13 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> jwtAuthenticationFilterRegistration(JwtAuthenticationFilter filter) {
+        org.springframework.boot.web.servlet.FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 }

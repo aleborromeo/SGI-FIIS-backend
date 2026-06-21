@@ -3,7 +3,7 @@ package com.sgi.fiis.proyectos.infrastructure.persistence;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +28,7 @@ class ProjectEntityTest {
     void testAllArgsConstructor() {
         ResearchLineEntity line = new ResearchLineEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
-        UsuarioEntity responsible = new UsuarioEntity();
+        UserEntity responsible = new UserEntity();
         ResearchCallEntity call = new ResearchCallEntity();
         LocalDate startDate = LocalDate.of(2025, 1, 1);
         LocalDate endDate = LocalDate.of(2025, 12, 31);
@@ -62,7 +62,7 @@ class ProjectEntityTest {
     void testBuilder() {
         ResearchLineEntity line = new ResearchLineEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
-        UsuarioEntity responsible = new UsuarioEntity();
+        UserEntity responsible = new UserEntity();
         LocalDate startDate = LocalDate.of(2025, 3, 1);
         LocalDate endDate = LocalDate.of(2025, 8, 30);
 
@@ -106,7 +106,7 @@ class ProjectEntityTest {
         ProjectEntity entity = new ProjectEntity();
         ResearchLineEntity line = new ResearchLineEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
-        UsuarioEntity responsible = new UsuarioEntity();
+        UserEntity responsible = new UserEntity();
 
         entity.setId(3);
         entity.setCode("PROJ-003");

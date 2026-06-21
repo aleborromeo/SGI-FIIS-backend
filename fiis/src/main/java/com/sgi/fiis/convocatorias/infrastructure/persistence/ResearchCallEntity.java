@@ -46,12 +46,9 @@ public class ResearchCallEntity {
     @JoinColumn(name = "id_documento_bases")
     private DocumentEntity document;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "convocatorias_lineas",
-        joinColumns = @JoinColumn(name = "id_convocatoria"),
-        inverseJoinColumns = @JoinColumn(name = "id_linea")
-    )
+    @JoinTable(name = "convocatorias_lineas", joinColumns = @JoinColumn(name = "id_convocatoria"), inverseJoinColumns = @JoinColumn(name = "id_linea"))
     private List<ResearchLineEntity> researchLines = new ArrayList<>();
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)

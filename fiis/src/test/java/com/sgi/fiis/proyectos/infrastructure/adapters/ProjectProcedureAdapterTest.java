@@ -6,7 +6,7 @@ import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.tramites.infrastructure.persistence.*;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +33,7 @@ class ProjectProcedureAdapterTest {
         adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository);
     }
 
-    private ProjectEntity createProjectEntity(Integer id, UsuarioEntity responsible, ResearchGroupEntity group) {
+    private ProjectEntity createProjectEntity(Integer id, UserEntity responsible, ResearchGroupEntity group) {
         ProjectEntity entity = new ProjectEntity();
         entity.setId(id);
         entity.setTitle("Test Project");
@@ -46,7 +46,7 @@ class ProjectProcedureAdapterTest {
     @Test
     void createPostulationProcedure_ShouldSucceed_WhenProjectExists() {
         Project project = Project.builder().id(1).build();
-        UsuarioEntity responsible = new UsuarioEntity();
+        UserEntity responsible = new UserEntity();
         responsible.setId(10L);
         ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(20);
@@ -86,7 +86,7 @@ class ProjectProcedureAdapterTest {
     @Test
     void createPostulationProcedure_ShouldSetCorrectProcedureFields() {
         Project project = Project.builder().id(1).build();
-        UsuarioEntity responsible = new UsuarioEntity();
+        UserEntity responsible = new UserEntity();
         responsible.setId(10L);
         ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(20);
@@ -162,7 +162,7 @@ class ProjectProcedureAdapterTest {
     @Test
     void createPostulationProcedure_ShouldSaveWithNullGroup() {
         Project project = Project.builder().id(1).build();
-        UsuarioEntity responsible = new UsuarioEntity();
+        UserEntity responsible = new UserEntity();
         responsible.setId(10L);
         ProjectEntity projectEntity = createProjectEntity(1, responsible, null);
 

@@ -7,7 +7,6 @@ import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import com.sgi.fiis.proyectos.application.ports.in.CreateProjectUseCase;
 import com.sgi.fiis.proyectos.application.ports.out.CreateProcedurePort;
 import com.sgi.fiis.proyectos.application.ports.out.SaveProjectPort;
-import com.sgi.fiis.proyectos.application.dto.MemberRequest;
 import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
@@ -21,7 +20,6 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
-
 @Service
 public class CreateProjectInteractor implements CreateProjectUseCase {
 
@@ -30,8 +28,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     private final CreateProcedurePort createProcedurePort;
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
-                                   SaveCallPort saveCallPort,
-                                   CreateProcedurePort createProcedurePort) {
+            SaveCallPort saveCallPort,
+            CreateProcedurePort createProcedurePort) {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
@@ -46,9 +44,12 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
             throw new BusinessRuleValidationException("Research group is not active or does not exist.");
         }
 
-        // 2. Validate responsible teacher is an active member of the research group (RN-02)
-        if (!saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(), request.getResearchGroupId())) {
-            throw new BusinessRuleValidationException("Responsible teacher is not an active member of the selected research group.");
+        // 2. Validate responsible teacher is an active member of the research group
+        // (RN-02)
+        if (!saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
+                request.getResearchGroupId())) {
+            throw new BusinessRuleValidationException(
+                    "Responsible teacher is not an active member of the selected research group.");
         }
 
         // 3. Validate Research Line exists and is active (RN-11)
@@ -65,14 +66,16 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         // 5. If linked to a call, fetch call and validate it (RF-33 & RF-34)
         if (request.getCallId() != null) {
             ResearchCall call = saveCallPort.findById(request.getCallId())
-                    .orElseThrow(() -> new BusinessRuleValidationException("Research call not found with ID: " + request.getCallId()));
-            
+                    .orElseThrow(() -> new BusinessRuleValidationException(
+                            "Research call not found with ID: " + request.getCallId()));
+
             // Validate that call is open and current date is within range
             call.validateCanSubmitProject(LocalDate.now(ZoneId.systemDefault()));
         }
 
         // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
-        String generatedCode = "PRJ-" + LocalDate.now(ZoneId.systemDefault()).getYear() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String generatedCode = "PRJ-" + LocalDate.now(ZoneId.systemDefault()).getYear() + "-"
+                + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 7. Create domain model
         Project project = new Project(
@@ -92,10 +95,10 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 groupCode,
                 request.getCallId(),
                 request.getDocumentId(),
-                ProjectStatus.POSTULATED
-        );
+                ProjectStatus.POSTULATED);
 
-        // 8. Validate domain invariants (budget > 0, dates order, and GINSOFT line consistency RN-12)
+        // 8. Validate domain invariants (budget > 0, dates order, and GINSOFT line
+        // consistency RN-12)
         project.validateInvariants();
 
         // 9. Save project
@@ -107,7 +110,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         // 11. Save project team members if provided (RF-36)
         if (request.getMembers() != null && !request.getMembers().isEmpty()) {
             List<ProjectMember> members = request.getMembers().stream()
-                    .map(m -> new ProjectMember(null, savedProject.getId(), m.getUserId(), m.getRole() != null ? m.getRole() : "INVESTIGADOR"))
+                    .map(m -> new ProjectMember(null, savedProject.getId(), m.getUserId(),
+                            m.getRole() != null ? m.getRole() : "INVESTIGADOR"))
                     .toList();
             saveProjectPort.saveMembers(savedProject.getId(), members);
         }
@@ -156,12 +160,18 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private ProjectStatus mapStatusFromString(String status) {
-        if ("POSTULADO".equalsIgnoreCase(status)) return ProjectStatus.POSTULATED;
-        if ("OBSERVADO".equalsIgnoreCase(status)) return ProjectStatus.OBSERVED;
-        if ("APROBADO".equalsIgnoreCase(status)) return ProjectStatus.APPROVED;
-        if ("RECHAZADO".equalsIgnoreCase(status)) return ProjectStatus.REJECTED;
-        if ("EN_EJECUCION".equalsIgnoreCase(status)) return ProjectStatus.IN_PROGRESS;
-        if ("FINALIZADO".equalsIgnoreCase(status)) return ProjectStatus.COMPLETED;
+        if ("POSTULADO".equalsIgnoreCase(status))
+            return ProjectStatus.POSTULATED;
+        if ("OBSERVADO".equalsIgnoreCase(status))
+            return ProjectStatus.OBSERVED;
+        if ("APROBADO".equalsIgnoreCase(status))
+            return ProjectStatus.APPROVED;
+        if ("RECHAZADO".equalsIgnoreCase(status))
+            return ProjectStatus.REJECTED;
+        if ("EN_EJECUCION".equalsIgnoreCase(status))
+            return ProjectStatus.IN_PROGRESS;
+        if ("FINALIZADO".equalsIgnoreCase(status))
+            return ProjectStatus.COMPLETED;
         return ProjectStatus.valueOf(status.toUpperCase());
     }
 
@@ -189,7 +199,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         List<com.sgi.fiis.proyectos.application.dto.MemberResponse> members = null;
         if (project.getId() != null) {
             members = saveProjectPort.findMembersByProjectId(project.getId()).stream()
-                    .map(m -> new com.sgi.fiis.proyectos.application.dto.MemberResponse(m.getId(), m.getUserId(), m.getRole()))
+                    .map(m -> new com.sgi.fiis.proyectos.application.dto.MemberResponse(m.getId(), m.getUserId(),
+                            m.getRole()))
                     .toList();
         }
 
@@ -211,7 +222,6 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 project.getCallId(),
                 project.getDocumentId(),
                 dbStatus,
-                members
-        );
+                members);
     }
 }

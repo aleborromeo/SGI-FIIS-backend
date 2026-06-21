@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
-import com.sgi.fiis.users.infrastructure.persistence.SpringDataUsuarioRepository;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
 
 import java.math.BigDecimal;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +29,7 @@ class SaveProjectAdapterTest {
     private ProjectJpaRepository jpaRepository;
     private ResearchLineJpaRepository lineRepository;
     private ResearchGroupJpaRepository groupRepository;
-    private SpringDataUsuarioRepository userRepository;
+    private SpringDataUserRepository userRepository;
     private ResearchCallJpaRepository callRepository;
     private GroupMembershipJpaRepository membershipRepository;
     private ProjectMemberJpaRepository projectMemberRepository;
@@ -47,7 +47,7 @@ class SaveProjectAdapterTest {
         line.setName("Line");
         entity.setResearchLine(line);
         
-        UsuarioEntity user = new UsuarioEntity();
+        UserEntity user = new UserEntity();
         user.setId(3L);
         entity.setResponsible(user);
         
@@ -68,7 +68,7 @@ class SaveProjectAdapterTest {
         jpaRepository = Mockito.mock(ProjectJpaRepository.class);
         lineRepository = Mockito.mock(ResearchLineJpaRepository.class);
         groupRepository = Mockito.mock(ResearchGroupJpaRepository.class);
-        userRepository = Mockito.mock(SpringDataUsuarioRepository.class);
+        userRepository = Mockito.mock(SpringDataUserRepository.class);
         callRepository = Mockito.mock(ResearchCallJpaRepository.class);
         membershipRepository = Mockito.mock(GroupMembershipJpaRepository.class);
         projectMemberRepository = Mockito.mock(ProjectMemberJpaRepository.class);
@@ -91,7 +91,7 @@ class SaveProjectAdapterTest {
         ProjectEntity entity = createValidEntity(1, "POSTULADO");
 
         when(lineRepository.findById(1)).thenReturn(Optional.of(new ResearchLineEntity()));
-        when(userRepository.findById(3L)).thenReturn(Optional.of(new UsuarioEntity()));
+        when(userRepository.findById(3L)).thenReturn(Optional.of(new UserEntity()));
         when(groupRepository.findById(2)).thenReturn(Optional.of(new ResearchGroupEntity()));
         when(callRepository.findById(4)).thenReturn(Optional.of(new ResearchCallEntity()));
         when(jpaRepository.save(any(ProjectEntity.class))).thenReturn(entity);

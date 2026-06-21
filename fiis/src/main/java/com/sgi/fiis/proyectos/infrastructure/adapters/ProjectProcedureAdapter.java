@@ -7,7 +7,7 @@ import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.tramites.infrastructure.persistence.*;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,7 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
         ProjectEntity projectEntity = projectRepository.findById(project.getId())
                 .orElseThrow(() -> new BusinessRuleValidationException("Project not found with ID: " + project.getId()));
 
-        UsuarioEntity applicant = projectEntity.getResponsible();
+        UserEntity applicant = projectEntity.getResponsible();
         ResearchGroupEntity group = projectEntity.getGroup();
 
         // 1. Generate unique procedure code (max 30 chars). Format: TRM-YYYY-[UUID-8]

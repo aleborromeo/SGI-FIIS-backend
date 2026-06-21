@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,8 +26,7 @@ class ResearchCallEntityTest {
 
         ResearchCallEntity entity = new ResearchCallEntity(
                 1, "Convocatoria 2025-I", "Description", startDate, endDate,
-                "ABIERTA", null, null, null, null
-        );
+                "ABIERTA", null, null, null, null);
 
         assertEquals(1, entity.getId());
         assertEquals("Convocatoria 2025-I", entity.getTitle());
@@ -113,11 +111,9 @@ class ResearchCallEntityTest {
         LocalDate endDate = LocalDate.of(2025, 3, 31);
 
         ResearchCallEntity entity1 = new ResearchCallEntity(
-                1, "Test", "Description", startDate, endDate, "ABIERTA", null, null, null, null
-        );
+                1, "Test", "Description", startDate, endDate, "ABIERTA", null, null, null, null);
         ResearchCallEntity entity2 = new ResearchCallEntity(
-                1, "Test", "Description", startDate, endDate, "ABIERTA", null, null, null, null
-        );
+                1, "Test", "Description", startDate, endDate, "ABIERTA", null, null, null, null);
 
         assertEquals(entity1, entity2);
         assertEquals(entity1.hashCode(), entity2.hashCode());

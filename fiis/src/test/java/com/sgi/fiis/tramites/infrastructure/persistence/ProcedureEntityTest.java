@@ -2,7 +2,7 @@ package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ class ProcedureEntityTest {
     @Test
     @DisplayName("Should create entity using all-args constructor")
     void testAllArgsConstructor() {
-        UsuarioEntity applicant = new UsuarioEntity();
+        UserEntity applicant = new UserEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
         ProjectEntity projectRef = new ProjectEntity();
 
@@ -48,7 +48,7 @@ class ProcedureEntityTest {
     @Test
     @DisplayName("Should create entity using builder")
     void testBuilder() {
-        UsuarioEntity applicant = new UsuarioEntity();
+        UserEntity applicant = new UserEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
 
         ProcedureEntity entity = ProcedureEntity.builder()
@@ -75,7 +75,7 @@ class ProcedureEntityTest {
     @DisplayName("Should set and get all fields via setters")
     void testSettersAndGetters() {
         ProcedureEntity entity = new ProcedureEntity();
-        UsuarioEntity applicant = new UsuarioEntity();
+        UserEntity applicant = new UserEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
         ProjectEntity projectRef = new ProjectEntity();
 

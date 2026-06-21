@@ -18,8 +18,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,12 +25,12 @@ import static org.mockito.Mockito.when;
 class ResearchCallModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
-    private static final LocalDate FIXED_TODAY      = LocalDate.of(2026, Month.JUNE, 1);
-    private static final LocalDate FIXED_PAST_5     = LocalDate.of(2026, Month.MAY, 27);
-    private static final LocalDate FIXED_PAST_10    = LocalDate.of(2026, Month.MAY, 22);
-    private static final LocalDate FIXED_FUTURE_2M  = LocalDate.of(2026, Month.AUGUST, 1);
-    private static final LocalDate FIXED_FUTURE_5D  = LocalDate.of(2026, Month.JUNE, 6);
-    private static final LocalDate FIXED_PAST_2D    = LocalDate.of(2026, Month.MAY, 30);
+    private static final LocalDate FIXED_TODAY = LocalDate.of(2026, Month.JUNE, 1);
+    private static final LocalDate FIXED_PAST_5 = LocalDate.of(2026, Month.MAY, 27);
+    private static final LocalDate FIXED_PAST_10 = LocalDate.of(2026, Month.MAY, 22);
+    private static final LocalDate FIXED_FUTURE_2M = LocalDate.of(2026, Month.AUGUST, 1);
+    private static final LocalDate FIXED_FUTURE_5D = LocalDate.of(2026, Month.JUNE, 6);
+    private static final LocalDate FIXED_PAST_2D = LocalDate.of(2026, Month.MAY, 30);
     private static final LocalDate FIXED_FUTURE_10D = LocalDate.of(2026, Month.JUNE, 11);
 
     private SaveCallPort saveCallPort;
@@ -57,7 +55,8 @@ class ResearchCallModuleTest {
 
         when(saveCallPort.areLinesActive(any())).thenReturn(true);
 
-        ResearchCall savedCall = new ResearchCall(1, "Call 2026", "Research call description", FIXED_TODAY, FIXED_FUTURE_2M, CallStatus.OPEN, null, Collections.singletonList(1));
+        ResearchCall savedCall = new ResearchCall(1, "Call 2026", "Research call description", FIXED_TODAY,
+                FIXED_FUTURE_2M, CallStatus.OPEN, null, Collections.singletonList(1));
         when(saveCallPort.save(any(ResearchCall.class))).thenReturn(savedCall);
 
         CallResponse response = createCallInteractor.execute(request);
@@ -71,24 +70,29 @@ class ResearchCallModuleTest {
     @Test
     void shouldValidateDatesCorrectlyOnSubmission() {
         // Active open call - single invocation in lambda (SonarCloud S5778)
-        ResearchCall openCall = new ResearchCall(1, "Call 1", "Description", FIXED_PAST_5, FIXED_FUTURE_5D, CallStatus.OPEN, null, null);
+        ResearchCall openCall = new ResearchCall(1, "Call 1", "Description", FIXED_PAST_5, FIXED_FUTURE_5D,
+                CallStatus.OPEN, null, null);
         assertDoesNotThrow(() -> openCall.validateCanSubmitProject(FIXED_TODAY));
 
         // Closed call - single invocation in lambda
-        ResearchCall closedCall = new ResearchCall(2, "Call 2", "Description", FIXED_PAST_5, FIXED_FUTURE_5D, CallStatus.CLOSED, null, null);
+        ResearchCall closedCall = new ResearchCall(2, "Call 2", "Description", FIXED_PAST_5, FIXED_FUTURE_5D,
+                CallStatus.CLOSED, null, null);
         assertThrows(BusinessRuleValidationException.class,
                 () -> closedCall.validateCanSubmitProject(FIXED_TODAY));
 
         // Expired call - single invocation in lambda
-        ResearchCall expiredCall = new ResearchCall(3, "Call 3", "Description", FIXED_PAST_10, FIXED_PAST_2D, CallStatus.OPEN, null, null);
+        ResearchCall expiredCall = new ResearchCall(3, "Call 3", "Description", FIXED_PAST_10, FIXED_PAST_2D,
+                CallStatus.OPEN, null, null);
         assertThrows(BusinessRuleValidationException.class,
                 () -> expiredCall.validateCanSubmitProject(FIXED_TODAY));
     }
 
     @Test
     void shouldListCallsFilteredByStatus() {
-        ResearchCall call1 = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN, null, null);
-        ResearchCall call2 = new ResearchCall(2, "Call 2", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.CLOSED, null, null);
+        ResearchCall call1 = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D,
+                CallStatus.OPEN, null, null);
+        ResearchCall call2 = new ResearchCall(2, "Call 2", "Description", FIXED_TODAY, FIXED_FUTURE_10D,
+                CallStatus.CLOSED, null, null);
 
         when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(Arrays.asList(call1));
         when(saveCallPort.findAll()).thenReturn(Arrays.asList(call1, call2));
@@ -103,7 +107,8 @@ class ResearchCallModuleTest {
 
     @Test
     void shouldFindCallsWithEmptyStatus() {
-        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN, null, null);
+        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN,
+                null, null);
         when(saveCallPort.findAll()).thenReturn(Arrays.asList(call));
 
         List<CallResponse> allCalls = callInteractor.execute("   ");
@@ -117,7 +122,8 @@ class ResearchCallModuleTest {
 
     @Test
     void shouldGetCallByIdSuccessfully() {
-        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.CLOSED, null, null);
+        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D,
+                CallStatus.CLOSED, null, null);
         when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
 
         CallResponse response = callInteractor.getCallById(1);
@@ -133,10 +139,12 @@ class ResearchCallModuleTest {
 
     @Test
     void shouldUpdateStatusSuccessfully() {
-        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN, null, null);
+        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN,
+                null, null);
         when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
-        
-        ResearchCall updatedCall = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.FINISHED, null, null);
+
+        ResearchCall updatedCall = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D,
+                CallStatus.FINISHED, null, null);
         when(saveCallPort.save(any())).thenReturn(updatedCall);
 
         CallResponse response = callInteractor.updateStatus(1, "FINALIZADA");
@@ -145,9 +153,10 @@ class ResearchCallModuleTest {
 
     @Test
     void shouldThrowExceptionWhenUpdateStatusInvalid() {
-        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN, null, null);
+        ResearchCall call = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D, CallStatus.OPEN,
+                null, null);
         when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
-        
+
         assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(1, "INVALID_STATUS"));
     }
 

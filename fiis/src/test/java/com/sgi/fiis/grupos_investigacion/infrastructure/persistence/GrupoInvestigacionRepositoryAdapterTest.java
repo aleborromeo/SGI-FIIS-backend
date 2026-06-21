@@ -7,14 +7,15 @@ import org.mockito.Mockito;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.ArgumentMatchers;
 import static org.mockito.Mockito.*;
 
 class GrupoInvestigacionRepositoryAdapterTest {
@@ -70,15 +71,14 @@ class GrupoInvestigacionRepositoryAdapterTest {
 
         when(jpaRepository.save(any(GrupoInvestigacionEntity.class))).thenReturn(entity);
         // Mock enrichWithCoordinator
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(10)))
-                .thenAnswer(invocation -> {
-                    RowMapper<GrupoInvestigacion> rm = invocation.getArgument(1);
-                    java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
-                    when(rs.getString("nombres")).thenReturn("John");
-                    when(rs.getString("apellidos")).thenReturn("Doe");
-                    GrupoInvestigacion g = rm.mapRow(rs, 1);
-                    return Collections.singletonList(g);
-                });
+        doAnswer(invocation -> {
+            RowMapper<GrupoInvestigacion> rm = invocation.getArgument(1);
+            java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
+            when(rs.getString("nombres")).thenReturn("John");
+            when(rs.getString("apellidos")).thenReturn("Doe");
+            GrupoInvestigacion g = rm.mapRow(rs, 1);
+            return Collections.singletonList(g);
+        }).when(jdbcTemplate).query(anyString(), ArgumentMatchers.<RowMapper<GrupoInvestigacion>>any(), anyInt());
 
         GrupoInvestigacion result = adapter.save(domain);
         assertNotNull(result);
@@ -93,8 +93,8 @@ class GrupoInvestigacionRepositoryAdapterTest {
         entity.setIdCoordinadorActual(10);
 
         when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(10)))
-                .thenReturn(Collections.emptyList());
+        doReturn(Collections.emptyList())
+                .when(jdbcTemplate).query(anyString(), ArgumentMatchers.<RowMapper<GrupoInvestigacion>>any(), anyInt());
 
         Optional<GrupoInvestigacion> result = adapter.findById(1);
         assertTrue(result.isPresent());
@@ -103,20 +103,19 @@ class GrupoInvestigacionRepositoryAdapterTest {
 
     @Test
     void shouldFindAll() {
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class)))
-                .thenAnswer(invocation -> {
-                    RowMapper<GrupoInvestigacion> rm = invocation.getArgument(1);
-                    java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
-                    when(rs.getInt("id_grupo")).thenReturn(1);
-                    when(rs.getString("codigo_grupo")).thenReturn("GIN-001");
-                    when(rs.getString("nombre_grupo")).thenReturn("Name");
-                    when(rs.getObject("id_coordinador_actual")).thenReturn(5);
-                    when(rs.getInt("id_coordinador_actual")).thenReturn(5);
-                    when(rs.getBoolean("es_activo")).thenReturn(true);
-                    when(rs.getString("coordinador_nombres")).thenReturn("John");
-                    when(rs.getString("coordinador_apellidos")).thenReturn("Doe");
-                    return Arrays.asList(rm.mapRow(rs, 1));
-                });
+        doAnswer(invocation -> {
+            RowMapper<GrupoInvestigacion> rm = invocation.getArgument(1);
+            java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
+            when(rs.getInt("id_grupo")).thenReturn(1);
+            when(rs.getString("codigo_grupo")).thenReturn("GIN-001");
+            when(rs.getString("nombre_grupo")).thenReturn("Name");
+            when(rs.getObject("id_coordinador_actual")).thenReturn(5);
+            when(rs.getInt("id_coordinador_actual")).thenReturn(5);
+            when(rs.getBoolean("es_activo")).thenReturn(true);
+            when(rs.getString("coordinador_nombres")).thenReturn("John");
+            when(rs.getString("coordinador_apellidos")).thenReturn("Doe");
+            return Collections.singletonList(rm.mapRow(rs, 1));
+        }).when(jdbcTemplate).query(anyString(), ArgumentMatchers.<RowMapper<GrupoInvestigacion>>any());
 
         List<GrupoInvestigacion> result = adapter.findAll();
         assertEquals(1, result.size());

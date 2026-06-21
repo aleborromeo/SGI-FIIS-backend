@@ -1,6 +1,6 @@
 package com.sgi.fiis.proyectos.infrastructure.persistence;
 
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +24,7 @@ public class ProjectMemberEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario", nullable = false)
-    private UsuarioEntity user;
+    private UserEntity user;
 
     @Column(name = "rol", nullable = false, length = 30)
     @Builder.Default

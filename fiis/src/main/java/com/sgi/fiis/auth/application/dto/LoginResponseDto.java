@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginResponseDto {
     private String token;
-    private String tipo;
-    private String correo;
-    private String nombres;
-    private String apellidos;
-    private String rolCodigo;
+    private String type;
+    private String email;
+    private String firstNames;
+    private String lastNames;
+    private String roleCode;
     private boolean mustChangePassword;
     private boolean requiresVerification;
 }

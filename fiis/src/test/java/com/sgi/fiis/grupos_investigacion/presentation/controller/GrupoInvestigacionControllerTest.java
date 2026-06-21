@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,8 +55,7 @@ class GrupoInvestigacionControllerTest {
         GrupoInvestigacionController controller = new GrupoInvestigacionController(
                 crearGrupoUseCase, listarGruposUseCase, obtenerGrupoUseCase,
                 asignarCoordinadorUseCase, asignarMiembroUseCase, retirarMiembroUseCase,
-                listarMiembrosUseCase, listarLineasPorGrupoUseCase, mapper, lineaMapper
-        );
+                listarMiembrosUseCase, listarLineasPorGrupoUseCase, mapper, lineaMapper);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
@@ -71,15 +69,16 @@ class GrupoInvestigacionControllerTest {
 
         GrupoInvestigacion domain = GrupoInvestigacion.builder().codigoGrupo("GIN-001").build();
         GrupoInvestigacion saved = GrupoInvestigacion.builder().id(1).codigoGrupo("GIN-001").build();
-        GrupoInvestigacionResponseDto response = GrupoInvestigacionResponseDto.builder().id(1).codigoGrupo("GIN-001").build();
+        GrupoInvestigacionResponseDto response = GrupoInvestigacionResponseDto.builder().id(1).codigoGrupo("GIN-001")
+                .build();
 
         when(mapper.toDomain(any(GrupoInvestigacionRequestDto.class))).thenReturn(domain);
         when(crearGrupoUseCase.execute(any(GrupoInvestigacion.class))).thenReturn(saved);
         when(mapper.toResponseDto(any(GrupoInvestigacion.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/grupos-investigacion")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1));
     }
@@ -116,14 +115,15 @@ class GrupoInvestigacionControllerTest {
         dto.setIdUsuario(5);
 
         GrupoInvestigacion domain = GrupoInvestigacion.builder().id(1).idCoordinadorActual(5).build();
-        GrupoInvestigacionResponseDto response = GrupoInvestigacionResponseDto.builder().id(1).idCoordinadorActual(5).build();
+        GrupoInvestigacionResponseDto response = GrupoInvestigacionResponseDto.builder().id(1).idCoordinadorActual(5)
+                .build();
 
         when(asignarCoordinadorUseCase.execute(1, 5)).thenReturn(domain);
         when(mapper.toResponseDto(any(GrupoInvestigacion.class))).thenReturn(response);
 
         mockMvc.perform(patch("/api/v1/grupos-investigacion/1/coordinador")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.idCoordinadorActual").value(5));
@@ -141,8 +141,8 @@ class GrupoInvestigacionControllerTest {
         when(mapper.toMembresiaResponseDto(any(Membresia.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/grupos-investigacion/2/miembros")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.idUsuario").value(5));
@@ -151,7 +151,8 @@ class GrupoInvestigacionControllerTest {
     @Test
     void shouldRetirarMiembro() throws Exception {
         Membresia domain = Membresia.builder().id(1).idGrupo(2).idUsuario(5).esActivo(false).build();
-        MembresiaResponseDto response = MembresiaResponseDto.builder().id(1).idGrupo(2).idUsuario(5).esActivo(false).build();
+        MembresiaResponseDto response = MembresiaResponseDto.builder().id(1).idGrupo(2).idUsuario(5).esActivo(false)
+                .build();
 
         when(retirarMiembroUseCase.execute(2, 5)).thenReturn(domain);
         when(mapper.toMembresiaResponseDto(any(Membresia.class))).thenReturn(response);

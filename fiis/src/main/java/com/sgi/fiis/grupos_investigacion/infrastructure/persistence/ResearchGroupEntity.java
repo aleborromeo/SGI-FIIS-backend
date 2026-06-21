@@ -1,6 +1,6 @@
 package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,5 +27,5 @@ public class ResearchGroupEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_coordinador_actual")
-    private UsuarioEntity currentCoordinator;
+    private UserEntity currentCoordinator;
 }

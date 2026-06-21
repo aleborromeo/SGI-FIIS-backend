@@ -3,18 +3,20 @@ package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 import com.sgi.fiis.grupos_investigacion.domain.model.Membresia;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class MembresiaRepositoryAdapterTest {
@@ -69,21 +71,20 @@ class MembresiaRepositoryAdapterTest {
     @Test
     void shouldFindActivasByGrupo() {
         LocalDateTime now = LocalDateTime.now();
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(2)))
-                .thenAnswer(invocation -> {
-                    RowMapper<Membresia> rm = invocation.getArgument(1);
-                    java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
-                    when(rs.getInt("id_membresia")).thenReturn(1);
-                    when(rs.getInt("id_grupo")).thenReturn(2);
-                    when(rs.getInt("id_usuario")).thenReturn(3);
-                    when(rs.getBoolean("es_activo")).thenReturn(true);
-                    when(rs.getObject("fecha_inicio", LocalDateTime.class)).thenReturn(now);
-                    when(rs.getObject("fecha_fin", LocalDateTime.class)).thenReturn(null);
-                    when(rs.getString("usuario_nombres")).thenReturn("John");
-                    when(rs.getString("usuario_apellidos")).thenReturn("Doe");
-                    when(rs.getString("usuario_correo")).thenReturn("john@doe.com");
-                    return Arrays.asList(rm.mapRow(rs, 1));
-                });
+        doAnswer(invocation -> {
+            RowMapper<Membresia> rm = invocation.getArgument(1);
+            java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
+            when(rs.getInt("id_membresia")).thenReturn(1);
+            when(rs.getInt("id_grupo")).thenReturn(2);
+            when(rs.getInt("id_usuario")).thenReturn(3);
+            when(rs.getBoolean("es_activo")).thenReturn(true);
+            when(rs.getObject("fecha_inicio", LocalDateTime.class)).thenReturn(now);
+            when(rs.getObject("fecha_fin", LocalDateTime.class)).thenReturn(null);
+            when(rs.getString("usuario_nombres")).thenReturn("John");
+            when(rs.getString("usuario_apellidos")).thenReturn("Doe");
+            when(rs.getString("usuario_correo")).thenReturn("john@doe.com");
+            return Collections.singletonList(rm.mapRow(rs, 1));
+        }).when(jdbcTemplate).query(anyString(), ArgumentMatchers.<RowMapper<Membresia>>any(), anyInt());
 
         List<Membresia> result = adapter.findActivasByGrupo(2);
         assertEquals(1, result.size());

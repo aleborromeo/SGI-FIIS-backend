@@ -2,7 +2,7 @@ package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class ProcedureEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_solicitante", nullable = false)
-    private UsuarioEntity applicant;
+    private UserEntity applicant;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_grupo", nullable = false)

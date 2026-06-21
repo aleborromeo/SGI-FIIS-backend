@@ -1,6 +1,6 @@
 package com.sgi.fiis.tramites.infrastructure.persistence;
 
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class ProcedureMovementEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario_accion", nullable = false)
-    private UsuarioEntity actionUser;
+    private UserEntity actionUser;
 
     @Column(name = "accion", nullable = false, length = 30)
     private String action;

@@ -5,66 +5,68 @@ import com.sgi.fiis.auth.application.service.PendingRegistrationService;
 import com.sgi.fiis.auth.domain.port.EmailSenderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Caso de uso: Auto-registro de usuarios (Paso 1).
- * Valida los datos iniciales y el dominio del correo, y guarda temporalmente en memoria enviando un código de verificación.
+ * Use case: Self-registration of users (Step 1).
+ * Validates initial data and email domain, and temporarily saves in memory while sending a verification code.
  */
 @Service
 public class RegisterUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterUseCase.class);
     private final SecureRandom random = new SecureRandom();
-    private final UsuarioRepositoryPort usuarioRepository;
+    private final UserRepositoryPort userRepository;
     private final PendingRegistrationService pendingRegistrationService;
     private final EmailSenderPort emailSender;
 
-    public RegisterUseCase(UsuarioRepositoryPort usuarioRepository,
+    public RegisterUseCase(UserRepositoryPort userRepository,
                            PendingRegistrationService pendingRegistrationService,
                            EmailSenderPort emailSender) {
-        this.usuarioRepository = usuarioRepository;
+        this.userRepository = userRepository;
         this.pendingRegistrationService = pendingRegistrationService;
         this.emailSender = emailSender;
     }
 
     public void execute(RegisterRequestDto dto) {
-        String correo = dto.getCorreoInstitucional().trim();
-
-        // 1. Validar dominio .edu.pe del correo
-        if (!correo.toLowerCase().endsWith(".edu.pe")) {
-            throw new BusinessException("El correo institucional debe pertenecer al dominio .edu.pe");
+        // 0. Validate passwords match
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new BusinessException("auth.password.mismatch");
         }
 
-        // 2. Validar que no exista DNI duplicado en la base de datos
-        if (usuarioRepository.existsByDni(dto.getDni())) {
+        String email = dto.getInstitutionalEmail().trim();
+
+        // 1. Validate email domain ends with .edu.pe
+        if (!email.toLowerCase().endsWith(".edu.pe")) {
+            throw new BusinessException("auth.email.invalid-domain");
+        }
+
+        // 2. Validate DNI uniqueness in DB
+        if (userRepository.existsByDni(dto.getDni())) {
             throw new DuplicateResourceException("Usuario", "DNI", dto.getDni());
         }
 
-        // 3. Validar que no exista correo duplicado en la base de datos
-        if (usuarioRepository.existsByCorreo(correo)) {
-            throw new DuplicateResourceException("Usuario", "correo", correo);
+        // 3. Validate email uniqueness in DB
+        if (userRepository.existsByEmail(email)) {
+            throw new DuplicateResourceException("Usuario", "correo", email);
         }
 
-        // 4. Generar código de 6 dígitos aleatorio
-        int num = random.nextInt(900000) + 100000; // 100000 a 999999
+        // 4. Generate 6-digit random code
+        int num = random.nextInt(900000) + 100000; // 100000 to 999999
         String code = String.valueOf(num);
 
-        // 5. Almacenar temporalmente en memoria
-        pendingRegistrationService.register(correo, dto, code);
+        // 5. Store temporarily in memory
+        pendingRegistrationService.register(email, dto, code);
 
-        // 6. Enviar código por correo electrónico
-        try {
-            emailSender.sendVerificationCode(correo, code);
-        } catch (Exception e) {
-            log.error("[EMAIL SENDER] Error al enviar código de registro: {}", e.getMessage(), e);
-        }
+        // 6. Send code by email
+        emailSender.sendVerificationCode(email, code);
 
-        // Imprimir en consola de desarrollo para pruebas fáciles
-        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", correo, code);
+        // Print to development console for easy testing
+        String cleanEmail = email.replaceAll("[\n\r]", "_");
+        log.info("CÓDIGO DE VERIFICACIÓN DE REGISTRO GENERADO (DEV) - Usuario: {}, Código: {}", cleanEmail, code);
     }
 }

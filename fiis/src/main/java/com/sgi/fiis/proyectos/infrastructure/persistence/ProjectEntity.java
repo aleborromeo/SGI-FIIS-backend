@@ -3,7 +3,7 @@ package com.sgi.fiis.proyectos.infrastructure.persistence;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -59,7 +59,7 @@ public class ProjectEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_responsable", nullable = false)
-    private UsuarioEntity responsible;
+    private UserEntity responsible;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_convocatoria")
