@@ -1,13 +1,13 @@
 package com.sgi.fiis.tramites.domain.model;
 
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static com.sgi.fiis.tramites.domain.model.EstadoTramite.*;
-import static com.sgi.fiis.users.domain.model.RolEnum.*;
+import static com.sgi.fiis.users.domain.model.RoleEnum.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Tramite - Entidad raíz del módulo tramites")

@@ -2,7 +2,7 @@ package com.sgi.fiis.tramites.domain.event;
 
 import com.sgi.fiis.tramites.domain.model.EstadoTramite;
 import com.sgi.fiis.tramites.domain.model.TipoTramite;
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ class TramiteEventosTest {
                 .idSolicitante(42L)
                 .estadoResultante(EstadoTramite.PENDIENTE_COORDINADOR)
                 .idAprobador(10L)
-                .rolAprobador(RolEnum.COORDINADOR_GRUPO)
+                .rolAprobador(RoleEnum.COORDINADOR_GRUPO)
                 .fechaAprobacion(fecha)
                 .build();
 
@@ -32,7 +32,7 @@ class TramiteEventosTest {
         assertEquals(42L, evento.getIdSolicitante());
         assertEquals(EstadoTramite.PENDIENTE_COORDINADOR, evento.getEstadoResultante());
         assertEquals(10L, evento.getIdAprobador());
-        assertEquals(RolEnum.COORDINADOR_GRUPO, evento.getRolAprobador());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, evento.getRolAprobador());
         assertEquals(fecha, evento.getFechaAprobacion());
     }
 
@@ -46,7 +46,7 @@ class TramiteEventosTest {
                 .tipoTramite(TipoTramite.PLAN_TESIS)
                 .idSolicitante(55L)
                 .idObservador(20L)
-                .rolObservador(RolEnum.DIRECTOR_INVESTIGACION)
+                .rolObservador(RoleEnum.DIRECTOR_INVESTIGACION)
                 .textoObservacion("Falta bibliografía actualizada")
                 .fechaObservacion(fecha)
                 .build();
@@ -56,7 +56,7 @@ class TramiteEventosTest {
         assertEquals(TipoTramite.PLAN_TESIS, evento.getTipoTramite());
         assertEquals(55L, evento.getIdSolicitante());
         assertEquals(20L, evento.getIdObservador());
-        assertEquals(RolEnum.DIRECTOR_INVESTIGACION, evento.getRolObservador());
+        assertEquals(RoleEnum.DIRECTOR_INVESTIGACION, evento.getRolObservador());
         assertEquals("Falta bibliografía actualizada", evento.getTextoObservacion());
         assertEquals(fecha, evento.getFechaObservacion());
     }

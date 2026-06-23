@@ -7,7 +7,7 @@ import com.sgi.fiis.tramites.application.mapper.TramiteMapper;
 import com.sgi.fiis.tramites.domain.model.Tramite;
 import com.sgi.fiis.tramites.domain.port.TramiteRepositoryPort;
 import com.sgi.fiis.tramites.domain.service.TramiteStateMachine;
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,7 @@ public class RechazarTramiteUseCase {
     }
 
     @Transactional
-    public TramiteResponseDto execute(Long idTramite, RolEnum rolEjecutor, Long idEjecutor) {
+    public TramiteResponseDto execute(Long idTramite, RoleEnum rolEjecutor, Long idEjecutor) {
         Tramite tramite = tramiteRepositoryPort.buscarPorId(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));
 

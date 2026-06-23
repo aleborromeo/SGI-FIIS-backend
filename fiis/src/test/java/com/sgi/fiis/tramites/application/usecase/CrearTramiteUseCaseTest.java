@@ -6,7 +6,7 @@ import com.sgi.fiis.tramites.domain.model.EstadoTramite;
 import com.sgi.fiis.tramites.domain.model.Tramite;
 import com.sgi.fiis.tramites.domain.model.TipoTramite;
 import com.sgi.fiis.tramites.domain.port.TramiteRepositoryPort;
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -45,7 +45,7 @@ class CrearTramiteUseCaseTest {
                 .idSolicitante(1L)
                 .idGrupo(10L)
                 .estadoActual(EstadoTramite.PENDIENTE_COORDINADOR)
-                .rolRevisorActual(RolEnum.COORDINADOR_GRUPO)
+                .rolRevisorActual(RoleEnum.COORDINADOR_GRUPO)
                 .idReferenciaProyecto(100L)
                 .fechaEnvio(LocalDateTime.now())
                 .fechaActualizacion(LocalDateTime.now())
@@ -56,7 +56,7 @@ class CrearTramiteUseCaseTest {
         TramiteResponseDto resultado = crearTramiteUseCase.execute(dto);
 
         assertEquals(EstadoTramite.PENDIENTE_COORDINADOR, resultado.getEstadoActual());
-        assertEquals(RolEnum.COORDINADOR_GRUPO, resultado.getRolRevisorActual());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, resultado.getRolRevisorActual());
         assertEquals(TipoTramite.PROYECTO, resultado.getTipoTramite());
         verify(tramiteRepositoryPort).guardar(any(Tramite.class));
     }
@@ -79,7 +79,7 @@ class CrearTramiteUseCaseTest {
 
         Tramite tramiteCapturado = captor.getValue();
         assertEquals(EstadoTramite.PENDIENTE_COORDINADOR, tramiteCapturado.getEstadoActual());
-        assertEquals(RolEnum.COORDINADOR_GRUPO, tramiteCapturado.getRolRevisorActual());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, tramiteCapturado.getRolRevisorActual());
         assertEquals(1, tramiteCapturado.getMovimientos().size());
         assertEquals("PRESENTADO_POR_SOLICITANTE", tramiteCapturado.getMovimientos().get(0).getAccion());
     }

@@ -3,7 +3,7 @@ package com.sgi.fiis.tramites.domain.service;
 import com.sgi.fiis.tramites.domain.model.EstadoTramite;
 import com.sgi.fiis.tramites.domain.model.Tramite;
 import com.sgi.fiis.tramites.domain.model.TransicionInvalidaException;
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 
 public class TramiteStateMachine {
 
@@ -20,23 +20,23 @@ public class TramiteStateMachine {
     private static final String OBSERVADO_POR_DECANO      = "OBSERVADO_POR_DECANO";
 
     public void aprobarPorCoordinador(Tramite tramite, Long idCoordinador) {
-        validarRolRevisor(tramite, RolEnum.COORDINADOR_GRUPO);
+        validarRolRevisor(tramite, RoleEnum.COORDINADOR_GRUPO);
         tramite.transicionarA(
                 EstadoTramite.PENDIENTE_DIRECCION,
-                RolEnum.COORDINADOR_GRUPO,
+                RoleEnum.COORDINADOR_GRUPO,
                 idCoordinador,
                 APROBADO_POR_COORDINADOR,
                 null,
-                RolEnum.DIRECTOR_INVESTIGACION
+                RoleEnum.DIRECTOR_INVESTIGACION
         );
     }
 
     public void observarPorCoordinador(Tramite tramite, Long idCoordinador, String observacion) {
-        validarRolRevisor(tramite, RolEnum.COORDINADOR_GRUPO);
+        validarRolRevisor(tramite, RoleEnum.COORDINADOR_GRUPO);
         // nuevoRolRevisor=null: en OBSERVADO el solicitante actúa por identidad, no por rol
         tramite.transicionarA(
                 EstadoTramite.OBSERVADO,
-                RolEnum.COORDINADOR_GRUPO,
+                RoleEnum.COORDINADOR_GRUPO,
                 idCoordinador,
                 OBSERVADO_POR_COORDINADOR,
                 observacion,
@@ -45,10 +45,10 @@ public class TramiteStateMachine {
     }
 
     public void rechazarPorCoordinador(Tramite tramite, Long idCoordinador) {
-        validarRolRevisor(tramite, RolEnum.COORDINADOR_GRUPO);
+        validarRolRevisor(tramite, RoleEnum.COORDINADOR_GRUPO);
         tramite.transicionarA(
                 EstadoTramite.RECHAZADO,
-                RolEnum.COORDINADOR_GRUPO,
+                RoleEnum.COORDINADOR_GRUPO,
                 idCoordinador,
                 RECHAZADO_POR_COORDINADOR,
                 null,
@@ -80,40 +80,40 @@ public class TramiteStateMachine {
                 idSolicitante,
                 REENVIADO_A_COORDINADOR,
                 null,
-                RolEnum.COORDINADOR_GRUPO
+                RoleEnum.COORDINADOR_GRUPO
         );
     }
 
     public void aprobarPorDirector(Tramite tramite, Long idDirector) {
-        validarRolRevisor(tramite, RolEnum.DIRECTOR_INVESTIGACION);
+        validarRolRevisor(tramite, RoleEnum.DIRECTOR_INVESTIGACION);
         tramite.transicionarA(
                 EstadoTramite.PENDIENTE_DECANATO,
-                RolEnum.DIRECTOR_INVESTIGACION,
+                RoleEnum.DIRECTOR_INVESTIGACION,
                 idDirector,
                 APROBADO_POR_DIRECTOR,
                 null,
-                RolEnum.DECANO
+                RoleEnum.DECANO
         );
     }
 
     public void observarPorDirector(Tramite tramite, Long idDirector, String observacion) {
-        validarRolRevisor(tramite, RolEnum.DIRECTOR_INVESTIGACION);
+        validarRolRevisor(tramite, RoleEnum.DIRECTOR_INVESTIGACION);
         // RN-07: la observación del Director devuelve al Coordinador, no al solicitante
         tramite.transicionarA(
                 EstadoTramite.OBSERVADO,
-                RolEnum.DIRECTOR_INVESTIGACION,
+                RoleEnum.DIRECTOR_INVESTIGACION,
                 idDirector,
                 OBSERVADO_POR_DIRECTOR,
                 observacion,
-                RolEnum.COORDINADOR_GRUPO
+                RoleEnum.COORDINADOR_GRUPO
         );
     }
 
     public void rechazarPorDirector(Tramite tramite, Long idDirector) {
-        validarRolRevisor(tramite, RolEnum.DIRECTOR_INVESTIGACION);
+        validarRolRevisor(tramite, RoleEnum.DIRECTOR_INVESTIGACION);
         tramite.transicionarA(
                 EstadoTramite.RECHAZADO,
-                RolEnum.DIRECTOR_INVESTIGACION,
+                RoleEnum.DIRECTOR_INVESTIGACION,
                 idDirector,
                 RECHAZADO_POR_DIRECTOR,
                 null,
@@ -122,11 +122,11 @@ public class TramiteStateMachine {
     }
 
     public void registrarResolucionPorDecano(Tramite tramite, Long idDecano) {
-        validarRolRevisor(tramite, RolEnum.DECANO);
+        validarRolRevisor(tramite, RoleEnum.DECANO);
         // PENDIENTE_DECANATO → APROBADO_CON_RESOLUCION (acción del Decano — RN-10)
         tramite.transicionarA(
                 EstadoTramite.APROBADO_CON_RESOLUCION,
-                RolEnum.DECANO,
+                RoleEnum.DECANO,
                 idDecano,
                 RESOLUCION_REGISTRADA,
                 null,
@@ -144,19 +144,19 @@ public class TramiteStateMachine {
     }
 
     public void observarPorDecano(Tramite tramite, Long idDecano, String observacion) {
-        validarRolRevisor(tramite, RolEnum.DECANO);
+        validarRolRevisor(tramite, RoleEnum.DECANO);
         // RN-07: la observación del Decano devuelve al Director
         tramite.transicionarA(
                 EstadoTramite.OBSERVADO,
-                RolEnum.DECANO,
+                RoleEnum.DECANO,
                 idDecano,
                 OBSERVADO_POR_DECANO,
                 observacion,
-                RolEnum.DIRECTOR_INVESTIGACION
+                RoleEnum.DIRECTOR_INVESTIGACION
         );
     }
 
-    private void validarRolRevisor(Tramite tramite, RolEnum rolEsperado) {
+    private void validarRolRevisor(Tramite tramite, RoleEnum rolEsperado) {
         if (rolEsperado != tramite.getRolRevisorActual()) {
             throw new TransicionInvalidaException(String.format(
                     "Acción no autorizada: se requiere rol [%s] pero el revisor actual del trámite es [%s]",

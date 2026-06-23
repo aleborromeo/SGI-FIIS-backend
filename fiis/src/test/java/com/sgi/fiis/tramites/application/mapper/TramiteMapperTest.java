@@ -6,7 +6,7 @@ import com.sgi.fiis.tramites.domain.model.EstadoTramite;
 import com.sgi.fiis.tramites.domain.model.MovimientoTramite;
 import com.sgi.fiis.tramites.domain.model.TipoTramite;
 import com.sgi.fiis.tramites.domain.model.Tramite;
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ class TramiteMapperTest {
                 .estadoActual(EstadoTramite.PENDIENTE_COORDINADOR)
                 .idSolicitante(42L)
                 .idGrupo(5L)
-                .rolRevisorActual(RolEnum.COORDINADOR_GRUPO)
+                .rolRevisorActual(RoleEnum.COORDINADOR_GRUPO)
                 .observacionActual(null)
                 .idReferenciaProyecto(100L)
                 .idReferenciaTesis(null)
@@ -43,7 +43,7 @@ class TramiteMapperTest {
         assertEquals(EstadoTramite.PENDIENTE_COORDINADOR, dto.getEstadoActual());
         assertEquals(42L, dto.getIdSolicitante());
         assertEquals(5L, dto.getIdGrupo());
-        assertEquals(RolEnum.COORDINADOR_GRUPO, dto.getRolRevisorActual());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, dto.getRolRevisorActual());
         assertNull(dto.getObservacionActual());
         assertEquals(100L, dto.getIdReferenciaProyecto());
         assertNull(dto.getIdReferenciaTesis());

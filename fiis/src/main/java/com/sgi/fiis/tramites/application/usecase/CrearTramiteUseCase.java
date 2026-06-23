@@ -6,7 +6,7 @@ import com.sgi.fiis.tramites.application.mapper.TramiteMapper;
 import com.sgi.fiis.tramites.domain.model.EstadoTramite;
 import com.sgi.fiis.tramites.domain.model.Tramite;
 import com.sgi.fiis.tramites.domain.port.TramiteRepositoryPort;
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +46,7 @@ public class CrearTramiteUseCase {
                 dto.getIdSolicitante(),
                 "PRESENTADO_POR_SOLICITANTE",
                 null,
-                RolEnum.COORDINADOR_GRUPO
+                RoleEnum.COORDINADOR_GRUPO
         );
 
         return TramiteMapper.toResponse(tramiteRepositoryPort.guardar(tramite));

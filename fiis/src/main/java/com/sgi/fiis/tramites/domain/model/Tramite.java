@@ -1,6 +1,6 @@
 package com.sgi.fiis.tramites.domain.model;
 
-import com.sgi.fiis.users.domain.model.RolEnum;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,7 +19,7 @@ public class Tramite {
     private Long idSolicitante;
     private Long idGrupo;
     private EstadoTramite estadoActual;
-    private RolEnum rolRevisorActual;
+    private RoleEnum rolRevisorActual;
     private String observacionActual;
 
     // Arco excluyente: exactamente uno debe ser no-nulo según tipoTramite
@@ -40,11 +40,11 @@ public class Tramite {
 
     public void transicionarA(
             EstadoTramite nuevoEstado,
-            RolEnum rolQueEjecuta,
+            RoleEnum rolQueEjecuta,
             Long idUsuarioAccion,
             String accion,
             String observacion,
-            RolEnum nuevoRolRevisor) {
+            RoleEnum nuevoRolRevisor) {
 
         if (!estadoActual.puedeTransicionarA(nuevoEstado)) {
             throw new TransicionInvalidaException(estadoActual, nuevoEstado, rolQueEjecuta);
