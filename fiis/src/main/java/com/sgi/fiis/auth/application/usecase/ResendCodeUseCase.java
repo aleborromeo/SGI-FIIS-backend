@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 
 /**
- * Caso de uso: Reenviar código de verificación (Paso 1.5).
- * Valida la existencia del registro pendiente y regenera un nuevo código para enviarlo.
+ * Use case: Resend verification code (Step 1.5).
+ * Validates the existence of the pending registration and regenerates a new code to send it.
  */
 @Service
 public class ResendCodeUseCase {
@@ -28,26 +28,26 @@ public class ResendCodeUseCase {
     }
 
     public void execute(ResendCodeRequestDto dto) {
-        String correo = dto.getCorreo().trim();
+        String email = dto.getEmail().trim();
 
-        // 1. Validar que exista el registro pendiente en memoria
-        PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get(correo);
+        // 1. Validate that the pending registration exists in memory
+        PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get(email);
         if (pending == null) {
-            throw new BusinessException("No se encontró ningún registro pendiente para el correo especificado");
+            throw new BusinessException("auth.register.pending-not-found");
         }
 
-        // 2. Generar un nuevo código de 6 dígitos aleatorio
-        int num = random.nextInt(900000) + 100000; // 100000 a 999999
+        // 2. Generate a new 6-digit random code
+        int num = random.nextInt(900000) + 100000; // 100000 to 999999
         String newCode = String.valueOf(num);
 
-        // 3. Actualizar temporalmente en memoria (conservando los datos originales pero renovando el código y tiempo)
-        pendingRegistrationService.register(correo, pending.getRequestDto(), newCode);
+        // 3. Update temporarily in memory (retains original details but renews the code and expiry time)
+        pendingRegistrationService.register(email, pending.getRequestDto(), newCode);
 
-        // 4. Enviar código por correo electrónico
-        emailSender.sendVerificationCode(correo, newCode);
+        // 4. Send code by email
+        emailSender.sendVerificationCode(email, newCode);
 
-        // Imprimir en consola de desarrollo para pruebas fáciles
-        String cleanCorreo = correo.replaceAll("[\n\r]", "_");
-        log.info("CÓDIGO DE VERIFICACIÓN REENVIADO (DEV) - Usuario: {}, Código: {}", cleanCorreo, newCode);
+        // Print to development console for easy testing
+        String cleanEmail = email.replaceAll("[\n\r]", "_");
+        log.info("CÓDIGO DE VERIFICACIÓN REENVIADO (DEV) - Usuario: {}, Código: {}", cleanEmail, newCode);
     }
 }

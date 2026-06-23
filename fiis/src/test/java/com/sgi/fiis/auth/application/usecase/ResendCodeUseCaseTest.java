@@ -34,16 +34,16 @@ class ResendCodeUseCaseTest {
         String email = "juan.perez@unas.edu.pe";
         RegisterRequestDto mockDto = RegisterRequestDto.builder()
                 .dni("12345678")
-                .nombres("Juan")
-                .apellidos("Perez")
-                .correoInstitucional(email)
-                .telefono("999888777")
+                .firstNames("Juan")
+                .lastNames("Perez")
+                .institutionalEmail(email)
+                .phone("999888777")
                 .password("password123")
-                .confirmarPassword("password123")
-                .rolCodigo("DOCENTE")
+                .confirmPassword("password123")
+                .roleCode("DOCENTE")
                 .build();
 
-        PendingRegistrationService.PendingRegistration mockPending = 
+        PendingRegistrationService.PendingRegistration mockPending =
                 new PendingRegistrationService.PendingRegistration(mockDto, "111111");
 
         when(pendingRegistrationService.get(email)).thenReturn(mockPending);
@@ -51,7 +51,7 @@ class ResendCodeUseCaseTest {
         doNothing().when(emailSender).sendVerificationCode(eq(email), anyString());
 
         ResendCodeRequestDto requestDto = ResendCodeRequestDto.builder()
-                .correo(email)
+                .email(email)
                 .build();
 
         assertDoesNotThrow(() -> resendCodeUseCase.execute(requestDto));
@@ -68,11 +68,11 @@ class ResendCodeUseCaseTest {
         when(pendingRegistrationService.get(email)).thenReturn(null);
 
         ResendCodeRequestDto requestDto = ResendCodeRequestDto.builder()
-                .correo(email)
+                .email(email)
                 .build();
 
         BusinessException ex = assertThrows(BusinessException.class, () -> resendCodeUseCase.execute(requestDto));
-        assertEquals("No se encontró ningún registro pendiente para el correo especificado", ex.getMessage());
+        assertEquals("auth.register.pending-not-found", ex.getMessage());
 
         verify(pendingRegistrationService).get(email);
         verify(pendingRegistrationService, never()).register(anyString(), any(), anyString());

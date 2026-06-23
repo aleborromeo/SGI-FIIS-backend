@@ -3,13 +3,13 @@ package com.sgi.fiis.auth.application.usecase;
 import com.sgi.fiis.auth.application.dto.LoginResponseDto;
 import com.sgi.fiis.auth.domain.port.OAuthUserHandlerPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
-import com.sgi.fiis.users.domain.model.Usuario;
+import com.sgi.fiis.users.domain.model.User;
 import org.springframework.stereotype.Service;
 
 /**
- * Caso de uso: Login vía OAuth2 (Microsoft).
- * Busca o crea el usuario a partir de los datos del proveedor OAuth,
- * y genera un JWT propio del sistema.
+ * Use case: Login via OAuth2 (Microsoft).
+ * Finds or creates the user from OAuth provider data,
+ * and generates a system JWT.
  */
 @Service
 public class OAuthLoginUseCase {
@@ -24,29 +24,29 @@ public class OAuthLoginUseCase {
     }
 
     /**
-     * Ejecuta el flujo OAuth: busca/crea usuario y genera JWT.
+     * Executes the OAuth flow: finds/creates user and generates JWT.
      *
-     * @param email    correo del usuario desde el proveedor OAuth
-     * @param name     nombre completo del usuario
-     * @param provider nombre del proveedor (ej: "microsoft")
-     * @return LoginResponseDto con el token JWT y datos del usuario
+     * @param email    user email from OAuth provider
+     * @param name     user full name
+     * @param provider provider name (e.g. "microsoft")
+     * @return LoginResponseDto with JWT token and user details
      */
     public LoginResponseDto execute(String email, String name, String provider) {
-        Usuario usuario = oAuthUserHandler.findOrCreateFromOAuth(email, name, provider);
+        User user = oAuthUserHandler.findOrCreateFromOAuth(email, name, provider);
 
         String token = tokenProvider.generateToken(
-                usuario.getCorreoInstitucional(),
-                usuario.getRolCodigo()
+                user.getInstitutionalEmail(),
+                user.getRoleCode()
         );
 
         return LoginResponseDto.builder()
                 .token(token)
-                .tipo("Bearer")
-                .correo(usuario.getCorreoInstitucional())
-                .nombres(usuario.getNombres())
-                .apellidos(usuario.getApellidos())
-                .rolCodigo(usuario.getRolCodigo())
-                .mustChangePassword(false) // Usuarios OAuth no necesitan cambiar contraseña
+                .type("Bearer")
+                .email(user.getInstitutionalEmail())
+                .firstNames(user.getFirstNames())
+                .lastNames(user.getLastNames())
+                .roleCode(user.getRoleCode())
+                .mustChangePassword(false) // OAuth users do not need to change password
                 .build();
     }
 }
