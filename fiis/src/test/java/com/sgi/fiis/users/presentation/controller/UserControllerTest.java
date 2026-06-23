@@ -94,9 +94,16 @@ class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/users")
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("student@unas.edu.pe").roles("ESTUDIANTE"))
+                        .header("Accept-Language", "es")
+                        .locale(new java.util.Locale("es"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.error").value("Forbidden"))
+                .andExpect(jsonPath("$.message").value("Acceso denegado. No tiene los privilegios necesarios para acceder a este recurso."))
+                .andExpect(jsonPath("$.path").value("/api/v1/users"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
         @Test
@@ -112,9 +119,16 @@ class UserControllerTest {
                                 .build();
 
                 mockMvc.perform(post("/api/v1/users")
+                                .header("Accept-Language", "es")
+                                .locale(new java.util.Locale("es"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isUnauthorized());
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.status").value(401))
+                                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                                .andExpect(jsonPath("$.message").value("Acceso no autorizado. Debe iniciar sesión e incluir el token JWT en las cabeceras."))
+                                .andExpect(jsonPath("$.path").value("/api/v1/users"))
+                                .andExpect(jsonPath("$.timestamp").exists());
         }
 
     @Test

@@ -29,8 +29,9 @@ public class LoginUseCase {
     }
 
     public LoginResponseDto execute(String email, String password) {
+        String cleanEmail = email != null ? email.trim() : "";
         // Find user by email
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(cleanEmail)
                 .orElseThrow(() -> new BadCredentialsException("auth.credentials.invalid"));
 
         // RF-02: Validate that the user is active

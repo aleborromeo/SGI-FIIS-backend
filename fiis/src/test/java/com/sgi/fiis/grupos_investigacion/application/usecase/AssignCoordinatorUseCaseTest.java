@@ -38,7 +38,7 @@ class AssignCoordinatorUseCaseTest {
     void execute_shouldThrowException_whenUserNotActive() {
         ResearchGroup group = ResearchGroup.builder().id(1).groupCode("GI-001").build();
         given(repository.findById(1)).willReturn(Optional.of(group));
-        given(repository.existsActiveUser(5)).willReturn(false);
+        given(repository.existsActiveUserWithRole(5, "COORDINADOR_GRUPO")).willReturn(false);
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(BusinessException.class)
@@ -55,7 +55,7 @@ class AssignCoordinatorUseCaseTest {
                 .active(true).build();
 
         given(repository.findById(1)).willReturn(Optional.of(group));
-        given(repository.existsActiveUser(3)).willReturn(true);
+        given(repository.existsActiveUserWithRole(3, "COORDINADOR_GRUPO")).willReturn(true);
         given(repository.save(any())).willReturn(updated);
 
         ResearchGroup result = useCase.execute(1, 3);

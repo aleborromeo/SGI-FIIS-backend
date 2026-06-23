@@ -11,6 +11,7 @@ import com.sgi.fiis.lineas_investigacion.presentation.mapper.ResearchLineMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class ResearchLineController {
 
     /** RF-24: Register research line */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchLineResponseDto> register(
             @Valid @RequestBody ResearchLineRequestDto dto) {
         ResearchLine line = registerResearchLineUseCase.execute(mapper.toDomain(dto));
@@ -48,6 +50,7 @@ public class ResearchLineController {
 
     /** RF-25, RF-27, RF-28: List research lines - all or only active for forms */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchLineResponseDto>> list(
             @RequestParam(defaultValue = "false") boolean onlyActive) {
         List<ResearchLineResponseDto> lines = listResearchLinesUseCase.execute(onlyActive).stream()
@@ -58,12 +61,14 @@ public class ResearchLineController {
 
     /** Get line by ID */
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResearchLineResponseDto> get(@PathVariable Integer id) {
         return ResponseEntity.ok(mapper.toResponseDto(getResearchLineUseCase.execute(id)));
     }
 
     /** RF-27: Activate or deactivate research line */
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchLineResponseDto> changeStatus(
             @PathVariable Integer id,
             @RequestBody Map<String, Boolean> body) {

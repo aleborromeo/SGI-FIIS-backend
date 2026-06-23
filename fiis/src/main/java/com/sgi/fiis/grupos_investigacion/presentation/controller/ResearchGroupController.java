@@ -9,6 +9,7 @@ import com.sgi.fiis.lineas_investigacion.presentation.mapper.ResearchLineMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class ResearchGroupController {
 
     /** RF-22: Create research group */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchGroupResponseDto> create(
             @Valid @RequestBody ResearchGroupRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -60,6 +62,7 @@ public class ResearchGroupController {
 
     /** RF-23: List research groups */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchGroupResponseDto>> list() {
         return ResponseEntity.ok(listGroupsUseCase.execute().stream()
                 .map(mapper::toResponseDto)
@@ -68,12 +71,14 @@ public class ResearchGroupController {
 
     /** Get group by ID */
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResearchGroupResponseDto> get(@PathVariable Integer id) {
         return ResponseEntity.ok(mapper.toResponseDto(getGroupUseCase.execute(id)));
     }
 
     /** RF-19: Assign coordinator to a group */
     @PatchMapping("/{id}/coordinator")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchGroupResponseDto> assignCoordinator(
             @PathVariable Integer id,
             @Valid @RequestBody AssignCoordinatorRequestDto dto) {
@@ -83,6 +88,7 @@ public class ResearchGroupController {
 
     /** RF-20: Add member to group */
     @PostMapping("/{id}/members")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MembershipResponseDto> assignMember(
             @PathVariable Integer id,
             @Valid @RequestBody AssignMemberRequestDto dto) {
@@ -93,6 +99,7 @@ public class ResearchGroupController {
 
     /** RF-20: Remove member from group (soft delete) */
     @DeleteMapping("/{id}/members/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MembershipResponseDto> removeMember(
             @PathVariable Integer id,
             @PathVariable Integer userId) {
@@ -102,6 +109,7 @@ public class ResearchGroupController {
 
     /** RF-20: List active members of the group */
     @GetMapping("/{id}/members")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<MembershipResponseDto>> listMembers(@PathVariable Integer id) {
         return ResponseEntity.ok(listMembersUseCase.execute(id).stream()
                 .map(mapper::toMembershipResponseDto)
@@ -110,6 +118,7 @@ public class ResearchGroupController {
 
     /** RF-26: List research lines associated to a group */
     @GetMapping("/{id}/lines")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchLineResponseDto>> listLines(@PathVariable Integer id) {
         getGroupUseCase.execute(id); // validates group exists
         return ResponseEntity.ok(listResearchLinesByGroupUseCase.execute(id).stream()

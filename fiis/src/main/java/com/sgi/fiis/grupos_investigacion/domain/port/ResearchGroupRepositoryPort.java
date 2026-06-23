@@ -11,4 +11,5 @@ public interface ResearchGroupRepositoryPort {
     List<ResearchGroup> findAll();
     boolean existsByCode(String groupCode);
     boolean existsActiveUser(Integer userId);
+    boolean existsActiveUserWithRole(Integer userId, String roleCode);
 }
