@@ -12,8 +12,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +40,8 @@ class MembershipRepositoryAdapterTest {
         entity.setGroupId(2);
         entity.setUserId(3);
         entity.setActive(true);
-        entity.setStartDate(LocalDateTime.of(2026, 1, 1, 0, 0));
-        entity.setEndDate(LocalDateTime.of(2026, 12, 31, 23, 59));
+        entity.setStartDate(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0));
+        entity.setEndDate(LocalDateTime.of(2026, Month.DECEMBER, 31, 23, 59));
         return entity;
     }
 
@@ -51,8 +51,8 @@ class MembershipRepositoryAdapterTest {
                 .groupId(2)
                 .userId(3)
                 .active(true)
-                .startDate(LocalDateTime.of(2026, 1, 1, 0, 0))
-                .endDate(LocalDateTime.of(2026, 12, 31, 23, 59))
+                .startDate(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0))
+                .endDate(LocalDateTime.of(2026, Month.DECEMBER, 31, 23, 59))
                 .build();
     }
 
@@ -119,8 +119,8 @@ class MembershipRepositoryAdapterTest {
         when(rs.getInt("id_grupo")).thenReturn(2);
         when(rs.getInt("id_usuario")).thenReturn(3);
         when(rs.getBoolean("es_activo")).thenReturn(true);
-        when(rs.getTimestamp("fecha_inicio")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 1, 1, 0, 0)));
-        when(rs.getTimestamp("fecha_fin")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 12, 31, 23, 59)));
+        when(rs.getObject("fecha_inicio", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0));
+        when(rs.getObject("fecha_fin", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.DECEMBER, 31, 23, 59));
         when(rs.getString("user_first_names")).thenReturn("Juan");
         when(rs.getString("user_last_names")).thenReturn("Perez");
         when(rs.getString("user_email")).thenReturn("juan.perez@unas.edu.pe");
@@ -139,8 +139,8 @@ class MembershipRepositoryAdapterTest {
         assertEquals(2, m.getGroupId());
         assertEquals(3, m.getUserId());
         assertTrue(m.isActive());
-        assertEquals(LocalDateTime.of(2026, 1, 1, 0, 0), m.getStartDate());
-        assertEquals(LocalDateTime.of(2026, 12, 31, 23, 59), m.getEndDate());
+        assertEquals(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0), m.getStartDate());
+        assertEquals(LocalDateTime.of(2026, Month.DECEMBER, 31, 23, 59), m.getEndDate());
         assertEquals("Juan", m.getUserFirstNames());
         assertEquals("Perez", m.getUserLastNames());
         assertEquals("juan.perez@unas.edu.pe", m.getUserEmail());
@@ -155,8 +155,8 @@ class MembershipRepositoryAdapterTest {
         when(rs.getInt("id_grupo")).thenReturn(2);
         when(rs.getInt("id_usuario")).thenReturn(3);
         when(rs.getBoolean("es_activo")).thenReturn(true);
-        when(rs.getTimestamp("fecha_inicio")).thenReturn(null);
-        when(rs.getTimestamp("fecha_fin")).thenReturn(null);
+        when(rs.getObject("fecha_inicio", LocalDateTime.class)).thenReturn(null);
+        when(rs.getObject("fecha_fin", LocalDateTime.class)).thenReturn(null);
         when(rs.getString("user_first_names")).thenReturn("Juan");
         when(rs.getString("user_last_names")).thenReturn("Perez");
         when(rs.getString("user_email")).thenReturn("juan.perez@unas.edu.pe");

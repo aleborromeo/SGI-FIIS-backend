@@ -59,8 +59,7 @@ public class TrazabilidadRepositoryImpl implements TrazabilidadRepositoryPort {
         m.setEstadoAnterior(rs.getString("estado_anterior"));
         m.setEstadoNuevo(rs.getString("estado_nuevo"));
         m.setObservacion(rs.getString("observacion"));
-        java.sql.Timestamp fm = rs.getTimestamp("fecha_movimiento");
-        if (fm != null) m.setFechaMovimiento(fm.toLocalDateTime());
+        m.setFechaMovimiento(rs.getObject("fecha_movimiento", java.time.LocalDateTime.class));
         return m;
     };
 }

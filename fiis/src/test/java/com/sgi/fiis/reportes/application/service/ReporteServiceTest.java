@@ -58,7 +58,7 @@ class ReporteServiceTest {
         // assert
         assertThat(respuesta.getData()).hasSize(1);
         assertThat(respuesta.getTotal()).isEqualTo(1L);
-        assertThat(respuesta.getPage()).isEqualTo(0);
+        assertThat(respuesta.getPage()).isZero();
         assertThat(respuesta.getSize()).isEqualTo(10);
         verify(repo, times(1)).findProyectos(filtro);
         verify(repo, times(1)).countProyectos(filtro);

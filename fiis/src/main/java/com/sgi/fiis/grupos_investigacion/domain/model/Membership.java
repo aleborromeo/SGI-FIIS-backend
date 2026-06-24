@@ -24,6 +24,6 @@ public class Membership {
 
     public void remove() {
         this.active = false;
-        this.endDate = LocalDateTime.now();
+        this.endDate = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 }

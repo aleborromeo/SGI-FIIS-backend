@@ -23,8 +23,8 @@ public class RegisterResearchLineUseCase {
             throw new DuplicateResourceException("ResearchLine", "name", line.getLineName());
         }
         line.setActive(true);
-        line.setCreatedAt(LocalDateTime.now());
-        line.setUpdatedAt(LocalDateTime.now());
+        line.setCreatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
+        line.setUpdatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
         return repository.save(line);
     }
 }

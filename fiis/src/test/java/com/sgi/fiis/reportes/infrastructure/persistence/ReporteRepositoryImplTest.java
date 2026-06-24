@@ -11,12 +11,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,8 +39,8 @@ class ReporteRepositoryImplTest {
         FiltroReporte filtro = new FiltroReporte();
         filtro.setIdGrupo(1);
         filtro.setEstado("ACTIVO");
-        filtro.setFechaDesde(LocalDate.of(2026, 1, 1));
-        filtro.setFechaHasta(LocalDate.of(2026, 12, 31));
+        filtro.setFechaDesde(LocalDate.of(2026, Month.JANUARY, 1));
+        filtro.setFechaHasta(LocalDate.of(2026, Month.DECEMBER, 31));
         filtro.setIdInvestigador(2);
         filtro.setIdConvocatoria(3);
         filtro.setSize(10);
@@ -57,9 +56,9 @@ class ReporteRepositoryImplTest {
         when(rs.getString("nombre_responsable")).thenReturn("Juan Perez");
         when(rs.getString("titulo_convocatoria")).thenReturn("Convocatoria 2026");
         when(rs.getBigDecimal("presupuesto")).thenReturn(new BigDecimal("15000.00"));
-        when(rs.getDate("fecha_inicio")).thenReturn(Date.valueOf(LocalDate.of(2026, 2, 1)));
-        when(rs.getDate("fecha_fin")).thenReturn(Date.valueOf(LocalDate.of(2026, 11, 30)));
-        when(rs.getTimestamp("fecha_creacion")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 1, 15, 10, 0)));
+        when(rs.getObject("fecha_inicio", LocalDate.class)).thenReturn(LocalDate.of(2026, Month.FEBRUARY, 1));
+        when(rs.getObject("fecha_fin", LocalDate.class)).thenReturn(LocalDate.of(2026, Month.NOVEMBER, 30));
+        when(rs.getObject("fecha_creacion", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 0));
 
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
             RowMapper<ReporteProyecto> mapper = invocation.getArgument(1);
@@ -81,9 +80,9 @@ class ReporteRepositoryImplTest {
         assertEquals("Juan Perez", p.getNombreResponsable());
         assertEquals("Convocatoria 2026", p.getTituloConvocatoria());
         assertEquals(new BigDecimal("15000.00"), p.getPresupuesto());
-        assertEquals(LocalDate.of(2026, 2, 1), p.getFechaInicio());
-        assertEquals(LocalDate.of(2026, 11, 30), p.getFechaFin());
-        assertEquals(LocalDateTime.of(2026, 1, 15, 10, 0), p.getFechaCreacion());
+        assertEquals(LocalDate.of(2026, Month.FEBRUARY, 1), p.getFechaInicio());
+        assertEquals(LocalDate.of(2026, Month.NOVEMBER, 30), p.getFechaFin());
+        assertEquals(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 0), p.getFechaCreacion());
     }
 
     @Test
@@ -118,8 +117,8 @@ class ReporteRepositoryImplTest {
         FiltroReporte filtro = new FiltroReporte();
         filtro.setIdGrupo(5);
         filtro.setEstado("EN_REVISION");
-        filtro.setFechaDesde(LocalDate.of(2026, 5, 1));
-        filtro.setFechaHasta(LocalDate.of(2026, 5, 31));
+        filtro.setFechaDesde(LocalDate.of(2026, Month.MAY, 1));
+        filtro.setFechaHasta(LocalDate.of(2026, Month.MAY, 31));
         filtro.setIdInvestigador(10);
         filtro.setTipoTramite("TESIS");
         filtro.setSize(5);
@@ -133,8 +132,8 @@ class ReporteRepositoryImplTest {
         when(rs.getString("estado_actual")).thenReturn("EN_REVISION");
         when(rs.getString("rol_revisor_actual")).thenReturn("DECANO");
         when(rs.getString("nombre_grupo")).thenReturn("Grupo Beta");
-        when(rs.getTimestamp("fecha_envio")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 5, 10, 9, 0)));
-        when(rs.getTimestamp("fecha_actualizacion")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 5, 12, 15, 30)));
+        when(rs.getObject("fecha_envio", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.MAY, 10, 9, 0));
+        when(rs.getObject("fecha_actualizacion", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.MAY, 12, 15, 30));
 
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
             RowMapper<ReporteTramite> mapper = invocation.getArgument(1);
@@ -154,8 +153,8 @@ class ReporteRepositoryImplTest {
         assertEquals("EN_REVISION", t.getEstadoActual());
         assertEquals("DECANO", t.getRolRevisorActual());
         assertEquals("Grupo Beta", t.getNombreGrupo());
-        assertEquals(LocalDateTime.of(2026, 5, 10, 9, 0), t.getFechaEnvio());
-        assertEquals(LocalDateTime.of(2026, 5, 12, 15, 30), t.getFechaActualizacion());
+        assertEquals(LocalDateTime.of(2026, Month.MAY, 10, 9, 0), t.getFechaEnvio());
+        assertEquals(LocalDateTime.of(2026, Month.MAY, 12, 15, 30), t.getFechaActualizacion());
     }
 
     @Test
@@ -177,8 +176,8 @@ class ReporteRepositoryImplTest {
     @SuppressWarnings("unchecked")
     void testFindResoluciones() throws SQLException {
         FiltroReporte filtro = new FiltroReporte();
-        filtro.setFechaDesde(LocalDate.of(2026, 3, 1));
-        filtro.setFechaHasta(LocalDate.of(2026, 3, 31));
+        filtro.setFechaDesde(LocalDate.of(2026, Month.MARCH, 1));
+        filtro.setFechaHasta(LocalDate.of(2026, Month.MARCH, 31));
         filtro.setIdInvestigador(8);
         filtro.setTipoTramite("PROYECTO");
         filtro.setSize(20);
@@ -187,12 +186,12 @@ class ReporteRepositoryImplTest {
         ResultSet rs = mock(ResultSet.class);
         when(rs.getInt("id_resolucion")).thenReturn(300);
         when(rs.getString("numero_resolucion")).thenReturn("RES-045-2026");
-        when(rs.getDate("fecha_emision")).thenReturn(Date.valueOf(LocalDate.of(2026, 3, 15)));
+        when(rs.getObject("fecha_emision", LocalDate.class)).thenReturn(LocalDate.of(2026, Month.MARCH, 15));
         when(rs.getString("asunto")).thenReturn("Aprobacion de Proyecto");
         when(rs.getString("codigo_tramite")).thenReturn("TRM-105");
         when(rs.getString("tipo_tramite")).thenReturn("PROYECTO");
         when(rs.getString("nombre_solicitante")).thenReturn("Carlos Ruiz");
-        when(rs.getTimestamp("fecha_registro")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 3, 16, 8, 30)));
+        when(rs.getObject("fecha_registro", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.MARCH, 16, 8, 30));
 
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
             RowMapper<ReporteResolucion> mapper = invocation.getArgument(1);
@@ -207,12 +206,12 @@ class ReporteRepositoryImplTest {
         ReporteResolucion r = result.get(0);
         assertEquals(300, r.getIdResolucion());
         assertEquals("RES-045-2026", r.getNumeroResolucion());
-        assertEquals(LocalDate.of(2026, 3, 15), r.getFechaEmision());
+        assertEquals(LocalDate.of(2026, Month.MARCH, 15), r.getFechaEmision());
         assertEquals("Aprobacion de Proyecto", r.getAsunto());
         assertEquals("TRM-105", r.getCodigoTramite());
         assertEquals("PROYECTO", r.getTipoTramite());
         assertEquals("Carlos Ruiz", r.getNombreSolicitante());
-        assertEquals(LocalDateTime.of(2026, 3, 16, 8, 30), r.getFechaRegistro());
+        assertEquals(LocalDateTime.of(2026, Month.MARCH, 16, 8, 30), r.getFechaRegistro());
     }
 
     @Test
@@ -235,8 +234,8 @@ class ReporteRepositoryImplTest {
         FiltroReporte filtro = new FiltroReporte();
         filtro.setIdGrupo(2);
         filtro.setEstado("APROBADO");
-        filtro.setFechaDesde(LocalDate.of(2026, 4, 1));
-        filtro.setFechaHasta(LocalDate.of(2026, 4, 30));
+        filtro.setFechaDesde(LocalDate.of(2026, Month.APRIL, 1));
+        filtro.setFechaHasta(LocalDate.of(2026, Month.APRIL, 30));
         filtro.setTipoTramite("INFORME_FINAL");
         filtro.setSize(10);
         filtro.setPage(0);
@@ -250,7 +249,7 @@ class ReporteRepositoryImplTest {
         when(rs.getBigDecimal("porcentaje_avance")).thenReturn(new BigDecimal("100.00"));
         when(rs.getString("estado_informe")).thenReturn("APROBADO");
         when(rs.getString("nombre_grupo")).thenReturn("Grupo Geotecnia");
-        when(rs.getTimestamp("fecha_registro")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 4, 25, 11, 45)));
+        when(rs.getObject("fecha_registro", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.APRIL, 25, 11, 45));
 
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
             RowMapper<ReporteInformeAvance> mapper = invocation.getArgument(1);
@@ -271,7 +270,7 @@ class ReporteRepositoryImplTest {
         assertEquals(new BigDecimal("100.00"), ia.getPorcentajeAvance());
         assertEquals("APROBADO", ia.getEstadoInforme());
         assertEquals("Grupo Geotecnia", ia.getNombreGrupo());
-        assertEquals(LocalDateTime.of(2026, 4, 25, 11, 45), ia.getFechaRegistro());
+        assertEquals(LocalDateTime.of(2026, Month.APRIL, 25, 11, 45), ia.getFechaRegistro());
     }
 
     @Test

@@ -24,14 +24,15 @@ import java.io.InputStream;
  */
 @Configuration
 @ConditionalOnProperty(name = "app.mail.mock", havingValue = "true", matchIfMissing = true)
+@lombok.extern.slf4j.Slf4j
 public class MailMockConfig {
 
     @PostConstruct
     public void init() {
-        System.out.println("=================================================");
-        System.out.println("[MAIL CONFIG] ¡ATENCIÓN! Modo MOCK de correo activo.");
-        System.out.println("Los correos no se enviarán a bandejas reales.");
-        System.out.println("=================================================");
+        log.info("=================================================");
+        log.info("[MAIL CONFIG] ¡ATENCIÓN! Modo MOCK de correo activo.");
+        log.info("Los correos no se enviarán a bandejas reales.");
+        log.info("=================================================");
     }
 
     @Bean

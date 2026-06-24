@@ -18,6 +18,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
     private static final String INFO_TYPE = "INFO";
 
     private static final String ACTIVE_CALL_TITLE = "Active call for applications";
+    private static final String OPEN_CALLS_SUFFIX = " open call(s) for applications.";
+    private static final String THERE_ARE_PREFIX = "There are ";
 
     private static final String SQL_COUNT_PROJECTS = "SELECT COUNT(*) FROM proyectos";
     private static final String SQL_COUNT_PROJECTS_IN_EXECUTION =
@@ -81,7 +83,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
                     .title(ACTIVE_CALL_TITLE)
-                    .description(openCalls + " open call(s) for applications.")
+                    .description(openCalls + OPEN_CALLS_SUFFIX)
                     .build());
         }
 
@@ -189,7 +191,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (!groupResult.isEmpty()) {
             java.util.Map<String, Object> row = groupResult.get(0);
             Object idVal = row.get("id_grupo");
-            groupId = idVal instanceof Number ? ((Number) idVal).intValue() : null;
+            groupId = idVal instanceof Number number ? number.intValue() : null;
             groupName = (String) row.get("nombre_grupo");
             groupCode = (String) row.get("codigo_grupo");
         }
@@ -307,7 +309,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
                     .title(ACTIVE_CALL_TITLE)
-                    .description("There are " + openCalls + " open call(s) for applications.")
+                    .description(THERE_ARE_PREFIX + openCalls + OPEN_CALLS_SUFFIX)
                     .build());
         }
 
@@ -400,7 +402,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
                     .title(ACTIVE_CALL_TITLE)
-                    .description("There are " + activeCallsForApplication + " open call(s) for applications in the faculty.")
+                    .description(THERE_ARE_PREFIX + activeCallsForApplication + " open call(s) for applications in the faculty.")
                     .build());
         }
 
@@ -476,7 +478,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
                     .title(ACTIVE_CALL_TITLE)
-                    .description("There are " + openCalls + " open call(s) for applications.")
+                    .description(THERE_ARE_PREFIX + openCalls + OPEN_CALLS_SUFFIX)
                     .build());
         }
 

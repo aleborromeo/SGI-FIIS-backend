@@ -134,7 +134,7 @@ class ResearchGroupControllerTest {
     void assignMember_shouldReturn400_whenViolatesRF21() throws Exception {
         AssignMemberRequestDto request = new AssignMemberRequestDto(5);
 
-        given(assignMemberUseCase.execute(eq(1), eq(5)))
+        given(assignMemberUseCase.execute(1, 5))
                 .willThrow(new BusinessException("The user with id 5 already belongs to an active research group (RF-21)"));
 
         mockMvc.perform(post("/api/v1/research-groups/1/members")

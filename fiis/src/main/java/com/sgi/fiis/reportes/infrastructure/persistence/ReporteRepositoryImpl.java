@@ -6,7 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,8 +83,8 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = new QueryBuilder();
         if (f.getIdGrupo() != null)       qb.and("p.id_grupo = ?",           f.getIdGrupo());
         if (f.getEstado() != null)         qb.and("p.estado_proyecto = ?",    f.getEstado());
-        if (f.getFechaDesde() != null)     qb.and("p.fecha_creacion >= ?",    Date.valueOf(f.getFechaDesde()));
-        if (f.getFechaHasta() != null)     qb.and("p.fecha_creacion <= ?",    Date.valueOf(f.getFechaHasta()));
+        if (f.getFechaDesde() != null)     qb.and("p.fecha_creacion >= ?",    f.getFechaDesde());
+        if (f.getFechaHasta() != null)     qb.and("p.fecha_creacion <= ?",    f.getFechaHasta());
         if (f.getIdInvestigador() != null) qb.and("p.id_responsable = ?",     f.getIdInvestigador());
         if (f.getIdConvocatoria() != null) qb.and("p.id_convocatoria = ?",    f.getIdConvocatoria());
         return qb;
@@ -100,12 +101,9 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         r.setNombreResponsable(rs.getString("nombre_responsable"));
         r.setTituloConvocatoria(rs.getString("titulo_convocatoria"));
         r.setPresupuesto(rs.getBigDecimal("presupuesto"));
-        Date fi = rs.getDate("fecha_inicio");
-        if (fi != null) r.setFechaInicio(fi.toLocalDate());
-        Date ff = rs.getDate("fecha_fin");
-        if (ff != null) r.setFechaFin(ff.toLocalDate());
-        java.sql.Timestamp fc = rs.getTimestamp("fecha_creacion");
-        if (fc != null) r.setFechaCreacion(fc.toLocalDateTime());
+        r.setFechaInicio(rs.getObject("fecha_inicio", LocalDate.class));
+        r.setFechaFin(rs.getObject("fecha_fin", LocalDate.class));
+        r.setFechaCreacion(rs.getObject("fecha_creacion", LocalDateTime.class));
         return r;
     };
 
@@ -158,8 +156,8 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = new QueryBuilder();
         if (f.getIdGrupo() != null)       qb.and("t.id_grupo = ?",           f.getIdGrupo());
         if (f.getEstado() != null)         qb.and("t.estado_actual = ?",      f.getEstado());
-        if (f.getFechaDesde() != null)     qb.and("t.fecha_envio >= ?",       Date.valueOf(f.getFechaDesde()));
-        if (f.getFechaHasta() != null)     qb.and("t.fecha_envio <= ?",       Date.valueOf(f.getFechaHasta()));
+        if (f.getFechaDesde() != null)     qb.and("t.fecha_envio >= ?",       f.getFechaDesde());
+        if (f.getFechaHasta() != null)     qb.and("t.fecha_envio <= ?",       f.getFechaHasta());
         if (f.getIdInvestigador() != null) qb.and("t.id_solicitante = ?",     f.getIdInvestigador());
         if (f.getTipoTramite() != null)    qb.and("t.tipo_tramite = ?",       f.getTipoTramite());
         return qb;
@@ -174,10 +172,8 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         r.setEstadoActual(rs.getString("estado_actual"));
         r.setRolRevisorActual(rs.getString("rol_revisor_actual"));
         r.setNombreGrupo(rs.getString(COL_NOMBRE_GRUPO));
-        java.sql.Timestamp fe = rs.getTimestamp("fecha_envio");
-        if (fe != null) r.setFechaEnvio(fe.toLocalDateTime());
-        java.sql.Timestamp fa = rs.getTimestamp("fecha_actualizacion");
-        if (fa != null) r.setFechaActualizacion(fa.toLocalDateTime());
+        r.setFechaEnvio(rs.getObject("fecha_envio", LocalDateTime.class));
+        r.setFechaActualizacion(rs.getObject("fecha_actualizacion", LocalDateTime.class));
         return r;
     };
 
@@ -227,8 +223,8 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
 
     private QueryBuilder buildResolucionesWhere(FiltroReporte f) {
         QueryBuilder qb = new QueryBuilder();
-        if (f.getFechaDesde() != null)     qb.and("r.fecha_emision >= ?",     Date.valueOf(f.getFechaDesde()));
-        if (f.getFechaHasta() != null)     qb.and("r.fecha_emision <= ?",     Date.valueOf(f.getFechaHasta()));
+        if (f.getFechaDesde() != null)     qb.and("r.fecha_emision >= ?",     f.getFechaDesde());
+        if (f.getFechaHasta() != null)     qb.and("r.fecha_emision <= ?",     f.getFechaHasta());
         if (f.getIdInvestigador() != null) qb.and("t.id_solicitante = ?",     f.getIdInvestigador());
         if (f.getTipoTramite() != null)    qb.and("t.tipo_tramite = ?",       f.getTipoTramite());
         return qb;
@@ -238,14 +234,12 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         ReporteResolucion r = new ReporteResolucion();
         r.setIdResolucion(rs.getInt("id_resolucion"));
         r.setNumeroResolucion(rs.getString("numero_resolucion"));
-        Date fe = rs.getDate("fecha_emision");
-        if (fe != null) r.setFechaEmision(fe.toLocalDate());
+        r.setFechaEmision(rs.getObject("fecha_emision", LocalDate.class));
         r.setAsunto(rs.getString("asunto"));
         r.setCodigoTramite(rs.getString("codigo_tramite"));
         r.setTipoTramite(rs.getString("tipo_tramite"));
         r.setNombreSolicitante(rs.getString("nombre_solicitante"));
-        java.sql.Timestamp fr = rs.getTimestamp("fecha_registro");
-        if (fr != null) r.setFechaRegistro(fr.toLocalDateTime());
+        r.setFechaRegistro(rs.getObject("fecha_registro", LocalDateTime.class));
         return r;
     };
 
@@ -298,8 +292,8 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = new QueryBuilder();
         if (f.getIdGrupo() != null)    qb.and("p.id_grupo = ?",            f.getIdGrupo());
         if (f.getEstado() != null)     qb.and("ia.estado_informe = ?",     f.getEstado());
-        if (f.getFechaDesde() != null) qb.and("ia.fecha_registro >= ?",    Date.valueOf(f.getFechaDesde()));
-        if (f.getFechaHasta() != null) qb.and("ia.fecha_registro <= ?",    Date.valueOf(f.getFechaHasta()));
+        if (f.getFechaDesde() != null) qb.and("ia.fecha_registro >= ?",    f.getFechaDesde());
+        if (f.getFechaHasta() != null) qb.and("ia.fecha_registro <= ?",    f.getFechaHasta());
         if (f.getTipoTramite() != null) qb.and("ia.tipo_informe = ?",      f.getTipoTramite());
         return qb;
     }
@@ -314,8 +308,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         r.setPorcentajeAvance(rs.getBigDecimal("porcentaje_avance"));
         r.setEstadoInforme(rs.getString("estado_informe"));
         r.setNombreGrupo(rs.getString(COL_NOMBRE_GRUPO));
-        java.sql.Timestamp fr = rs.getTimestamp("fecha_registro");
-        if (fr != null) r.setFechaRegistro(fr.toLocalDateTime());
+        r.setFechaRegistro(rs.getObject("fecha_registro", LocalDateTime.class));
         return r;
     };
 
