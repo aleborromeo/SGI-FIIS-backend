@@ -353,4 +353,45 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.groupCode").value("GT-01"))
                 .andExpect(jsonPath("$.alerts", hasSize(0)));
     }
+
+    @Test
+    @DisplayName("GET /api/dashboard/dean/{userId} with incorrect role should throw AccessDeniedException")
+    void getDashboardDean_withIncorrectRole_shouldThrowAccessDeniedException() {
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 6)
+                            .principal(getMockAuth(6L, "ESTUDIANTE")));
+        });
+    }
+
+    @Test
+    @DisplayName("GET /api/dashboard/dean/{userId} with different user ID should throw AccessDeniedException")
+    void getDashboardDean_withDifferentUser_shouldThrowAccessDeniedException() {
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 99)
+                            .principal(getMockAuth(6L, "DECANO")));
+        });
+    }
+
+    @Test
+    @DisplayName("GET /api/dashboard/dean/{userId} with null authentication should throw AccessDeniedException")
+    void getDashboardDean_withNullAuth_shouldThrowAccessDeniedException() {
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 6));
+        });
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/dashboard/me with null authentication should return 401 Unauthorized")
+    void getDashboardMe_withNullAuth_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/dashboard/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/dashboard/me with unsupported role should return 403 Forbidden")
+    void getDashboardMe_withUnsupportedRole_shouldReturnForbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/dashboard/me")
+                        .principal(getMockAuth(10L, "INVITADO")))
+                .andExpect(status().isForbidden());
+    }
 }
