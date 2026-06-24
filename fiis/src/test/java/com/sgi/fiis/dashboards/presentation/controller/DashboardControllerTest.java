@@ -2,12 +2,15 @@ package com.sgi.fiis.dashboards.presentation.controller;
 
 import com.sgi.fiis.dashboards.application.dto.*;
 import com.sgi.fiis.dashboards.application.usecase.*;
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -63,6 +66,38 @@ class DashboardControllerTest {
                 .build();
     }
 
+    private UsernamePasswordAuthenticationToken getMockAuth(Long id, String role) {
+        CustomUserDetails userDetails = new CustomUserDetails(
+                id,
+                "test@unas.edu.pe",
+                "password",
+                true,
+                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/dashboard/me should return correct dashboard for logged-in role")
+    void getDashboardMe_shouldReturnCorrectRoleDashboard() throws Exception {
+        DashboardStudentResponse studentResponse = DashboardStudentResponse.builder()
+                .submittedThesisPlans(1)
+                .currentPlanStatus("POSTULADO")
+                .groupName("Grupo Tesis")
+                .groupCode("GT-01")
+                .alerts(List.of())
+                .build();
+
+        when(getStudentDashboardUseCase.execute(7)).thenReturn(studentResponse);
+
+        mockMvc.perform(get("/api/v1/dashboard/me")
+                        .principal(getMockAuth(7L, "ESTUDIANTE")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.submittedThesisPlans").value(1))
+                .andExpect(jsonPath("$.currentPlanStatus").value("POSTULADO"))
+                .andExpect(jsonPath("$.groupName").value("Grupo Tesis"));
+    }
+
     @Test
     @DisplayName("GET /api/dashboard/admin/{userId} should return admin dashboard")
     void getDashboardAdmin_shouldReturnOk() throws Exception {
@@ -89,7 +124,8 @@ class DashboardControllerTest {
 
         when(getAdminDashboardUseCase.execute(1)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/admin/{userId}", 1))
+        mockMvc.perform(get("/api/v1/dashboard/admin/{userId}", 1)
+                        .principal(getMockAuth(1L, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalUsers").value(10))
                 .andExpect(jsonPath("$.totalActiveUsers").value(8))
@@ -129,7 +165,8 @@ class DashboardControllerTest {
 
         when(getDirectorDashboardUseCase.execute(2)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/director/{userId}", 2))
+        mockMvc.perform(get("/api/v1/dashboard/director/{userId}", 2)
+                        .principal(getMockAuth(2L, "DIRECTOR_INVESTIGACION")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalProjects").value(20))
                 .andExpect(jsonPath("$.activeProjects").value(12))
@@ -169,7 +206,8 @@ class DashboardControllerTest {
 
         when(getCoordinatorDashboardUseCase.execute(3)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/coordinator/{userId}", 3))
+        mockMvc.perform(get("/api/v1/dashboard/coordinator/{userId}", 3)
+                        .principal(getMockAuth(3L, "COORDINADOR_GRUPO")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.groupId").value(3))
                 .andExpect(jsonPath("$.groupName").value("Grupo FIIS"))
@@ -207,7 +245,8 @@ class DashboardControllerTest {
 
         when(getTeacherDashboardUseCase.execute(4)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/teacher/{userId}", 4))
+        mockMvc.perform(get("/api/v1/dashboard/teacher/{userId}", 4)
+                        .principal(getMockAuth(4L, "DOCENTE_INVESTIGADOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.projectsAsLead").value(2))
                 .andExpect(jsonPath("$.projectsAsMember").value(4))
@@ -239,7 +278,8 @@ class DashboardControllerTest {
 
         when(getEvaluatorDashboardUseCase.execute(5)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/evaluator/{userId}", 5))
+        mockMvc.perform(get("/api/v1/dashboard/evaluator/{userId}", 5)
+                        .principal(getMockAuth(5L, "EVALUADOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assignedEvaluations").value(10))
                 .andExpect(jsonPath("$.pendingEvaluations").value(3))
@@ -270,7 +310,8 @@ class DashboardControllerTest {
 
         when(getDeanDashboardUseCase.execute(6)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 6))
+        mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 6)
+                        .principal(getMockAuth(6L, "DECANO")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalFacultyProjects").value(30))
                 .andExpect(jsonPath("$.activeProjects").value(15))
@@ -300,7 +341,8 @@ class DashboardControllerTest {
 
         when(getStudentDashboardUseCase.execute(7)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/dashboard/student/{userId}", 7))
+        mockMvc.perform(get("/api/v1/dashboard/student/{userId}", 7)
+                        .principal(getMockAuth(7L, "ESTUDIANTE")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.submittedThesisPlans").value(1))
                 .andExpect(jsonPath("$.currentPlanStatus").value("OBSERVADO"))
@@ -310,5 +352,46 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.groupName").value("Grupo Tesis"))
                 .andExpect(jsonPath("$.groupCode").value("GT-01"))
                 .andExpect(jsonPath("$.alerts", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("GET /api/dashboard/dean/{userId} with incorrect role should throw AccessDeniedException")
+    void getDashboardDean_withIncorrectRole_shouldThrowAccessDeniedException() {
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 6)
+                            .principal(getMockAuth(6L, "ESTUDIANTE")));
+        });
+    }
+
+    @Test
+    @DisplayName("GET /api/dashboard/dean/{userId} with different user ID should throw AccessDeniedException")
+    void getDashboardDean_withDifferentUser_shouldThrowAccessDeniedException() {
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 99)
+                            .principal(getMockAuth(6L, "DECANO")));
+        });
+    }
+
+    @Test
+    @DisplayName("GET /api/dashboard/dean/{userId} with null authentication should throw AccessDeniedException")
+    void getDashboardDean_withNullAuth_shouldThrowAccessDeniedException() {
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/v1/dashboard/dean/{userId}", 6));
+        });
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/dashboard/me with null authentication should return 401 Unauthorized")
+    void getDashboardMe_withNullAuth_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/dashboard/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/dashboard/me with unsupported role should return 403 Forbidden")
+    void getDashboardMe_withUnsupportedRole_shouldReturnForbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/dashboard/me")
+                        .principal(getMockAuth(10L, "INVITADO")))
+                .andExpect(status().isForbidden());
     }
 }

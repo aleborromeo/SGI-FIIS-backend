@@ -21,8 +21,8 @@ public class AssignCoordinatorUseCase {
         ResearchGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("ResearchGroup", "id", groupId));
 
-        if (!groupRepository.existsActiveUser(userId)) {
-            throw new BusinessException("User with id " + userId + " does not exist or is not active");
+        if (!groupRepository.existsActiveUserWithRole(userId, "COORDINADOR_GRUPO")) {
+            throw new BusinessException("User with id " + userId + " does not exist, is not active, or does not have the COORDINADOR_GRUPO role");
         }
 
         group.setCurrentCoordinatorId(userId);

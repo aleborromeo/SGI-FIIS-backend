@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,12 +13,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final CustomAuthenticationEntryPoint customAuthEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
+                          CustomAuthenticationEntryPoint customAuthEntryPoint,
+                          CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.customAuthEntryPoint = customAuthEntryPoint;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -38,16 +46,29 @@ public class SecurityConfig {
                     // Rutas protegidas por rol
                     .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/research-groups/**").hasRole("ADMIN")
+                    .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/v1/research-groups/**").hasRole("ADMIN")
+                    .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v1/research-groups/**").hasRole("ADMIN")
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/research-lines/**").hasRole("ADMIN")
+                    .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/v1/research-lines/**").hasRole("ADMIN")
+                    .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v1/research-lines/**").hasRole("ADMIN")
+                    // Dashboard security rules (RF-88 a RF-94)
+                    .requestMatchers("/api/v1/dashboard/me").authenticated()
+                    .requestMatchers("/api/v1/dashboard/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/dashboard/director/**").hasRole("DIRECTOR_INVESTIGACION")
+                    .requestMatchers("/api/v1/dashboard/coordinator/**").hasRole("COORDINADOR_GRUPO")
+                    .requestMatchers("/api/v1/dashboard/teacher/**").hasRole("DOCENTE_INVESTIGADOR")
+                    .requestMatchers("/api/v1/dashboard/evaluator/**").hasRole("EVALUADOR")
+                    .requestMatchers("/api/v1/dashboard/dean/**").hasRole("DECANO")
+                    .requestMatchers("/api/v1/dashboard/student/**").hasRole("ESTUDIANTE")
                     // Cualquier otra petición requiere autenticación
                     .anyRequest().authenticated()
                 )
                 // JWT filter para endpoints protegidos
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptions -> exceptions
-                    .defaultAuthenticationEntryPointFor(
-                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
-                        org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern("/api/**")
-                    )
+                    .authenticationEntryPoint(customAuthEntryPoint)
+                    .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
             return http.build();

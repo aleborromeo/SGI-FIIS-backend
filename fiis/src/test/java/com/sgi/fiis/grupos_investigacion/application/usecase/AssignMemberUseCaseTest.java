@@ -43,7 +43,7 @@ class AssignMemberUseCaseTest {
     void execute_shouldThrowException_whenUserNotActive() {
         given(groupRepository.findById(1)).willReturn(Optional.of(
                 ResearchGroup.builder().id(1).build()));
-        given(groupRepository.existsActiveUser(5)).willReturn(false);
+        given(groupRepository.existsActiveUserWithRole(5, "DOCENTE_INVESTIGADOR")).willReturn(false);
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(BusinessException.class)
@@ -54,7 +54,7 @@ class AssignMemberUseCaseTest {
     void execute_shouldThrowException_whenUserAlreadyHasMembership_RF21() {
         given(groupRepository.findById(1)).willReturn(Optional.of(
                 ResearchGroup.builder().id(1).build()));
-        given(groupRepository.existsActiveUser(2)).willReturn(true);
+        given(groupRepository.existsActiveUserWithRole(2, "DOCENTE_INVESTIGADOR")).willReturn(true);
         given(membershipRepository.existsActiveByUser(2)).willReturn(true);
 
         assertThatThrownBy(() -> useCase.execute(1, 2))
@@ -70,7 +70,7 @@ class AssignMemberUseCaseTest {
 
         given(groupRepository.findById(1)).willReturn(Optional.of(
                 ResearchGroup.builder().id(1).build()));
-        given(groupRepository.existsActiveUser(2)).willReturn(true);
+        given(groupRepository.existsActiveUserWithRole(2, "DOCENTE_INVESTIGADOR")).willReturn(true);
         given(membershipRepository.existsActiveByUser(2)).willReturn(false);
         given(membershipRepository.save(any())).willReturn(saved);
 

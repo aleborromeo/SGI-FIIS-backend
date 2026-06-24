@@ -68,6 +68,20 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
         return count != null && count > 0;
     }
 
+    @Override
+    public boolean existsActiveUserWithRole(Integer userId, String roleCode) {
+        String sql = """
+                SELECT COUNT(*) FROM usuarios u
+                WHERE u.id_usuario = ? AND u.es_activo = TRUE 
+                  AND (
+                    EXISTS (SELECT 1 FROM roles r WHERE r.id_rol = u.id_rol_principal AND r.codigo_rol = ?)
+                    OR EXISTS (SELECT 1 FROM usuarios_roles ur JOIN roles r ON ur.id_rol = r.id_rol WHERE ur.id_usuario = u.id_usuario AND r.codigo_rol = ?)
+                  )
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId, roleCode, roleCode);
+        return count != null && count > 0;
+    }
+
     private ResearchGroup enrichWithCoordinator(ResearchGroup group) {
         if (group.getCurrentCoordinatorId() == null) {
             return group;

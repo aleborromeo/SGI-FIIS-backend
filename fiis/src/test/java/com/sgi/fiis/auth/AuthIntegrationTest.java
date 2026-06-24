@@ -248,4 +248,19 @@ class AuthIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("No se encontró ningún registro pendiente para el correo especificado"));
     }
+
+    @Test
+    @DisplayName("Should return 401 JSON error when accessing protected endpoint without token")
+    void testProtectedEndpointWithoutToken() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/users")
+                        .header("Accept-Language", "es")
+                        .locale(new java.util.Locale("es")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Acceso no autorizado. Debe iniciar sesión e incluir el token JWT en las cabeceras."))
+                .andExpect(jsonPath("$.path").value("/api/v1/users"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
 }
+

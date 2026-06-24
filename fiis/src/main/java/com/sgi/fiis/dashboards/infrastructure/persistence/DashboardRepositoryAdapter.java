@@ -188,7 +188,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         List<java.util.Map<String, Object>> groupResult = jdbcTemplate.queryForList(sqlGroup, userId);
         if (!groupResult.isEmpty()) {
             java.util.Map<String, Object> row = groupResult.get(0);
-            groupId = (Integer) row.get("id_grupo");
+            Object idVal = row.get("id_grupo");
+            groupId = idVal instanceof Number ? ((Number) idVal).intValue() : null;
             groupName = (String) row.get("nombre_grupo");
             groupCode = (String) row.get("codigo_grupo");
         }
