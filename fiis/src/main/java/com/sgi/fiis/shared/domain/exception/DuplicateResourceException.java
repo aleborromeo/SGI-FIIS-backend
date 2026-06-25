@@ -28,6 +28,6 @@ public class DuplicateResourceException extends RuntimeException {
     }
 
     public Object[] getArgs() {
-        return args;
+        return args != null ? args.clone() : null;
     }
 }
