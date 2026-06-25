@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * Configura la información general de la API y añade soporte para el flujo de autorización con JWT Bearer tokens.
  */
 @Configuration
+@lombok.extern.slf4j.Slf4j
 public class OpenApiConfig {
 
     @Value("${spring.mail.host}")
@@ -31,13 +32,13 @@ public class OpenApiConfig {
     private boolean mailMock;
     @PostConstruct
     public void printMailConfig() {
-        System.out.println("=================================================");
-        System.out.println("DEBUG MAIL CONFIGURATION ON STARTUP:");
-        System.out.println("Host: " + mailHost);
-        System.out.println("Username: " + mailUsername);
-        System.out.println("Password length: " + (mailPassword != null ? mailPassword.length() : "null"));
-        System.out.println("Mail Mode: " + (mailMock ? "MOCK (Fake Sender)" : "SMTP (Real Sender)"));
-        System.out.println("=================================================");
+        log.info("=================================================");
+        log.info("DEBUG MAIL CONFIGURATION ON STARTUP:");
+        log.info("Host: {}", mailHost);
+        log.info("Username: {}", mailUsername);
+        log.info("Password length: {}", (mailPassword != null ? mailPassword.length() : "null"));
+        log.info("Mail Mode: {}", (mailMock ? "MOCK (Fake Sender)" : "SMTP (Real Sender)"));
+        log.info("=================================================");
     }
 
     @Bean

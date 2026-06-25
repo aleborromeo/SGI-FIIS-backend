@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/research-groups")
+@lombok.RequiredArgsConstructor
 public class ResearchGroupController {
 
     private final CreateGroupUseCase createGroupUseCase;
@@ -28,28 +29,6 @@ public class ResearchGroupController {
     private final ListResearchLinesByGroupUseCase listResearchLinesByGroupUseCase;
     private final ResearchGroupMapper mapper;
     private final ResearchLineMapper lineMapper;
-
-    public ResearchGroupController(CreateGroupUseCase createGroupUseCase,
-                                   ListGroupsUseCase listGroupsUseCase,
-                                   GetGroupUseCase getGroupUseCase,
-                                   AssignCoordinatorUseCase assignCoordinatorUseCase,
-                                   AssignMemberUseCase assignMemberUseCase,
-                                   RemoveMemberUseCase removeMemberUseCase,
-                                   ListMembersUseCase listMembersUseCase,
-                                   ListResearchLinesByGroupUseCase listResearchLinesByGroupUseCase,
-                                   ResearchGroupMapper mapper,
-                                   ResearchLineMapper lineMapper) {
-        this.createGroupUseCase = createGroupUseCase;
-        this.listGroupsUseCase = listGroupsUseCase;
-        this.getGroupUseCase = getGroupUseCase;
-        this.assignCoordinatorUseCase = assignCoordinatorUseCase;
-        this.assignMemberUseCase = assignMemberUseCase;
-        this.removeMemberUseCase = removeMemberUseCase;
-        this.listMembersUseCase = listMembersUseCase;
-        this.listResearchLinesByGroupUseCase = listResearchLinesByGroupUseCase;
-        this.mapper = mapper;
-        this.lineMapper = lineMapper;
-    }
 
     /** RF-22: Create research group */
     @PostMapping

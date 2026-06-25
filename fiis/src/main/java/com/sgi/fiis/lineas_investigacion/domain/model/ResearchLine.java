@@ -20,11 +20,11 @@ public class ResearchLine {
 
     public void activate() {
         this.active = true;
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 
     public void deactivate() {
         this.active = false;
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 }

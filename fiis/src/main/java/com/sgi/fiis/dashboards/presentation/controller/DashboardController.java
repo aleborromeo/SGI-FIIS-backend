@@ -29,7 +29,7 @@ public class DashboardController {
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getMyDashboard(Authentication authentication) {
+    public ResponseEntity<Object> getMyDashboard(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

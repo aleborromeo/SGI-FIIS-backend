@@ -5,7 +5,7 @@ import com.sgi.fiis.grupos_investigacion.domain.port.MembershipRepositoryPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,15 +61,15 @@ public class MembershipRepositoryAdapter implements MembershipRepositoryPort {
     }
 
     private Membership fromRow(java.sql.ResultSet rs) throws java.sql.SQLException {
-        Timestamp tsInicio = rs.getTimestamp("fecha_inicio");
-        Timestamp tsFin = rs.getTimestamp("fecha_fin");
+        LocalDateTime tsInicio = rs.getObject("fecha_inicio", LocalDateTime.class);
+        LocalDateTime tsFin = rs.getObject("fecha_fin", LocalDateTime.class);
         return Membership.builder()
                 .id(rs.getInt("id_membresia"))
                 .groupId(rs.getInt("id_grupo"))
                 .userId(rs.getInt("id_usuario"))
                 .active(rs.getBoolean("es_activo"))
-                .startDate(tsInicio != null ? tsInicio.toLocalDateTime() : null)
-                .endDate(tsFin != null ? tsFin.toLocalDateTime() : null)
+                .startDate(tsInicio)
+                .endDate(tsFin)
                 .userFirstNames(rs.getString("user_first_names"))
                 .userLastNames(rs.getString("user_last_names"))
                 .userEmail(rs.getString("user_email"))

@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +55,7 @@ class ResearchGroupRepositoryAdapterTest {
     @Test
     @DisplayName("Should successfully save a ResearchGroup and enrich with coordinator")
     @SuppressWarnings("unchecked")
-    void testSave() throws SQLException {
+    void testSave() {
         ResearchGroup domain = getTestGroup();
         ResearchGroupEntity entity = getTestGroupEntity();
 
@@ -108,7 +107,7 @@ class ResearchGroupRepositoryAdapterTest {
     @Test
     @DisplayName("Should find a ResearchGroup by ID and enrich coordinator details")
     @SuppressWarnings("unchecked")
-    void testFindById() throws SQLException {
+    void testFindById() {
         ResearchGroupEntity entity = getTestGroupEntity();
         when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
 
@@ -141,7 +140,7 @@ class ResearchGroupRepositoryAdapterTest {
     @Test
     @DisplayName("Should find all ResearchGroups and map them correctly")
     @SuppressWarnings("unchecked")
-    void testFindAll() throws SQLException {
+    void testFindAll() {
         when(jdbcTemplate.query(anyString(), any(RowMapper.class))).thenAnswer(invocation -> {
             RowMapper<ResearchGroup> mapper = invocation.getArgument(1);
             ResultSet rs = mock(ResultSet.class);

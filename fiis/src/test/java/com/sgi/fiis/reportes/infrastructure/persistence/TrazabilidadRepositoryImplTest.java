@@ -12,8 +12,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,7 +43,7 @@ class TrazabilidadRepositoryImplTest {
         when(rs.getString("estado_anterior")).thenReturn("EN_PROGRESO");
         when(rs.getString("estado_nuevo")).thenReturn("APROBADO");
         when(rs.getString("observacion")).thenReturn("Todo conforme");
-        when(rs.getTimestamp("fecha_movimiento")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 5, 20, 10, 30)));
+        when(rs.getObject("fecha_movimiento", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.MAY, 20, 10, 30));
 
         when(jdbc.query(anyString(), any(RowMapper.class), eq(100))).thenAnswer(invocation -> {
             RowMapper<TrazabilidadMovimiento> mapper = invocation.getArgument(1);
@@ -63,7 +63,7 @@ class TrazabilidadRepositoryImplTest {
         assertEquals("EN_PROGRESO", m.getEstadoAnterior());
         assertEquals("APROBADO", m.getEstadoNuevo());
         assertEquals("Todo conforme", m.getObservacion());
-        assertEquals(LocalDateTime.of(2026, 5, 20, 10, 30), m.getFechaMovimiento());
+        assertEquals(LocalDateTime.of(2026, Month.MAY, 20, 10, 30), m.getFechaMovimiento());
     }
 
     @Test
@@ -79,7 +79,7 @@ class TrazabilidadRepositoryImplTest {
         when(rs.getString("estado_anterior")).thenReturn("EN_PROGRESO");
         when(rs.getString("estado_nuevo")).thenReturn("APROBADO");
         when(rs.getString("observacion")).thenReturn("Todo conforme");
-        when(rs.getTimestamp("fecha_movimiento")).thenReturn(null);
+        when(rs.getObject("fecha_movimiento", LocalDateTime.class)).thenReturn(null);
 
         when(jdbc.query(anyString(), any(RowMapper.class), eq(100))).thenAnswer(invocation -> {
             RowMapper<TrazabilidadMovimiento> mapper = invocation.getArgument(1);

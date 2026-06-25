@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +33,8 @@ class ResearchLineRepositoryAdapterTest {
         entity.setId(1);
         entity.setLineName("Tecnologia y Comunicaciones");
         entity.setActive(true);
-        entity.setCreatedAt(LocalDateTime.of(2026, 1, 1, 12, 0));
-        entity.setUpdatedAt(LocalDateTime.of(2026, 1, 2, 12, 0));
+        entity.setCreatedAt(LocalDateTime.of(2026, Month.JANUARY, 1, 12, 0));
+        entity.setUpdatedAt(LocalDateTime.of(2026, Month.JANUARY, 2, 12, 0));
         return entity;
     }
 
@@ -42,8 +43,8 @@ class ResearchLineRepositoryAdapterTest {
                 .id(1)
                 .lineName("Tecnologia y Comunicaciones")
                 .active(true)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0))
-                .updatedAt(LocalDateTime.of(2026, 1, 2, 12, 0))
+                .createdAt(LocalDateTime.of(2026, Month.JANUARY, 1, 12, 0))
+                .updatedAt(LocalDateTime.of(2026, Month.JANUARY, 2, 12, 0))
                 .build();
     }
 

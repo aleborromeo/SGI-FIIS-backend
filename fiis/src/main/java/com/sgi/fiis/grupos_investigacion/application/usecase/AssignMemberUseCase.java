@@ -40,7 +40,7 @@ public class AssignMemberUseCase {
                 .groupId(groupId)
                 .userId(userId)
                 .active(true)
-                .startDate(LocalDateTime.now())
+                .startDate(LocalDateTime.now(java.time.ZoneId.systemDefault()))
                 .build();
 
         return membershipRepository.save(membership);
