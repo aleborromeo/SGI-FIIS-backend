@@ -15,6 +15,7 @@ import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -62,6 +63,12 @@ class AuthIntegrationTest {
 
     @MockitoBean
     private EmailSenderPort emailSenderPort;
+
+    // Mock the transaction manager so @Transactional on VerifyRegistrationUseCase
+    // does NOT attempt to open a real JPA EntityManager / DB connection in tests.
+    // All repositories are already mocked, so no real transaction is needed.
+    @MockitoBean
+    private PlatformTransactionManager transactionManager;
 
     @Test
     @DisplayName("Should successfully login directly and return JWT")
