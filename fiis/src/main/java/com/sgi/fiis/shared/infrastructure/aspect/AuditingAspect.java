@@ -48,7 +48,7 @@ public class AuditingAspect {
                 "INSERT INTO auditoria_general (usuario, accion, fecha, ip_origen) VALUES (?, ?, ?, ?)",
                 username,
                 auditable.action(),
-                LocalDateTime.now(ZoneId.systemDefault()),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 ipAddress
         );
     }

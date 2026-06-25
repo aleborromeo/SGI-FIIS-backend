@@ -7,9 +7,11 @@ import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLine
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
+import com.sgi.fiis.shared.infrastructure.persistence.JsonbHelper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -100,6 +102,8 @@ public class SaveCallAdapter implements SaveCallPort {
                 .id(domain.getId())
                 .title(domain.getTitle())
                 .description(domain.getDescription())
+                .titleJson(JsonbHelper.toJson(Map.of("es", domain.getTitle() != null ? domain.getTitle() : "")))
+                .descriptionJson(JsonbHelper.toJson(Map.of("es", domain.getDescription() != null ? domain.getDescription() : "")))
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status(dbStatus)
@@ -125,8 +129,8 @@ public class SaveCallAdapter implements SaveCallPort {
 
         return new ResearchCall(
                 entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
+                JsonbHelper.getText(entity.getTitleJson(), "es"),
+                JsonbHelper.getText(entity.getDescriptionJson(), "es"),
                 entity.getStartDate(),
                 entity.getEndDate(),
                 domainStatus,

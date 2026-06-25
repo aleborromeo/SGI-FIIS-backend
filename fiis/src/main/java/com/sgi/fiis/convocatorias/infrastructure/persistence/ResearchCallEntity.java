@@ -33,6 +33,12 @@ public class ResearchCallEntity {
     @Column(name = "descripcion", nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "titulo_jsonb", columnDefinition = "jsonb", nullable = false)
+    private String titleJson;
+
+    @Column(name = "descripcion_jsonb", columnDefinition = "jsonb", nullable = false)
+    private String descriptionJson;
+
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate startDate;
 
@@ -59,8 +65,8 @@ public class ResearchCallEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now(ZoneId.systemDefault());
-        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
+        createdAt = LocalDateTime.now(ZoneId.of("UTC"));
+        updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
         if (status == null) {
             status = "ABIERTA";
         }
@@ -68,6 +74,6 @@ public class ResearchCallEntity {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
+        updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

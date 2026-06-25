@@ -41,7 +41,7 @@ public class AsignarMiembroUseCase {
                 .idGrupo(idGrupo)
                 .idUsuario(idUsuario)
                 .esActivo(true)
-                .fechaInicio(LocalDateTime.now(ZoneId.systemDefault()))
+                .fechaInicio(LocalDateTime.now(ZoneId.of("UTC")))
                 .build();
 
         return membresiaRepository.save(membresia);

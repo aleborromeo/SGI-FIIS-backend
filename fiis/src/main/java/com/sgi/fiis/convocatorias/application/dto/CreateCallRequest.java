@@ -17,20 +17,20 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateCallRequest {
 
-    @NotBlank
+    @NotBlank(message = "{convocatorias.validation.title.required}")
     private String title;
 
-    @NotBlank
+    @NotBlank(message = "{convocatorias.validation.description.required}")
     private String description;
 
-    @NotNull
+    @NotNull(message = "{convocatorias.validation.start-date.required}")
     private LocalDate startDate;
 
-    @NotNull
+    @NotNull(message = "{convocatorias.validation.end-date.required}")
     private LocalDate endDate;
 
     private Integer documentId;
 
-    @NotEmpty
+    @NotEmpty(message = "{convocatorias.validation.lines.not-empty}")
     private List<Integer> researchLineIds;
 }

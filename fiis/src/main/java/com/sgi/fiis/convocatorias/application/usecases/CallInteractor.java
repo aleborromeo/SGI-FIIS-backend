@@ -53,7 +53,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
                     callStatus = CallStatus.valueOf(status.toUpperCase());
                 }
             } catch (IllegalArgumentException e) {
-                throw new BusinessRuleValidationException("Invalid status filter: " + status);
+                throw new BusinessRuleValidationException("convocatorias.error.invalid-status", status);
             }
             calls = saveCallPort.findByStatus(callStatus);
         } else {
@@ -69,7 +69,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
     @Transactional(readOnly = true)
     public CallResponse getCallById(Integer id) {
         ResearchCall call = saveCallPort.findById(id)
-                .orElseThrow(() -> new BusinessRuleValidationException("Research call not found with ID: " + id));
+                .orElseThrow(() -> new BusinessRuleValidationException("convocatorias.error.not-found", id));
         return mapToResponse(call);
     }
 
@@ -78,7 +78,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
     @Auditable(action = "UPDATE_RESEARCH_CALL_STATUS")
     public CallResponse updateStatus(Integer id, String status) {
         ResearchCall call = saveCallPort.findById(id)
-                .orElseThrow(() -> new BusinessRuleValidationException("Research call not found with ID: " + id));
+                .orElseThrow(() -> new BusinessRuleValidationException("convocatorias.error.not-found", id));
 
         CallStatus callStatus;
         try {
@@ -92,7 +92,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
                 callStatus = CallStatus.valueOf(status.toUpperCase());
             }
         } catch (IllegalArgumentException e) {
-            throw new BusinessRuleValidationException("Invalid status value: " + status);
+            throw new BusinessRuleValidationException("convocatorias.error.invalid-status-value", status);
         }
 
         call.setStatus(callStatus);

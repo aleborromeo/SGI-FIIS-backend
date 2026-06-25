@@ -21,11 +21,11 @@ public class LineaInvestigacion {
 
     public void activar() {
         this.esActiva = true;
-        this.fechaActualizacion = LocalDateTime.now(ZoneId.systemDefault());
+        this.fechaActualizacion = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     public void desactivar() {
         this.esActiva = false;
-        this.fechaActualizacion = LocalDateTime.now(ZoneId.systemDefault());
+        this.fechaActualizacion = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

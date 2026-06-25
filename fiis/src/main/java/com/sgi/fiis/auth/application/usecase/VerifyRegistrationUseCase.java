@@ -7,6 +7,7 @@ import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.users.domain.model.User;
+import java.time.ZoneId;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class VerifyRegistrationUseCase {
 
         // 4. Persist the user in the database
         RegisterRequestDto dto = pending.getRequestDto();
-        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
         User newUser = User.builder()
                 .dni(dto.getDni())

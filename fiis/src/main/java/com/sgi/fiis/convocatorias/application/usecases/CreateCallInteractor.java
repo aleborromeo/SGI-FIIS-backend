@@ -25,7 +25,7 @@ public class CreateCallInteractor implements CreateCallUseCase {
     public CallResponse execute(CreateCallRequest request) {
         // RN-11: Validate that all research lines are active
         if (!saveCallPort.areLinesActive(request.getResearchLineIds())) {
-            throw new BusinessRuleValidationException("All research lines must be active.");
+            throw new BusinessRuleValidationException("convocatorias.error.lines-not-active");
         }
 
         // Create domain model which executes business rule checks (e.g. endDate is not before startDate)

@@ -39,6 +39,8 @@ class SaveCallAdapterTest {
                 .id(1)
                 .title("Call Open")
                 .description("Description")
+                .titleJson("{\"es\":\"Call Open\"}")
+                .descriptionJson("{\"es\":\"Description\"}")
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status("ABIERTA")
@@ -60,6 +62,8 @@ class SaveCallAdapterTest {
                 .id(1)
                 .title("Call Closed")
                 .description("Description")
+                .titleJson("{\"es\":\"Call Closed\"}")
+                .descriptionJson("{\"es\":\"Description\"}")
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status("CERRADA")
@@ -78,6 +82,8 @@ class SaveCallAdapterTest {
                 .id(1)
                 .title("Call Finished")
                 .description("Description")
+                .titleJson("{\"es\":\"Call Finished\"}")
+                .descriptionJson("{\"es\":\"Description\"}")
                 .startDate(domain.getStartDate())
                 .endDate(domain.getEndDate())
                 .status("FINALIZADA")
@@ -95,6 +101,8 @@ class SaveCallAdapterTest {
                 .id(2)
                 .title("Some Call")
                 .description("Description")
+                .titleJson("{\"es\":\"Some Call\"}")
+                .descriptionJson("{\"es\":\"Description\"}")
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(10))
                 .status("CERRADA")
@@ -117,9 +125,9 @@ class SaveCallAdapterTest {
 
     @Test
     void shouldFindByStatus() {
-        ResearchCallEntity openEntity = ResearchCallEntity.builder().id(1).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
-        ResearchCallEntity closedEntity = ResearchCallEntity.builder().id(2).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
-        ResearchCallEntity finishedEntity = ResearchCallEntity.builder().id(3).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("FINALIZADA").build();
+        ResearchCallEntity openEntity = ResearchCallEntity.builder().id(1).title("Call 1").description("Desc").titleJson("{\"es\":\"Call 1\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
+        ResearchCallEntity closedEntity = ResearchCallEntity.builder().id(2).title("Call 2").description("Desc").titleJson("{\"es\":\"Call 2\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
+        ResearchCallEntity finishedEntity = ResearchCallEntity.builder().id(3).title("Call 3").description("Desc").titleJson("{\"es\":\"Call 3\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("FINALIZADA").build();
 
         when(jpaRepository.findByStatus("ABIERTA")).thenReturn(Arrays.asList(openEntity));
         when(jpaRepository.findByStatus("CERRADA")).thenReturn(Arrays.asList(closedEntity));
@@ -140,8 +148,8 @@ class SaveCallAdapterTest {
 
     @Test
     void shouldFindAll() {
-        ResearchCallEntity entity1 = ResearchCallEntity.builder().id(1).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
-        ResearchCallEntity entity2 = ResearchCallEntity.builder().id(2).description("Desc").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
+        ResearchCallEntity entity1 = ResearchCallEntity.builder().id(1).title("Call 1").description("Desc").titleJson("{\"es\":\"Call 1\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
+        ResearchCallEntity entity2 = ResearchCallEntity.builder().id(2).title("Call 2").description("Desc").titleJson("{\"es\":\"Call 2\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
         when(jpaRepository.findAll()).thenReturn(Arrays.asList(entity1, entity2));
 
         List<ResearchCall> result = adapter.findAll();

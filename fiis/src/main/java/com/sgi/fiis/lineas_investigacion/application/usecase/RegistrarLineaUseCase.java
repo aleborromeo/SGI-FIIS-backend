@@ -24,8 +24,8 @@ public class RegistrarLineaUseCase {
             throw new DuplicateResourceException("LineaInvestigacion", "nombre", linea.getNombreLinea());
         }
         linea.setEsActiva(true);
-        linea.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
-        linea.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
+        linea.setFechaCreacion(LocalDateTime.now(ZoneId.of("UTC")));
+        linea.setFechaActualizacion(LocalDateTime.now(ZoneId.of("UTC")));
         return lineaRepository.save(linea);
     }
 }

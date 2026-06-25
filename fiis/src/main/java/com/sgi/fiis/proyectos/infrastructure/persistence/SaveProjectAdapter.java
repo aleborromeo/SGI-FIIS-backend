@@ -12,11 +12,13 @@ import com.sgi.fiis.proyectos.application.ports.out.SaveProjectPort;
 import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
+import com.sgi.fiis.shared.infrastructure.persistence.JsonbHelper;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -175,6 +177,10 @@ public class SaveProjectAdapter implements SaveProjectPort {
                 .title(domain.getTitle())
                 .summary(domain.getSummary())
                 .generalObjective(domain.getGeneralObjective())
+                .titleJson(JsonbHelper.toJson(Map.of("es", domain.getTitle() != null ? domain.getTitle() : "")))
+                .summaryJson(JsonbHelper.toJson(Map.of("es", domain.getSummary() != null ? domain.getSummary() : "")))
+                .generalObjectiveJson(JsonbHelper.toJson(Map.of("es", domain.getGeneralObjective() != null ? domain.getGeneralObjective() : "")))
+                .executionPlaceJson(JsonbHelper.toJson(Map.of("es", domain.getExecutionPlace() != null ? domain.getExecutionPlace() : "")))
                 .researchLine(line)
                 .group(group)
                 .budget(domain.getBudget())
@@ -205,15 +211,15 @@ public class SaveProjectAdapter implements SaveProjectPort {
         return new Project(
                 entity.getId(),
                 entity.getCode(),
-                entity.getTitle(),
-                entity.getSummary(),
-                entity.getGeneralObjective(),
+                JsonbHelper.getText(entity.getTitleJson(), "es"),
+                JsonbHelper.getText(entity.getSummaryJson(), "es"),
+                JsonbHelper.getText(entity.getGeneralObjectiveJson(), "es"),
                 entity.getResearchLine().getId(),
                 entity.getResearchLine().getName(),
                 entity.getBudget(),
                 entity.getStartDate(),
                 entity.getEndDate(),
-                entity.getExecutionPlace(),
+                JsonbHelper.getText(entity.getExecutionPlaceJson(), "es"),
                 entity.getResponsible().getId(),
                 entity.getGroup().getId(),
                 entity.getGroup().getCode(),

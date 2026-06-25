@@ -163,7 +163,7 @@ class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("auth.register.success"));
+                .andExpect(jsonPath("$.message").value("Registro exitoso. Verifique su correo para activar la cuenta."));
 
         // Retrieve the generated code from PendingRegistrationService
         PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get("jose.evaristo@unas.edu.pe");
@@ -223,7 +223,7 @@ class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(resendDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("auth.resend-code.success"));
+                .andExpect(jsonPath("$.message").value("C\u00F3digo de verificación reenviado exitosamente."));
 
         // Get new code and assert it is updated
         PendingRegistrationService.PendingRegistration updatedPending = pendingRegistrationService.get("maria.carmen@unas.edu.pe");

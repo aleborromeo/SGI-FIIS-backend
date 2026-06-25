@@ -54,12 +54,12 @@ public class ProcedureEntity {
 
     @PrePersist
     protected void onCreate() {
-        sentAt = LocalDateTime.now(ZoneId.systemDefault());
-        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
+        sentAt = LocalDateTime.now(ZoneId.of("UTC"));
+        updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
+        updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

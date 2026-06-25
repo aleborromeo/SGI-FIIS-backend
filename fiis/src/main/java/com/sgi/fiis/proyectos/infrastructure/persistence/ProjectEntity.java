@@ -37,6 +37,18 @@ public class ProjectEntity {
     @Column(name = "objetivo_general", nullable = false, columnDefinition = "TEXT")
     private String generalObjective;
 
+    @Column(name = "titulo_jsonb", columnDefinition = "jsonb", nullable = false)
+    private String titleJson;
+
+    @Column(name = "resumen_jsonb", columnDefinition = "jsonb", nullable = false)
+    private String summaryJson;
+
+    @Column(name = "objetivo_general_jsonb", columnDefinition = "jsonb", nullable = false)
+    private String generalObjectiveJson;
+
+    @Column(name = "lugar_ejecucion_jsonb", columnDefinition = "jsonb", nullable = false)
+    private String executionPlaceJson;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_linea", nullable = false)
     private ResearchLineEntity researchLine;
@@ -79,12 +91,12 @@ public class ProjectEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now(ZoneId.systemDefault());
-        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
+        createdAt = LocalDateTime.now(ZoneId.of("UTC"));
+        updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now(ZoneId.systemDefault());
+        updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

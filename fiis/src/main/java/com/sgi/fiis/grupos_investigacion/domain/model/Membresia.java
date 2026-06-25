@@ -25,6 +25,6 @@ public class Membresia {
 
     public void retirar() {
         this.esActivo = false;
-        this.fechaFin = LocalDateTime.now(ZoneId.systemDefault());
+        this.fechaFin = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

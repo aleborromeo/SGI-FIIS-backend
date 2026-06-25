@@ -8,6 +8,7 @@ import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.RoleRepositoryPort;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
+import java.time.ZoneId;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -60,8 +61,8 @@ public class CreateUserUseCase {
         user.setPasswordHash(passwordEncoder.encode(user.getDni()));
         user.setActive(true);
         user.setMustChangePassword(true);
-        user.setCreatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
-        user.setUpdatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
+        user.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+        user.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
 
         return userRepository.save(user);
     }

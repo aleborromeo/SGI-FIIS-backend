@@ -4,6 +4,7 @@ import com.sgi.fiis.auth.application.dto.RegisterRequestDto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +23,7 @@ public class PendingRegistrationService {
         public PendingRegistration(RegisterRequestDto requestDto, String code) {
             this.requestDto = requestDto;
             this.code = code;
-            this.expiresAt = LocalDateTime.now(java.time.ZoneId.systemDefault()).plusMinutes(5); // Expira en 5 mins
+            this.expiresAt = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(5); // Expira en 5 mins
         }
 
         public RegisterRequestDto getRequestDto() {
@@ -34,7 +35,7 @@ public class PendingRegistrationService {
         }
 
         public boolean isExpired() {
-            return LocalDateTime.now(java.time.ZoneId.systemDefault()).isAfter(expiresAt);
+            return LocalDateTime.now(ZoneId.of("UTC")).isAfter(expiresAt);
         }
     }
 

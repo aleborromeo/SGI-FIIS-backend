@@ -39,6 +39,6 @@ public class DocumentEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now(ZoneId.systemDefault());
+        createdAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

@@ -41,40 +41,39 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     public ProjectResponse execute(CreateProjectRequest request) {
         // 1. Validate Research Group exists and is active
         if (!saveProjectPort.isGroupActive(request.getResearchGroupId())) {
-            throw new BusinessRuleValidationException("Research group is not active or does not exist.");
+            throw new BusinessRuleValidationException("proyectos.error.group-not-active");
         }
 
         // 2. Validate responsible teacher is an active member of the research group
         // (RN-02)
         if (!saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
                 request.getResearchGroupId())) {
-            throw new BusinessRuleValidationException(
-                    "Responsible teacher is not an active member of the selected research group.");
+            throw new BusinessRuleValidationException("proyectos.error.responsible-not-member");
         }
 
         // 3. Validate Research Line exists and is active (RN-11)
         if (!saveProjectPort.isLineActive(request.getResearchLineId())) {
-            throw new BusinessRuleValidationException("Research line is not active or does not exist.");
+            throw new BusinessRuleValidationException("proyectos.error.line-not-active");
         }
 
         // 4. Fetch metadata: Group Code and Line Name
         String groupCode = saveProjectPort.getGroupCode(request.getResearchGroupId())
-                .orElseThrow(() -> new BusinessRuleValidationException("Group code not found."));
+                .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.group-code-not-found"));
         String lineName = saveProjectPort.getLineName(request.getResearchLineId())
-                .orElseThrow(() -> new BusinessRuleValidationException("Research line name not found."));
+                .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.line-name-not-found"));
 
         // 5. If linked to a call, fetch call and validate it (RF-33 & RF-34)
         if (request.getCallId() != null) {
             ResearchCall call = saveCallPort.findById(request.getCallId())
                     .orElseThrow(() -> new BusinessRuleValidationException(
-                            "Research call not found with ID: " + request.getCallId()));
+                            "proyectos.error.call-not-found", request.getCallId()));
 
             // Validate that call is open and current date is within range
-            call.validateCanSubmitProject(LocalDate.now(ZoneId.systemDefault()));
+            call.validateCanSubmitProject(LocalDate.now(ZoneId.of("UTC")));
         }
 
         // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
-        String generatedCode = "PRJ-" + LocalDate.now(ZoneId.systemDefault()).getYear() + "-"
+        String generatedCode = "PRJ-" + LocalDate.now(ZoneId.of("UTC")).getYear() + "-"
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 7. Create domain model
@@ -145,13 +144,13 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     @Auditable(action = "UPDATE_PROJECT_STATUS")
     public ProjectResponse updateStatus(Integer id, String status) {
         Project project = saveProjectPort.findById(id)
-                .orElseThrow(() -> new BusinessRuleValidationException("Project not found with ID: " + id));
+                .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.project-not-found", id));
 
         ProjectStatus newStatus;
         try {
             newStatus = mapStatusFromString(status);
         } catch (IllegalArgumentException e) {
-            throw new BusinessRuleValidationException("Invalid status value: " + status);
+            throw new BusinessRuleValidationException("proyectos.error.invalid-status-value", status);
         }
 
         project.setStatus(newStatus);
@@ -179,7 +178,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     public ProjectResponse getProjectById(Integer id) {
         return saveProjectPort.findById(id)
                 .map(this::mapToResponse)
-                .orElseThrow(() -> new BusinessRuleValidationException("Project not found with ID: " + id));
+                .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.project-not-found", id));
     }
 
     private ProjectResponse mapToResponse(Project project) {

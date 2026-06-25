@@ -35,7 +35,8 @@ class ProjectEntityTest {
 
         ProjectEntity entity = new ProjectEntity(
                 1, "PROJ-001", "Test Project", "Summary",
-                "General Objective", line, group, BigDecimal.valueOf(10000),
+                "General Objective", null, null, null, null,
+                line, group, BigDecimal.valueOf(10000),
                 startDate, endDate, "Lima", responsible, call,
                 42, "ACTIVO", null, null
         );

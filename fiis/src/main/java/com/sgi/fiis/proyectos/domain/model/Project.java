@@ -36,13 +36,13 @@ public class Project {
 
     public void validateInvariants() {
         if (budget == null || budget.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessRuleValidationException("Project budget must be greater than zero.");
+            throw new BusinessRuleValidationException("proyectos.error.budget-must-be-positive");
         }
         if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
-            throw new BusinessRuleValidationException("Project start date must be before end date.");
+            throw new BusinessRuleValidationException("proyectos.error.invalid-dates");
         }
         if (title == null || title.trim().isEmpty()) {
-            throw new BusinessRuleValidationException("Project title is required.");
+            throw new BusinessRuleValidationException("proyectos.error.title-required");
         }
         // RN-12: GINSOFT group is restricted to 'Computacion' and 'Ingenieria de software' lines
         if ("GINSOFT".equalsIgnoreCase(researchGroupCode) && researchLineName != null &&
@@ -50,8 +50,8 @@ public class Project {
             !researchLineName.equalsIgnoreCase("Ingenieria de software") &&
             !researchLineName.equalsIgnoreCase("ComputaciÃƒÂ³n") &&
             !researchLineName.equalsIgnoreCase("IngenierÃƒÂ­a de software")) {
-            
-            throw new BusinessRuleValidationException("GINSOFT group is strictly restricted to 'Computacion' and 'Ingenieria de software' research lines.");
+
+            throw new BusinessRuleValidationException("proyectos.error.ginsoft-restriction");
         }
     }
 }

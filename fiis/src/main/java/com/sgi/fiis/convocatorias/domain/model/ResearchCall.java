@@ -36,7 +36,7 @@ public class ResearchCall {
                         LocalDate endDate, CallStatus status, Integer documentId,
                         List<Integer> researchLineIds) {
         if (endDate.isBefore(startDate)) {
-            throw new BusinessRuleValidationException("End date cannot be before start date.");
+            throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
         }
         this.id = id;
         this.title = title;
@@ -59,16 +59,13 @@ public class ResearchCall {
      */
     public void validateCanSubmitProject(LocalDate submissionDate) {
         if (status != CallStatus.OPEN) {
-            throw new BusinessRuleValidationException(
-                    "Cannot submit projects. The research call is " + status + ".");
+            throw new BusinessRuleValidationException("convocatorias.error.call-not-open", status);
         }
         if (submissionDate.isAfter(endDate)) {
-            throw new BusinessRuleValidationException(
-                    "Cannot submit projects. The submission period closed on " + endDate + ".");
+            throw new BusinessRuleValidationException("convocatorias.error.call-closed", endDate);
         }
         if (submissionDate.isBefore(startDate)) {
-            throw new BusinessRuleValidationException(
-                    "Cannot submit projects. The submission period starts on " + startDate + ".");
+            throw new BusinessRuleValidationException("convocatorias.error.call-not-started", startDate);
         }
     }
 
