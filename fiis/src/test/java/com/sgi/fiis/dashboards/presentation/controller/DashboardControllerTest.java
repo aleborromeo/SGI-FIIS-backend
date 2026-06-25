@@ -394,4 +394,24 @@ class DashboardControllerTest {
                         .principal(getMockAuth(10L, "INVITADO")))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @DisplayName("GET /api/v1/dashboard/me with authority not starting with ROLE_ should still map role correctly")
+    void getDashboardMe_withAuthorityWithoutRolePrefix_shouldStillMap() throws Exception {
+        CustomUserDetails userDetails = new CustomUserDetails(
+                1L,
+                "admin@unas.edu.pe",
+                "password",
+                true,
+                List.of(new SimpleGrantedAuthority("ADMIN"))
+        );
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        DashboardAdminResponse response = DashboardAdminResponse.builder().alerts(List.of()).build();
+        when(getAdminDashboardUseCase.execute(1)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/dashboard/me")
+                        .principal(auth))
+                .andExpect(status().isOk());
+    }
 }

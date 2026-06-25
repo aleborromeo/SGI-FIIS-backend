@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -155,7 +156,7 @@ class AuthIntegrationTest {
                 .mustChangePassword(false)
                 .roleCode("DOCENTE")
                 .build();
-        when(userRepositoryPort.save(any(User.class))).thenReturn(persistedUser);
+        when(userRepositoryPort.save(any())).thenReturn(persistedUser);
         doNothing().when(emailSenderPort).sendVerificationCode(eq("jose.evaristo@unas.edu.pe"), anyString());
 
         // 1. Post to register endpoint
@@ -178,6 +179,7 @@ class AuthIntegrationTest {
         mockMvc.perform(post("/api/v1/auth/verify-registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(verifyDto)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.email").value("jose.evaristo@unas.edu.pe"))
