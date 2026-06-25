@@ -179,14 +179,22 @@ class AuthIntegrationTest {
         // 2. Post to verify endpoint
         VerifyRegistrationRequestDto verifyDto = new VerifyRegistrationRequestDto("jose.evaristo@unas.edu.pe", code);
 
-        mockMvc.perform(post("/api/v1/auth/verify-registration")
+        org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(post("/api/v1/auth/verify-registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(verifyDto)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value("jose.evaristo@unas.edu.pe"))
-                .andExpect(jsonPath("$.roleCode").value("DOCENTE"));
+                .andReturn();
+
+        if (result.getResolvedException() != null) {
+            fail("Verify registration failed with exception: " + result.getResolvedException().getMessage(), result.getResolvedException());
+        }
+
+        assertEquals(200, result.getResponse().getStatus(), "Expected 200 OK but got " + result.getResponse().getStatus() + ". Response body: " + result.getResponse().getContentAsString());
+        
+        String content = result.getResponse().getContentAsString();
+        assertTrue(content.contains("\"token\""), "Response should contain token");
+        assertTrue(content.contains("\"email\":\"jose.evaristo@unas.edu.pe\""), "Response should contain correct email");
+        assertTrue(content.contains("\"roleCode\":\"DOCENTE\""), "Response should contain correct roleCode");
 
         // Assert memory storage is cleaned
         assertNull(pendingRegistrationService.get("jose.evaristo@unas.edu.pe"));
