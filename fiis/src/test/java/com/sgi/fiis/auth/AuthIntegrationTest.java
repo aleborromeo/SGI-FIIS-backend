@@ -35,8 +35,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+import org.springframework.test.annotation.DirtiesContext;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext
 @DisplayName("Auth Integration Tests")
 class AuthIntegrationTest {
 
