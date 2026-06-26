@@ -66,7 +66,8 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("all-apis")
                 .pathsToMatch("/api/**")
-                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion")
+                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion",
+                        "com.sgi.fiis.tramites")
                 .build();
     }
 
@@ -113,7 +114,8 @@ public class OpenApiConfig {
     public GroupedOpenApi tramitesApi() {
         return GroupedOpenApi.builder()
                 .group("tramites")
-                .pathsToMatch("/api/tramites/**")
+                .pathsToMatch("/api/v1/tramites/**")
+                .packagesToScan("com.sgi.fiis.tramites")
                 .build();
     }
 

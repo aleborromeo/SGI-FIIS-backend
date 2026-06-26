@@ -16,7 +16,7 @@ public class TramiteRequestDto {
     @NotNull(message = "El tipo de trámite es obligatorio")
     private TipoTramite tipoTramite;
 
-    @NotNull(message = "El id del solicitante es obligatorio")
+    // Poblado por el controller desde el JWT — el cliente no lo envía
     private Long idSolicitante;
 
     private Long idGrupo;
