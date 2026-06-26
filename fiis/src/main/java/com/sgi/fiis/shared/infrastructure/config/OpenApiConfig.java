@@ -109,12 +109,12 @@ public class OpenApiConfig {
                 .build();
     }
 
-    // Flujo de Trámites
+    // Procedures (Academic Workflow)
     @Bean
-    public GroupedOpenApi tramitesApi() {
+    public GroupedOpenApi proceduresApi() {
         return GroupedOpenApi.builder()
-                .group("tramites")
-                .pathsToMatch("/api/v1/tramites/**")
+                .group("procedures")
+                .pathsToMatch("/api/v1/procedures/**")
                 .packagesToScan("com.sgi.fiis.tramites")
                 .build();
     }

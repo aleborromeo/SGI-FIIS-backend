@@ -141,9 +141,9 @@ $tokenEst = (Invoke-RestMethod `
 
 ## 4. Endpoints del módulo de trámites
 
-Todos bajo el prefijo `/api/v1/tramites`. Requieren autenticación JWT.
+Todos bajo el prefijo `/api/v1/procedures`. Requieren autenticación JWT.
 
-### POST `/api/v1/tramites` — Crear trámite
+### POST `/api/v1/procedures` — Crear trámite
 
 Crea un nuevo trámite y lo presenta automáticamente al Coordinador de Grupo.
 
@@ -169,7 +169,7 @@ Crea un nuevo trámite y lo presenta automáticamente al Coordinador de Grupo.
 
 ---
 
-### PUT `/api/v1/tramites/{id}/aprobar` — Aprobar trámite
+### PUT `/api/v1/procedures/{id}/approve` — Aprobar trámite
 
 Avanza el trámite al siguiente estado según el rol del ejecutor.
 
@@ -184,7 +184,7 @@ Avanza el trámite al siguiente estado según el rol del ejecutor.
 
 ---
 
-### PUT `/api/v1/tramites/{id}/observar` — Observar trámite
+### PUT `/api/v1/procedures/{id}/flag` — Observar trámite
 
 Regresa el trámite al solicitante con una observación. El solicitante debe subsanar.
 
@@ -208,7 +208,7 @@ Regresa el trámite al solicitante con una observación. El solicitante debe sub
 
 ---
 
-### PUT `/api/v1/tramites/{id}/subsanar` — Subsanar trámite
+### PUT `/api/v1/procedures/{id}/remediate` — Subsanar trámite
 
 El solicitante original responde a la observación. Solo puede hacerlo el mismo usuario que creó el trámite.
 
@@ -228,7 +228,7 @@ El solicitante original responde a la observación. Solo puede hacerlo el mismo 
 
 ---
 
-### PUT `/api/v1/tramites/{id}/rechazar` — Rechazar trámite
+### PUT `/api/v1/procedures/{id}/reject` — Rechazar trámite
 
 Rechaza el trámite de forma definitiva (estado terminal, no reversible).
 
@@ -245,7 +245,7 @@ Rechaza el trámite de forma definitiva (estado terminal, no reversible).
 
 ---
 
-### PUT `/api/v1/tramites/{id}/resolucion` — Registrar resolución
+### PUT `/api/v1/procedures/{id}/resolution` — Registrar resolución
 
 Solo el Decano. Finaliza el trámite en dos pasos automáticos: `PENDIENTE_DECANATO` → `APROBADO_CON_RESOLUCION` → `FINALIZADO`.
 
@@ -255,7 +255,7 @@ Solo el Decano. Finaliza el trámite en dos pasos automáticos: `PENDIENTE_DECAN
 
 ---
 
-### GET `/api/v1/tramites/{id}/trazabilidad` — Consultar historial
+### GET `/api/v1/procedures/{id}/traceability` — Consultar historial
 
 Devuelve todos los movimientos del trámite en orden cronológico. Cualquier usuario autenticado puede consultarla.
 
@@ -296,7 +296,7 @@ $tokenEst = (Invoke-RestMethod `
 # - idGrupo: 9 (grupo de prueba insertado en la DB)
 # - idReferenciaTesis: 1 (plan de tesis de prueba insertado en la DB)
 $tramite = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites" `
+  -Uri "http://localhost:8080/api/v1/procedures" `
   -Method POST `
   -Body '{"tipoTramite":"PLAN_TESIS","idGrupo":9,"idReferenciaTesis":1}' `
   -ContentType "application/json" `
@@ -320,7 +320,7 @@ $tokenCoord = (Invoke-RestMethod `
 
 # Aprobar — no requiere body
 $r = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/aprobar" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/approve" `
   -Method PUT `
   -Headers @{ Authorization = "Bearer $tokenCoord" }
 
@@ -340,7 +340,7 @@ $tokenDir = (Invoke-RestMethod `
   -ContentType "application/json").token
 
 $r = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/aprobar" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/approve" `
   -Method PUT `
   -Headers @{ Authorization = "Bearer $tokenDir" }
 
@@ -360,7 +360,7 @@ $tokenDec = (Invoke-RestMethod `
   -ContentType "application/json").token
 
 $r = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/resolucion" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/resolution" `
   -Method PUT `
   -Headers @{ Authorization = "Bearer $tokenDec" }
 
@@ -373,7 +373,7 @@ Write-Host "Decano finalizó → estado=$($r.estadoActual)"
 
 ```powershell
 $traz = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/trazabilidad" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/traceability" `
   -Headers @{ Authorization = "Bearer $tokenDec" }
 
 Write-Host "TRAZABILIDAD ($($traz.Count) movimientos):"
@@ -401,7 +401,7 @@ Primero crear un **nuevo** trámite (repite el Paso 1). Luego:
 ```powershell
 # Coordinador observa el trámite en PENDIENTE_COORDINADOR
 $r = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/observar" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/flag" `
   -Method PUT `
   -Body '{"textoObservacion":"Falta firma del asesor en el documento"}' `
   -ContentType "application/json" `
@@ -415,7 +415,7 @@ Write-Host "Observacion vigente: $($r.observacionActual)"
 
 # Estudiante subsana (debe ser el mismo que creó el trámite)
 $r = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/subsanar" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/remediate" `
   -Method PUT `
   -Body '{"detalleSubsanacion":"Se adjunta firma del asesor escaneada"}' `
   -ContentType "application/json" `
@@ -437,7 +437,7 @@ Write-Host "Subsanado → estado=$($r.estadoActual)"
 # Coordinador rechaza (también puede hacerlo el Director si el trámite
 # ya pasó a PENDIENTE_DIRECCION)
 $r = Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/tramites/$ID/rechazar" `
+  -Uri "http://localhost:8080/api/v1/procedures/$ID/reject" `
   -Method PUT `
   -Headers @{ Authorization = "Bearer $tokenCoord" }
 
@@ -455,7 +455,7 @@ Estos son errores válidos que el sistema debe devolver. Úsalos para verificar 
 | Escenario | Cómo reproducirlo | Respuesta esperada |
 |---|---|---|
 | Rol incorrecto para la acción | Login como ESTUDIANTE, intentar aprobar un trámite | `400` — "El rol [ESTUDIANTE] no puede aprobar trámites" |
-| Trámite inexistente | Llamar a `/api/v1/tramites/9999/aprobar` | `404` — "Trámite no encontrado con id: 9999" |
+| Trámite inexistente | Llamar a `/api/v1/procedures/9999/approve` | `404` — "Trámite no encontrado con id: 9999" |
 | Arco excluyente inválido | Crear con `idReferenciaProyecto` y `idReferenciaTesis` ambos no nulos | `400` — "El trámite debe referenciar exactamente una entidad origen" |
 | Transición inválida | Intentar aprobar un trámite ya FINALIZADO | `400` — "Transición inválida: FINALIZADO → PENDIENTE_DIRECCION" |
 | Otro usuario intenta subsanar | Login con un usuario diferente al solicitante, intentar subsanar | `400` — "Solo el solicitante original puede subsanar" |
@@ -476,7 +476,7 @@ http://localhost:8080/swagger-ui.html
 
 ### Seleccionar el grupo de trámites
 
-En el selector desplegable de la esquina superior derecha, elegir **`tramites`**. Se mostrarán los 7 endpoints del módulo.
+En el selector desplegable de la esquina superior derecha, elegir **`procedures`**. Se mostrarán los 7 endpoints del módulo.
 
 ### Autenticar en Swagger
 
@@ -490,7 +490,7 @@ Todos los endpoints marcados con candado cerrado ahora usan el token automática
 
 | Grupo | Endpoints |
 |---|---|
-| `tramites` | `/api/v1/tramites/**` — módulo de trámites |
+| `procedures` | `/api/v1/procedures/**` — módulo de trámites |
 | `auth-users` | `/api/v1/auth/**` y `/api/v1/users/**` |
 | `all-apis` | Todos los módulos implementados |
 
