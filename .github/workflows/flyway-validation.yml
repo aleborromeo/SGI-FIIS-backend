@@ -25,6 +25,10 @@ jobs:
       - name: Create .env file
         run: |
           echo "${{ secrets.DOTENV_FILE }}" > .env
+          sed -i 's/DB_PORT=5432/DB_PORT=5433/g' .env
+          if ! grep -q "DB_PORT" .env; then
+            echo "DB_PORT=5433" >> .env
+          fi
 
       # 2. Construir los contenedores
       - name: Build containers
