@@ -4,6 +4,7 @@ import com.sgi.fiis.auth.application.dto.RegisterRequestDto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +23,7 @@ public class PendingRegistrationService {
         public PendingRegistration(RegisterRequestDto requestDto, String code) {
             this.requestDto = requestDto;
             this.code = code;
-            this.expiresAt = LocalDateTime.now(java.time.ZoneId.systemDefault()).plusMinutes(5); // Expira en 5 mins
+            this.expiresAt = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(5); // Expira en 5 mins
         }
 
         public RegisterRequestDto getRequestDto() {
@@ -34,21 +35,24 @@ public class PendingRegistrationService {
         }
 
         public boolean isExpired() {
-            return LocalDateTime.now(java.time.ZoneId.systemDefault()).isAfter(expiresAt);
+            return LocalDateTime.now(ZoneId.of("UTC")).isAfter(expiresAt);
         }
     }
 
     private final Map<String, PendingRegistration> store = new ConcurrentHashMap<>();
 
     public void register(String email, RegisterRequestDto requestDto, String code) {
-        store.put(email.toLowerCase(), new PendingRegistration(requestDto, code));
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        store.put(cleanEmail, new PendingRegistration(requestDto, code));
     }
 
     public PendingRegistration get(String email) {
-        return store.get(email.toLowerCase());
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        return store.get(cleanEmail);
     }
 
     public void remove(String email) {
-        store.remove(email.toLowerCase());
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        store.remove(cleanEmail);
     }
 }

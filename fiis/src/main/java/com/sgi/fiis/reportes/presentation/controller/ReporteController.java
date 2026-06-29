@@ -58,8 +58,15 @@ public class ReporteController {
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        FiltroReporte filtro = buildFiltro(idGrupo, estado, fechaDesde, fechaHasta,
-                                           idInvestigador, idConvocatoria, null, page, size);
+        FiltroReporte filtro = new FiltroReporte();
+        filtro.setIdGrupo(idGrupo);
+        filtro.setEstado(estado);
+        filtro.setFechaDesde(fechaDesde);
+        filtro.setFechaHasta(fechaHasta);
+        filtro.setIdInvestigador(idInvestigador);
+        filtro.setIdConvocatoria(idConvocatoria);
+        filtro.setPage(page);
+        filtro.setSize(size);
         return ResponseEntity.ok(service.generarReporteProyectos(filtro));
     }
 
@@ -88,8 +95,15 @@ public class ReporteController {
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        FiltroReporte filtro = buildFiltro(idGrupo, estado, fechaDesde, fechaHasta,
-                                           idInvestigador, null, tipoTramite, page, size);
+        FiltroReporte filtro = new FiltroReporte();
+        filtro.setIdGrupo(idGrupo);
+        filtro.setEstado(estado);
+        filtro.setFechaDesde(fechaDesde);
+        filtro.setFechaHasta(fechaHasta);
+        filtro.setIdInvestigador(idInvestigador);
+        filtro.setTipoTramite(tipoTramite);
+        filtro.setPage(page);
+        filtro.setSize(size);
         return ResponseEntity.ok(service.generarReporteTramites(filtro));
     }
 
@@ -114,8 +128,13 @@ public class ReporteController {
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        FiltroReporte filtro = buildFiltro(null, null, fechaDesde, fechaHasta,
-                                           idInvestigador, null, tipoTramite, page, size);
+        FiltroReporte filtro = new FiltroReporte();
+        filtro.setFechaDesde(fechaDesde);
+        filtro.setFechaHasta(fechaHasta);
+        filtro.setIdInvestigador(idInvestigador);
+        filtro.setTipoTramite(tipoTramite);
+        filtro.setPage(page);
+        filtro.setSize(size);
         return ResponseEntity.ok(service.generarReporteResoluciones(filtro));
     }
 
@@ -143,29 +162,14 @@ public class ReporteController {
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        FiltroReporte filtro = buildFiltro(idGrupo, estado, fechaDesde, fechaHasta,
-                                           null, null, tipoTramite, page, size);
+        FiltroReporte filtro = new FiltroReporte();
+        filtro.setIdGrupo(idGrupo);
+        filtro.setEstado(estado);
+        filtro.setFechaDesde(fechaDesde);
+        filtro.setFechaHasta(fechaHasta);
+        filtro.setTipoTramite(tipoTramite);
+        filtro.setPage(page);
+        filtro.setSize(size);
         return ResponseEntity.ok(service.generarReporteInformes(filtro));
-    }
-
-    // -------------------------------------------------------------------------
-    // Helper
-    // -------------------------------------------------------------------------
-
-    private FiltroReporte buildFiltro(Integer idGrupo, String estado,
-                                      LocalDate desde, LocalDate hasta,
-                                      Integer idInvestigador, Integer idConvocatoria,
-                                      String tipoTramite, int page, int size) {
-        FiltroReporte f = new FiltroReporte();
-        f.setIdGrupo(idGrupo);
-        f.setEstado(estado);
-        f.setFechaDesde(desde);
-        f.setFechaHasta(hasta);
-        f.setIdInvestigador(idInvestigador);
-        f.setIdConvocatoria(idConvocatoria);
-        f.setTipoTramite(tipoTramite);
-        f.setPage(page);
-        f.setSize(size);
-        return f;
     }
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Data
 @Builder
@@ -20,11 +21,11 @@ public class LineaInvestigacion {
 
     public void activar() {
         this.esActiva = true;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     public void desactivar() {
         this.esActiva = false;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(ZoneId.of("UTC"));
     }
 }

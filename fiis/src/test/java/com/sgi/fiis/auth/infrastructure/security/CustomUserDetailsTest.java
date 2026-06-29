@@ -64,7 +64,7 @@ class CustomUserDetailsTest {
 
         // Different IDs
         assertNotEquals(user1, user3);
-        assertNotEquals(user1, null);
-        assertNotEquals(user1, "some-string");
+        assertNotEquals(null, user1);
+        assertNotEquals("some-string", user1);
     }
 }

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class BusinessException extends RuntimeException {
-    private final List<Object> args;
+    private final transient List<Object> args;
 
     public BusinessException(String message) {
         super(message);

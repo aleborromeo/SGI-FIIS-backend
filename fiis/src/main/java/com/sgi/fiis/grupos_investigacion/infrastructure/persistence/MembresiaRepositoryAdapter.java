@@ -5,7 +5,7 @@ import com.sgi.fiis.grupos_investigacion.domain.port.MembresiaRepositoryPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -61,15 +61,15 @@ public class MembresiaRepositoryAdapter implements MembresiaRepositoryPort {
     }
 
     private Membresia fromRow(java.sql.ResultSet rs) throws java.sql.SQLException {
-        Timestamp tsInicio = rs.getTimestamp("fecha_inicio");
-        Timestamp tsFin = rs.getTimestamp("fecha_fin");
+        java.time.LocalDateTime tsInicio = rs.getObject("fecha_inicio", java.time.LocalDateTime.class);
+        java.time.LocalDateTime tsFin = rs.getObject("fecha_fin", java.time.LocalDateTime.class);
         return Membresia.builder()
                 .id(rs.getInt("id_membresia"))
                 .idGrupo(rs.getInt("id_grupo"))
                 .idUsuario(rs.getInt("id_usuario"))
                 .esActivo(rs.getBoolean("es_activo"))
-                .fechaInicio(tsInicio != null ? tsInicio.toLocalDateTime() : null)
-                .fechaFin(tsFin != null ? tsFin.toLocalDateTime() : null)
+                .fechaInicio(tsInicio)
+                .fechaFin(tsFin)
                 .usuarioNombres(rs.getString("usuario_nombres"))
                 .usuarioApellidos(rs.getString("usuario_apellidos"))
                 .usuarioCorreo(rs.getString("usuario_correo"))
