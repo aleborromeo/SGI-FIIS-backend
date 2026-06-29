@@ -113,4 +113,34 @@ class LoginUseCaseTest {
         verify(passwordEncoder).matches("wrong-password", "hashed-pass");
         verifyNoInteractions(tokenProvider);
     }
+
+    @Test
+    @DisplayName("Should handle null email gracefully by throwing BadCredentialsException")
+    void testLoginNullEmail() {
+        when(userRepository.findByEmail("")).thenReturn(Optional.empty());
+
+        assertThrows(BadCredentialsException.class, () ->
+                loginUseCase.execute(null, "password"));
+
+        verify(userRepository).findByEmail("");
+        verifyNoInteractions(passwordEncoder, tokenProvider);
+    }
+
+    @Test
+    @DisplayName("Should throw BadCredentialsException when user password hash is null (OAuth user)")
+    void testLoginNullPasswordHash() {
+        User user = User.builder()
+                .institutionalEmail("oauth@unas.edu.pe")
+                .active(true)
+                .passwordHash(null)
+                .build();
+
+        when(userRepository.findByEmail("oauth@unas.edu.pe")).thenReturn(Optional.of(user));
+
+        assertThrows(BadCredentialsException.class, () ->
+                loginUseCase.execute("oauth@unas.edu.pe", "password"));
+
+        verify(userRepository).findByEmail("oauth@unas.edu.pe");
+        verifyNoInteractions(passwordEncoder, tokenProvider);
+    }
 }

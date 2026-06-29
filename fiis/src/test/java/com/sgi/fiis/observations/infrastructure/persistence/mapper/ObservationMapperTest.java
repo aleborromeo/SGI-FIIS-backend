@@ -49,9 +49,9 @@ class ObservationMapperTest {
         assertEquals(1, domain.getId().intValue());
         assertEquals(2, domain.getProcedureId().intValue());
         assertEquals(3, domain.getReviewerId().intValue());
-        assertEquals(ObservationType.TECHNICAL, domain.getType());
+        assertEquals(ObservationType.TECNICA, domain.getType());
         assertEquals("Technical description", domain.getDescription());
-        assertEquals(ObservationStatus.PENDING, domain.getStatus());
+        assertEquals(ObservationStatus.PENDIENTE, domain.getStatus());
         assertEquals("ROLE_EVALUADOR", domain.getReviewerRole());
         assertNotNull(domain.getCreatedAt());
         assertNotNull(domain.getUpdatedAt());
@@ -66,8 +66,8 @@ class ObservationMapperTest {
                 .status("SUBSANADA")
                 .build();
         Observation docDomain = mapper.toDomain(docEntity);
-        assertEquals(ObservationType.DOCUMENTARY, docDomain.getType());
-        assertEquals(ObservationStatus.REMEDIED, docDomain.getStatus());
+        assertEquals(ObservationType.DOCUMENTAL, docDomain.getType());
+        assertEquals(ObservationStatus.SUBSANADA, docDomain.getStatus());
 
         // Presupuestal & Vigente
         ObservationJpaEntity presEntity = ObservationJpaEntity.builder()
@@ -75,8 +75,8 @@ class ObservationMapperTest {
                 .status("VIGENTE")
                 .build();
         Observation presDomain = mapper.toDomain(presEntity);
-        assertEquals(ObservationType.BUDGETARY, presDomain.getType());
-        assertEquals(ObservationStatus.ACTIVE, presDomain.getStatus());
+        assertEquals(ObservationType.PRESUPUESTAL, presDomain.getType());
+        assertEquals(ObservationStatus.VIGENTE, presDomain.getStatus());
 
         // Formato & Vigente
         ObservationJpaEntity formEntity = ObservationJpaEntity.builder()
@@ -84,7 +84,7 @@ class ObservationMapperTest {
                 .status("VIGENTE")
                 .build();
         Observation formDomain = mapper.toDomain(formEntity);
-        assertEquals(ObservationType.FORMAT, formDomain.getType());
+        assertEquals(ObservationType.FORMATO, formDomain.getType());
     }
 
     @Test
@@ -134,9 +134,9 @@ class ObservationMapperTest {
                 .id(1)
                 .procedureId(2)
                 .reviewerId(3)
-                .type(ObservationType.TECHNICAL)
+                .type(ObservationType.TECNICA)
                 .description("Technical description")
-                .status(ObservationStatus.PENDING)
+                .status(ObservationStatus.PENDIENTE)
                 .reviewerRole("ROLE_EVALUADOR")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -161,8 +161,8 @@ class ObservationMapperTest {
     void toJpa_otherTypesAndStatuses_shouldMapCorrectly() {
         // Documentary & Remedied
         Observation docDomain = Observation.builder()
-                .type(ObservationType.DOCUMENTARY)
-                .status(ObservationStatus.REMEDIED)
+                .type(ObservationType.DOCUMENTAL)
+                .status(ObservationStatus.SUBSANADA)
                 .build();
         ObservationJpaEntity docEntity = mapper.toJpa(docDomain);
         assertEquals("DOCUMENTAL", docEntity.getType());
@@ -170,8 +170,8 @@ class ObservationMapperTest {
 
         // Budgetary & Active
         Observation presDomain = Observation.builder()
-                .type(ObservationType.BUDGETARY)
-                .status(ObservationStatus.ACTIVE)
+                .type(ObservationType.PRESUPUESTAL)
+                .status(ObservationStatus.VIGENTE)
                 .build();
         ObservationJpaEntity presEntity = mapper.toJpa(presDomain);
         assertEquals("PRESUPUESTAL", presEntity.getType());
@@ -179,8 +179,8 @@ class ObservationMapperTest {
 
         // Format & Active
         Observation formDomain = Observation.builder()
-                .type(ObservationType.FORMAT)
-                .status(ObservationStatus.ACTIVE)
+                .type(ObservationType.FORMATO)
+                .status(ObservationStatus.VIGENTE)
                 .build();
         ObservationJpaEntity formEntity = mapper.toJpa(formDomain);
         assertEquals("FORMATO", formEntity.getType());
