@@ -7,6 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FiisApplication {
 
 	public static void main(String[] args) {
+		try {
+			Class.forName("com.sgi.fiis.shared.infrastructure.config.EnvLoaderConfig");
+		} catch (ClassNotFoundException e) {
+			// ignore
+		}
 		SpringApplication.run(FiisApplication.class, args);
 	}
 

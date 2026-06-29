@@ -1,11 +1,11 @@
 package com.sgi.fiis.auth.domain.port;
 
-import com.sgi.fiis.users.domain.model.Usuario;
+import com.sgi.fiis.users.domain.model.User;
 
 /**
- * Puerto del dominio para manejo de usuarios autenticados vía OAuth.
- * Busca un usuario existente por correo o crea uno nuevo con datos del proveedor.
+ * Domain port for handling users authenticated via OAuth.
+ * Finds an existing user by email or creates a new one with provider data.
  */
 public interface OAuthUserHandlerPort {
-    Usuario findOrCreateFromOAuth(String email, String name, String provider);
+    User findOrCreateFromOAuth(String email, String name, String provider);
 }

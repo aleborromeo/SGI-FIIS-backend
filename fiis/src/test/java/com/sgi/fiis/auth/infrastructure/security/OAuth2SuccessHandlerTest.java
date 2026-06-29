@@ -63,10 +63,10 @@ class OAuth2SuccessHandlerTest {
 
         LoginResponseDto loginResponse = LoginResponseDto.builder()
                 .token("jwt-token")
-                .correo("user@unas.edu.pe")
-                .nombres("Juan")
-                .apellidos("Perez")
-                .rolCodigo("ESTUDIANTE")
+                .email("user@unas.edu.pe")
+                .firstNames("Juan")
+                .lastNames("Perez")
+                .roleCode("ESTUDIANTE")
                 .build();
 
         when(oAuthLoginUseCase.execute("user@unas.edu.pe", "Juan Perez", "microsoft")).thenReturn(loginResponse);
@@ -87,10 +87,10 @@ class OAuth2SuccessHandlerTest {
 
         LoginResponseDto loginResponse = LoginResponseDto.builder()
                 .token("jwt-token")
-                .correo("user-pref@unas.edu.pe")
-                .nombres("Juan")
-                .apellidos("Perez")
-                .rolCodigo("ESTUDIANTE")
+                .email("user-pref@unas.edu.pe")
+                .firstNames("Juan")
+                .lastNames("Perez")
+                .roleCode("ESTUDIANTE")
                 .build();
 
         when(oAuthLoginUseCase.execute("user-pref@unas.edu.pe", "Juan Perez", "microsoft")).thenReturn(loginResponse);

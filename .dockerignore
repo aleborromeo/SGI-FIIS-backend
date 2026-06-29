@@ -1,6 +1,15 @@
 fiis/target
 .git
 .github
+.deepsource.toml
 .vscode
 .idea
 *.log
+.gitignore
+README.md
+.env
+.env.*
+coverage
+**/target
+**/build
+**/.DS_Store

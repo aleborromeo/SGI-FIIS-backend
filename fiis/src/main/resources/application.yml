@@ -2,14 +2,18 @@ spring:
   application:
     name: fiis
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/db_fiis_investigacion}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:admin}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:db_fiis_investigacion}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:}}
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+  servlet:
+    multipart:
+      max-file-size: 5MB       # Tamaño máximo permitido por cada archivo individual
+      max-request-size: 10MB     # Tamaño máximo total permitido para toda la petición HTTP
   jpa:
     hibernate:
       ddl-auto: none
@@ -22,8 +26,8 @@ spring:
   mail:
     host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME:tu_correo@unas.edu.pe}
-    password: ${SPRING_MAIL_PASSWORD:tu_contraseña}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -50,8 +54,17 @@ spring:
             user-info-uri: https://graph.microsoft.com/oidc/userinfo
             user-name-attribute: email
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+    tagsSorter: alpha
 
 app:
+  mail:
+    mock: ${APP_MAIL_MOCK:true}
   jwt:
     secret: ${JWT_SECRET:default-dev-secret-key-change-in-production-min-32-chars}
     expiration-ms: 86400000

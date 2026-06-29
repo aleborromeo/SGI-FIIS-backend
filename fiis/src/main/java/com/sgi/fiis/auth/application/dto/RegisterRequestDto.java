@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para la petición de auto-registro (Sign Up).
+ * DTO for self-registration request (Sign Up).
  */
 @Data
 @Builder
@@ -16,29 +16,32 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RegisterRequestDto {
 
-    @NotBlank(message = "El DNI es obligatorio")
-    @Size(min = 8, max = 8, message = "El DNI debe tener exactamente 8 caracteres")
+    @NotBlank(message = "{validation.dni.required}")
+    @Size(min = 8, max = 8, message = "{validation.dni.size}")
     private String dni;
 
-    @NotBlank(message = "Los nombres son obligatorios")
-    @Size(max = 100, message = "Los nombres no deben exceder 100 caracteres")
-    private String nombres;
+    @NotBlank(message = "{validation.nombres.required}")
+    @Size(max = 100, message = "{validation.nombres.size}")
+    private String firstNames;
 
-    @NotBlank(message = "Los apellidos son obligatorios")
-    @Size(max = 100, message = "Los apellidos no deben exceder 100 caracteres")
-    private String apellidos;
+    @NotBlank(message = "{validation.apellidos.required}")
+    @Size(max = 100, message = "{validation.apellidos.size}")
+    private String lastNames;
 
-    @NotBlank(message = "El correo institucional es obligatorio")
-    @Size(max = 150, message = "El correo no debe exceder 150 caracteres")
-    private String correoInstitucional;
+    @NotBlank(message = "{validation.correo.required}")
+    @Size(max = 150, message = "{validation.correo.size}")
+    private String institutionalEmail;
 
-    @Size(max = 20, message = "El teléfono no debe exceder 20 caracteres")
-    private String telefono;
+    @Size(max = 20, message = "{validation.telefono.size}")
+    private String phone;
 
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 6, max = 100, message = "La contraseña debe tener al menos 6 caracteres")
+    @NotBlank(message = "{validation.password.required}")
+    @Size(min = 6, max = 100, message = "{validation.password.size}")
     private String password;
 
-    @NotBlank(message = "El código de rol es obligatorio")
-    private String rolCodigo;
+    @NotBlank(message = "{validation.confirmarPassword.required}")
+    private String confirmPassword;
+
+    @NotBlank(message = "{validation.rolCodigo.required}")
+    private String roleCode;
 }
