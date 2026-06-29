@@ -1,4 +1,4 @@
-﻿package com.sgi.fiis.documentacion.infrastructure.persistence.repository;
+package com.sgi.fiis.documentacion.infrastructure.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.sgi.fiis.documentacion.infrastructure.persistence.entity.DocumentEntity;

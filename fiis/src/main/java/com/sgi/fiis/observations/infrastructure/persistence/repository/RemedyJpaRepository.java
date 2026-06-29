@@ -1,4 +1,4 @@
-﻿package com.sgi.fiis.observations.infrastructure.persistence.repository;
+package com.sgi.fiis.observations.infrastructure.persistence.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

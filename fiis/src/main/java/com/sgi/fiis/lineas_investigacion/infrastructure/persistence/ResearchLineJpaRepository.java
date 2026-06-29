@@ -1,4 +1,4 @@
-﻿package com.sgi.fiis.lineas_investigacion.infrastructure.persistence;
+package com.sgi.fiis.lineas_investigacion.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
