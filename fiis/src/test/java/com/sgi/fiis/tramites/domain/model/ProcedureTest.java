@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static com.sgi.fiis.tramites.domain.model.ProcedureStatus.*;
 import static com.sgi.fiis.users.domain.model.RoleEnum.*;
@@ -14,7 +15,7 @@ class ProcedureTest {
 
     private static final Long ID_SOLICITANTE = 10L;
     private static final Long ID_COORDINADOR = 20L;
-    private static final LocalDateTime FECHA_INICIAL = LocalDateTime.of(2026, 1, 1, 9, 0);
+    private static final LocalDateTime FECHA_INICIAL = LocalDateTime.of(2026, Month.JANUARY, 1, 9, 0);
 
     private Procedure tramiteEnPendienteCoordinador() {
         return Procedure.builder()
@@ -151,9 +152,8 @@ class ProcedureTest {
         tramite.transitionTo(PENDIENTE_DIRECCION, COORDINADOR_GRUPO, ID_COORDINADOR,
                 "APROBADO_POR_COORDINADOR", null, DIRECTOR_INVESTIGACION);
 
-        assertThrows(UnsupportedOperationException.class, () ->
-                tramite.getMovements().clear()
-        );
+        var movements = tramite.getMovements();
+        assertThrows(UnsupportedOperationException.class, movements::clear);
     }
 
     // -------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static com.sgi.fiis.tramites.domain.model.ProcedureStatus.*;
 import static com.sgi.fiis.users.domain.model.RoleEnum.*;
@@ -18,7 +19,7 @@ class ProcedureStateMachineTest {
     private static final Long ID_COORDINADOR = 20L;
     private static final Long ID_DIRECTOR    = 30L;
     private static final Long ID_DECANO      = 40L;
-    private static final LocalDateTime FECHA = LocalDateTime.of(2026, 1, 1, 9, 0);
+    private static final LocalDateTime FECHA = LocalDateTime.of(2026, Month.JANUARY, 1, 9, 0);
 
     private ProcedureStateMachine stateMachine;
 

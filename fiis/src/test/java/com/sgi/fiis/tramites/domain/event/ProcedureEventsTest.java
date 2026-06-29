@@ -6,6 +6,7 @@ import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,7 +14,7 @@ class ProcedureEventsTest {
 
     @Test
     void tramiteAprobadoEvent_construyeCorrectamente() {
-        LocalDateTime fecha = LocalDateTime.of(2026, 6, 17, 10, 0);
+        LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 10, 0);
 
         ProcedureApprovedEvent evento = ProcedureApprovedEvent.builder()
                 .idTramite(1L)
@@ -38,7 +39,7 @@ class ProcedureEventsTest {
 
     @Test
     void tramiteObservadoEvent_construyeCorrectamente() {
-        LocalDateTime fecha = LocalDateTime.of(2026, 6, 17, 11, 30);
+        LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 11, 30);
 
         ProcedureFlaggedEvent evento = ProcedureFlaggedEvent.builder()
                 .idTramite(2L)
@@ -63,7 +64,7 @@ class ProcedureEventsTest {
 
     @Test
     void tramiteFinalizadoEvent_construyeCorrectamente() {
-        LocalDateTime fecha = LocalDateTime.of(2026, 6, 17, 15, 45);
+        LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 15, 45);
 
         ProcedureFinalizedEvent evento = ProcedureFinalizedEvent.builder()
                 .idTramite(3L)

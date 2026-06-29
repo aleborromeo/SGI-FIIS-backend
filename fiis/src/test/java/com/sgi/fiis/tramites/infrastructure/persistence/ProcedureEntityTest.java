@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,8 +32,8 @@ class ProcedureEntityTest {
         entity.setIdGrupo(20L);
         entity.setEstadoActual("PENDING_COORDINATOR");
         entity.setRolRevisorActual("COORDINADOR_GRUPO");
-        entity.setFechaEnvio(LocalDateTime.of(2026, 1, 1, 10, 0));
-        entity.setFechaActualizacion(LocalDateTime.of(2026, 1, 1, 10, 0));
+        entity.setFechaEnvio(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0));
+        entity.setFechaActualizacion(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0));
 
         assertEquals(3L, entity.getId());
         assertEquals("TRM-2026-001", entity.getCodigoTramite());

@@ -10,6 +10,7 @@ import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +18,7 @@ class ProcedureMapperTest {
 
     @Test
     void toResponse_mapeaTodosLosCamposCorrectamente() {
-        LocalDateTime ahora = LocalDateTime.of(2026, 6, 17, 10, 0);
+        LocalDateTime ahora = LocalDateTime.of(2026, Month.JUNE, 17, 10, 0);
 
         Procedure tramite = Procedure.builder()
                 .id(1L)
@@ -54,7 +55,7 @@ class ProcedureMapperTest {
 
     @Test
     void toMovimientoResponse_mapeaTodosLosCamposCorrectamente() {
-        LocalDateTime fecha = LocalDateTime.of(2026, 6, 17, 11, 0);
+        LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 11, 0);
 
         ProcedureMovement movimiento = ProcedureMovement.builder()
                 .idUsuarioAccion(10L)
