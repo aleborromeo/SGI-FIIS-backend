@@ -1,4 +1,4 @@
-package com.sgi.fiis.proyectos.infrastructure.persistence;
+﻿package com.sgi.fiis.proyectos.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

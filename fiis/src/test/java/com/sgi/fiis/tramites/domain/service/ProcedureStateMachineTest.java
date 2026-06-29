@@ -1,7 +1,6 @@
 package com.sgi.fiis.tramites.domain.service;
 
 import com.sgi.fiis.tramites.domain.model.*;
-import com.sgi.fiis.users.domain.model.RoleEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
