@@ -87,6 +87,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_GATEWAY, message);
     }
 
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentAndState(RuntimeException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         Locale locale = LocaleContextHolder.getLocale();

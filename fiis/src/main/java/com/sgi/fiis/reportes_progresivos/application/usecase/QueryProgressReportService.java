@@ -5,6 +5,7 @@ import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
 import com.sgi.fiis.reportes_progresivos.domain.port.in.QueryProgressReportUseCase;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
 import com.sgi.fiis.reportes_progresivos.infrastucture.persistence.adapter.ProgressReportMapper;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class QueryProgressReportService implements QueryProgressReportUseCase {
     @Override
     public ProgressReportResponse getById(Long reportId) {
         ProgressReport report = repositoryPort.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Progress report not found with id: " + reportId));
         return ProgressReportMapper.toResponse(report);
     }

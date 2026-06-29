@@ -5,6 +5,7 @@ import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
 import com.sgi.fiis.reportes_progresivos.domain.port.in.ReviewProgressReportUseCase;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
 import com.sgi.fiis.reportes_progresivos.infrastucture.persistence.adapter.ProgressReportMapper;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 
 /**
  * Service to review progress reports.
@@ -48,7 +49,7 @@ public class ReviewProgressReportService implements ReviewProgressReportUseCase 
 
     private ProgressReport findOrFail(Long id) {
         return repositoryPort.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Progress report not found with id: " + id));
     }
 }

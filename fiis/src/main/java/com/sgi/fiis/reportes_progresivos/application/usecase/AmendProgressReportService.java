@@ -6,6 +6,7 @@ import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
 import com.sgi.fiis.reportes_progresivos.domain.port.in.AmendProgressReportUseCase;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
 import com.sgi.fiis.reportes_progresivos.infrastucture.persistence.adapter.ProgressReportMapper;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 
 /**
  * Service to amend observed progress reports.
@@ -21,7 +22,7 @@ public class AmendProgressReportService implements AmendProgressReportUseCase {
     @Override
     public ProgressReportResponse amend(AmendReportCommand command) {
         ProgressReport report = repositoryPort.findById(command.getReportId())
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Progress report not found with id: " + command.getReportId()));
 
         if (command.getAmendmentDocumentId() != null) {

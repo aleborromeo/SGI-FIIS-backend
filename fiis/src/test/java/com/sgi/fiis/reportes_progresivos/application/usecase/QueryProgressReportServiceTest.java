@@ -5,6 +5,7 @@ import com.sgi.fiis.reportes_progresivos.application.dto.ProgressReportResponse;
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReportStatus;
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,6 @@ class QueryProgressReportServiceTest {
     void getByIdNotFoundThrows() {
         when(repositoryPort.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.getById(999L));
+        assertThrows(ResourceNotFoundException.class, () -> service.getById(999L));
     }
 }
