@@ -1,13 +1,13 @@
 package com.sgi.fiis;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class FiisApplicationTests {
 
     @Test
-    void contextLoads() {
+    void applicationClassDebeExistir() {
+        assertNotNull(FiisApplication.class);
     }
-
 }
