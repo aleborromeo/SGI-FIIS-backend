@@ -118,6 +118,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Should handle MethodArgumentNotValidException")
+    @SuppressWarnings("unchecked")
     void handleValidation_shouldReturn400WithDetails() {
         BindingResult bindingResult = mock(BindingResult.class);
         FieldError fieldError = new FieldError("object", "email", "Formato de correo inválido");
