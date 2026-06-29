@@ -21,10 +21,19 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      # 1. Crear el archivo .env en la RAÍZ del proyecto
+      # 1. Crear el archivo .env en la RAÍZ del proyecto con credenciales de prueba
       - name: Create .env file
         run: |
-          echo "${{ secrets.DOTENV_FILE }}" > .env
+          cat > .env << 'EOF'
+          DB_NAME=db_fiis_investigacion
+          DB_USER=postgres
+          DB_PASSWORD=12345
+          JWT_SECRET=default-dev-secret-key-change-in-production-min-32-chars
+          APP_FRONTEND_URL=http://localhost:3000
+          AZURE_CLIENT_ID=dummy-client-id
+          AZURE_CLIENT_SECRET=dummy-client-secret
+          AZURE_TENANT_ID=common
+          EOF
 
       # 2. Construir los contenedores
       - name: Build containers
@@ -43,6 +52,17 @@ jobs:
       # 5. Ejecutar los tests unitarios e integrados dentro de la carpeta fiis
       - name: Run unit and integration tests
         working-directory: ./fiis
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5433/db_fiis_investigacion
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: "12345"
+          SPRING_JPA_HIBERNATE_DDL_AUTO: update
+          SPRING_FLYWAY_ENABLED: "false"
+          SPRING_MAIL_HOST: localhost
+          SPRING_MAIL_PORT: "25"
+          SPRING_MAIL_USERNAME: ci@sgi-fiis.pe
+          APP_MAIL_MOCK: "true"
+          APP_FRONTEND_URL: http://localhost:3000
         run: mvn clean test
 
       # 6. Verificar que el contenedor backend siga vivo

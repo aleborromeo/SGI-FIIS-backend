@@ -5,7 +5,10 @@ import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
-import com.sgi.fiis.tramites.infrastructure.persistence.*;
+import com.sgi.fiis.tramites.infrastructure.persistence.ProcedureEntity;
+import com.sgi.fiis.tramites.infrastructure.persistence.ProcedureMovementEntity;
+import com.sgi.fiis.tramites.infrastructure.persistence.ProcedureMovementJpaRepository;
+import com.sgi.fiis.tramites.infrastructure.persistence.SpringDataProcedureRepository;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,13 @@ class ProjectProcedureAdapterTest {
         return entity;
     }
 
+    private ProcedureEntity buildSavedProcedure(Long id) {
+        ProcedureEntity p = new ProcedureEntity();
+        p.setId(id);
+        p.setCodigoTramite("TRM-2026-ABCD1234");
+        return p;
+    }
+
     @Test
     void createPostulationProcedure_ShouldSucceed_WhenProjectExists() {
         Project project = Project.builder().id(1).build();
@@ -52,13 +62,8 @@ class ProjectProcedureAdapterTest {
         group.setId(20);
         ProjectEntity projectEntity = createProjectEntity(1, responsible, group);
 
-        ProcedureEntity savedProcedure = ProcedureEntity.builder()
-                .id(100)
-                .code("TRM-2026-ABCD1234")
-                .build();
-
         when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
-        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
+        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(buildSavedProcedure(100L));
         when(movementRepository.save(any(ProcedureMovementEntity.class))).thenReturn(null);
 
         adapter.createPostulationProcedure(project);
@@ -92,13 +97,8 @@ class ProjectProcedureAdapterTest {
         group.setId(20);
         ProjectEntity projectEntity = createProjectEntity(1, responsible, group);
 
-        ProcedureEntity savedProcedure = ProcedureEntity.builder()
-                .id(100)
-                .code("TRM-2026-ABCD1234")
-                .build();
-
         when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
-        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
+        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(buildSavedProcedure(100L));
         when(movementRepository.save(any(ProcedureMovementEntity.class))).thenReturn(null);
 
         adapter.createPostulationProcedure(project);
@@ -107,29 +107,29 @@ class ProjectProcedureAdapterTest {
         verify(procedureRepository).save(procedureCaptor.capture());
         ProcedureEntity capturedProcedure = procedureCaptor.getValue();
 
-        assertNotNull(capturedProcedure.getCode());
-        assertTrue(capturedProcedure.getCode().startsWith("TRM-"));
-        assertTrue(capturedProcedure.getCode().length() <= 30);
-        assertEquals("PROYECTO", capturedProcedure.getProcedureType());
-        assertEquals("PENDING_COORDINATOR", capturedProcedure.getStatus());
-        assertEquals("COORDINADOR_GRUPO", capturedProcedure.getReviewerRole());
-        assertSame(responsible, capturedProcedure.getApplicant());
-        assertSame(group, capturedProcedure.getGroup());
-        assertSame(projectEntity, capturedProcedure.getProjectReference());
-        assertNotNull(capturedProcedure.getSentAt());
-        assertNotNull(capturedProcedure.getUpdatedAt());
+        assertNotNull(capturedProcedure.getCodigoTramite());
+        assertTrue(capturedProcedure.getCodigoTramite().startsWith("TRM-"));
+        assertTrue(capturedProcedure.getCodigoTramite().length() <= 30);
+        assertEquals("PROYECTO", capturedProcedure.getTipoTramite());
+        assertEquals("PENDING_COORDINATOR", capturedProcedure.getEstadoActual());
+        assertEquals("COORDINADOR_GRUPO", capturedProcedure.getRolRevisorActual());
+        assertEquals(10L, capturedProcedure.getIdSolicitante());
+        assertEquals(20L, capturedProcedure.getIdGrupo());
+        assertEquals(1L, capturedProcedure.getIdReferenciaProyecto());
+        assertNotNull(capturedProcedure.getFechaEnvio());
+        assertNotNull(capturedProcedure.getFechaActualizacion());
 
         ArgumentCaptor<ProcedureMovementEntity> movementCaptor = ArgumentCaptor.forClass(ProcedureMovementEntity.class);
         verify(movementRepository).save(movementCaptor.capture());
         ProcedureMovementEntity capturedMovement = movementCaptor.getValue();
 
-        assertSame(savedProcedure, capturedMovement.getProcedure());
-        assertSame(responsible, capturedMovement.getActionUser());
-        assertEquals("CREAR", capturedMovement.getAction());
-        assertEquals("REGISTERED", capturedMovement.getPreviousState());
-        assertEquals("PENDING_COORDINATOR", capturedMovement.getNewState());
-        assertNotNull(capturedMovement.getComment());
-        assertNotNull(capturedMovement.getMovementAt());
+        assertEquals(100L, capturedMovement.getIdTramite());
+        assertEquals(10L, capturedMovement.getIdUsuarioAccion());
+        assertEquals("CREAR", capturedMovement.getAccion());
+        assertEquals("REGISTERED", capturedMovement.getEstadoAnterior());
+        assertEquals("PENDING_COORDINATOR", capturedMovement.getEstadoNuevo());
+        assertNotNull(capturedMovement.getObservacion());
+        assertNotNull(capturedMovement.getFechaMovimiento());
     }
 
     @Test
@@ -139,24 +139,19 @@ class ProjectProcedureAdapterTest {
         group.setId(20);
         ProjectEntity projectEntity = createProjectEntity(1, null, group);
 
-        ProcedureEntity savedProcedure = ProcedureEntity.builder()
-                .id(100)
-                .code("TRM-2026-ABCD1234")
-                .build();
-
         when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
-        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
+        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(buildSavedProcedure(100L));
         when(movementRepository.save(any(ProcedureMovementEntity.class))).thenReturn(null);
 
         adapter.createPostulationProcedure(project);
 
         ArgumentCaptor<ProcedureEntity> procedureCaptor = ArgumentCaptor.forClass(ProcedureEntity.class);
         verify(procedureRepository).save(procedureCaptor.capture());
-        assertNull(procedureCaptor.getValue().getApplicant());
+        assertNull(procedureCaptor.getValue().getIdSolicitante());
 
         ArgumentCaptor<ProcedureMovementEntity> movementCaptor = ArgumentCaptor.forClass(ProcedureMovementEntity.class);
         verify(movementRepository).save(movementCaptor.capture());
-        assertNull(movementCaptor.getValue().getActionUser());
+        assertNull(movementCaptor.getValue().getIdUsuarioAccion());
     }
 
     @Test
@@ -166,19 +161,14 @@ class ProjectProcedureAdapterTest {
         responsible.setId(10L);
         ProjectEntity projectEntity = createProjectEntity(1, responsible, null);
 
-        ProcedureEntity savedProcedure = ProcedureEntity.builder()
-                .id(100)
-                .code("TRM-2026-ABCD1234")
-                .build();
-
         when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
-        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
+        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(buildSavedProcedure(100L));
         when(movementRepository.save(any(ProcedureMovementEntity.class))).thenReturn(null);
 
         adapter.createPostulationProcedure(project);
 
         ArgumentCaptor<ProcedureEntity> procedureCaptor = ArgumentCaptor.forClass(ProcedureEntity.class);
         verify(procedureRepository).save(procedureCaptor.capture());
-        assertNull(procedureCaptor.getValue().getGroup());
+        assertNull(procedureCaptor.getValue().getIdGrupo());
     }
 }

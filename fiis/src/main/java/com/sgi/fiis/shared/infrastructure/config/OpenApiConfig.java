@@ -67,7 +67,10 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("all-apis")
                 .pathsToMatch("/api/**")
-                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion", "com.sgi.fiis.grupos_investigacion", "com.sgi.fiis.lineas_investigacion", "com.sgi.fiis.dashboards", "com.sgi.fiis.reportes", "com.sgi.fiis.observations")
+                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion",
+                        "com.sgi.fiis.tramites", "com.sgi.fiis.grupos_investigacion",
+                        "com.sgi.fiis.lineas_investigacion", "com.sgi.fiis.dashboards",
+                        "com.sgi.fiis.reportes", "com.sgi.fiis.observations")
                 .build();
     }
 
@@ -109,12 +112,13 @@ public class OpenApiConfig {
                 .build();
     }
 
-    // Flujo de Trámites
+    // Procedures (Academic Workflow)
     @Bean
-    public GroupedOpenApi tramitesApi() {
+    public GroupedOpenApi proceduresApi() {
         return GroupedOpenApi.builder()
-                .group("tramites")
-                .pathsToMatch("/api/tramites/**")
+                .group("procedures")
+                .pathsToMatch("/api/v1/procedures/**")
+                .packagesToScan("com.sgi.fiis.tramites")
                 .build();
     }
 
