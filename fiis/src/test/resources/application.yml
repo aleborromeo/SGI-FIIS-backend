@@ -79,5 +79,5 @@ app:
 # Debug logging para OAuth2 (quitar en producción)
 logging:
   level:
-    org.springframework.security: INFO
-    org.springframework.security.oauth2: INFO
+    '[org.springframework.security]': INFO
+    '[org.springframework.security.oauth2]': INFO

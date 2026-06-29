@@ -8,14 +8,21 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 @Configuration
-public class I18nConfig {
+public class LocaleConfig {
 
     @Bean
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
+        List<Locale> supportedLocales = Arrays.asList(
+                new Locale("es"),
+                new Locale("en")
+        );
+        resolver.setSupportedLocales(supportedLocales);
         resolver.setDefaultLocale(new Locale("es"));
         return resolver;
     }
@@ -23,8 +30,14 @@ public class I18nConfig {
     @Bean
     public MessageSource messageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("messages");
+        messageSource.setBasenames(
+                "i18n/shared/messages",
+                "i18n/auth/messages",
+                "i18n/convocatorias/messages",
+                "i18n/projects/messages"
+        );
         messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setUseCodeAsDefaultMessage(true);
         return messageSource;
     }
 
