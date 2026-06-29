@@ -1,5 +1,8 @@
 package com.sgi.fiis.reportes_progresivos.domain.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -8,6 +11,8 @@ import java.time.ZoneId;
  * Domain entity for Progress Reports (RF-70 to RF-77).
  * Pure domain -- no JPA or Spring annotations.
  */
+@Getter
+@Setter
 public class ProgressReport {
 
     private Long id;
@@ -114,42 +119,8 @@ public class ProgressReport {
 
     // -- Getters and Setters --
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Long getProjectId() { return projectId; }
-    public void setProjectId(Long projectId) { this.projectId = projectId; }
-
-    public ProgressReportType getReportType() { return reportType; }
-    public void setReportType(ProgressReportType reportType) { this.reportType = reportType; }
-
-    public String getPeriod() { return period; }
-    public void setPeriod(String period) { this.period = period; }
-
-    public BigDecimal getProgressPercentage() { return progressPercentage; }
     public void setProgressPercentage(BigDecimal progressPercentage) {
         validatePercentage(progressPercentage);
         this.progressPercentage = progressPercentage;
     }
-
-    public String getAchievements() { return achievements; }
-    public void setAchievements(String achievements) { this.achievements = achievements; }
-
-    public String getDifficulties() { return difficulties; }
-    public void setDifficulties(String difficulties) { this.difficulties = difficulties; }
-
-    public String getRecommendations() { return recommendations; }
-    public void setRecommendations(String recommendations) { this.recommendations = recommendations; }
-
-    public Long getAttachedDocumentId() { return attachedDocumentId; }
-    public void setAttachedDocumentId(Long attachedDocumentId) { this.attachedDocumentId = attachedDocumentId; }
-
-    public ProgressReportStatus getReportStatus() { return reportStatus; }
-    public void setReportStatus(ProgressReportStatus reportStatus) { this.reportStatus = reportStatus; }
-
-    public LocalDateTime getRegistrationDate() { return registrationDate; }
-    public void setRegistrationDate(LocalDateTime registrationDate) { this.registrationDate = registrationDate; }
-
-    public LocalDateTime getLastUpdatedDate() { return lastUpdatedDate; }
-    public void setLastUpdatedDate(LocalDateTime lastUpdatedDate) { this.lastUpdatedDate = lastUpdatedDate; }
 }

@@ -132,7 +132,7 @@ public class OpenApiConfig {
     public GroupedOpenApi progressReportsApi() {
         return GroupedOpenApi.builder()
                 .group("progress-reports")
-                .pathsToMatch("/api/progressreports/**")
+                .pathsToMatch("/api/progress-reports/**")
                 .build();
     }
 
