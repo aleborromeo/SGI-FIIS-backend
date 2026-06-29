@@ -176,4 +176,37 @@ class GlobalExceptionHandlerTest {
         assertEquals(500, response.getBody().get("status"));
         assertEquals("Error interno del servidor", response.getBody().get("message"));
     }
+    @Test
+    @DisplayName("Should handle AuthorizationDeniedException")
+    void handleAuthorizationDenied_shouldReturn403() {
+        org.springframework.security.authorization.AuthorizationDeniedException ex = 
+            new org.springframework.security.authorization.AuthorizationDeniedException("Access Denied");
+            
+        when(messageSource.getMessage(eq("exception.access-denied"), any(), anyString(), any(Locale.class)))
+                .thenReturn("Acceso denegado");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleAuthorizationDenied(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(403, response.getBody().get("status"));
+        assertEquals("Acceso denegado", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle AccessDeniedException")
+    void handleAccessDenied_shouldReturn403() {
+        org.springframework.security.access.AccessDeniedException ex = 
+            new org.springframework.security.access.AccessDeniedException("Access Denied");
+            
+        when(messageSource.getMessage(eq("exception.access-denied"), any(), anyString(), any(Locale.class)))
+                .thenReturn("Acceso denegado");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleAccessDenied(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(403, response.getBody().get("status"));
+        assertEquals("Acceso denegado", response.getBody().get("message"));
+    }
 }
