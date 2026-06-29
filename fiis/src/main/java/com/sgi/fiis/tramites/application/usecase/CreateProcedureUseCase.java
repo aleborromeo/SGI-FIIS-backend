@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class CreateProcedureUseCase {
@@ -33,8 +34,8 @@ public class CreateProcedureUseCase {
                 .idReferenciaProyecto(dto.getIdReferenciaProyecto())
                 .idReferenciaTesis(dto.getIdReferenciaTesis())
                 .idReferenciaInforme(dto.getIdReferenciaInforme())
-                .fechaEnvio(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .fechaEnvio(LocalDateTime.now(ZoneId.systemDefault()))
+                .fechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()))
                 .build();
 
         tramite.validateExclusiveReference();
@@ -53,7 +54,7 @@ public class CreateProcedureUseCase {
     }
 
     private String generarCodigo() {
-        int anio = LocalDateTime.now().getYear();
+        int anio = LocalDateTime.now(ZoneId.systemDefault()).getYear();
         long secuencia = System.nanoTime() % 1_000_000L;
         return String.format("TRM-%d-%06d", anio, secuencia);
     }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class RegisterResolutionUseCase {
@@ -40,7 +41,7 @@ public class RegisterResolutionUseCase {
                 .codigoTramite(guardado.getCodigoTramite())
                 .tipoTramite(guardado.getTipoTramite())
                 .idSolicitante(guardado.getIdSolicitante())
-                .fechaFinalizacion(LocalDateTime.now())
+                .fechaFinalizacion(LocalDateTime.now(ZoneId.systemDefault()))
                 .build());
 
         return ProcedureMapper.toResponse(guardado);

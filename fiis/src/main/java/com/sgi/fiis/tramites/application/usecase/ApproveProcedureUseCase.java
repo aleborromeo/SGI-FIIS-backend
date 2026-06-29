@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class ApproveProcedureUseCase {
@@ -50,7 +51,7 @@ public class ApproveProcedureUseCase {
                 .estadoResultante(guardado.getEstadoActual())
                 .idAprobador(idEjecutor)
                 .rolAprobador(rolEjecutor)
-                .fechaAprobacion(LocalDateTime.now())
+                .fechaAprobacion(LocalDateTime.now(ZoneId.systemDefault()))
                 .build());
 
         return ProcedureMapper.toResponse(guardado);

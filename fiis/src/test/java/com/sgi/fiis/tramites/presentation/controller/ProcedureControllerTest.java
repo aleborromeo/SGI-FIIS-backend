@@ -76,7 +76,7 @@ class ProcedureControllerTest {
     @DisplayName("approve: extracts RoleEnum from JWT and delegates to use case")
     void approve_extractsRoleFromJwt_returns200() {
         ProcedureResponseDto expected = ProcedureResponseDto.builder().id(1L).build();
-        when(approveProcedureUseCase.execute(eq(1L), eq(RoleEnum.COORDINADOR_GRUPO), eq(10L)))
+        when(approveProcedureUseCase.execute(1L, RoleEnum.COORDINADOR_GRUPO, 10L))
                 .thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.approve(1L, coordinator);
@@ -99,8 +99,7 @@ class ProcedureControllerTest {
     void flag_passesObservationTextToUseCase_returns200() {
         FlagProcedureRequestDto body = new FlagProcedureRequestDto("Missing advisor signature");
         ProcedureResponseDto expected = ProcedureResponseDto.builder().id(2L).build();
-        when(flagProcedureUseCase.execute(
-                eq(2L), eq(RoleEnum.COORDINADOR_GRUPO), eq(10L), eq("Missing advisor signature")))
+        when(flagProcedureUseCase.execute(2L, RoleEnum.COORDINADOR_GRUPO, 10L, "Missing advisor signature"))
                 .thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.flag(2L, body, coordinator);
@@ -114,7 +113,7 @@ class ProcedureControllerTest {
     void remediate_passesDetailAndApplicantId_returns200() {
         RemediateProcedureRequestDto body = new RemediateProcedureRequestDto("Attached scanned signature");
         ProcedureResponseDto expected = ProcedureResponseDto.builder().id(3L).build();
-        when(remediateProcedureUseCase.execute(eq(3L), eq(5L), eq("Attached scanned signature")))
+        when(remediateProcedureUseCase.execute(3L, 5L, "Attached scanned signature"))
                 .thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.remediate(3L, body, student);
@@ -126,7 +125,7 @@ class ProcedureControllerTest {
     @DisplayName("reject: extracts RoleEnum from JWT and returns 200")
     void reject_extractsRoleFromJwt_returns200() {
         ProcedureResponseDto expected = ProcedureResponseDto.builder().id(4L).build();
-        when(rejectProcedureUseCase.execute(eq(4L), eq(RoleEnum.COORDINADOR_GRUPO), eq(10L)))
+        when(rejectProcedureUseCase.execute(4L, RoleEnum.COORDINADOR_GRUPO, 10L))
                 .thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.reject(4L, coordinator);
@@ -138,7 +137,7 @@ class ProcedureControllerTest {
     @DisplayName("registerResolution: passes only user id from JWT")
     void registerResolution_passesUserIdFromJwt_returns200() {
         ProcedureResponseDto expected = ProcedureResponseDto.builder().id(5L).build();
-        when(registerResolutionUseCase.execute(eq(5L), eq(10L))).thenReturn(expected);
+        when(registerResolutionUseCase.execute(5L, 10L)).thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.registerResolution(5L, coordinator);
 

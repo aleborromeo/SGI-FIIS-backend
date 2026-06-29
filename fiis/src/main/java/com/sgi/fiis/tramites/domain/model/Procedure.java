@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +55,7 @@ public class Procedure {
         this.estadoActual     = nuevoEstado;
         this.rolRevisorActual = nuevoRolRevisor;
         this.observacionActual = observacion;
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now(ZoneId.systemDefault());
 
         movimientos.add(ProcedureMovement.builder()
                 .idUsuarioAccion(idUsuarioAccion)

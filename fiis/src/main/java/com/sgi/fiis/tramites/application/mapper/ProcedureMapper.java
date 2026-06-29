@@ -6,7 +6,6 @@ import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
 import com.sgi.fiis.tramites.domain.model.Procedure;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ProcedureMapper {
 
@@ -44,6 +43,6 @@ public class ProcedureMapper {
     public static List<ProcedureMovementResponseDto> toMovimientoResponseList(List<ProcedureMovement> movimientos) {
         return movimientos.stream()
                 .map(ProcedureMapper::toMovimientoResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

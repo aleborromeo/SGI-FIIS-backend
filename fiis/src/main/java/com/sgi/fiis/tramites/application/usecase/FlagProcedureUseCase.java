@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class FlagProcedureUseCase {
@@ -52,7 +53,7 @@ public class FlagProcedureUseCase {
                 .idObservador(idEjecutor)
                 .rolObservador(rolEjecutor)
                 .textoObservacion(textoObservacion)
-                .fechaObservacion(LocalDateTime.now())
+                .fechaObservacion(LocalDateTime.now(ZoneId.systemDefault()))
                 .build());
 
         return ProcedureMapper.toResponse(guardado);
