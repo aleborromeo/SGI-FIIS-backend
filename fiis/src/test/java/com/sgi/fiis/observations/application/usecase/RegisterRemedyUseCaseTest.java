@@ -55,9 +55,9 @@ class RegisterRemedyUseCaseTest {
                 .id(observationId)
                 .procedureId(1)
                 .reviewerId(10)
-                .type(ObservationType.TECHNICAL)
-                .description("Falta la firma en el documento de propuesta técnica")
-                .status(ObservationStatus.PENDING)
+                .type(ObservationType.TECNICA)
+                .description("Falta la firma en el documento de propuesta tÃ©cnica")
+                .status(ObservationStatus.PENDIENTE)
                 .reviewerRole("COORDINADOR_GRUPO")
                 .createdAt(fechaFija)
                 .updatedAt(fechaFija)
@@ -91,7 +91,7 @@ class RegisterRemedyUseCaseTest {
         assertEquals(fechaFija, response.getUpdatedAt());
 
         // Verify that observation was marked as REMEDIED and updated
-        assertEquals(ObservationStatus.REMEDIED, observationOriginal.getStatus());
+        assertEquals(ObservationStatus.SUBSANADA, observationOriginal.getStatus());
         verify(observationRepository, times(1)).save(observationOriginal);
         verify(remedyRepository, times(1)).save(any(Remedy.class));
     }
@@ -127,9 +127,9 @@ class RegisterRemedyUseCaseTest {
                 .id(observationId)
                 .procedureId(1)
                 .reviewerId(10)
-                .type(ObservationType.TECHNICAL)
+                .type(ObservationType.TECNICA)
                 .description("Falta la firma")
-                .status(ObservationStatus.REMEDIED)
+                .status(ObservationStatus.SUBSANADA)
                 .reviewerRole("COORDINADOR_GRUPO")
                 .createdAt(fechaFija)
                 .updatedAt(fechaFija)

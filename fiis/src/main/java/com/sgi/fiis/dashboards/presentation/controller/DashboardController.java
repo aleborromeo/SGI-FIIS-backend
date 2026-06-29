@@ -66,7 +66,7 @@ public class DashboardController {
      * Global view: users, groups, projects, procedures and resolutions.
      */
     @GetMapping("/admin/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
     public ResponseEntity<DashboardAdminResponse> getAdminDashboard(
             @PathVariable Integer userId,
             Authentication authentication) {
@@ -152,7 +152,7 @@ public class DashboardController {
         return ResponseEntity.ok(studentDashboardUseCase.execute(userId));
     }
 
-    // --- Helper de Validación de Acceso y Propiedad de Recurso ---
+    // --- Helper de ValidaciÃ³n de Acceso y Propiedad de Recurso ---
     private void validateAccess(Integer targetUserId, Authentication authentication, String requiredRole) {
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
             throw new org.springframework.security.access.AccessDeniedException("Acceso denegado: Usuario no autenticado.");

@@ -55,12 +55,12 @@ class ObservationControllerTest {
 
     @Test
     @DisplayName("Should successfully register an observation")
-    @WithMockUser(username = "admin@unas.edu.pe", roles = {"ADMIN"})
+    @WithMockUser(username = "admin@unas.edu.pe", roles = {"COORDINADOR_GRUPO"})
     void testRegistrarObservacionSuccess() throws Exception {
         ObservationRequestDTO request = ObservationRequestDTO.builder()
                 .procedureId(1)
                 .reviewerId(10)
-                .type("TECHNICAL")
+                .type("TECNICA")
                 .description("Falta firma")
                 .reviewerRole("COORDINADOR_GRUPO")
                 .build();
@@ -69,9 +69,9 @@ class ObservationControllerTest {
                 .id(100)
                 .procedureId(1)
                 .reviewerId(10)
-                .type("TECHNICAL")
+                .type("TECNICA")
                 .description("Falta firma")
-                .status("PENDING")
+                .status("PENDIENTE")
                 .reviewerRole("COORDINADOR_GRUPO")
                 .build();
 
@@ -83,7 +83,7 @@ class ObservationControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(100))
                 .andExpect(jsonPath("$.description").value("Falta firma"))
-                .andExpect(jsonPath("$.status").value("PENDING"));
+                .andExpect(jsonPath("$.status").value("PENDIENTE"));
     }
 
     @Test
@@ -122,9 +122,9 @@ class ObservationControllerTest {
         ObservationResponseDTO response = ObservationResponseDTO.builder()
                 .id(100)
                 .procedureId(1)
-                .type("TECHNICAL")
+                .type("TECNICA")
                 .description("Falta firma")
-                .status("PENDING")
+                .status("PENDIENTE")
                 .build();
 
         when(listObservationsByProcedureUseCase.execute(1)).thenReturn(Collections.singletonList(response));
@@ -142,9 +142,9 @@ class ObservationControllerTest {
         ObservationResponseDTO response = ObservationResponseDTO.builder()
                 .id(100)
                 .procedureId(1)
-                .type("TECHNICAL")
+                .type("TECNICA")
                 .description("Falta firma")
-                .status("PENDING")
+                .status("PENDIENTE")
                 .build();
 
         when(getObservationUseCase.execute(100)).thenReturn(response);
@@ -163,7 +163,7 @@ class ObservationControllerTest {
 
         mockMvc.perform(get("/api/observations/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Observación no encontrada con ID: 999"));
+                .andExpect(jsonPath("$.error").value("ObservaciÃ³n no encontrada con ID: 999"));
     }
 
     @Test
@@ -182,6 +182,6 @@ class ObservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("No se puede subsanar la observación con ID: 100. Solo se pueden subsanar observaciones en estado PENDIENTE."));
+                .andExpect(jsonPath("$.error").value("No se puede subsanar la observaciÃ³n con ID: 100. Solo se pueden subsanar observaciones en estado PENDIENTE."));
     }
 }

@@ -31,7 +31,7 @@ public class Observation {
                 .reviewerId(reviewerId)
                 .type(type)
                 .description(description)
-                .status(ObservationStatus.PENDING)
+                .status(ObservationStatus.PENDIENTE)
                 .reviewerRole(reviewerRole)
                 .createdAt(now)
                 .updatedAt(now)
@@ -39,10 +39,10 @@ public class Observation {
     }
 
     public boolean markAsRemedied() {
-        if (this.status != ObservationStatus.PENDING) {
+        if (this.status != ObservationStatus.PENDIENTE) {
             return false;
         }
-        this.status = ObservationStatus.REMEDIED;
+        this.status = ObservationStatus.SUBSANADA;
         this.updatedAt = LocalDateTime.now(ZoneId.systemDefault());
         return true;
     }
@@ -60,6 +60,6 @@ public class Observation {
     }
 
     public boolean isRemediable() {
-        return this.status == ObservationStatus.PENDING;
+        return this.status == ObservationStatus.PENDIENTE;
     }
 }

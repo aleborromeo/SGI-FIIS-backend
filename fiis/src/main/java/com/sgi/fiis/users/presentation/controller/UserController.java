@@ -84,7 +84,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> toggleStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> body) {
-        boolean activate = body.getOrDefault("active", true);
+        boolean activate = body.getOrDefault("VIGENTE", true);
         Long authenticatedUserId = 0L;
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails customUserDetails) {
@@ -98,6 +98,6 @@ public class UserController {
     @PatchMapping("/{id}/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id) {
         resetPasswordUseCase.execute(id);
-        return ResponseEntity.ok(Map.of("message", "Contraseña reiniciada exitosamente"));
+        return ResponseEntity.ok(Map.of("message", "ContraseÃ±a reiniciada exitosamente"));
     }
 }
