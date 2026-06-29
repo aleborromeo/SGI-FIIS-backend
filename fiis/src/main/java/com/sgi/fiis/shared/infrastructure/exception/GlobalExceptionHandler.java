@@ -103,7 +103,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        ex.printStackTrace(); // Added for debugging
+        org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class).error("Excepción no manejada capturada: ", ex);
+        
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("exception.internal-error", null, "Error interno del servidor", locale);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, message);
