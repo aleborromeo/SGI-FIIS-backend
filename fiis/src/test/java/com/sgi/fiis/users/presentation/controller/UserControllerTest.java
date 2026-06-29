@@ -135,7 +135,7 @@ class UserControllerTest {
                                 .andExpect(status().isUnauthorized())
                                 .andExpect(jsonPath("$.status").value(401))
                                 .andExpect(jsonPath("$.error").value("Unauthorized"))
-                                .andExpect(jsonPath("$.message").value("Acceso no autorizado. Debe iniciar sesiÃ³n e incluir el token JWT en las cabeceras."))
+                                .andExpect(jsonPath("$.message").value("Acceso no autorizado. Debe iniciar sesión e incluir el token JWT en las cabeceras."))
                                 .andExpect(jsonPath("$.path").value("/api/v1/users"))
                                 .andExpect(jsonPath("$.timestamp").exists());
         }
@@ -253,7 +253,7 @@ class UserControllerTest {
         mockMvc.perform(patch("/api/v1/users/{id}/reset-password", 2L)
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("admin@unas.edu.pe").roles("ADMIN")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("ContraseÃ±a reiniciada exitosamente"));
+                .andExpect(jsonPath("$.message").value("Contraseña reiniciada exitosamente"));
 
         org.mockito.Mockito.verify(resetPasswordUseCase).execute(2L);
     }

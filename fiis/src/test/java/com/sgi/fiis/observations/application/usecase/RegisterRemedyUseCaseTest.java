@@ -56,7 +56,7 @@ class RegisterRemedyUseCaseTest {
                 .procedureId(1)
                 .reviewerId(10)
                 .type(ObservationType.TECNICA)
-                .description("Falta la firma en el documento de propuesta tÃ©cnica")
+                .description("Falta la firma en el documento de propuesta técnica")
                 .status(ObservationStatus.PENDIENTE)
                 .reviewerRole("COORDINADOR_GRUPO")
                 .createdAt(fechaFija)

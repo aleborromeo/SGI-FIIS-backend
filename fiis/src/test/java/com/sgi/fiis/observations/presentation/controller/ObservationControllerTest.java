@@ -163,7 +163,7 @@ class ObservationControllerTest {
 
         mockMvc.perform(get("/api/observations/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("ObservaciÃ³n no encontrada con ID: 999"));
+                .andExpect(jsonPath("$.error").value("Observación no encontrada con ID: 999"));
     }
 
     @Test
@@ -182,6 +182,6 @@ class ObservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("No se puede subsanar la observaciÃ³n con ID: 100. Solo se pueden subsanar observaciones en estado PENDIENTE."));
+                .andExpect(jsonPath("$.error").value("No se puede subsanar la observación con ID: 100. Solo se pueden subsanar observaciones en estado PENDIENTE."));
     }
 }

@@ -98,6 +98,6 @@ public class UserController {
     @PatchMapping("/{id}/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id) {
         resetPasswordUseCase.execute(id);
-        return ResponseEntity.ok(Map.of("message", "ContraseÃ±a reiniciada exitosamente"));
+        return ResponseEntity.ok(Map.of("message", "Contraseña reiniciada exitosamente"));
     }
 }

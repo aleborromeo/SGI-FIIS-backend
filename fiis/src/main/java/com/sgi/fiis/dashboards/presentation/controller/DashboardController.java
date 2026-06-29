@@ -152,7 +152,7 @@ public class DashboardController {
         return ResponseEntity.ok(studentDashboardUseCase.execute(userId));
     }
 
-    // --- Helper de ValidaciÃ³n de Acceso y Propiedad de Recurso ---
+    // --- Helper de Validación de Acceso y Propiedad de Recurso ---
     private void validateAccess(Integer targetUserId, Authentication authentication, String requiredRole) {
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
             throw new org.springframework.security.access.AccessDeniedException("Acceso denegado: Usuario no autenticado.");

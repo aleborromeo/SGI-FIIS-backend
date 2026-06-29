@@ -39,7 +39,7 @@ class RegisterObservationUseCaseTest {
                 .procedureId(1)
                 .reviewerId(10)
                 .type("TECNICA")
-                .description("Falta la firma en el documento de propuesta tÃ©cnica")
+                .description("Falta la firma en el documento de propuesta técnica")
                 .reviewerRole("COORDINADOR_GRUPO")
                 .build();
 
@@ -49,7 +49,7 @@ class RegisterObservationUseCaseTest {
                 .procedureId(1)
                 .reviewerId(10)
                 .type(ObservationType.TECNICA)
-                .description("Falta la firma en el documento de propuesta tÃ©cnica")
+                .description("Falta la firma en el documento de propuesta técnica")
                 .status(ObservationStatus.PENDIENTE)
                 .reviewerRole("COORDINADOR_GRUPO")
                 .createdAt(fechaFija)
@@ -67,7 +67,7 @@ class RegisterObservationUseCaseTest {
         assertEquals(1, response.getProcedureId());
         assertEquals(10, response.getReviewerId());
         assertEquals("TECNICA", response.getType());
-        assertEquals("Falta la firma en el documento de propuesta tÃ©cnica", response.getDescription());
+        assertEquals("Falta la firma en el documento de propuesta técnica", response.getDescription());
         assertEquals("PENDIENTE", response.getStatus());
         assertEquals("COORDINADOR_GRUPO", response.getReviewerRole());
         assertEquals(fechaFija, response.getCreatedAt());
