@@ -41,9 +41,13 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: false
+          JWT_SECRET: ci-test-secret-key-for-jwt-signing-min-32-characters-long
+          AZURE_CLIENT_ID: ci-dummy-client-id
+          AZURE_CLIENT_SECRET: ci-dummy-client-secret
+          AZURE_TENANT_ID: common
           SPRING_MAIL_HOST: localhost
           SPRING_MAIL_PORT: "25"
           SPRING_MAIL_USERNAME: ci@sgi-fiis.pe
           APP_MAIL_MOCK: "true"
           APP_FRONTEND_URL: http://localhost:3000
-        run: ./mvnw clean verify
+        run: ./mvnw clean verify -Djdk.attach.allowAttachSelf=true
