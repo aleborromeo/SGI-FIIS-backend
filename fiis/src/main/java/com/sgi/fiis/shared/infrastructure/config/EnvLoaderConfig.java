@@ -6,6 +6,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 /**
  * Cargador manual de variables de entorno desde el archivo .env.
  * Garantiza que las propiedades estén disponibles en el System antes de que Spring resuelva los placeholders.
@@ -22,6 +27,10 @@ public class EnvLoaderConfig {
     }
 
     static {
+        loadEnv();
+    }
+    
+    public static void loadEnv() {
         try {
             // Asegurar que las variables de Azure no estén vacías para evitar fallos de inicialización
             String azureClientId = System.getenv("AZURE_CLIENT_ID");
@@ -34,17 +43,17 @@ public class EnvLoaderConfig {
             }
 
             // Buscar .env en el directorio actual o en el directorio padre
-            java.nio.file.Path path = java.nio.file.Paths.get(".env");
-            if (!java.nio.file.Files.exists(path)) {
-                path = java.nio.file.Paths.get("../.env");
+            Path path = Paths.get(".env");
+            if (!Files.exists(path)) {
+                path = Paths.get("../.env");
             }
-            if (!java.nio.file.Files.exists(path)) {
+            if (!Files.exists(path)) {
                 // Buscar en el directorio actual dentro de fiis (por si se arranca desde la raíz del workspace)
-                path = java.nio.file.Paths.get("fiis/.env");
+                path = Paths.get("fiis/.env");
             }
 
-            if (java.nio.file.Files.exists(path)) {
-                java.util.List<String> lines = java.nio.file.Files.readAllLines(path);
+            if (Files.exists(path)) {
+                List<String> lines = Files.readAllLines(path);
                 int count = 0;
                 for (String line : lines) {
                     line = line.trim();

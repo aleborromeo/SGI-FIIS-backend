@@ -12,6 +12,8 @@ import java.sql.DatabaseMetaData;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Disabled;
+
 /**
  * Pruebas de integración para verificar la conexión a la base de datos PostgreSQL.
  *
@@ -20,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
  *   - Opción 2: PostgreSQL local en localhost:5432 con la BD 'db_fiis_investigacion'
  */
 @SpringBootTest
+@Disabled("Deshabilitado temporalmente porque en CI y test local usamos H2 en memoria, y este test requiere PostgreSQL")
 @DisplayName("Pruebas de Conexión a Base de Datos")
-@org.junit.jupiter.api.Disabled("Deshabilitado temporalmente porque en CI y test local usamos H2 en memoria, y este test requiere PostgreSQL")
 class DatabaseConnectionTest {
 
     @Autowired
