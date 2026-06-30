@@ -87,6 +87,20 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_GATEWAY, message);
     }
 
+    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthorizationDenied(org.springframework.security.authorization.AuthorizationDeniedException ex) {
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("exception.access-denied", null, "Acceso denegado. No tienes los permisos necesarios para realizar esta acción.", locale);
+        return buildResponse(HttpStatus.FORBIDDEN, message);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("exception.access-denied", null, "Acceso denegado. No tienes los permisos necesarios para realizar esta acción.", locale);
+        return buildResponse(HttpStatus.FORBIDDEN, message);
+    }
+
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentAndState(RuntimeException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
