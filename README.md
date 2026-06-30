@@ -31,7 +31,6 @@
 - [CI/CD](#cicd)
 - [Roles del sistema](#roles-del-sistema)
 - [Documentación técnica](#documentación-técnica)
-- [Equipo de desarrollo](#equipo-de-desarrollo)
 
 ---
 
