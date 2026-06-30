@@ -39,8 +39,8 @@ public class LoginUseCase {
             throw new BusinessException("auth.user.inactive");
         }
 
-        // Validate password
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+        // Validate password (prevent NullPointerException/IllegalArgumentException for OAuth users without password)
+        if (user.getPasswordHash() == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new BadCredentialsException("auth.credentials.invalid");
         }
 

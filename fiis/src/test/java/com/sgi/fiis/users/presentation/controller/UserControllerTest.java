@@ -241,7 +241,7 @@ class UserControllerTest {
         mockMvc.perform(patch("/api/v1/users/{id}/status", 2L)
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(userDetails))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Collections.singletonMap("active", false))))
+                        .content(objectMapper.writeValueAsString(Collections.singletonMap("VIGENTE", false))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(2))
                 .andExpect(jsonPath("$.active").value(false));

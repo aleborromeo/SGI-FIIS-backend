@@ -30,9 +30,11 @@ public class ProjectController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE_INVESTIGADOR')")
     @Operation(summary = "Postulate a new research project")
     @ApiResponse(responseCode = "200", description = "Project successfully postulated")
     @ApiResponse(responseCode = "400", description = "Invalid project request or business rule validation error")
+    @ApiResponse(responseCode = "403", description = "Forbidden - Requires DOCENTE_INVESTIGADOR role")
     public ResponseEntity<ProjectResponse> createProject(
             @Valid @RequestBody CreateProjectRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
@@ -45,6 +47,7 @@ public class ProjectController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List research projects with optional filters")
     @ApiResponse(responseCode = "200", description = "List of projects retrieved successfully")
     public ResponseEntity<List<ProjectResponse>> getProjects(
@@ -75,6 +78,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get project details by ID")
     @ApiResponse(responseCode = "200", description = "Details retrieved successfully")
     @ApiResponse(responseCode = "403", description = "Forbidden - not your project")
@@ -99,7 +103,7 @@ public class ProjectController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
     @Operation(summary = "Update project status", description = "Updates the status of a research project.")
     @ApiResponse(responseCode = "200", description = "Status updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid status value")
