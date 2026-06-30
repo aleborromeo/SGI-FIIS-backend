@@ -1,6 +1,5 @@
 package com.sgi.fiis.resolutions.infrastructure.adapter;
 
-import com.sgi.fiis.resolutions.domain.port.out.DocumentStoragePort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
