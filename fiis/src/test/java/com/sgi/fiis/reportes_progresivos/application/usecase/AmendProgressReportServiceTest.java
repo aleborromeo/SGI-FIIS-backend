@@ -6,6 +6,7 @@ import com.sgi.fiis.reportes_progresivos.application.dto.ProgressReportResponse;
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReportStatus;
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -89,12 +90,12 @@ class AmendProgressReportServiceTest {
     }
 
     @Test
-    @DisplayName("Amend with non-existent report throws IllegalArgumentException")
+    @DisplayName("Amend with non-existent report throws ResourceNotFoundException")
     void amendNotFoundThrows() {
         when(repositoryPort.findById(999L)).thenReturn(Optional.empty());
 
         AmendReportCommand cmd = buildCommand(999L);
-        assertThrows(IllegalArgumentException.class, () -> service.amend(cmd));
+        assertThrows(ResourceNotFoundException.class, () -> service.amend(cmd));
         verify(repositoryPort, never()).save(any());
     }
 }

@@ -5,6 +5,7 @@ import com.sgi.fiis.reportes_progresivos.application.dto.ProgressReportResponse;
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReportStatus;
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -94,7 +95,7 @@ class ReviewProgressReportServiceTest {
     void approveNotFoundThrows() {
         when(repositoryPort.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.approve(999L));
+        assertThrows(ResourceNotFoundException.class, () -> service.approve(999L));
         verify(repositoryPort, never()).save(any());
     }
 
@@ -103,7 +104,7 @@ class ReviewProgressReportServiceTest {
     void observeNotFoundThrows() {
         when(repositoryPort.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> service.observe(999L, "feedback"));
     }
 
@@ -112,7 +113,7 @@ class ReviewProgressReportServiceTest {
     void rejectNotFoundThrows() {
         when(repositoryPort.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.reject(999L));
+        assertThrows(ResourceNotFoundException.class, () -> service.reject(999L));
     }
 
     @Test
@@ -120,6 +121,6 @@ class ReviewProgressReportServiceTest {
     void forwardNotFoundThrows() {
         when(repositoryPort.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.forwardToDirector(999L));
+        assertThrows(ResourceNotFoundException.class, () -> service.forwardToDirector(999L));
     }
 }

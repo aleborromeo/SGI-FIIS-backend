@@ -1,6 +1,5 @@
 package com.sgi.fiis;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
  *   - Opción 2: PostgreSQL local en localhost:5432 con la BD 'db_fiis_investigacion'
  */
 @SpringBootTest
-@Disabled("Requiere PostgreSQL corriendo en localhost:5432")
 @DisplayName("Pruebas de Conexión a Base de Datos")
 @org.junit.jupiter.api.Disabled("Deshabilitado temporalmente porque en CI y test local usamos H2 en memoria, y este test requiere PostgreSQL")
 class DatabaseConnectionTest {
