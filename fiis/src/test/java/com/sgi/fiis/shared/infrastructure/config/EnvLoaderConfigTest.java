@@ -44,10 +44,17 @@ class EnvLoaderConfigTest {
     void testLoadEnv_NoFile_SetsAzureDefaults() {
         EnvLoaderConfig.loadEnv();
         
-        assertNotNull(System.getProperty("AZURE_CLIENT_ID"));
-        assertNotNull(System.getProperty("AZURE_CLIENT_SECRET"));
-        assertEquals("dummy-client-id", System.getProperty("AZURE_CLIENT_ID"));
-        assertEquals("dummy-client-secret", System.getProperty("AZURE_CLIENT_SECRET"));
+        String envClientId = System.getenv("AZURE_CLIENT_ID");
+        if (envClientId == null || envClientId.trim().isEmpty()) {
+            assertNotNull(System.getProperty("AZURE_CLIENT_ID"));
+            assertEquals("dummy-client-id", System.getProperty("AZURE_CLIENT_ID"));
+        }
+
+        String envClientSecret = System.getenv("AZURE_CLIENT_SECRET");
+        if (envClientSecret == null || envClientSecret.trim().isEmpty()) {
+            assertNotNull(System.getProperty("AZURE_CLIENT_SECRET"));
+            assertEquals("dummy-client-secret", System.getProperty("AZURE_CLIENT_SECRET"));
+        }
     }
 
     @Test
