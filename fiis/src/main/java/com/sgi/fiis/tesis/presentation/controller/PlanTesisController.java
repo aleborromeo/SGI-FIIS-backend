@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import pe.unas.fiis.sgifiis.thesis.application.dto.*;
+import pe.unas.fiis.sgifiis.thesis.domain.RolRevisor;
 import pe.unas.fiis.sgifiis.thesis.domain.port.in.PlanTesisUseCase;
 
 @RestController
@@ -26,7 +27,7 @@ public class PlanTesisController {
     }
 
     @GetMapping("/student/{idEstudiante}")
-    public ResponseEntity<List<PlanTesisResponse>> listarPorEstudiante(@PathVariable Integer idEstudiante) {
+    public ResponseEntity<List<PlanTesisResponse>> listarPorEstudiante(@PathVariable Long idEstudiante) {
         return ResponseEntity.ok(planTesisUseCase.listarPorEstudiante(idEstudiante));
     }
 
@@ -35,9 +36,14 @@ public class PlanTesisController {
         return ResponseEntity.ok(planTesisUseCase.listarPorGrupo(idGrupo));
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<List<PlanTesisResponse>> listarPendientes(@RequestParam RolRevisor revisor) {
+        return ResponseEntity.ok(planTesisUseCase.listarPendientesPorRevisor(revisor));
+    }
+
     @PatchMapping("/{idPlanTesis}/coordinator/approve")
-    public ResponseEntity<PlanTesisResponse> aprobarCoordinador(@PathVariable Integer idPlanTesis, @RequestParam Integer idUsuarioAccion) {
-        return ResponseEntity.ok(planTesisUseCase.aprobarPorCoordinador(idPlanTesis, idUsuarioAccion));
+    public ResponseEntity<PlanTesisResponse> aprobarCoordinador(@PathVariable Integer idPlanTesis) {
+        return ResponseEntity.ok(planTesisUseCase.aprobarPorCoordinador(idPlanTesis));
     }
 
     @PatchMapping("/{idPlanTesis}/coordinator/observe")
@@ -46,13 +52,13 @@ public class PlanTesisController {
     }
 
     @PatchMapping("/{idPlanTesis}/coordinator/reject")
-    public ResponseEntity<PlanTesisResponse> rechazarCoordinador(@PathVariable Integer idPlanTesis, @RequestParam Integer idUsuarioAccion, @RequestParam String motivo) {
-        return ResponseEntity.ok(planTesisUseCase.rechazarPorCoordinador(idPlanTesis, idUsuarioAccion, motivo));
+    public ResponseEntity<PlanTesisResponse> rechazarCoordinador(@PathVariable Integer idPlanTesis, @RequestParam String motivo) {
+        return ResponseEntity.ok(planTesisUseCase.rechazarPorCoordinador(idPlanTesis, motivo));
     }
 
     @PatchMapping("/{idPlanTesis}/director/approve")
-    public ResponseEntity<PlanTesisResponse> aprobarDirector(@PathVariable Integer idPlanTesis, @RequestParam Integer idUsuarioAccion) {
-        return ResponseEntity.ok(planTesisUseCase.aprobarPorDirector(idPlanTesis, idUsuarioAccion));
+    public ResponseEntity<PlanTesisResponse> aprobarDirector(@PathVariable Integer idPlanTesis) {
+        return ResponseEntity.ok(planTesisUseCase.aprobarPorDirector(idPlanTesis));
     }
 
     @PatchMapping("/{idPlanTesis}/director/observe")
@@ -63,5 +69,11 @@ public class PlanTesisController {
     @PatchMapping("/{idPlanTesis}/subsanar")
     public ResponseEntity<PlanTesisResponse> subsanar(@PathVariable Integer idPlanTesis, @Valid @RequestBody SubsanarPlanTesisCommand command) {
         return ResponseEntity.ok(planTesisUseCase.subsanarPlan(idPlanTesis, command));
+    }
+
+    @PostMapping("/{idPlanTesis}/dean/resolution")
+    public ResponseEntity<PlanTesisResponse> registrarResolucion(@PathVariable Integer idPlanTesis,
+            @Valid @RequestBody RegistrarResolucionCommand command) {
+        return ResponseEntity.ok(planTesisUseCase.registrarResolucion(idPlanTesis, command));
     }
 }

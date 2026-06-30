@@ -1,14 +1,14 @@
 package pe.unas.fiis.sgifiis.thesis.application.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record RegistrarPlanTesisCommand(
         @NotBlank @Size(max = 500) String tituloTesis,
-        String resumen,
-        @NotNull Integer idEstudiante,
-        @NotNull Integer idLinea,
-        @NotNull Integer idGrupo,
-        Integer idDocumentoActual
+        @NotBlank @Size(max = 5000) String resumen,
+        @NotNull @Min(1) Integer idLinea,
+        @NotNull @Min(1) Integer idGrupo,
+        @Min(1) Integer idDocumentoActual
 ) {}

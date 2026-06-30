@@ -1,6 +1,8 @@
 package pe.unas.fiis.sgifiis.thesis.application.service;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.unas.fiis.sgifiis.thesis.application.dto.*;
@@ -8,6 +10,7 @@ import pe.unas.fiis.sgifiis.thesis.domain.*;
 import pe.unas.fiis.sgifiis.thesis.domain.exception.*;
 import pe.unas.fiis.sgifiis.thesis.domain.port.in.InformeTesisUseCase;
 import pe.unas.fiis.sgifiis.thesis.domain.port.out.*;
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 
 @Service
 @Transactional
@@ -26,9 +29,10 @@ public class InformeTesisService implements InformeTesisUseCase {
 
     @Override
     public InformeTesisResponse registrarInformeFinal(RegistrarInformeTesisCommand command) {
+        Long idEstudiante = extraerIdEstudianteDelContexto();
         PlanTesis plan = planRepository.findById(command.idPlanTesis())
                 .orElseThrow(() -> new PlanTesisNoEncontradoException(command.idPlanTesis()));
-        if (!plan.getIdEstudiante().equals(command.idEstudiante())) {
+        if (!plan.getIdEstudiante().equals(idEstudiante)) {
             throw new ReglaDeNegocioVioladaException("El informe final solo puede registrarlo el estudiante propietario del plan");
         }
         if (plan.getEstadoPlan() != EstadoPlanTesis.APROBADO) {
@@ -42,14 +46,16 @@ public class InformeTesisService implements InformeTesisUseCase {
     }
 
     @Override
-    public InformeTesisResponse aprobarInforme(Integer idInformeTesis, Integer idUsuarioAccion) {
+    public InformeTesisResponse aprobarInforme(Integer idInformeTesis) {
+        validarRolDirector();
         InformeTesis informe = obtenerInforme(idInformeTesis);
         informe.aprobar();
         return toResponse(informeRepository.save(informe));
     }
 
     @Override
-    public InformeTesisResponse observarInforme(Integer idInformeTesis, Integer idUsuarioAccion, String observacion) {
+    public InformeTesisResponse observarInforme(Integer idInformeTesis, String observacion) {
+        validarRolDirector();
         InformeTesis informe = obtenerInforme(idInformeTesis);
         informe.observar();
         return toResponse(informeRepository.save(informe));
@@ -65,6 +71,32 @@ public class InformeTesisService implements InformeTesisUseCase {
     @Transactional(readOnly = true)
     public List<InformeTesisResponse> listarPorPlan(Integer idPlanTesis) {
         return informeRepository.findByPlanTesis(idPlanTesis).stream().map(this::toResponse).toList();
+    }
+
+    private Long extraerIdEstudianteDelContexto() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            boolean esEstudiante = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ESTUDIANTE"));
+            if (!esEstudiante) {
+                throw new ReglaDeNegocioVioladaException("Solo los estudiantes pueden registrar un informe de tesis");
+            }
+            return userDetails.getId();
+        }
+        throw new ReglaDeNegocioVioladaException("No se pudo identificar al estudiante autenticado");
+    }
+
+    private void validarRolDirector() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            boolean esDirector = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_DIRECTOR_INVESTIGACION"));
+            if (!esDirector) {
+                throw new ReglaDeNegocioVioladaException("Solo los directores de investigación pueden revisar informes de tesis");
+            }
+            return;
+        }
+        throw new ReglaDeNegocioVioladaException("No se pudo identificar al usuario autenticado");
     }
 
     private InformeTesis obtenerInforme(Integer idInformeTesis) {

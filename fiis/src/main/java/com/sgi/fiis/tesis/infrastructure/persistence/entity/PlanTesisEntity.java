@@ -21,7 +21,7 @@ public class PlanTesisEntity {
     private String resumen;
 
     @Column(name = "id_estudiante", nullable = false)
-    private Integer idEstudiante;
+    private Long idEstudiante;
 
     @Column(name = "id_linea", nullable = false)
     private Integer idLinea;
@@ -50,8 +50,8 @@ public class PlanTesisEntity {
     public void setTituloTesis(String tituloTesis) { this.tituloTesis = tituloTesis; }
     public String getResumen() { return resumen; }
     public void setResumen(String resumen) { this.resumen = resumen; }
-    public Integer getIdEstudiante() { return idEstudiante; }
-    public void setIdEstudiante(Integer idEstudiante) { this.idEstudiante = idEstudiante; }
+    public Long getIdEstudiante() { return idEstudiante; }
+    public void setIdEstudiante(Long idEstudiante) { this.idEstudiante = idEstudiante; }
     public Integer getIdLinea() { return idLinea; }
     public void setIdLinea(Integer idLinea) { this.idLinea = idLinea; }
     public Integer getIdGrupo() { return idGrupo; }

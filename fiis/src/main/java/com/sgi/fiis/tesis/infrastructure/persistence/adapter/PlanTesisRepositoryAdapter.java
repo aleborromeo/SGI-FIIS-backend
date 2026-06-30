@@ -20,7 +20,7 @@ public class PlanTesisRepositoryAdapter implements PlanTesisRepositoryPort {
     }
     public PlanTesis save(PlanTesis planTesis) { return mapper.toDomain(repository.save(mapper.toEntity(planTesis))); }
     public Optional<PlanTesis> findById(Integer idPlanTesis) { return repository.findById(idPlanTesis).map(mapper::toDomain); }
-    public List<PlanTesis> findByEstudiante(Integer idEstudiante) { return repository.findByIdEstudiante(idEstudiante).stream().map(mapper::toDomain).toList(); }
+    public List<PlanTesis> findByEstudiante(Long idEstudiante) { return repository.findByIdEstudiante(idEstudiante).stream().map(mapper::toDomain).toList(); }
     public List<PlanTesis> findByGrupo(Integer idGrupo) { return repository.findByIdGrupo(idGrupo).stream().map(mapper::toDomain).toList(); }
     public List<PlanTesis> findByEstado(EstadoPlanTesis estadoPlan) { return repository.findByEstadoPlan(estadoPlan).stream().map(mapper::toDomain).toList(); }
 }

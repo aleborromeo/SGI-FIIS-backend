@@ -7,7 +7,7 @@ public class PlanTesis {
     private Integer idPlanTesis;
     private String tituloTesis;
     private String resumen;
-    private Integer idEstudiante;
+    private Long idEstudiante;
     private Integer idLinea;
     private Integer idGrupo;
     private Integer idDocumentoActual;
@@ -15,7 +15,7 @@ public class PlanTesis {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
 
-    public PlanTesis(Integer idPlanTesis, String tituloTesis, String resumen, Integer idEstudiante,
+    public PlanTesis(Integer idPlanTesis, String tituloTesis, String resumen, Long idEstudiante,
                      Integer idLinea, Integer idGrupo, Integer idDocumentoActual, EstadoPlanTesis estadoPlan,
                      LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
         this.idPlanTesis = idPlanTesis;
@@ -30,14 +30,14 @@ public class PlanTesis {
         this.fechaActualizacion = fechaActualizacion;
     }
 
-    public static PlanTesis nuevo(String tituloTesis, String resumen, Integer idEstudiante,
+    public static PlanTesis nuevo(String tituloTesis, String resumen, Long idEstudiante,
                                   Integer idLinea, Integer idGrupo, Integer idDocumentoActual) {
         return new PlanTesis(null, tituloTesis, resumen, idEstudiante, idLinea, idGrupo,
                 idDocumentoActual, EstadoPlanTesis.POSTULADO, null, null);
     }
 
     public void marcarObservado() {
-        if (estadoPlan == EstadoPlanTesis.APROBADO || estadoPlan == EstadoPlanTesis.RECHAZADO) {
+        if (estadoPlan == EstadoPlanTesis.RECHAZADO) {
             throw new TransicionEstadoInvalidaException("No se puede observar un plan en estado " + estadoPlan);
         }
         estadoPlan = EstadoPlanTesis.OBSERVADO;
@@ -69,7 +69,7 @@ public class PlanTesis {
     public Integer getIdPlanTesis() { return idPlanTesis; }
     public String getTituloTesis() { return tituloTesis; }
     public String getResumen() { return resumen; }
-    public Integer getIdEstudiante() { return idEstudiante; }
+    public Long getIdEstudiante() { return idEstudiante; }
     public Integer getIdLinea() { return idLinea; }
     public Integer getIdGrupo() { return idGrupo; }
     public Integer getIdDocumentoActual() { return idDocumentoActual; }

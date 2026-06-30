@@ -31,12 +31,12 @@ public class InformeTesisController {
     }
 
     @PatchMapping("/{idInformeTesis}/approve")
-    public ResponseEntity<InformeTesisResponse> aprobar(@PathVariable Integer idInformeTesis, @RequestParam Integer idUsuarioAccion) {
-        return ResponseEntity.ok(informeTesisUseCase.aprobarInforme(idInformeTesis, idUsuarioAccion));
+    public ResponseEntity<InformeTesisResponse> aprobar(@PathVariable Integer idInformeTesis) {
+        return ResponseEntity.ok(informeTesisUseCase.aprobarInforme(idInformeTesis));
     }
 
     @PatchMapping("/{idInformeTesis}/observe")
-    public ResponseEntity<InformeTesisResponse> observar(@PathVariable Integer idInformeTesis, @RequestParam Integer idUsuarioAccion, @RequestParam String observacion) {
-        return ResponseEntity.ok(informeTesisUseCase.observarInforme(idInformeTesis, idUsuarioAccion, observacion));
+    public ResponseEntity<InformeTesisResponse> observar(@PathVariable Integer idInformeTesis, @RequestParam String observacion) {
+        return ResponseEntity.ok(informeTesisUseCase.observarInforme(idInformeTesis, observacion));
     }
 }

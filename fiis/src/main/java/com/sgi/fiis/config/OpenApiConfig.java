@@ -94,12 +94,13 @@ public class OpenApiConfig {
                 .build();
     }
 
-    // Planes de Tesis
+    // Planes de Tesis e Informes de Tesis
     @Bean
     public GroupedOpenApi thesisApi() {
         return GroupedOpenApi.builder()
                 .group("thesis")
-                .pathsToMatch("/api/thesis/**")
+                .pathsToMatch("/api/v1/thesis/**")
+                .packagesToScan("pe.unas.fiis.sgifiis.thesis")
                 .build();
     }
 

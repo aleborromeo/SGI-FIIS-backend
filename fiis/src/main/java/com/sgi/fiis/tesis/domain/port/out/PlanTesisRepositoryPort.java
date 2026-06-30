@@ -8,7 +8,7 @@ import pe.unas.fiis.sgifiis.thesis.domain.PlanTesis;
 public interface PlanTesisRepositoryPort {
     PlanTesis save(PlanTesis planTesis);
     Optional<PlanTesis> findById(Integer idPlanTesis);
-    List<PlanTesis> findByEstudiante(Integer idEstudiante);
+    List<PlanTesis> findByEstudiante(Long idEstudiante);
     List<PlanTesis> findByGrupo(Integer idGrupo);
     List<PlanTesis> findByEstado(EstadoPlanTesis estadoPlan);
 }

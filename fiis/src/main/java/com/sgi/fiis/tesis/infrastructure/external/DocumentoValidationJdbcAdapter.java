@@ -13,7 +13,7 @@ public class DocumentoValidationJdbcAdapter implements DocumentoValidationPort {
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM documentos WHERE id_documento = ? AND es_activo = TRUE", Integer.class, idDocumento);
         return count != null && count > 0;
     }
-    public boolean documentoPerteneceAUsuario(Integer idDocumento, Integer idUsuario) {
+    public boolean documentoPerteneceAUsuario(Integer idDocumento, Long idUsuario) {
         if (idDocumento == null || idUsuario == null) return false;
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM documentos WHERE id_documento = ? AND id_usuario_subio = ? AND es_activo = TRUE", Integer.class, idDocumento, idUsuario);
         return count != null && count > 0;

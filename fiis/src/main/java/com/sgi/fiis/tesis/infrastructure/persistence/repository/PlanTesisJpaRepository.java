@@ -6,7 +6,7 @@ import pe.unas.fiis.sgifiis.thesis.domain.EstadoPlanTesis;
 import pe.unas.fiis.sgifiis.thesis.infrastructure.persistence.entity.PlanTesisEntity;
 
 public interface PlanTesisJpaRepository extends JpaRepository<PlanTesisEntity, Integer> {
-    List<PlanTesisEntity> findByIdEstudiante(Integer idEstudiante);
+    List<PlanTesisEntity> findByIdEstudiante(Long idEstudiante);
     List<PlanTesisEntity> findByIdGrupo(Integer idGrupo);
     List<PlanTesisEntity> findByEstadoPlan(EstadoPlanTesis estadoPlan);
 }
