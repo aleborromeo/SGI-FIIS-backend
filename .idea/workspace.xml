@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="822649ad-3d5c-4043-8e1d-7c962c62c5ba" name="Changes" comment="validacion de enpoint con swagger" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="develop" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Jasc742&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/aleborromeo/SGI-FIIS-backend.git&quot;,
+    &quot;accountId&quot;: &quot;62236d4e-059b-4d2e-92a1-0731b4260ae3&quot;
+  }
+}</component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.0000000417838493" />
+      <entry key="M10" value="1.002149953643816" />
+      <entry key="M15" value="1.0803536135897134" />
+      <entry key="M30" value="4.010013406408507" />
+      <entry key="H1" value="19.43779464165285" />
+      <entry key="H2" value="46.687297245595836" />
+      <entry key="H4" value="74.05633707098096" />
+      <entry key="D1" value="125.36065195163813" />
+      <entry key="W1" value="144.21023541406578" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="5.020735672063108E-285" />
+      <entry key="S30" value="1.8768405367929456E-95" />
+      <entry key="S60" value="5.4220029673014183E-48" />
+      <entry key="M2" value="3.167459076414658E-24" />
+      <entry key="M5" value="5.97782352804685E-10" />
+      <entry key="M10" value="3.4518095015259756E-5" />
+      <entry key="M15" value="0.001335189898752964" />
+      <entry key="M30" value="0.051665904165929526" />
+      <entry key="H1" value="0.3214373857467938" />
+      <entry key="H2" value="0.8017851976600621" />
+      <entry key="H4" value="1.2663178407567792" />
+      <entry key="D1" value="1.8533122865165914" />
+      <entry key="W1" value="1.9783543321110606" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.47963205966263217" />
+      <entry key="MS500" value="0.8633395585744118" />
+      <entry key="S2" value="0.9639298077406432" />
+      <entry key="S5" value="0.9854127202602957" />
+      <entry key="S10" value="0.9926795657513535" />
+      <entry key="S30" value="0.9975538766096193" />
+      <entry key="S60" value="0.9987761894486769" />
+      <entry key="M2" value="0.9993879073956603" />
+      <entry key="M5" value="0.9997551603552403" />
+      <entry key="M10" value="1.00206170698251" />
+      <entry key="M15" value="1.0815990360767043" />
+      <entry key="M30" value="4.061481458588228" />
+      <entry key="H1" value="19.758723540198332" />
+      <entry key="H2" value="47.48846331114363" />
+      <entry key="H4" value="75.3221634345991" />
+      <entry key="D1" value="127.2138306003396" />
+      <entry key="W1" value="146.18856817766502" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="3FJMS5LXYy060Zf4qAycYkaOD7o" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/tesis&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.25134.95" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.25134.95" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="822649ad-3d5c-4043-8e1d-7c962c62c5ba" name="Changes" comment="" />
+      <created>1781788717225</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1781788717225</updated>
+    </task>
+    <task id="LOCAL-00001" summary="modulo tesis implementacion">
+      <option name="closed" value="true" />
+      <created>1781797281918</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1781797281918</updated>
+    </task>
+    <task id="LOCAL-00002" summary="modulo tesis implementacion">
+      <option name="closed" value="true" />
+      <created>1781797475189</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1781797475189</updated>
+    </task>
+    <task id="LOCAL-00003" summary="validacion de enpoint con swagger">
+      <option name="closed" value="true" />
+      <created>1782783217391</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1782783217391</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="modulo tesis implementacion" />
+    <MESSAGE value="validacion de enpoint con swagger" />
+    <option name="LAST_COMMIT_MESSAGE" value="validacion de enpoint con swagger" />
+  </component>
+</project>
