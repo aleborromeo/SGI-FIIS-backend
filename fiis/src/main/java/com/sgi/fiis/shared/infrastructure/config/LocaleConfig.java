@@ -35,7 +35,8 @@ public class LocaleConfig {
                 "i18n/auth/messages",
                 "i18n/convocatorias/messages",
                 "i18n/projects/messages",
-                "i18n/resolutions/messages"
+                "i18n/resolutions/messages",
+                "i18n/documentos/messages"
         );
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setUseCodeAsDefaultMessage(true);
