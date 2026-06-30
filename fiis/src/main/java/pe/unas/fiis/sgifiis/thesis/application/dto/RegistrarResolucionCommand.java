@@ -8,5 +8,5 @@ public record RegistrarResolucionCommand(
         @NotBlank String numeroResolucion,
         @NotNull LocalDate fechaEmision,
         @NotBlank String asunto,
-        Integer idDocumentoAdjunto
+        @NotNull Integer idDocumentoAdjunto
 ) {}
