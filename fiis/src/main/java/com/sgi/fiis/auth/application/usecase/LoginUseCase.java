@@ -4,56 +4,57 @@ import com.sgi.fiis.auth.application.dto.LoginResponseDto;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
-import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 /**
- * Caso de uso: Login (RF-01, RF-02).
- * Valida credenciales, verifica usuario activo y genera JWT.
+ * Use case: Login (RF-01, RF-02).
+ * Validates credentials, checks active user and generates JWT.
  */
 @Service
 public class LoginUseCase {
 
-    private final UsuarioRepositoryPort usuarioRepository;
+    private final UserRepositoryPort userRepository;
     private final PasswordEncoderPort passwordEncoder;
     private final TokenProviderPort tokenProvider;
 
-    public LoginUseCase(UsuarioRepositoryPort usuarioRepository,
+    public LoginUseCase(UserRepositoryPort userRepository,
                         PasswordEncoderPort passwordEncoder,
                         TokenProviderPort tokenProvider) {
-        this.usuarioRepository = usuarioRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
     }
 
-    public LoginResponseDto execute(String correo, String password) {
-        // Buscar usuario por correo
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new BadCredentialsException("Credenciales inválidas"));
+    public LoginResponseDto execute(String email, String password) {
+        String cleanEmail = email != null ? email.trim() : "";
+        // Find user by email
+        User user = userRepository.findByEmail(cleanEmail)
+                .orElseThrow(() -> new BadCredentialsException("auth.credentials.invalid"));
 
-        // RF-02: Validar que el usuario esté activo
-        if (!usuario.isActivo()) {
-            throw new BusinessException("Usuario inactivo. Contacte al administrador.");
+        // RF-02: Validate that the user is active
+        if (!user.isActive()) {
+            throw new BusinessException("auth.user.inactive");
         }
 
-        // Validar contraseña
-        if (!passwordEncoder.matches(password, usuario.getPasswordHash())) {
-            throw new BadCredentialsException("Credenciales inválidas");
+        // Validate password (prevent NullPointerException/IllegalArgumentException for OAuth users without password)
+        if (user.getPasswordHash() == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw new BadCredentialsException("auth.credentials.invalid");
         }
 
-        // Generar JWT
-        String token = tokenProvider.generateToken(usuario.getCorreoInstitucional(), usuario.getRolCodigo());
+        // Generate JWT
+        String token = tokenProvider.generateToken(user.getInstitutionalEmail(), user.getRoleCode());
 
         return LoginResponseDto.builder()
                 .token(token)
-                .tipo("Bearer")
-                .correo(usuario.getCorreoInstitucional())
-                .nombres(usuario.getNombres())
-                .apellidos(usuario.getApellidos())
-                .rolCodigo(usuario.getRolCodigo())
-                .mustChangePassword(usuario.isMustChangePassword())
+                .type("Bearer")
+                .email(user.getInstitutionalEmail())
+                .firstNames(user.getFirstNames())
+                .lastNames(user.getLastNames())
+                .roleCode(user.getRoleCode())
+                .mustChangePassword(user.isMustChangePassword())
                 .build();
     }
 }

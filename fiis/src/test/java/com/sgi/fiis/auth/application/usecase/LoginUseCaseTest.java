@@ -4,8 +4,8 @@ import com.sgi.fiis.auth.application.dto.LoginResponseDto;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
-import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class LoginUseCaseTest {
 
     @Mock
-    private UsuarioRepositoryPort usuarioRepository;
+    private UserRepositoryPort userRepository;
 
     @Mock
     private PasswordEncoderPort passwordEncoder;
@@ -38,17 +38,17 @@ class LoginUseCaseTest {
     @Test
     @DisplayName("Should successfully login credentials, generate and return JWT directly")
     void testLoginSuccess() {
-        Usuario usuario = Usuario.builder()
-                .correoInstitucional("admin@unas.edu.pe")
-                .nombres("Admin")
-                .apellidos("Sistema")
-                .activo(true)
+        User user = User.builder()
+                .institutionalEmail("admin@unas.edu.pe")
+                .firstNames("Admin")
+                .lastNames("Sistema")
+                .active(true)
                 .mustChangePassword(true)
                 .passwordHash("hashed-pass")
-                .rolCodigo("ADMIN")
+                .roleCode("ADMIN")
                 .build();
 
-        when(usuarioRepository.findByCorreo("admin@unas.edu.pe")).thenReturn(Optional.of(usuario));
+        when(userRepository.findByEmail("admin@unas.edu.pe")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("00000000", "hashed-pass")).thenReturn(true);
         when(tokenProvider.generateToken("admin@unas.edu.pe", "ADMIN")).thenReturn("jwt-token");
 
@@ -56,11 +56,11 @@ class LoginUseCaseTest {
 
         assertNotNull(response);
         assertEquals("jwt-token", response.getToken());
-        assertEquals("Bearer", response.getTipo());
-        assertEquals("admin@unas.edu.pe", response.getCorreo());
+        assertEquals("Bearer", response.getType());
+        assertEquals("admin@unas.edu.pe", response.getEmail());
         assertFalse(response.isRequiresVerification());
 
-        verify(usuarioRepository).findByCorreo("admin@unas.edu.pe");
+        verify(userRepository).findByEmail("admin@unas.edu.pe");
         verify(passwordEncoder).matches("00000000", "hashed-pass");
         verify(tokenProvider).generateToken("admin@unas.edu.pe", "ADMIN");
     }
@@ -68,49 +68,79 @@ class LoginUseCaseTest {
     @Test
     @DisplayName("Should throw BadCredentialsException when user not found")
     void testLoginUserNotFound() {
-        when(usuarioRepository.findByCorreo("invalid@unas.edu.pe")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("invalid@unas.edu.pe")).thenReturn(Optional.empty());
 
-        assertThrows(BadCredentialsException.class, () -> 
+        assertThrows(BadCredentialsException.class, () ->
                 loginUseCase.execute("invalid@unas.edu.pe", "password"));
 
-        verify(usuarioRepository).findByCorreo("invalid@unas.edu.pe");
+        verify(userRepository).findByEmail("invalid@unas.edu.pe");
         verifyNoInteractions(passwordEncoder, tokenProvider);
     }
 
     @Test
     @DisplayName("Should throw BusinessException when user is inactive")
     void testLoginInactiveUser() {
-        Usuario usuario = Usuario.builder()
-                .correoInstitucional("inactive@unas.edu.pe")
-                .activo(false)
+        User user = User.builder()
+                .institutionalEmail("inactive@unas.edu.pe")
+                .active(false)
                 .build();
 
-        when(usuarioRepository.findByCorreo("inactive@unas.edu.pe")).thenReturn(Optional.of(usuario));
+        when(userRepository.findByEmail("inactive@unas.edu.pe")).thenReturn(Optional.of(user));
 
-        assertThrows(BusinessException.class, () -> 
+        assertThrows(BusinessException.class, () ->
                 loginUseCase.execute("inactive@unas.edu.pe", "password"));
 
-        verify(usuarioRepository).findByCorreo("inactive@unas.edu.pe");
+        verify(userRepository).findByEmail("inactive@unas.edu.pe");
         verifyNoInteractions(passwordEncoder, tokenProvider);
     }
 
     @Test
     @DisplayName("Should throw BadCredentialsException when password does not match")
     void testLoginPasswordMismatch() {
-        Usuario usuario = Usuario.builder()
-                .correoInstitucional("admin@unas.edu.pe")
-                .activo(true)
+        User user = User.builder()
+                .institutionalEmail("admin@unas.edu.pe")
+                .active(true)
                 .passwordHash("hashed-pass")
                 .build();
 
-        when(usuarioRepository.findByCorreo("admin@unas.edu.pe")).thenReturn(Optional.of(usuario));
+        when(userRepository.findByEmail("admin@unas.edu.pe")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong-password", "hashed-pass")).thenReturn(false);
 
-        assertThrows(BadCredentialsException.class, () -> 
+        assertThrows(BadCredentialsException.class, () ->
                 loginUseCase.execute("admin@unas.edu.pe", "wrong-password"));
 
-        verify(usuarioRepository).findByCorreo("admin@unas.edu.pe");
+        verify(userRepository).findByEmail("admin@unas.edu.pe");
         verify(passwordEncoder).matches("wrong-password", "hashed-pass");
         verifyNoInteractions(tokenProvider);
+    }
+
+    @Test
+    @DisplayName("Should handle null email gracefully by throwing BadCredentialsException")
+    void testLoginNullEmail() {
+        when(userRepository.findByEmail("")).thenReturn(Optional.empty());
+
+        assertThrows(BadCredentialsException.class, () ->
+                loginUseCase.execute(null, "password"));
+
+        verify(userRepository).findByEmail("");
+        verifyNoInteractions(passwordEncoder, tokenProvider);
+    }
+
+    @Test
+    @DisplayName("Should throw BadCredentialsException when user password hash is null (OAuth user)")
+    void testLoginNullPasswordHash() {
+        User user = User.builder()
+                .institutionalEmail("oauth@unas.edu.pe")
+                .active(true)
+                .passwordHash(null)
+                .build();
+
+        when(userRepository.findByEmail("oauth@unas.edu.pe")).thenReturn(Optional.of(user));
+
+        assertThrows(BadCredentialsException.class, () ->
+                loginUseCase.execute("oauth@unas.edu.pe", "password"));
+
+        verify(userRepository).findByEmail("oauth@unas.edu.pe");
+        verifyNoInteractions(passwordEncoder, tokenProvider);
     }
 }

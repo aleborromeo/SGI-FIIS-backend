@@ -101,7 +101,7 @@ class DocumentControllerTest {
                         "PDF",
                         100L,
                         42L,
-                        LocalDateTime.of(2026, 6, 17, 10, 0)
+                        LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0)
                 );
 
         when(uploadDocumentUseCase.execute(

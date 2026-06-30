@@ -6,8 +6,8 @@ import com.sgi.fiis.auth.application.service.PendingRegistrationService;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
-import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ class VerifyRegistrationUseCaseTest {
     private PendingRegistrationService pendingRegistrationService;
 
     @Mock
-    private UsuarioRepositoryPort usuarioRepository;
+    private UserRepositoryPort userRepository;
 
     @Mock
     private PasswordEncoderPort passwordEncoder;
@@ -40,110 +40,110 @@ class VerifyRegistrationUseCaseTest {
     @Test
     @DisplayName("Should successfully verify registration code, save active user and return JWT")
     void testVerifyRegistrationSuccess() {
-        String correo = "juan.perez@unas.edu.pe";
-        String codigo = "123456";
+        String email = "juan.perez@unas.edu.pe";
+        String code = "123456";
 
         RegisterRequestDto dto = RegisterRequestDto.builder()
                 .dni("12345678")
-                .nombres("Juan")
-                .apellidos("Perez")
-                .correoInstitucional(correo)
-                .telefono("999888777")
+                .firstNames("Juan")
+                .lastNames("Perez")
+                .institutionalEmail(email)
+                .phone("999888777")
                 .password("password123")
-                .confirmarPassword("password123")
-                .rolCodigo("DOCENTE")
+                .confirmPassword("password123")
+                .roleCode("DOCENTE")
                 .build();
 
         PendingRegistrationService.PendingRegistration pending = mock(PendingRegistrationService.PendingRegistration.class);
         when(pending.getRequestDto()).thenReturn(dto);
-        when(pending.getCode()).thenReturn(codigo);
+        when(pending.getCode()).thenReturn(code);
         when(pending.isExpired()).thenReturn(false);
 
-        when(pendingRegistrationService.get(correo)).thenReturn(pending);
+        when(pendingRegistrationService.get(email)).thenReturn(pending);
         when(passwordEncoder.encode("password123")).thenReturn("encoded-pass");
-        
-        Usuario mockSavedUser = Usuario.builder()
-                .correoInstitucional(correo)
-                .nombres("Juan")
-                .apellidos("Perez")
-                .rolCodigo("DOCENTE")
-                .activo(true)
+
+        User mockSavedUser = User.builder()
+                .institutionalEmail(email)
+                .firstNames("Juan")
+                .lastNames("Perez")
+                .roleCode("DOCENTE")
+                .active(true)
                 .mustChangePassword(false)
                 .build();
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(mockSavedUser);
-        when(tokenProvider.generateToken(correo, "DOCENTE")).thenReturn("jwt-token");
+        when(userRepository.save(any(User.class))).thenReturn(mockSavedUser);
+        when(tokenProvider.generateToken(email, "DOCENTE")).thenReturn("jwt-token");
 
-        LoginResponseDto response = verifyRegistrationUseCase.execute(correo, codigo);
+        LoginResponseDto response = verifyRegistrationUseCase.execute(email, code);
 
         assertNotNull(response);
         assertEquals("jwt-token", response.getToken());
-        assertEquals("Bearer", response.getTipo());
-        assertEquals(correo, response.getCorreo());
-        assertEquals("DOCENTE", response.getRolCodigo());
+        assertEquals("Bearer", response.getType());
+        assertEquals(email, response.getEmail());
+        assertEquals("DOCENTE", response.getRoleCode());
         assertFalse(response.isMustChangePassword());
 
-        verify(pendingRegistrationService).get(correo);
+        verify(pendingRegistrationService).get(email);
         verify(passwordEncoder).encode("password123");
-        verify(usuarioRepository).save(any(Usuario.class));
-        verify(pendingRegistrationService).remove(correo);
-        verify(tokenProvider).generateToken(correo, "DOCENTE");
+        verify(userRepository).save(any(User.class));
+        verify(pendingRegistrationService).remove(email);
+        verify(tokenProvider).generateToken(email, "DOCENTE");
     }
 
     @Test
     @DisplayName("Should throw BusinessException when no pending registration is found")
     void testVerifyRegistrationNotFound() {
-        String correo = "invalid@unas.edu.pe";
-        String codigo = "123456";
+        String email = "invalid@unas.edu.pe";
+        String code = "123456";
 
-        when(pendingRegistrationService.get(correo)).thenReturn(null);
+        when(pendingRegistrationService.get(email)).thenReturn(null);
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> 
-                verifyRegistrationUseCase.execute(correo, codigo));
-        assertEquals("No se encontró ningún registro pendiente o ya ha sido verificado", ex.getMessage());
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                verifyRegistrationUseCase.execute(email, code));
+        assertEquals("auth.register.pending-not-found", ex.getMessage());
 
-        verify(pendingRegistrationService).get(correo);
-        verifyNoInteractions(passwordEncoder, usuarioRepository, tokenProvider);
+        verify(pendingRegistrationService).get(email);
+        verifyNoInteractions(passwordEncoder, userRepository, tokenProvider);
     }
 
     @Test
     @DisplayName("Should throw BusinessException and remove from memory when registration code has expired")
     void testVerifyRegistrationExpired() {
-        String correo = "juan.perez@unas.edu.pe";
-        String codigo = "123456";
+        String email = "juan.perez@unas.edu.pe";
+        String code = "123456";
 
         PendingRegistrationService.PendingRegistration pending = mock(PendingRegistrationService.PendingRegistration.class);
         when(pending.isExpired()).thenReturn(true);
 
-        when(pendingRegistrationService.get(correo)).thenReturn(pending);
+        when(pendingRegistrationService.get(email)).thenReturn(pending);
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> 
-                verifyRegistrationUseCase.execute(correo, codigo));
-        assertEquals("El código de verificación ha expirado", ex.getMessage());
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                verifyRegistrationUseCase.execute(email, code));
+        assertEquals("auth.register.expired", ex.getMessage());
 
-        verify(pendingRegistrationService).get(correo);
-        verify(pendingRegistrationService).remove(correo);
-        verifyNoInteractions(passwordEncoder, usuarioRepository, tokenProvider);
+        verify(pendingRegistrationService).get(email);
+        verify(pendingRegistrationService).remove(email);
+        verifyNoInteractions(passwordEncoder, userRepository, tokenProvider);
     }
 
     @Test
     @DisplayName("Should throw BusinessException when verification code does not match")
     void testVerifyRegistrationCodeMismatch() {
-        String correo = "juan.perez@unas.edu.pe";
-        String codigo = "123456";
-        String wrongCodigo = "654321";
+        String email = "juan.perez@unas.edu.pe";
+        String code = "123456";
+        String wrongCode = "654321";
 
         PendingRegistrationService.PendingRegistration pending = mock(PendingRegistrationService.PendingRegistration.class);
-        when(pending.getCode()).thenReturn(codigo);
+        when(pending.getCode()).thenReturn(code);
         when(pending.isExpired()).thenReturn(false);
 
-        when(pendingRegistrationService.get(correo)).thenReturn(pending);
+        when(pendingRegistrationService.get(email)).thenReturn(pending);
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> 
-                verifyRegistrationUseCase.execute(correo, wrongCodigo));
-        assertEquals("Código de verificación inválido", ex.getMessage());
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                verifyRegistrationUseCase.execute(email, wrongCode));
+        assertEquals("auth.register.invalid-code", ex.getMessage());
 
-        verify(pendingRegistrationService).get(correo);
-        verify(pendingRegistrationService, never()).remove(correo);
-        verifyNoInteractions(passwordEncoder, usuarioRepository, tokenProvider);
+        verify(pendingRegistrationService).get(email);
+        verify(pendingRegistrationService, never()).remove(email);
+        verifyNoInteractions(passwordEncoder, userRepository, tokenProvider);
     }
 }

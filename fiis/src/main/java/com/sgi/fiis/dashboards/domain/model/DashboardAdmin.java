@@ -9,18 +9,18 @@ import java.util.List;
 @Builder
 public class DashboardAdmin {
 
-    private int totalUsuarios;
-    private int totalUsuariosActivos;
-    private int totalGrupos;
-    private int totalGruposActivos;
-    private int totalProyectos;
-    private int proyectosActivos;
-    private int tramitesPendientes;
-    private int resolucionesEmitidas;
+    private int totalUsers;
+    private int totalActiveUsers;
+    private int totalGroups;
+    private int totalActiveGroups;
+    private int totalProjects;
+    private int activeProjects;
+    private int pendingProcedures;
+    private int issuedResolutions;
 
-    private int tramitesEnRevision;
-    private int tramitesAprobados;
-    private int tramitesRechazados;
+    private int proceduresUnderReview;
+    private int approvedProcedures;
+    private int rejectedProcedures;
 
-    private List<AlertaItem> alertas;
+    private List<AlertItem> alerts;
 }

@@ -1,8 +1,8 @@
 package com.sgi.fiis.auth.infrastructure.security;
 
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
-import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class OAuthUserHandlerAdapterTest {
 
     @Mock
-    private UsuarioRepositoryPort usuarioRepository;
+    private UserRepositoryPort userRepository;
 
     @Mock
     private PasswordEncoderPort passwordEncoder;
@@ -31,48 +31,48 @@ class OAuthUserHandlerAdapterTest {
     @Test
     @DisplayName("Should return existing user from OAuth")
     void testFindOrCreateFromOAuthExisting() {
-        Usuario existingUser = Usuario.builder()
+        User existingUser = User.builder()
                 .id(1L)
-                .correoInstitucional("existing@unas.edu.pe")
-                .rolCodigo("ADMIN")
+                .institutionalEmail("existing@unas.edu.pe")
+                .roleCode("ADMIN")
                 .build();
 
-        when(usuarioRepository.findByCorreo("existing@unas.edu.pe")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByEmail("existing@unas.edu.pe")).thenReturn(Optional.of(existingUser));
 
-        Usuario result = adapter.findOrCreateFromOAuth("existing@unas.edu.pe", "Existing User", "microsoft");
+        User result = adapter.findOrCreateFromOAuth("existing@unas.edu.pe", "Existing User", "microsoft");
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        assertEquals("existing@unas.edu.pe", result.getCorreoInstitucional());
-        verify(usuarioRepository).findByCorreo("existing@unas.edu.pe");
-        verifyNoMoreInteractions(usuarioRepository);
+        assertEquals("existing@unas.edu.pe", result.getInstitutionalEmail());
+        verify(userRepository).findByEmail("existing@unas.edu.pe");
+        verifyNoMoreInteractions(userRepository);
         verifyNoInteractions(passwordEncoder);
     }
 
     @Test
     @DisplayName("Should create new user from OAuth if not exists")
     void testFindOrCreateFromOAuthCreateNew() {
-        when(usuarioRepository.findByCorreo("new@unas.edu.pe")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("new@unas.edu.pe")).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("hashed-placeholder-password");
-        
-        Usuario savedUser = Usuario.builder()
+
+        User savedUser = User.builder()
                 .id(100L)
                 .dni("OA123456")
-                .nombres("New")
-                .apellidos("User")
-                .correoInstitucional("new@unas.edu.pe")
-                .rolCodigo("ESTUDIANTE")
-                .activo(true)
+                .firstNames("New")
+                .lastNames("User")
+                .institutionalEmail("new@unas.edu.pe")
+                .roleCode("ESTUDIANTE")
+                .active(true)
                 .build();
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        Usuario result = adapter.findOrCreateFromOAuth("new@unas.edu.pe", "New User", "microsoft");
+        User result = adapter.findOrCreateFromOAuth("new@unas.edu.pe", "New User", "microsoft");
 
         assertNotNull(result);
         assertEquals(100L, result.getId());
-        assertEquals("new@unas.edu.pe", result.getCorreoInstitucional());
-        verify(usuarioRepository).findByCorreo("new@unas.edu.pe");
+        assertEquals("new@unas.edu.pe", result.getInstitutionalEmail());
+        verify(userRepository).findByEmail("new@unas.edu.pe");
         verify(passwordEncoder).encode(anyString());
-        verify(usuarioRepository).save(any(Usuario.class));
+        verify(userRepository).save(any(User.class));
     }
 }

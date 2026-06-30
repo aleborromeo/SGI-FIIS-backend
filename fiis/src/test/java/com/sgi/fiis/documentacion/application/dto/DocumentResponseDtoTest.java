@@ -14,7 +14,7 @@ class DocumentResponseDtoTest {
     @DisplayName("Debe cubrir la estructura de datos del DTO de respuesta")
     void testDtoDataAndStructure() {
 
-        LocalDateTime now = LocalDateTime.of(2026, 6, 17, 10, 0);
+        LocalDateTime now = LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0);
 
         // 1. Instanciar DTO
         DocumentResponseDto dto1 =

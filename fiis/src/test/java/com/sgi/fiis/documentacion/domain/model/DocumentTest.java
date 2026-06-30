@@ -10,7 +10,7 @@ class DocumentTest {
 
     @Test
     void testDocumentDomainOperations() {
-        LocalDateTime now = LocalDateTime.of(2026, 6, 17, 10, 0);
+        LocalDateTime now = LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0);
 
         // 1. Probar el patrón Builder Estático real de tu código
         Document doc1 = Document.builder()
