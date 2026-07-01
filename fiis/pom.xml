@@ -27,7 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <sonar.cpd.exclusions>src/main/java/com/sgi/fiis/dashboards/domain/model/Dashboard*.java,src/main/java/com/sgi/fiis/dashboards/application/dto/Dashboard*Response.java</sonar.cpd.exclusions>
         <sonar.organization>sgi-fiis</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -35,7 +35,11 @@
         <sonar.coverage.exclusions>
             src/main/java/com/sgi/fiis/FiisApplication.java,
             src/main/java/com/sgi/fiis/**/*Config.java,
-            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java
+            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/infrastructure/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/presentation/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/application/dto/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/domain/exception/**/*.java
         </sonar.coverage.exclusions>
     </properties>
     <dependencies>
@@ -202,6 +206,7 @@
 							<path>
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
@@ -217,6 +222,7 @@
 							<path>
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
