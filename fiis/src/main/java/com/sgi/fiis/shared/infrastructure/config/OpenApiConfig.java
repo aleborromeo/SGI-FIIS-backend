@@ -70,7 +70,7 @@ public class OpenApiConfig {
                 .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion",
                         "com.sgi.fiis.tramites", "com.sgi.fiis.grupos_investigacion",
                         "com.sgi.fiis.lineas_investigacion", "com.sgi.fiis.dashboards",
-                        "com.sgi.fiis.reportes", "com.sgi.fiis.observations")
+                        "com.sgi.fiis.reportes", "com.sgi.fiis.observations", "com.sgi.fiis.thesis")
                 .build();
     }
 
@@ -122,12 +122,13 @@ public class OpenApiConfig {
                 .build();
     }
 
-    // Planes de Tesis
+    // Planes de Tesis e Informes de Tesis
     @Bean
     public GroupedOpenApi thesisApi() {
         return GroupedOpenApi.builder()
                 .group("thesis")
-                .pathsToMatch("/api/thesis/**")
+                .pathsToMatch("/api/v1/thesis/**")
+                .packagesToScan("com.sgi.fiis.thesis")
                 .build();
     }
 
