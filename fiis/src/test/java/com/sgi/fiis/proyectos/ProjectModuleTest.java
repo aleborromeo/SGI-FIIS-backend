@@ -29,11 +29,11 @@ import static org.mockito.Mockito.*;
 class ProjectModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
-    private static final LocalDate FIXED_TODAY     = LocalDate.of(2026, Month.JUNE, 1);
-    private static final LocalDate FIXED_PAST_1D   = LocalDate.of(2026, Month.MAY, 31);
-    private static final LocalDate FIXED_FUTURE_6M = LocalDate.of(2026, Month.DECEMBER, 1);
-    private static final LocalDate FIXED_FUTURE_1M = LocalDate.of(2026, Month.JULY, 1);
-    private static final LocalDate FIXED_FUTURE_10 = LocalDate.of(2026, Month.JUNE, 11);
+    private static final LocalDate FIXED_TODAY     = LocalDate.now();
+    private static final LocalDate FIXED_PAST_1D   = LocalDate.now().minusDays(30);
+    private static final LocalDate FIXED_FUTURE_6M = LocalDate.now().plusMonths(6);
+    private static final LocalDate FIXED_FUTURE_1M = LocalDate.now().plusMonths(1);
+    private static final LocalDate FIXED_FUTURE_10 = LocalDate.now().plusDays(10);
 
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
