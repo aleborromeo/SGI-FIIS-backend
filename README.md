@@ -244,17 +244,17 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=db_fiis_investigacion
 DB_USER=postgres
-DB_PASSWORD=<reemplazar_con_tu_password>
+DB_PASSWORD=
 
 # Seguridad y JWT
-JWT_SECRET=<reemplazar_con_tu_clave_jwt_256_bits>
+JWT_SECRET=
 APP_FRONTEND_URL=http://localhost:3000
 
 # Correo (SMTP)
 SPRING_MAIL_HOST=smtp.gmail.com
 SPRING_MAIL_PORT=587
 SPRING_MAIL_USERNAME=sgifiis@gmail.com
-SPRING_MAIL_PASSWORD=<reemplazar_con_tu_app_password>
+SPRING_MAIL_PASSWORD=
 APP_MAIL_MOCK=false          # true para entornos de desarrollo sin SMTP
 ```
 
