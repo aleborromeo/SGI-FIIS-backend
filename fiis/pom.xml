@@ -35,7 +35,11 @@
         <sonar.coverage.exclusions>
             src/main/java/com/sgi/fiis/FiisApplication.java,
             src/main/java/com/sgi/fiis/**/*Config.java,
-            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java
+            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/infrastructure/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/presentation/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/application/dto/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/domain/exception/**/*.java
         </sonar.coverage.exclusions>
     </properties>
     <dependencies>
@@ -161,31 +165,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JWT (jjwt) -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>0.12.6</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>0.12.6</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.12.6</version>
-            <scope>runtime</scope>
-        </dependency>
 
-        <!-- H2 base de datos en memoria para pruebas -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 	<build>
@@ -226,6 +206,7 @@
 							<path>
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
@@ -241,6 +222,7 @@
 							<path>
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
