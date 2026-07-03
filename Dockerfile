@@ -7,7 +7,7 @@ COPY fiis/pom.xml .
 COPY fiis/src ./src
 
 # Construir el proyecto
-RUN mvn clean package -DskipTests
+RUN --network=host mvn clean package -DskipTests
 
 # Imagen final ligera
 FROM eclipse-temurin:17-jre-alpine

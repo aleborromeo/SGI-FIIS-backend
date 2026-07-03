@@ -20,8 +20,13 @@ services:
       - sgifiis-network
 
   api_fiis:
-    build: .
+    build:
+      context: .
+      network: host
     container_name: sgifiis-backend-api
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "8080:8080"
     env_file:
