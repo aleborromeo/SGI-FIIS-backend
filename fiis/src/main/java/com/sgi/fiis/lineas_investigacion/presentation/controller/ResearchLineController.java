@@ -41,7 +41,7 @@ public class ResearchLineController {
 
     /** RF-24: Register research line */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchLineResponseDto> register(
             @Valid @RequestBody ResearchLineRequestDto dto) {
         ResearchLine line = registerResearchLineUseCase.execute(mapper.toDomain(dto));
@@ -68,11 +68,11 @@ public class ResearchLineController {
 
     /** RF-27: Activate or deactivate research line */
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchLineResponseDto> changeStatus(
             @PathVariable Integer id,
             @RequestBody Map<String, Boolean> body) {
-        boolean active = body.getOrDefault("VIGENTE", true);
+        boolean active = body.getOrDefault("active", true);
         ResearchLine line = changeResearchLineStatusUseCase.execute(id, active);
         return ResponseEntity.ok(mapper.toResponseDto(line));
     }
