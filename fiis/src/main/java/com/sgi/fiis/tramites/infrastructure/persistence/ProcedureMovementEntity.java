@@ -38,5 +38,6 @@ public class ProcedureMovementEntity {
     @Column(name = "fecha_movimiento", nullable = false)
     private LocalDateTime fechaMovimiento;
 
-    // id_documento_adjunto existe en DB (V7) pero no es gestionado por este módulo
+    @Column(name = "id_documento_adjunto")
+    private Long idDocumentoAdjunto;
 }

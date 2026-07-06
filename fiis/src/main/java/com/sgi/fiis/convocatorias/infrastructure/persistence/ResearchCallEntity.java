@@ -2,6 +2,7 @@ package com.sgi.fiis.convocatorias.infrastructure.persistence;
 
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,6 +48,10 @@ public class ResearchCallEntity {
 
     @Column(name = "estado", nullable = false, length = 20)
     private String status;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_creador", nullable = false)
+    private UserEntity creator;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_documento_bases")

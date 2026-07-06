@@ -3,6 +3,7 @@ package com.sgi.fiis.shared.infrastructure.exception;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleBusiness(BusinessException ex) {
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
+        return buildResponse(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(BusinessRuleValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessRuleValidation(BusinessRuleValidationException ex) {
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = ex.getErrorKey() != null 
+                ? messageSource.getMessage(ex.getErrorKey(), ex.getArgs(), ex.getMessage(), locale)
+                : ex.getMessage();
         return buildResponse(HttpStatus.BAD_REQUEST, message);
     }
 
