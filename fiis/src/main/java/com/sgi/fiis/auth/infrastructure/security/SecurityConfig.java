@@ -16,10 +16,14 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomAccessDeniedHandler accessDeniedHandler) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, 
+                          CustomAccessDeniedHandler accessDeniedHandler,
+                          CustomAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Bean
@@ -48,7 +52,7 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions
                     .accessDeniedHandler(accessDeniedHandler)
                     .defaultAuthenticationEntryPointFor(
-                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
+                        authenticationEntryPoint,
                         org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern("/api/**")
                     )
                 );
