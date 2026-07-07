@@ -1,44 +1,43 @@
 package com.sgi.fiis.tramites.infrastructure.persistence;
 
-import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "movimientos_tramite")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ProcedureMovementEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_movimiento")
-    private Integer id;
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tramite", nullable = false)
-    private ProcedureEntity procedure;
+    @Column(name = "id_tramite", nullable = false)
+    private Long idTramite;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario_accion", nullable = false)
-    private UserEntity actionUser;
+    @Column(name = "id_usuario_accion", nullable = false)
+    private Long idUsuarioAccion;
 
-    @Column(name = "accion", nullable = false, length = 30)
-    private String action;
+    @Column(name = "accion", nullable = false, length = 50)
+    private String accion;
 
-    @Column(name = "estado_anterior", nullable = false, length = 30)
-    private String previousState;
+    @Column(name = "estado_anterior", nullable = false, length = 50)
+    private String estadoAnterior;
 
-    @Column(name = "estado_nuevo", nullable = false, length = 30)
-    private String newState;
+    @Column(name = "estado_nuevo", nullable = false, length = 50)
+    private String estadoNuevo;
 
-    @Column(name = "comentario", columnDefinition = "TEXT")
-    private String comment;
+    @Column(name = "observacion")
+    private String observacion;
 
     @Column(name = "fecha_movimiento", nullable = false)
-    private LocalDateTime movementAt;
+    private LocalDateTime fechaMovimiento;
+
+    @Column(name = "id_documento_adjunto")
+    private Long idDocumentoAdjunto;
 }

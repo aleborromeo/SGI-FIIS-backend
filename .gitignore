@@ -11,3 +11,6 @@ fiis/.env
 # Maven builds (si se ejecutan en raíz, aunque están en fiis/)
 fiis/target/
 fiis/build/
+
+# Contexto local de Claude Code
+CLAUDE.md

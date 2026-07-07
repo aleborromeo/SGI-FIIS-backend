@@ -48,41 +48,21 @@ public class ObservationMapper {
 
     private ObservationStatus mapStatusToDomain(String dbStatus) {
         if (dbStatus == null) return null;
-        return switch (dbStatus) {
-            case "PENDIENTE" -> ObservationStatus.PENDING;
-            case "SUBSANADA" -> ObservationStatus.REMEDIED;
-            case "VIGENTE" -> ObservationStatus.ACTIVE;
-            default -> throw new IllegalArgumentException("Unknown DB status: " + dbStatus);
-        };
+        return ObservationStatus.valueOf(dbStatus);
     }
 
     private String mapStatusToJpa(ObservationStatus domainStatus) {
         if (domainStatus == null) return null;
-        return switch (domainStatus) {
-            case PENDING -> "PENDIENTE";
-            case REMEDIED -> "SUBSANADA";
-            case ACTIVE -> "VIGENTE";
-        };
+        return domainStatus.name();
     }
 
     private ObservationType mapTypeToDomain(String dbType) {
         if (dbType == null) return null;
-        return switch (dbType) {
-            case "TECNICA" -> ObservationType.TECHNICAL;
-            case "DOCUMENTAL" -> ObservationType.DOCUMENTARY;
-            case "PRESUPUESTAL" -> ObservationType.BUDGETARY;
-            case "FORMATO" -> ObservationType.FORMAT;
-            default -> throw new IllegalArgumentException("Unknown DB type: " + dbType);
-        };
+        return ObservationType.valueOf(dbType);
     }
 
     private String mapTypeToJpa(ObservationType domainType) {
         if (domainType == null) return null;
-        return switch (domainType) {
-            case TECHNICAL -> "TECNICA";
-            case DOCUMENTARY -> "DOCUMENTAL";
-            case BUDGETARY -> "PRESUPUESTAL";
-            case FORMAT -> "FORMATO";
-        };
+        return domainType.name();
     }
 }

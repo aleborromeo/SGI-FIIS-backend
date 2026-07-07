@@ -1,6 +1,7 @@
 package com.sgi.fiis.proyectos.infrastructure.persistence;
 
 import com.sgi.fiis.proyectos.domain.model.Project;
+import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGrou
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipEntity;
 
 import java.math.BigDecimal;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
@@ -102,9 +104,33 @@ class SaveProjectAdapterTest {
     }
 
     @Test
+    void testSave_ThrowsExceptionsForMissingEntities() {
+        Project project = Project.builder()
+                .researchLineId(99)
+                .responsibleId(3L)
+                .researchGroupId(2)
+                .build();
+        
+        when(lineRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> adapter.save(project));
+
+        when(lineRepository.findById(99)).thenReturn(Optional.of(new ResearchLineEntity()));
+        when(groupRepository.findById(2)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> adapter.save(project));
+
+        when(groupRepository.findById(2)).thenReturn(Optional.of(new ResearchGroupEntity()));
+        when(userRepository.findById(3L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> adapter.save(project));
+
+        when(userRepository.findById(3L)).thenReturn(Optional.of(new UserEntity()));
+        project.setCallId(99);
+        when(callRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> adapter.save(project));
+    }
+
+    @Test
     void testFindById() {
         ProjectEntity entity = createValidEntity(1, "POSTULADO");
-
         when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
 
         Optional<Project> result = adapter.findById(1);
@@ -151,5 +177,99 @@ class SaveProjectAdapterTest {
         ProjectEntity entity2 = createValidEntity(2, "RECHAZADO");
         when(jpaRepository.findById(2)).thenReturn(Optional.of(entity2));
         assertEquals(ProjectStatus.REJECTED, adapter.findById(2).get().getStatus());
+    }
+
+    @Test
+    void testGetGroupCode() {
+        ResearchGroupEntity group = new ResearchGroupEntity();
+        group.setGroupCode("CODE");
+        when(groupRepository.findById(1)).thenReturn(Optional.of(group));
+        when(groupRepository.findById(2)).thenReturn(Optional.empty());
+        
+        assertEquals("CODE", adapter.getGroupCode(1).orElse(null));
+        assertFalse(adapter.getGroupCode(2).isPresent());
+    }
+
+    @Test
+    void testGetLineName() {
+        ResearchLineEntity line = new ResearchLineEntity();
+        line.setLineName("LNAME");
+        when(lineRepository.findById(1)).thenReturn(Optional.of(line));
+        
+        assertEquals("LNAME", adapter.getLineName(1).orElse(null));
+        assertFalse(adapter.getLineName(2).isPresent());
+    }
+
+    @Test
+    void testIsUserMemberOfGroup() {
+        GroupMembershipEntity membership = new GroupMembershipEntity();
+        membership.setActive(true);
+        when(membershipRepository.findByUserIdAndGroupId(1L, 1)).thenReturn(Optional.of(membership));
+        when(membershipRepository.findByUserIdAndGroupId(2L, 1)).thenReturn(Optional.empty());
+
+        assertTrue(adapter.isUserMemberOfGroup(1L, 1));
+        assertFalse(adapter.isUserMemberOfGroup(2L, 1));
+    }
+
+    @Test
+    void testIsGroupActive() {
+        ResearchGroupEntity group = new ResearchGroupEntity();
+        group.setActive(true);
+        when(groupRepository.findById(1)).thenReturn(Optional.of(group));
+
+        assertTrue(adapter.isGroupActive(1));
+        assertFalse(adapter.isGroupActive(2));
+    }
+
+    @Test
+    void testIsLineActive() {
+        ResearchLineEntity line = new ResearchLineEntity();
+        line.setActive(true);
+        when(lineRepository.findById(1)).thenReturn(Optional.of(line));
+
+        assertTrue(adapter.isLineActive(1));
+        assertFalse(adapter.isLineActive(2));
+    }
+
+    @Test
+    void testSaveMembers() {
+        ProjectEntity project = new ProjectEntity();
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(project));
+        when(userRepository.findById(3L)).thenReturn(Optional.of(new UserEntity()));
+        
+        List<ProjectMember> members = List.of(new ProjectMember(null, 1, 3, "INV"));
+        adapter.saveMembers(1, members);
+        
+        verify(projectMemberRepository).deleteByProjectId(1);
+        verify(projectMemberRepository).save(any(ProjectMemberEntity.class));
+    }
+
+    @Test
+    void testSaveMembers_ThrowsException() {
+        when(jpaRepository.findById(99)).thenReturn(Optional.empty());
+        List<ProjectMember> members = List.of();
+        assertThrows(IllegalArgumentException.class, () -> adapter.saveMembers(99, members));
+
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(new ProjectEntity()));
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        List<ProjectMember> invalidMembers = List.of(new ProjectMember(null, 1, 99, "INV"));
+        assertThrows(IllegalArgumentException.class, () -> adapter.saveMembers(1, invalidMembers));
+    }
+
+    @Test
+    void testFindMembersByProjectId() {
+        ProjectMemberEntity pme = new ProjectMemberEntity();
+        pme.setId(1);
+        pme.setRole("INV");
+        UserEntity u = new UserEntity();
+        u.setId(3L);
+        pme.setUser(u);
+        
+        when(projectMemberRepository.findByProjectId(1)).thenReturn(List.of(pme));
+        
+        List<ProjectMember> res = adapter.findMembersByProjectId(1);
+        assertEquals(1, res.size());
+        assertEquals("INV", res.get(0).getRole());
+        assertEquals(3, res.get(0).getUserId());
     }
 }

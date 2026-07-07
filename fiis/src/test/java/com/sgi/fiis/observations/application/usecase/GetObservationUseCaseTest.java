@@ -42,9 +42,9 @@ class GetObservationUseCaseTest {
                 .id(observationId)
                 .procedureId(1)
                 .reviewerId(10)
-                .type(ObservationType.TECHNICAL)
+                .type(ObservationType.TECNICA)
                 .description("Falta firma")
-                .status(ObservationStatus.PENDING)
+                .status(ObservationStatus.PENDIENTE)
                 .reviewerRole("COORDINADOR_GRUPO")
                 .createdAt(ahora)
                 .updatedAt(ahora)
@@ -57,8 +57,8 @@ class GetObservationUseCaseTest {
         assertNotNull(response);
         assertEquals(100, response.getId());
         assertEquals(1, response.getProcedureId());
-        assertEquals("TECHNICAL", response.getType());
-        assertEquals("PENDING", response.getStatus());
+        assertEquals("TECNICA", response.getType());
+        assertEquals("PENDIENTE", response.getStatus());
 
         verify(observationRepository, times(1)).findById(observationId);
     }

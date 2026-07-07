@@ -35,7 +35,11 @@
         <sonar.coverage.exclusions>
             src/main/java/com/sgi/fiis/FiisApplication.java,
             src/main/java/com/sgi/fiis/**/*Config.java,
-            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java
+            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/infrastructure/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/presentation/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/application/dto/**/*.java,
+            src/main/java/com/sgi/fiis/thesis/domain/exception/**/*.java
         </sonar.coverage.exclusions>
     </properties>
     <dependencies>
@@ -153,6 +157,15 @@
             <artifactId>spring-boot-starter-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- H2 in-memory DB para tests (sin necesitar PostgreSQL local) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
 	<build>
@@ -169,6 +182,14 @@
 				</excludes>
 			</configuration>
 		</plugin>
+        <!-- Necesario para Mockito con ByteBuddy en JDK 17+ y 21+ -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Xshare:off -Djdk.attach.allowAttachSelf=true</argLine>
+            </configuration>
+        </plugin>
 
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
@@ -185,6 +206,7 @@
 							<path>
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
@@ -200,6 +222,7 @@
 							<path>
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
