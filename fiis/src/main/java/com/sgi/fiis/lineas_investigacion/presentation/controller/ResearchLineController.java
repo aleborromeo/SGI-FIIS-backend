@@ -121,6 +121,6 @@ public class ResearchLineController {
             @PathVariable Integer id,
             @PathVariable Integer groupId) {
         removeGroupFromResearchLineUseCase.execute(id, groupId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
