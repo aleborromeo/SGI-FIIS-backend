@@ -53,6 +53,18 @@ class ResearchLineControllerTest {
     private ResearchLineMapper mapper;
 
     @MockitoBean
+    private AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase;
+
+    @MockitoBean
+    private RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase;
+
+    @MockitoBean
+    private com.sgi.fiis.grupos_investigacion.application.usecase.ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase;
+
+    @MockitoBean
+    private com.sgi.fiis.grupos_investigacion.presentation.mapper.ResearchGroupMapper groupMapper;
+
+    @MockitoBean
     private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
 
     @MockitoBean

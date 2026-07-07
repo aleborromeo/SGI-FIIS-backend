@@ -36,12 +36,12 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     @Override
     public List<ResearchGroup> findAll() {
         String sql = """
-                SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
-                       g.id_coordinador_actual, g.es_activo,
-                       u.nombres AS coordinator_first_names,
-                       u.apellidos AS coordinator_last_names
-                 FROM grupos_investigacion g
-                 LEFT JOIN usuarios u ON g.id_coordinador_actual = u.id_usuario
+                 SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
+                        g.id_coordinador_actual, g.es_activo,
+                        u.nombres AS coordinator_first_names,
+                        u.apellidos AS coordinator_last_names
+                  FROM grupos_investigacion g
+                  LEFT JOIN usuarios u ON g.id_coordinador_actual = u.id_usuario
                  ORDER BY g.nombre_grupo
                 """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> ResearchGroup.builder()
@@ -59,6 +59,14 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     @Override
     public boolean existsByCode(String groupCode) {
         return jpaRepository.existsByGroupCode(groupCode);
+    }
+
+    @Override
+    public List<ResearchGroup> findGroupsByLineId(Integer lineId) {
+        return jpaRepository.findActiveByLineId(lineId).stream()
+                .map(this::toDomain)
+                .map(this::enrichWithCoordinator)
+                .toList();
     }
 
     @Override

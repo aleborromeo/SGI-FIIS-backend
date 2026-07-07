@@ -18,7 +18,7 @@ public class ThesisPlanRepositoryAdapter implements ThesisPlanRepositoryPort {
         this.repository = repository;
         this.mapper = mapper;
     }
-    public ThesisPlan save(ThesisPlan thesisPlan) { return mapper.toDomain(repository.save(mapper.toEntity(thesisPlan))); }
+    public ThesisPlan save(ThesisPlan thesisPlan) { return mapper.toDomain(repository.saveAndFlush(mapper.toEntity(thesisPlan))); }
     public Optional<ThesisPlan> findById(Integer idPlanTesis) { return repository.findById(idPlanTesis).map(mapper::toDomain); }
     public List<ThesisPlan> findByEstudiante(Long idEstudiante) { return repository.findByIdEstudiante(idEstudiante).stream().map(mapper::toDomain).toList(); }
     public List<ThesisPlan> findByGrupo(Integer idGrupo) { return repository.findByIdGrupo(idGrupo).stream().map(mapper::toDomain).toList(); }

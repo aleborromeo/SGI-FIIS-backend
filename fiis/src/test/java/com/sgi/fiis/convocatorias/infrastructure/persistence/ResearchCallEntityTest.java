@@ -28,7 +28,7 @@ class ResearchCallEntityTest {
                 1, "Convocatoria 2025-I", "Description",
                 null, null,
                 startDate, endDate,
-                "ABIERTA", null, null, null, null);
+                "ABIERTA", null, null, null, null, null);
 
         assertEquals(1, entity.getId());
         assertEquals("Convocatoria 2025-I", entity.getTitle());
@@ -115,11 +115,11 @@ class ResearchCallEntityTest {
         ResearchCallEntity entity1 = new ResearchCallEntity(
                 1, "Test", "Description",
                 null, null,
-                startDate, endDate, "ABIERTA", null, null, null, null);
+                startDate, endDate, "ABIERTA", null, null, null, null, null);
         ResearchCallEntity entity2 = new ResearchCallEntity(
                 1, "Test", "Description",
                 null, null,
-                startDate, endDate, "ABIERTA", null, null, null, null);
+                startDate, endDate, "ABIERTA", null, null, null, null, null);
 
         assertEquals(entity1, entity2);
         assertEquals(entity1.hashCode(), entity2.hashCode());
