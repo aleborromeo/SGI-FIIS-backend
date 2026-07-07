@@ -93,4 +93,16 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return ResponseEntity.ok(userMapper.toResponseDto(user));
     }
+
+    /** Mock stats para WelcomePage */
+    @GetMapping("/public-stats")
+    public ResponseEntity<Map<String, Integer>> getPublicStats() {
+        return ResponseEntity.ok(Map.of(
+            "proyectosRegistrados", 350,
+            "tesis", 160,
+            "docentesInvestigadores", 28,
+            "gruposInvestigacion", 8,
+            "proyectosCulminados", 65
+        ));
+    }
 }
