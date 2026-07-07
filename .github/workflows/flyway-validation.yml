@@ -63,16 +63,16 @@ jobs:
       - name: Verify backend container
         run: |
           docker ps
-          if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api)" != "true" ]; then
+          if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api-dev)" != "true" ]; then
             echo "El contenedor backend no está ejecutándose."
-            docker logs sgifiis-backend-api
+            docker logs sgifiis-backend-api-dev
             exit 1
           fi
 
       # 8. Si algo falla en los tests, muestra los logs de Spring
       - name: Show backend logs
         if: failure()
-        run: docker logs sgifiis-backend-api
+        run: docker logs sgifiis-backend-api-dev
 
       # 9. Limpieza absoluta
       - name: Stop containers
