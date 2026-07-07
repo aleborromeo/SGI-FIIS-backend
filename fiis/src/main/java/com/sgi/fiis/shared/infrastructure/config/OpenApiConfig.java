@@ -177,7 +177,7 @@ public class OpenApiConfig {
     public GroupedOpenApi reportsApi() {
         return GroupedOpenApi.builder()
                 .group("reports")
-                .pathsToMatch("/api/reportes/**")
+                .pathsToMatch("/api/reports/**")
                 .build();
     }
 }
