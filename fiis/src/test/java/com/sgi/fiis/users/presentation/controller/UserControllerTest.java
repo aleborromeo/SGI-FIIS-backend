@@ -96,6 +96,7 @@ class UserControllerTest {
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("student@unas.edu.pe").roles("ESTUDIANTE"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                 .andExpect(status().isForbidden());
     }
 
@@ -114,6 +115,7 @@ class UserControllerTest {
                 mockMvc.perform(post("/api/v1/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
+                                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                                 .andExpect(status().isUnauthorized());
         }
 
