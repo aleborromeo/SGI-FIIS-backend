@@ -11,7 +11,9 @@ public class JsonbHelper {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private JsonbHelper() {}
+    private JsonbHelper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static String toJson(Map<String, String> map) {
         try {

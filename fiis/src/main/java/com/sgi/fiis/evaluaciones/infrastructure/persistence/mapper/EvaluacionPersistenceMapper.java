@@ -6,6 +6,7 @@ import com.sgi.fiis.evaluaciones.infrastructure.persistence.entity.EvaluacionJpa
 public class EvaluacionPersistenceMapper {
 
     private EvaluacionPersistenceMapper() {
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static EvaluacionJpaEntity toJpaEntity(Evaluacion evaluacion) {

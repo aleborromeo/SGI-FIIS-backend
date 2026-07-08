@@ -1,0 +1,14 @@
+refactor: corregir code smells reportados por SonarQube
+
+- Eliminados imports no utilizados en LocaleConfigTest (MessageSource, ResourceBundleMessageSource, LocalValidatorFactoryBean)
+- Eliminado import LocaleContextHolder en GlobalExceptionHandlerTest
+- Eliminado import Locale no utilizado en GlobalExceptionHandler
+- Reemplazada lambda por referencia a metodo en SaveCallAdapter (lineRepository::findById)
+- Refactorizado ResearchCall con patron Builder para evitar constructor de 8 parametros
+- Refactorizado Evaluacion con patron Builder para evitar constructor y metodo de 9 parametros
+- Agregado ZoneId.systemDefault() en todos los LocalDateTime.now() de Evaluacion
+- Agregado UnsupportedOperationException en constructores privados de clases de utilidad:
+  EvaluacionPersistenceMapper, ProgressReportMapper, JsonbHelper, ProcedureMapper
+- Eliminados imports no utilizados en SpringDataResearchGroupLineRepository
+- Sustituido constructor de 9 parametros en ResearchLineController por @RequiredArgsConstructor
+- Fusionado if anidado en EnvLoaderConfig.cleanEnvValue()

@@ -19,35 +19,58 @@ public class ResearchCall {
     private Integer documentId;
     private final List<Integer> researchLineIds;
 
-    /**
-     * Constructs a ResearchCall with the given parameters.
-     *
-     * @param id               unique identifier
-     * @param title            call title
-     * @param description      call description
-     * @param startDate        start date of submission period
-     * @param endDate          end date of submission period
-     * @param status           current status of the call
-     * @param documentId       associated document identifier
-     * @param researchLineIds  list of research line identifiers
-     * @throws BusinessRuleValidationException if endDate is before startDate
-     */
+    private ResearchCall(Builder builder) {
+        if (builder.endDate.isBefore(builder.startDate)) {
+            throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
+        }
+        this.id = builder.id;
+        this.title = builder.title;
+        this.description = builder.description;
+        this.startDate = builder.startDate;
+        this.endDate = builder.endDate;
+        this.status = builder.status;
+        this.documentId = builder.documentId;
+        this.researchLineIds = builder.researchLineIds != null
+                ? new ArrayList<>(builder.researchLineIds)
+                : new ArrayList<>();
+    }
+
+    /** Convenience constructor kept for backward compatibility with existing callers. */
     public ResearchCall(Integer id, String title, String description, LocalDate startDate,
                         LocalDate endDate, CallStatus status, Integer documentId,
                         List<Integer> researchLineIds) {
-        if (endDate.isBefore(startDate)) {
-            throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
-        }
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.status = status;
-        this.documentId = documentId;
-        this.researchLineIds = researchLineIds != null
-                ? new ArrayList<>(researchLineIds)
-                : new ArrayList<>();
+        this(new Builder()
+                .id(id).title(title).description(description)
+                .startDate(startDate).endDate(endDate).status(status)
+                .documentId(documentId).researchLineIds(researchLineIds));
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private Integer id;
+        private String title;
+        private String description;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private CallStatus status;
+        private Integer documentId;
+        private List<Integer> researchLineIds;
+
+        private Builder() {}
+
+        public Builder id(Integer id)                           { this.id = id; return this; }
+        public Builder title(String title)                      { this.title = title; return this; }
+        public Builder description(String description)          { this.description = description; return this; }
+        public Builder startDate(LocalDate startDate)           { this.startDate = startDate; return this; }
+        public Builder endDate(LocalDate endDate)               { this.endDate = endDate; return this; }
+        public Builder status(CallStatus status)                { this.status = status; return this; }
+        public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
+        public Builder researchLineIds(List<Integer> lineIds)   { this.researchLineIds = lineIds; return this; }
+
+        public ResearchCall build() { return new ResearchCall(this); }
     }
 
     /**
