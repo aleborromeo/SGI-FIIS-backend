@@ -40,7 +40,10 @@ jobs:
           echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/db_fiis_investigacion" >> $GITHUB_ENV
           echo "SPRING_FLYWAY_ENABLED=false" >> $GITHUB_ENV
 
-      # 3. Construir los contenedores
+      # 3. Crear red externa y construir los contenedores
+      - name: Create external network
+        run: docker network create sgifiis-network-shared
+
       - name: Build containers
         run: docker compose build
 
