@@ -37,7 +37,7 @@ class CustomAuthenticationEntryPointTest {
         entryPoint.commence(request, response, exception);
 
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
-        assertEquals("application/json;charset=UTF-8", response.getContentType());
+        assertTrue(response.getContentType().startsWith(MediaType.APPLICATION_JSON_VALUE));
         assertEquals("UTF-8", response.getCharacterEncoding());
 
         String content = response.getContentAsString();

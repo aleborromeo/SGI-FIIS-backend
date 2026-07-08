@@ -4,13 +4,10 @@ import com.sgi.fiis.auth.application.dto.RegisterRequestDto;
 import com.sgi.fiis.auth.application.service.PendingRegistrationService.PendingRegistration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @DisplayName("PendingRegistrationService Unit Tests")
 class PendingRegistrationServiceTest {
@@ -63,18 +60,17 @@ class PendingRegistrationServiceTest {
 
     @Test
     @DisplayName("Should detect expired registration")
-    void testIsExpired() {
+    void testIsExpired() throws Exception {
         RegisterRequestDto dto = new RegisterRequestDto();
         String code = "123456";
 
         PendingRegistration registration = new PendingRegistration(dto, code);
         assertFalse(registration.isExpired());
 
-        LocalDateTime futureTime = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(6);
+        Field expiresAtField = PendingRegistration.class.getDeclaredField("expiresAt");
+        expiresAtField.setAccessible(true);
+        expiresAtField.set(registration, LocalDateTime.now().minusMinutes(1));
 
-        try (MockedStatic<LocalDateTime> mockedLocalDateTime = mockStatic(LocalDateTime.class, CALLS_REAL_METHODS)) {
-            mockedLocalDateTime.when(() -> LocalDateTime.now(any(ZoneId.class))).thenReturn(futureTime);
-            assertTrue(registration.isExpired());
-        }
+        assertTrue(registration.isExpired());
     }
 }
