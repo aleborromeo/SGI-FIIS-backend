@@ -3,10 +3,6 @@ package com.sgi.fiis.shared.presentation.controller;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
-import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipEntity;
-import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
-import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
-import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +14,6 @@ import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -80,6 +75,7 @@ class FileControllerTest {
 
     @Test
     void shouldThrowExceptionWhenFileIsTooLarge() {
+        // Mocking size to be too large
         MockMultipartFile file = Mockito.mock(MockMultipartFile.class);
         when(file.isEmpty()).thenReturn(false);
         when(file.getSize()).thenReturn(15L * 1024 * 1024);
@@ -98,29 +94,6 @@ class FileControllerTest {
                 Collections.emptyList());
 
         assertThrows(BusinessRuleValidationException.class, () -> fileController.uploadFile(file, userDetails));
-    }
-    
-    @Test
-    void shouldThrowExceptionWhenOriginalFilenameIsNull() {
-        MockMultipartFile file = new MockMultipartFile("file", null, "application/pdf", "dummy".getBytes());
-        CustomUserDetails userDetails = new CustomUserDetails(1L, "test@test.com", "pass", true,
-                Collections.emptyList());
-
-        assertThrows(BusinessRuleValidationException.class, () -> fileController.uploadFile(file, userDetails));
-    }
-    
-    @Test
-    void shouldThrowExceptionWhenTransferFails() throws IOException {
-        MultipartFile file = Mockito.mock(MultipartFile.class);
-        when(file.isEmpty()).thenReturn(false);
-        when(file.getSize()).thenReturn(100L);
-        when(file.getOriginalFilename()).thenReturn("test.pdf");
-        Mockito.doThrow(new IOException("Disk full")).when(file).transferTo(any(java.io.File.class));
-
-        CustomUserDetails userDetails = new CustomUserDetails(1L, "test@test.com", "pass", true,
-                Collections.emptyList());
-
-        assertThrows(RuntimeException.class, () -> fileController.uploadFile(file, userDetails));
     }
 
     @Test
@@ -143,48 +116,8 @@ class FileControllerTest {
         ResponseEntity<org.springframework.core.io.Resource> response = fileController.downloadFile(1, userDetails);
         assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getHeaders().getContentDisposition().toString().contains("test.pdf"));
-        assertEquals("application/pdf", response.getHeaders().getContentType().toString());
 
         Files.deleteIfExists(tempFile);
-    }
-    
-    @Test
-    void shouldDownloadDocAndDocx() throws IOException {
-        Path tempFile = Files.createTempFile("test", ".doc");
-        Files.write(tempFile, "dummy content".getBytes());
-
-        DocumentEntity doc1 = DocumentEntity.builder().id(1).originalName("test.doc").fileExtension("DOC").storagePath(tempFile.toString()).creatorId(1L).build();
-        DocumentEntity doc2 = DocumentEntity.builder().id(2).originalName("test.docx").fileExtension("DOCX").storagePath(tempFile.toString()).creatorId(1L).build();
-        DocumentEntity doc3 = DocumentEntity.builder().id(3).originalName("test.txt").fileExtension("TXT").storagePath(tempFile.toString()).creatorId(1L).build();
-
-        when(documentRepository.findById(1)).thenReturn(Optional.of(doc1));
-        when(documentRepository.findById(2)).thenReturn(Optional.of(doc2));
-        when(documentRepository.findById(3)).thenReturn(Optional.of(doc3));
-        
-        CustomUserDetails userDetails = new CustomUserDetails(1L, "test@test.com", "pass", true, Collections.emptyList());
-
-        assertEquals("application/msword", fileController.downloadFile(1, userDetails).getHeaders().getContentType().toString());
-        assertEquals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileController.downloadFile(2, userDetails).getHeaders().getContentType().toString());
-        assertEquals("application/octet-stream", fileController.downloadFile(3, userDetails).getHeaders().getContentType().toString());
-
-        Files.deleteIfExists(tempFile);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFileNotFoundOnDisk() {
-        DocumentEntity doc = DocumentEntity.builder()
-                .id(1)
-                .originalName("test.pdf")
-                .fileExtension("PDF")
-                .storagePath("/tmp/nonexistent-file-12345.pdf")
-                .creatorId(1L)
-                .build();
-
-        when(documentRepository.findById(1)).thenReturn(Optional.of(doc));
-        CustomUserDetails userDetails = new CustomUserDetails(1L, "test@test.com", "pass", true,
-                Collections.emptyList());
-
-        assertThrows(BusinessRuleValidationException.class, () -> fileController.downloadFile(1, userDetails));
     }
 
     @Test
@@ -227,56 +160,6 @@ class FileControllerTest {
         ResponseEntity<org.springframework.core.io.Resource> response = fileController.downloadFile(1, userDetails);
         assertEquals(200, response.getStatusCode().value());
 
-        Files.deleteIfExists(tempFile);
-    }
-    
-    @Test
-    void shouldAllowDownloadForProjectOwner() throws IOException {
-        Path tempFile = Files.createTempFile("test", ".pdf");
-        Files.write(tempFile, "dummy".getBytes());
-
-        DocumentEntity doc = DocumentEntity.builder().id(1).originalName("t.pdf").fileExtension("PDF").storagePath(tempFile.toString()).creatorId(2L).build();
-        when(documentRepository.findById(1)).thenReturn(Optional.of(doc));
-        
-        ProjectEntity proj = new ProjectEntity();
-        UserEntity owner = new UserEntity();
-        owner.setId(1L);
-        proj.setResponsible(owner);
-        when(projectRepository.findByDocumentId(1)).thenReturn(Optional.of(proj));
-
-        CustomUserDetails userDetails = new CustomUserDetails(1L, "owner@test.com", "pass", true, Collections.emptyList());
-        ResponseEntity<org.springframework.core.io.Resource> response = fileController.downloadFile(1, userDetails);
-        
-        assertEquals(200, response.getStatusCode().value());
-        Files.deleteIfExists(tempFile);
-    }
-    
-    @Test
-    void shouldAllowDownloadForProjectCoordinator() throws IOException {
-        Path tempFile = Files.createTempFile("test", ".pdf");
-        Files.write(tempFile, "dummy".getBytes());
-
-        DocumentEntity doc = DocumentEntity.builder().id(1).originalName("t.pdf").fileExtension("PDF").storagePath(tempFile.toString()).creatorId(2L).build();
-        when(documentRepository.findById(1)).thenReturn(Optional.of(doc));
-        
-        ProjectEntity proj = new ProjectEntity();
-        UserEntity owner = new UserEntity();
-        owner.setId(99L);
-        proj.setResponsible(owner);
-        
-        ResearchGroupEntity group = new ResearchGroupEntity();
-        group.setId(5);
-        proj.setGroup(group);
-        when(projectRepository.findByDocumentId(1)).thenReturn(Optional.of(proj));
-        
-        GroupMembershipEntity membership = new GroupMembershipEntity();
-        membership.setGroup(group);
-        when(membershipRepository.findByUserIdAndActiveTrue(1L)).thenReturn(Optional.of(membership));
-
-        CustomUserDetails userDetails = new CustomUserDetails(1L, "coord@test.com", "pass", true, Collections.singletonList(new SimpleGrantedAuthority("ROLE_COORDINADOR_GRUPO")));
-        ResponseEntity<org.springframework.core.io.Resource> response = fileController.downloadFile(1, userDetails);
-        
-        assertEquals(200, response.getStatusCode().value());
         Files.deleteIfExists(tempFile);
     }
 

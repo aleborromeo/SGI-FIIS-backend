@@ -85,13 +85,13 @@ public class SaveProjectAdapter implements SaveProjectPort {
     @Override
     public Optional<String> getGroupCode(Integer groupId) {
         return groupRepository.findById(groupId)
-                .map(ResearchGroupEntity::getGroupCode);
+                .map(ResearchGroupEntity::getCode);
     }
 
     @Override
     public Optional<String> getLineName(Integer lineId) {
         return lineRepository.findById(lineId)
-                .map(ResearchLineEntity::getLineName);
+                .map(ResearchLineEntity::getName);
     }
 
     @Override
@@ -214,15 +214,15 @@ public class SaveProjectAdapter implements SaveProjectPort {
                 JsonbHelper.getText(entity.getTitleJson(), "es"),
                 JsonbHelper.getText(entity.getSummaryJson(), "es"),
                 JsonbHelper.getText(entity.getGeneralObjectiveJson(), "es"),
-                entity.getResearchLine() != null ? entity.getResearchLine().getId() : null,
-                entity.getResearchLine() != null ? entity.getResearchLine().getLineName() : "Sin asignar",
+                entity.getResearchLine().getId(),
+                entity.getResearchLine().getName(),
                 entity.getBudget(),
                 entity.getStartDate(),
                 entity.getEndDate(),
                 JsonbHelper.getText(entity.getExecutionPlaceJson(), "es"),
-                entity.getResponsible() != null ? entity.getResponsible().getId() : null,
-                entity.getGroup() != null ? entity.getGroup().getId() : null,
-                entity.getGroup() != null ? entity.getGroup().getGroupCode() : "Sin asignar",
+                entity.getResponsible().getId(),
+                entity.getGroup().getId(),
+                entity.getGroup().getCode(),
                 entity.getResearchCall() != null ? entity.getResearchCall().getId() : null,
                 entity.getDocumentId(),
                 domainStatus

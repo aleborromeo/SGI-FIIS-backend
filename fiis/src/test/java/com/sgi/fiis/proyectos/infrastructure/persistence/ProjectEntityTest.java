@@ -35,10 +35,10 @@ class ProjectEntityTest {
 
         ProjectEntity entity = new ProjectEntity(
                 1, "PROJ-001", "Test Project", "Summary",
-                "General Objective", null, null, null, null,
+                "General Objective", null, null, "{}", "{}",
                 line, group, BigDecimal.valueOf(10000),
                 startDate, endDate, "Lima", responsible, call,
-                42, "ACTIVO", null, null
+                42, "POSTULADO", null, null
         );
 
         assertEquals(1, entity.getId());
@@ -55,7 +55,7 @@ class ProjectEntityTest {
         assertSame(responsible, entity.getResponsible());
         assertSame(call, entity.getResearchCall());
         assertEquals(42, entity.getDocumentId());
-        assertEquals("ACTIVO", entity.getStatus());
+        assertEquals("POSTULADO", entity.getStatus());
     }
 
     @Test

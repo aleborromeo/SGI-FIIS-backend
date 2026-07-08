@@ -38,7 +38,7 @@ public class ResearchCallController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION')")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     @Operation(summary = "Create a new research call", description = "Allows the research director to register a new research call with submission date ranges.")
     @ApiResponse(responseCode = "200", description = "Research call successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
@@ -49,7 +49,6 @@ public class ResearchCallController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE_INVESTIGADOR', 'DIRECTOR_INVESTIGACION', 'ADMIN')")
     @Operation(summary = "List research calls", description = "Retrieves all research calls, optionally filtered by status.")
     @ApiResponse(responseCode = "200", description = "List of research calls retrieved successfully")
     public ResponseEntity<List<CallResponse>> getCalls(
@@ -59,7 +58,6 @@ public class ResearchCallController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE_INVESTIGADOR', 'DIRECTOR_INVESTIGACION', 'ADMIN')")
     @Operation(summary = "Get research call by ID", description = "Retrieves a single research call by its ID.")
     @ApiResponse(responseCode = "200", description = "Research call found")
     @ApiResponse(responseCode = "404", description = "Research call not found")
@@ -69,7 +67,7 @@ public class ResearchCallController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION')")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     @Operation(summary = "Update research call status", description = "Allows the research director to change the status of a research call (ABIERTA, CERRADA, FINALIZADA).")
     @ApiResponse(responseCode = "200", description = "Status updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid status value")

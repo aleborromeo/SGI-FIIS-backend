@@ -22,7 +22,7 @@ class DocumentEntityTest {
     void testAllArgsConstructor() {
         DocumentEntity entity = new DocumentEntity(
                 1, "report.pdf", "/uploads/report.pdf",
-                2048L, "pdf", 10L, null, null
+                2048L, "pdf", 10L, null
         );
 
         assertEquals(1, entity.getId());

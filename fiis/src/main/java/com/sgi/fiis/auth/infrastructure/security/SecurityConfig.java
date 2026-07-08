@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,23 +12,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String ROLE_ADMIN = "ADMIN";
-    private static final String RESEARCH_GROUPS_PATH = "/api/v1/research-groups/**";
-    private static final String RESEARCH_LINES_PATH = "/api/v1/research-lines/**";
-
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final CustomAuthenticationEntryPoint customAuthEntryPoint;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
-                          CustomAuthenticationEntryPoint customAuthEntryPoint,
-                          CustomAccessDeniedHandler customAccessDeniedHandler) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.customAuthEntryPoint = customAuthEntryPoint;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -48,31 +36,18 @@ public class SecurityConfig {
                     .requestMatchers("/health").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                     // Rutas protegidas por rol
-                    .requestMatchers("/api/v1/users/**").hasRole(ROLE_ADMIN)
-                    .requestMatchers("/api/v1/roles/**").hasRole(ROLE_ADMIN)
-                    .requestMatchers(org.springframework.http.HttpMethod.POST, RESEARCH_GROUPS_PATH).hasRole(ROLE_ADMIN)
-                    .requestMatchers(org.springframework.http.HttpMethod.PATCH, RESEARCH_GROUPS_PATH).hasRole(ROLE_ADMIN)
-                    .requestMatchers(org.springframework.http.HttpMethod.DELETE, RESEARCH_GROUPS_PATH).hasRole(ROLE_ADMIN)
-                    .requestMatchers(org.springframework.http.HttpMethod.POST, RESEARCH_LINES_PATH).hasRole(ROLE_ADMIN)
-                    .requestMatchers(org.springframework.http.HttpMethod.PATCH, RESEARCH_LINES_PATH).hasRole(ROLE_ADMIN)
-                    .requestMatchers(org.springframework.http.HttpMethod.DELETE, RESEARCH_LINES_PATH).hasRole(ROLE_ADMIN)
-                    // Dashboard security rules (RF-88 a RF-94)
-                    .requestMatchers("/api/v1/dashboard/me").authenticated()
-                    .requestMatchers("/api/v1/dashboard/admin/**").hasRole(ROLE_ADMIN)
-                    .requestMatchers("/api/v1/dashboard/director/**").hasRole("DIRECTOR_INVESTIGACION")
-                    .requestMatchers("/api/v1/dashboard/coordinator/**").hasRole("COORDINADOR_GRUPO")
-                    .requestMatchers("/api/v1/dashboard/teacher/**").hasRole("DOCENTE_INVESTIGADOR")
-                    .requestMatchers("/api/v1/dashboard/evaluator/**").hasRole("EVALUADOR")
-                    .requestMatchers("/api/v1/dashboard/dean/**").hasRole("DECANO")
-                    .requestMatchers("/api/v1/dashboard/student/**").hasRole("ESTUDIANTE")
+                    .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
                     // Cualquier otra petición requiere autenticación
                     .anyRequest().authenticated()
                 )
                 // JWT filter para endpoints protegidos
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptions -> exceptions
-                    .authenticationEntryPoint(customAuthEntryPoint)
-                    .accessDeniedHandler(customAccessDeniedHandler)
+                    .defaultAuthenticationEntryPointFor(
+                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
+                        org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern("/api/**")
+                    )
                 );
 
             return http.build();

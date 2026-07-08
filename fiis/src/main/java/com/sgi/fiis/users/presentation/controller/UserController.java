@@ -84,7 +84,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> toggleStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> body) {
-        boolean activate = body.getOrDefault("VIGENTE", true);
+        boolean activate = body.getOrDefault("active", true);
         Long authenticatedUserId = 0L;
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails customUserDetails) {
