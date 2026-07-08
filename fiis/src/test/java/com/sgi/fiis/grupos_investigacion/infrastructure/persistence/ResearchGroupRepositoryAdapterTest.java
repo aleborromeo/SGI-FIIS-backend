@@ -201,4 +201,45 @@ class ResearchGroupRepositoryAdapterTest {
 
         assertFalse(adapter.existsActiveUser(5));
     }
+
+    @Test
+    @DisplayName("Should return true when active user with role exists")
+    void testExistsActiveUserWithRole_True() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(5), eq("ADMIN"), eq("ADMIN"))).thenReturn(1);
+        assertTrue(adapter.existsActiveUserWithRole(5, "ADMIN"));
+    }
+
+    @Test
+    @DisplayName("Should return false when active user with role does not exist or count is null")
+    void testExistsActiveUserWithRole_False() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(5), eq("ADMIN"), eq("ADMIN"))).thenReturn(0);
+        assertFalse(adapter.existsActiveUserWithRole(5, "ADMIN"));
+
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(5), eq("ADMIN"), eq("ADMIN"))).thenReturn(null);
+        assertFalse(adapter.existsActiveUserWithRole(5, "ADMIN"));
+    }
+
+    @Test
+    @DisplayName("Should find groups by line ID")
+    @SuppressWarnings("unchecked")
+    void testFindGroupsByLineId() {
+        ResearchGroupEntity entity = getTestGroupEntity();
+        when(jpaRepository.findActiveByLineId(4)).thenReturn(List.of(entity));
+
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
+            RowMapper<ResearchGroup> mapper = invocation.getArgument(1);
+            ResultSet rs = mock(ResultSet.class);
+            when(rs.getString("nombres")).thenReturn("Maria");
+            when(rs.getString("apellidos")).thenReturn("Lopez");
+            ResearchGroup enriched = mapper.mapRow(rs, 0);
+            return List.of(enriched);
+        });
+
+        List<ResearchGroup> result = adapter.findGroupsByLineId(4);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("GI-001", result.get(0).getGroupCode());
+        assertEquals("Maria", result.get(0).getCoordinatorFirstNames());
+    }
 }
+
