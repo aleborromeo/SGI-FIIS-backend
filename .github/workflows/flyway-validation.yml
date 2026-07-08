@@ -1,0 +1,66 @@
+name: Flyway Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  flyway-validation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # 1. Crear el archivo .env en la RAÍZ del proyecto
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.DOTENV_FILE }}" > .env
+
+      # 2. Construir los contenedores
+      - name: Build containers
+        run: docker compose build
+
+      # 3. Levantar la base de datos y la API
+      - name: Start containers
+        run: docker compose up -d
+
+      # 4. Esperar a que la base de datos inicie por completo
+      - name: Wait for database startup
+        run: |
+          echo "Esperando que la base de datos y los servicios estén listos..."
+          sleep 30
+
+      # 5. Ejecutar los tests unitarios e integrados dentro de la carpeta fiis
+      - name: Run unit and integration tests
+        working-directory: ./fiis
+        run: mvn clean test
+
+      # 6. Verificar que el contenedor backend siga vivo
+      - name: Verify backend container
+        run: |
+          docker ps
+          if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api)" != "true" ]; then
+            echo "El contenedor backend no está ejecutándose."
+            docker logs sgifiis-backend-api
+            exit 1
+          fi
+
+      # 7. Si algo falla en los tests, muestra los logs de Spring
+      - name: Show backend logs
+        if: failure()
+        run: docker logs sgifiis-backend-api
+
+      # 8. Limpieza absoluta (Corregido: docker compose lee el .env de la raíz automáticamente)
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v

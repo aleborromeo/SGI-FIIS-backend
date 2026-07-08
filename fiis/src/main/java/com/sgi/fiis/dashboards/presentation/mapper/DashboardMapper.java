@@ -12,150 +12,150 @@ public class DashboardMapper {
     // =========================================================================
     // ADMIN
     // =========================================================================
-    public DashboardAdminResponse toAdminResponse(DashboardAdmin modelo) {
+    public DashboardAdminResponse toAdminResponse(DashboardAdmin model) {
         return DashboardAdminResponse.builder()
-                .totalUsuarios(modelo.getTotalUsuarios())
-                .totalUsuariosActivos(modelo.getTotalUsuariosActivos())
-                .totalGrupos(modelo.getTotalGrupos())
-                .totalGruposActivos(modelo.getTotalGruposActivos())
-                .totalProyectos(modelo.getTotalProyectos())
-                .proyectosActivos(modelo.getProyectosActivos())
-                .tramitesPendientes(modelo.getTramitesPendientes())
-                .resolucionesEmitidas(modelo.getResolucionesEmitidas())
-                .tramitesEnRevision(modelo.getTramitesEnRevision())
-                .tramitesAprobados(modelo.getTramitesAprobados())
-                .tramitesRechazados(modelo.getTramitesRechazados())
-                .alertas(mapAlertas(modelo.getAlertas()))
+                .totalUsers(model.getTotalUsers())
+                .totalActiveUsers(model.getTotalActiveUsers())
+                .totalGroups(model.getTotalGroups())
+                .totalActiveGroups(model.getTotalActiveGroups())
+                .totalProjects(model.getTotalProjects())
+                .activeProjects(model.getActiveProjects())
+                .pendingProcedures(model.getPendingProcedures())
+                .issuedResolutions(model.getIssuedResolutions())
+                .proceduresUnderReview(model.getProceduresUnderReview())
+                .approvedProcedures(model.getApprovedProcedures())
+                .rejectedProcedures(model.getRejectedProcedures())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
     // DIRECTOR
     // =========================================================================
-    public DashboardDirectorResponse toDirectorResponse(DashboardDirector modelo) {
+    public DashboardDirectorResponse toDirectorResponse(DashboardDirector model) {
         return DashboardDirectorResponse.builder()
-                .totalProyectos(modelo.getTotalProyectos())
-                .proyectosActivos(modelo.getProyectosActivos())
-                .proyectosPostulados(modelo.getProyectosPostulados())
-                .proyectosObservados(modelo.getProyectosObservados())
-                .tramitesPendientesRevision(modelo.getTramitesPendientesRevision())
-                .informesPorVencer(modelo.getInformesPorVencer())
-                .resolucionesEmitidas(modelo.getResolucionesEmitidas())
-                .convocatoriasAbiertas(modelo.getConvocatoriasAbiertas())
-                .tramitesEnCoordinador(modelo.getTramitesEnCoordinador())
-                .tramitesEnDirector(modelo.getTramitesEnDirector())
-                .tramitesEnDecano(modelo.getTramitesEnDecano())
-                .tramitesFinalizados(modelo.getTramitesFinalizados())
-                .alertas(mapAlertas(modelo.getAlertas()))
+                .totalProjects(model.getTotalProjects())
+                .activeProjects(model.getActiveProjects())
+                .submittedProjects(model.getSubmittedProjects())
+                .observedProjects(model.getObservedProjects())
+                .pendingReviewProcedures(model.getPendingReviewProcedures())
+                .reportsNearingDeadline(model.getReportsNearingDeadline())
+                .issuedResolutions(model.getIssuedResolutions())
+                .openCallsForApplication(model.getOpenCallsForApplication())
+                .proceduresWithCoordinator(model.getProceduresWithCoordinator())
+                .proceduresWithDirector(model.getProceduresWithDirector())
+                .proceduresWithDean(model.getProceduresWithDean())
+                .completedProcedures(model.getCompletedProcedures())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
-    // COORDINADOR
+    // COORDINATOR
     // =========================================================================
-    public DashboardCoordinadorResponse toCoordinadorResponse(DashboardCoordinador modelo) {
-        return DashboardCoordinadorResponse.builder()
-                .idGrupo(modelo.getIdGrupo())
-                .nombreGrupo(modelo.getNombreGrupo())
-                .codigoGrupo(modelo.getCodigoGrupo())
-                .totalMiembros(modelo.getTotalMiembros())
-                .miembrosActivos(modelo.getMiembrosActivos())
-                .totalProyectosGrupo(modelo.getTotalProyectosGrupo())
-                .proyectosActivosGrupo(modelo.getProyectosActivosGrupo())
-                .tramitesPendientesGrupo(modelo.getTramitesPendientesGrupo())
-                .informesAvanceGrupo(modelo.getInformesAvanceGrupo())
-                .planesTesisGrupo(modelo.getPlanesTesisGrupo())
-                .tramitesPostulados(modelo.getTramitesPostulados())
-                .tramitesEnRevision(modelo.getTramitesEnRevision())
-                .tramitesAprobados(modelo.getTramitesAprobados())
-                .tramitesObservados(modelo.getTramitesObservados())
-                .alertas(mapAlertas(modelo.getAlertas()))
+    public DashboardCoordinatorResponse toCoordinatorResponse(DashboardCoordinator model) {
+        return DashboardCoordinatorResponse.builder()
+                .groupId(model.getGroupId())
+                .groupName(model.getGroupName())
+                .groupCode(model.getGroupCode())
+                .totalMembers(model.getTotalMembers())
+                .activeMembers(model.getActiveMembers())
+                .totalGroupProjects(model.getTotalGroupProjects())
+                .activeGroupProjects(model.getActiveGroupProjects())
+                .pendingGroupProcedures(model.getPendingGroupProcedures())
+                .groupProgressReports(model.getGroupProgressReports())
+                .groupThesisPlans(model.getGroupThesisPlans())
+                .submittedProcedures(model.getSubmittedProcedures())
+                .proceduresUnderReview(model.getProceduresUnderReview())
+                .approvedProcedures(model.getApprovedProcedures())
+                .observedProcedures(model.getObservedProcedures())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
-    // DOCENTE
+    // TEACHER
     // =========================================================================
-    public DashboardDocenteResponse toDocenteResponse(DashboardDocente modelo) {
-        return DashboardDocenteResponse.builder()
-                .proyectosComoResponsable(modelo.getProyectosComoResponsable())
-                .proyectosComoIntegrante(modelo.getProyectosComoIntegrante())
-                .tramitesPendientes(modelo.getTramitesPendientes())
-                .informesAvancePendientes(modelo.getInformesAvancePendientes())
-                .documentosCargados(modelo.getDocumentosCargados())
-                .resolucionesRecibidas(modelo.getResolucionesRecibidas())
-                .proyectosPostulados(modelo.getProyectosPostulados())
-                .proyectosAprobados(modelo.getProyectosAprobados())
-                .proyectosEnEjecucion(modelo.getProyectosEnEjecucion())
-                .proyectosFinalizados(modelo.getProyectosFinalizados())
-                .alertas(mapAlertas(modelo.getAlertas()))
+    public DashboardTeacherResponse toTeacherResponse(DashboardTeacher model) {
+        return DashboardTeacherResponse.builder()
+                .projectsAsLead(model.getProjectsAsLead())
+                .projectsAsMember(model.getProjectsAsMember())
+                .pendingProcedures(model.getPendingProcedures())
+                .pendingProgressReports(model.getPendingProgressReports())
+                .uploadedDocuments(model.getUploadedDocuments())
+                .receivedResolutions(model.getReceivedResolutions())
+                .submittedProjects(model.getSubmittedProjects())
+                .approvedProjects(model.getApprovedProjects())
+                .projectsInExecution(model.getProjectsInExecution())
+                .completedProjects(model.getCompletedProjects())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
-    // EVALUADOR
+    // EVALUATOR
     // =========================================================================
-    public DashboardEvaluadorResponse toEvaluadorResponse(DashboardEvaluador modelo) {
-        return DashboardEvaluadorResponse.builder()
-                .evaluacionesAsignadas(modelo.getEvaluacionesAsignadas())
-                .evaluacionesPendientes(modelo.getEvaluacionesPendientes())
-                .evaluacionesCompletadas(modelo.getEvaluacionesCompletadas())
-                .proyectosAsignados(modelo.getProyectosAsignados())
-                .planesTesisAsignados(modelo.getPlanesTesisAsignados())
-                .evaluacionesAprobadas(modelo.getEvaluacionesAprobadas())
-                .evaluacionesRechazadas(modelo.getEvaluacionesRechazadas())
-                .evaluacionesConObservaciones(modelo.getEvaluacionesConObservaciones())
-                .alertas(mapAlertas(modelo.getAlertas()))
+    public DashboardEvaluatorResponse toEvaluatorResponse(DashboardEvaluator model) {
+        return DashboardEvaluatorResponse.builder()
+                .assignedEvaluations(model.getAssignedEvaluations())
+                .pendingEvaluations(model.getPendingEvaluations())
+                .completedEvaluations(model.getCompletedEvaluations())
+                .assignedProjects(model.getAssignedProjects())
+                .assignedThesisPlans(model.getAssignedThesisPlans())
+                .approvedEvaluations(model.getApprovedEvaluations())
+                .rejectedEvaluations(model.getRejectedEvaluations())
+                .evaluationsWithObservations(model.getEvaluationsWithObservations())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
-    // DECANO
+    // DEAN
     // =========================================================================
-    public DashboardDecanoResponse toDecanoResponse(DashboardDecano modelo) {
-        return DashboardDecanoResponse.builder()
-                .totalProyectosFacultad(modelo.getTotalProyectosFacultad())
-                .proyectosActivos(modelo.getProyectosActivos())
-                .tramitesPendientesFirma(modelo.getTramitesPendientesFirma())
-                .resolucionesEmitidas(modelo.getResolucionesEmitidas())
-                .convocatoriasActivas(modelo.getConvocatoriasActivas())
-                .totalGruposActivos(modelo.getTotalGruposActivos())
-                .tramitesEnEspera(modelo.getTramitesEnEspera())
-                .tramitesAprobadosMes(modelo.getTramitesAprobadosMes())
-                .tramitesRechazadosMes(modelo.getTramitesRechazadosMes())
-                .alertas(mapAlertas(modelo.getAlertas()))
+    public DashboardDeanResponse toDeanResponse(DashboardDean model) {
+        return DashboardDeanResponse.builder()
+                .totalFacultyProjects(model.getTotalFacultyProjects())
+                .activeProjects(model.getActiveProjects())
+                .pendingSignatureProcedures(model.getPendingSignatureProcedures())
+                .issuedResolutions(model.getIssuedResolutions())
+                .activeCallsForApplication(model.getActiveCallsForApplication())
+                .totalActiveGroups(model.getTotalActiveGroups())
+                .waitingProcedures(model.getWaitingProcedures())
+                .approvedProceduresThisMonth(model.getApprovedProceduresThisMonth())
+                .rejectedProceduresThisMonth(model.getRejectedProceduresThisMonth())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
-    // ESTUDIANTE
+    // STUDENT
     // =========================================================================
-    public DashboardEstudianteResponse toEstudianteResponse(DashboardEstudiante modelo) {
-        return DashboardEstudianteResponse.builder()
-                .planesTesisPresentados(modelo.getPlanesTesisPresentados())
-                .estadoPlanActual(modelo.getEstadoPlanActual())
-                .tramitesPendientes(modelo.getTramitesPendientes())
-                .documentosCargados(modelo.getDocumentosCargados())
-                .convocatoriasAbiertas(modelo.getConvocatoriasAbiertas())
-                .nombreGrupo(modelo.getNombreGrupo())
-                .codigoGrupo(modelo.getCodigoGrupo())
-                .alertas(mapAlertas(modelo.getAlertas()))
+    public DashboardStudentResponse toStudentResponse(DashboardStudent model) {
+        return DashboardStudentResponse.builder()
+                .submittedThesisPlans(model.getSubmittedThesisPlans())
+                .currentPlanStatus(model.getCurrentPlanStatus())
+                .pendingProcedures(model.getPendingProcedures())
+                .uploadedDocuments(model.getUploadedDocuments())
+                .openCallsForApplication(model.getOpenCallsForApplication())
+                .groupName(model.getGroupName())
+                .groupCode(model.getGroupCode())
+                .alerts(mapAlerts(model.getAlerts()))
                 .build();
     }
 
     // =========================================================================
-    // ALERTAS
+    // ALERTS
     // =========================================================================
-    private List<AlertaItemResponse> mapAlertas(List<AlertaItem> alertas) {
-        if (alertas == null) {
+    private List<AlertItemResponse> mapAlerts(List<AlertItem> alerts) {
+        if (alerts == null) {
             return List.of();
         }
 
-        return alertas.stream()
-                .map(alerta -> AlertaItemResponse.builder()
-                        .tipo(alerta.getTipo())
-                        .titulo(alerta.getTitulo())
-                        .descripcion(alerta.getDescripcion())
+        return alerts.stream()
+                .map(alert -> AlertItemResponse.builder()
+                        .type(alert.getType())
+                        .title(alert.getTitle())
+                        .description(alert.getDescription())
                         .build())
                 .toList();
     }

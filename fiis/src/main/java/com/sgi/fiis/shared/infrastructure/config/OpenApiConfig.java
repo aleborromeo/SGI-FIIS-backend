@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * Configura la información general de la API y añade soporte para el flujo de autorización con JWT Bearer tokens.
  */
 @Configuration
+@lombok.extern.slf4j.Slf4j
 public class OpenApiConfig {
 
     @Value("${spring.mail.host}")
@@ -31,13 +32,13 @@ public class OpenApiConfig {
     private boolean mailMock;
     @PostConstruct
     public void printMailConfig() {
-        System.out.println("=================================================");
-        System.out.println("DEBUG MAIL CONFIGURATION ON STARTUP:");
-        System.out.println("Host: " + mailHost);
-        System.out.println("Username: " + mailUsername);
-        System.out.println("Password length: " + (mailPassword != null ? mailPassword.length() : "null"));
-        System.out.println("Mail Mode: " + (mailMock ? "MOCK (Fake Sender)" : "SMTP (Real Sender)"));
-        System.out.println("=================================================");
+        log.info("=================================================");
+        log.info("DEBUG MAIL CONFIGURATION ON STARTUP:");
+        log.info("Host: {}", mailHost);
+        log.info("Username: {}", mailUsername);
+        log.info("Password length: {}", (mailPassword != null ? mailPassword.length() : "null"));
+        log.info("Mail Mode: {}", (mailMock ? "MOCK (Fake Sender)" : "SMTP (Real Sender)"));
+        log.info("=================================================");
     }
 
     @Bean
@@ -66,7 +67,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("all-apis")
                 .pathsToMatch("/api/**")
-                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion")
+                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion", "com.sgi.fiis.grupos_investigacion", "com.sgi.fiis.lineas_investigacion", "com.sgi.fiis.dashboards", "com.sgi.fiis.reportes", "com.sgi.fiis.observations")
                 .build();
     }
 
@@ -85,7 +86,7 @@ public class OpenApiConfig {
     public GroupedOpenApi authAndUsersApi() {
         return GroupedOpenApi.builder()
                 .group("auth-users")
-                .pathsToMatch("/api/auth/**", "/api/users/**")
+                .pathsToMatch("/api/v1/auth/**", "/api/v1/users/**", "/api/v1/roles/**")
                 .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users")
                 .build();
     }
@@ -95,7 +96,7 @@ public class OpenApiConfig {
     public GroupedOpenApi researchApi() {
         return GroupedOpenApi.builder()
                 .group("research")
-                .pathsToMatch("/api/researchgroups/**", "/api/researchlines/**")
+                .pathsToMatch("/api/v1/research-groups/**", "/api/v1/research-lines/**")
                 .build();
     }
 
@@ -167,7 +168,7 @@ public class OpenApiConfig {
     public GroupedOpenApi dashboardsApi() {
         return GroupedOpenApi.builder()
                 .group("dashboards")
-                .pathsToMatch("/api/dashboards/**", "/api/dashboard/**")
+                .pathsToMatch("/api/v1/dashboard/**")
                 .build();
     }
 
@@ -176,7 +177,7 @@ public class OpenApiConfig {
     public GroupedOpenApi reportsApi() {
         return GroupedOpenApi.builder()
                 .group("reports")
-                .pathsToMatch("/api/reports/**")
+                .pathsToMatch("/api/reportes/**")
                 .build();
     }
 }

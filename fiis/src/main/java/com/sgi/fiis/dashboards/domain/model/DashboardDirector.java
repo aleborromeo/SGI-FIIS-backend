@@ -9,19 +9,19 @@ import java.util.List;
 @Builder
 public class DashboardDirector {
 
-    private int totalProyectos;
-    private int proyectosActivos;
-    private int proyectosPostulados;
-    private int proyectosObservados;
-    private int tramitesPendientesRevision;
-    private int informesPorVencer;
-    private int resolucionesEmitidas;
-    private int convocatoriasAbiertas;
+    private int totalProjects;
+    private int activeProjects;
+    private int submittedProjects;
+    private int observedProjects;
+    private int pendingReviewProcedures;
+    private int reportsNearingDeadline;
+    private int issuedResolutions;
+    private int openCallsForApplication;
 
-    private int tramitesEnCoordinador;
-    private int tramitesEnDirector;
-    private int tramitesEnDecano;
-    private int tramitesFinalizados;
+    private int proceduresWithCoordinator;
+    private int proceduresWithDirector;
+    private int proceduresWithDean;
+    private int completedProcedures;
 
-    private List<AlertaItem> alertas;
+    private List<AlertItem> alerts;
 }

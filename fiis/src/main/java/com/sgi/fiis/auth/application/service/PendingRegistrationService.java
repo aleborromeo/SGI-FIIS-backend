@@ -41,14 +41,17 @@ public class PendingRegistrationService {
     private final Map<String, PendingRegistration> store = new ConcurrentHashMap<>();
 
     public void register(String email, RegisterRequestDto requestDto, String code) {
-        store.put(email.toLowerCase(), new PendingRegistration(requestDto, code));
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        store.put(cleanEmail, new PendingRegistration(requestDto, code));
     }
 
     public PendingRegistration get(String email) {
-        return store.get(email.toLowerCase());
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        return store.get(cleanEmail);
     }
 
     public void remove(String email) {
-        store.remove(email.toLowerCase());
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        store.remove(cleanEmail);
     }
 }

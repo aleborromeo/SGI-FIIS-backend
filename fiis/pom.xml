@@ -31,6 +31,12 @@
         <sonar.cpd.exclusions>src/main/java/com/sgi/fiis/dashboards/domain/model/Dashboard*.java,src/main/java/com/sgi/fiis/dashboards/application/dto/Dashboard*Response.java</sonar.cpd.exclusions>
         <sonar.organization>sgi-fiis</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.exclusions>
+            src/main/java/com/sgi/fiis/FiisApplication.java,
+            src/main/java/com/sgi/fiis/**/*Config.java,
+            src/main/java/com/sgi/fiis/shared/infrastructure/config/**/*.java
+        </sonar.coverage.exclusions>
     </properties>
     <dependencies>
         <dependency>
