@@ -41,6 +41,10 @@ class SaveProjectAdapterTest {
         entity.setTitle("Test");
         entity.setStatus(status);
         entity.setBudget(new BigDecimal("100"));
+        entity.setTitleJson("{}");
+        entity.setSummaryJson("{}");
+        entity.setGeneralObjectiveJson("{}");
+        entity.setExecutionPlaceJson("{}");
         
         ResearchLineEntity line = new ResearchLineEntity();
         line.setId(1);

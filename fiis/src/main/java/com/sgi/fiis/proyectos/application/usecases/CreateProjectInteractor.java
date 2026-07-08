@@ -26,21 +26,18 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     private final SaveProjectPort saveProjectPort;
     private final SaveCallPort saveCallPort;
     private final CreateProcedurePort createProcedurePort;
-    private final Clock clock;
+    private Clock clock;
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
             SaveCallPort saveCallPort,
             CreateProcedurePort createProcedurePort) {
-        this(saveProjectPort, saveCallPort, createProcedurePort, Clock.systemUTC());
-    }
-
-    public CreateProjectInteractor(SaveProjectPort saveProjectPort,
-            SaveCallPort saveCallPort,
-            CreateProcedurePort createProcedurePort,
-            Clock clock) {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
+        this.clock = Clock.systemUTC();
+    }
+
+    public void setClock(Clock clock) {
         this.clock = clock;
     }
 

@@ -26,7 +26,7 @@ class ResearchCallEntityTest {
 
         ResearchCallEntity entity = new ResearchCallEntity(
                 1, "Convocatoria 2025-I", "Description",
-                null, null,
+                "{\"es\": \"Descripción de la convocatoria\"}", "{\"es\": \"Objetivos de la convocatoria\"}",
                 startDate, endDate,
                 "ABIERTA", null, null, null, null);
 
@@ -114,11 +114,11 @@ class ResearchCallEntityTest {
 
         ResearchCallEntity entity1 = new ResearchCallEntity(
                 1, "Test", "Description",
-                null, null,
+                "{}", "{}",
                 startDate, endDate, "ABIERTA", null, null, null, null);
         ResearchCallEntity entity2 = new ResearchCallEntity(
                 1, "Test", "Description",
-                null, null,
+                "{}", "{}",
                 startDate, endDate, "ABIERTA", null, null, null, null);
 
         assertEquals(entity1, entity2);

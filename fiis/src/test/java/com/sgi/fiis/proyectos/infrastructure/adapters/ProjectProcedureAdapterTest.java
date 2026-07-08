@@ -111,7 +111,7 @@ class ProjectProcedureAdapterTest {
         assertTrue(capturedProcedure.getCode().startsWith("TRM-"));
         assertTrue(capturedProcedure.getCode().length() <= 30);
         assertEquals("PROYECTO", capturedProcedure.getProcedureType());
-        assertEquals("PENDING_COORDINATOR", capturedProcedure.getStatus());
+        assertEquals("PENDIENTE_COORDINADOR", capturedProcedure.getStatus());
         assertEquals("COORDINADOR_GRUPO", capturedProcedure.getReviewerRole());
         assertSame(responsible, capturedProcedure.getApplicant());
         assertSame(group, capturedProcedure.getGroup());
@@ -126,37 +126,27 @@ class ProjectProcedureAdapterTest {
         assertSame(savedProcedure, capturedMovement.getProcedure());
         assertSame(responsible, capturedMovement.getActionUser());
         assertEquals("CREAR", capturedMovement.getAction());
-        assertEquals("REGISTERED", capturedMovement.getPreviousState());
-        assertEquals("PENDING_COORDINATOR", capturedMovement.getNewState());
+        assertEquals("REGISTRADO", capturedMovement.getPreviousState());
+        assertEquals("PENDIENTE_COORDINADOR", capturedMovement.getNewState());
         assertNotNull(capturedMovement.getComment());
         assertNotNull(capturedMovement.getMovementAt());
     }
 
     @Test
-    void createPostulationProcedure_ShouldSaveWithNullResponsible() {
+    void createPostulationProcedure_ShouldThrow_WhenProjectResponsibleIsNull() {
         Project project = Project.builder().id(1).build();
         ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(20);
         ProjectEntity projectEntity = createProjectEntity(1, null, group);
 
-        ProcedureEntity savedProcedure = ProcedureEntity.builder()
-                .id(100)
-                .code("TRM-2026-ABCD1234")
-                .build();
-
         when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
-        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
-        when(movementRepository.save(any(ProcedureMovementEntity.class))).thenReturn(null);
 
-        adapter.createPostulationProcedure(project);
+        BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
+                () -> adapter.createPostulationProcedure(project));
+        assertTrue(exception.getMessage().contains("Project responsible must not be null"));
 
-        ArgumentCaptor<ProcedureEntity> procedureCaptor = ArgumentCaptor.forClass(ProcedureEntity.class);
-        verify(procedureRepository).save(procedureCaptor.capture());
-        assertNull(procedureCaptor.getValue().getApplicant());
-
-        ArgumentCaptor<ProcedureMovementEntity> movementCaptor = ArgumentCaptor.forClass(ProcedureMovementEntity.class);
-        verify(movementRepository).save(movementCaptor.capture());
-        assertNull(movementCaptor.getValue().getActionUser());
+        verify(procedureRepository, never()).save(any());
+        verify(movementRepository, never()).save(any());
     }
 
     @Test

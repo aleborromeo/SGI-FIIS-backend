@@ -5,9 +5,12 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.proyectos.application.dto.CreateProjectRequest;
 import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import com.sgi.fiis.proyectos.application.ports.in.CreateProjectUseCase;
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
+import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -18,10 +21,14 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.argThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -41,7 +48,10 @@ class ProjectControllerTest {
     void setup() {
         createProjectUseCase = Mockito.mock(CreateProjectUseCase.class);
         ProjectController projectController = new ProjectController(createProjectUseCase);
+        MessageSource messageSource = Mockito.mock(MessageSource.class);
+        Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(projectController)
+                .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
                     @Override
                     public boolean supportsParameter(MethodParameter parameter) {
@@ -91,6 +101,11 @@ class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.code").value("PRJ-123"));
+
+        verify(createProjectUseCase, times(1)).execute(argThat(req ->
+                req.getTitle().equals("Controller Test") &&
+                req.getResponsibleId() == 3
+        ));
     }
 
     @Test
@@ -134,5 +149,16 @@ class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.code").value("PRJ-1"));
+
+        verify(createProjectUseCase, times(1)).getProjectById(1);
+    }
+
+    @Test
+    void testGetProjectById_NotFound() throws Exception {
+        when(createProjectUseCase.getProjectById(99))
+                .thenThrow(new BusinessRuleValidationException("Project not found with ID: 99"));
+
+        mockMvc.perform(get("/api/v1/projects/99"))
+                .andExpect(status().isBadRequest());
     }
 }
