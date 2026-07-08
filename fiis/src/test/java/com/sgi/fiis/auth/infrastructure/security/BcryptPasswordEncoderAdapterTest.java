@@ -41,8 +41,8 @@ class BcryptPasswordEncoderAdapterTest {
     }
 
     @Test
-    @DisplayName("Should return false when encoded password is null without throwing NPE")
+    @DisplayName("Should throw IllegalArgumentException when encoded password is null")
     void testMatchesNullEncodedPassword() {
-        assertFalse(adapter.matches("mySecretPassword", null));
+        assertThrows(IllegalArgumentException.class, () -> adapter.matches("mySecretPassword", null));
     }
 }
