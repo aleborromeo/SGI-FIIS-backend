@@ -47,10 +47,6 @@ jobs:
       - name: Build containers
         run: docker compose build
 
-      # 3.5. Crear red externa compartida
-      - name: Create shared external docker network
-        run: docker network create sgifiis-network-shared
-
       # 4. Levantar la base de datos y la API
       - name: Start containers
         run: docker compose up -d
