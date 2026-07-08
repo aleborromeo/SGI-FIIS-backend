@@ -31,17 +31,24 @@ class ProcedureRepositoryAdapterTest {
 
     private static final LocalDateTime FECHA = LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0);
 
-    private ProcedureEntity buildEntity(Long id) {
+    private ProcedureEntity buildEntity(Integer id) {
         ProcedureEntity e = new ProcedureEntity();
         e.setId(id);
-        e.setCodigoTramite("TRM-2026-001");
-        e.setTipoTramite("PROYECTO");
-        e.setIdSolicitante(10L);
-        e.setIdGrupo(1L);
-        e.setEstadoActual("PENDIENTE_COORDINADOR");
-        e.setRolRevisorActual("COORDINADOR_GRUPO");
-        e.setFechaEnvio(FECHA);
-        e.setFechaActualizacion(FECHA);
+        e.setCode("TRM-2026-001");
+        e.setProcedureType("PROYECTO");
+        
+        com.sgi.fiis.users.infrastructure.persistence.UserEntity applicant = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        applicant.setId(10L);
+        e.setApplicant(applicant);
+        
+        com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity group = new com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity();
+        group.setId(1);
+        e.setGroup(group);
+        
+        e.setStatus("PENDIENTE_COORDINADOR");
+        e.setReviewerRole("COORDINADOR_GRUPO");
+        e.setSentAt(FECHA);
+        e.setUpdatedAt(FECHA);
         return e;
     }
 
@@ -63,8 +70,8 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("save: persists entity and returns mapped domain")
     void save_persistsEntityAndReturnsDomain() {
-        when(tramiteRepository.save(any())).thenReturn(buildEntity(1L));
-        when(movimientoRepository.countByProcedureId(1L)).thenReturn(0L);
+        when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
+        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
 
         Procedure result = adapter.save(buildDomain());
 
@@ -77,8 +84,8 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findById: found → returns mapped domain")
     void findById_found_returnsDomain() {
-        when(tramiteRepository.findById(1L)).thenReturn(Optional.of(buildEntity(1L)));
-        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1L)).thenReturn(List.of());
+        when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
+        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findById(1L);
 
@@ -90,7 +97,7 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findById: not found → returns empty Optional")
     void findById_notFound_returnsEmpty() {
-        when(tramiteRepository.findById(99L)).thenReturn(Optional.empty());
+        when(tramiteRepository.findById(99)).thenReturn(Optional.empty());
 
         assertTrue(adapter.findById(99L).isEmpty());
     }
@@ -98,9 +105,9 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findByCode: found → returns mapped domain")
     void findByCode_found_returnsDomain() {
-        when(tramiteRepository.findByCodigoTramite("TRM-2026-001"))
-                .thenReturn(Optional.of(buildEntity(1L)));
-        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1L)).thenReturn(List.of());
+        when(tramiteRepository.findByCode("TRM-2026-001"))
+                .thenReturn(Optional.of(buildEntity(1)));
+        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findByCode("TRM-2026-001");
 
@@ -111,7 +118,7 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findByApplicantId: returns list of mapped procedures")
     void findByApplicantId_returnsMappedList() {
-        when(tramiteRepository.findByIdSolicitante(10L)).thenReturn(List.of(buildEntity(1L)));
+        when(tramiteRepository.findByApplicantId(10L)).thenReturn(List.of(buildEntity(1)));
 
         List<Procedure> result = adapter.findByApplicantId(10L);
 
@@ -122,8 +129,8 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findByStatus: returns list filtered by status")
     void findByStatus_returnsMappedList() {
-        when(tramiteRepository.findByEstadoActual("PENDIENTE_COORDINADOR"))
-                .thenReturn(List.of(buildEntity(1L)));
+        when(tramiteRepository.findByStatus("PENDIENTE_COORDINADOR"))
+                .thenReturn(List.of(buildEntity(1)));
 
         List<Procedure> result = adapter.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
 
@@ -134,9 +141,9 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("existsByCode: delegates to repository")
     void existsByCode_delegatesToRepository() {
-        when(tramiteRepository.existsByCodigoTramite("TRM-2026-001")).thenReturn(true);
+        when(tramiteRepository.existsByCode("TRM-2026-001")).thenReturn(true);
 
         assertTrue(adapter.existsByCode("TRM-2026-001"));
-        verify(tramiteRepository).existsByCodigoTramite("TRM-2026-001");
+        verify(tramiteRepository).existsByCode("TRM-2026-001");
     }
 }

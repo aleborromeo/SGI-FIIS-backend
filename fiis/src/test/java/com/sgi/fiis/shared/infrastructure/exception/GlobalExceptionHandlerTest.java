@@ -72,12 +72,12 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleValidation() {
-        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        org.springframework.core.MethodParameter methodParameter = mock(org.springframework.core.MethodParameter.class);
         BindingResult bindingResult = mock(BindingResult.class);
         FieldError fieldError = new FieldError("object", "field", "Error message");
         
-        when(ex.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(methodParameter, bindingResult);
 
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleValidation(ex);
         

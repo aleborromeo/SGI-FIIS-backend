@@ -56,8 +56,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("192.168.1.10");
         when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -86,8 +85,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn("203.0.113.5, 10.0.0.1");
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -107,8 +105,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -130,8 +127,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -173,8 +169,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn("");
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());

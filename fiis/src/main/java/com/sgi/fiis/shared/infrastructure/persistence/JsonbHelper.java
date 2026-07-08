@@ -30,7 +30,9 @@ public class JsonbHelper {
         try {
             return MAPPER.readValue(json, new TypeReference<Map<String, String>>() {});
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to deserialize JSONB string: " + json, e);
+            Map<String, String> legacyMap = new HashMap<>();
+            legacyMap.put("es", json);
+            return legacyMap;
         }
     }
 

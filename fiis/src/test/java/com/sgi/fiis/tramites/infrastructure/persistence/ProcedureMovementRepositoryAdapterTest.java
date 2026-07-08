@@ -25,19 +25,25 @@ class ProcedureMovementRepositoryAdapterTest {
 
     private ProcedureMovementEntity buildMovementEntity() {
         ProcedureMovementEntity e = new ProcedureMovementEntity();
-        e.setIdTramite(1L);
-        e.setIdUsuarioAccion(20L);
-        e.setAccion("APROBADO_POR_COORDINADOR");
-        e.setEstadoAnterior("PENDIENTE_COORDINADOR");
-        e.setEstadoNuevo("PENDIENTE_DIRECCION");
-        e.setFechaMovimiento(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0));
+        ProcedureEntity proc = new ProcedureEntity();
+        proc.setId(1);
+        e.setProcedure(proc);
+        
+        com.sgi.fiis.users.infrastructure.persistence.UserEntity actionUser = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        actionUser.setId(20L);
+        e.setActionUser(actionUser);
+        
+        e.setAction("APROBADO_POR_COORDINADOR");
+        e.setPreviousState("PENDIENTE_COORDINADOR");
+        e.setNewState("PENDIENTE_DIRECCION");
+        e.setMovementAt(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0));
         return e;
     }
 
     @Test
     @DisplayName("findByProcedureId: maps entity list to domain model")
     void findByProcedureId_returnsMappedList() {
-        when(repository.findByProcedureIdOrderByDateAsc(1L)).thenReturn(List.of(buildMovementEntity()));
+        when(repository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of(buildMovementEntity()));
 
         List<ProcedureMovement> result = adapter.findByProcedureId(1L);
 
@@ -52,7 +58,7 @@ class ProcedureMovementRepositoryAdapterTest {
     @Test
     @DisplayName("findByProcedureId: returns empty list when no movements exist")
     void findByProcedureId_emptyList() {
-        when(repository.findByProcedureIdOrderByDateAsc(99L)).thenReturn(List.of());
+        when(repository.findByProcedureIdOrderByDateAsc(99)).thenReturn(List.of());
 
         assertTrue(adapter.findByProcedureId(99L).isEmpty());
     }
