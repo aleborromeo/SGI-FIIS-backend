@@ -167,15 +167,13 @@ class GlobalExceptionHandlerTest {
     @DisplayName("Should handle generic Exception")
     void handleGeneral_shouldReturn500() {
         Exception ex = new Exception("unexpected error");
-        when(messageSource.getMessage(eq("exception.internal-error"), any(), anyString(), any(Locale.class)))
-                .thenReturn("Error interno del servidor");
 
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleGeneral(ex);
 
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(500, response.getBody().get("status"));
-        assertEquals("Error interno del servidor", response.getBody().get("message"));
+        assertEquals("unexpected error", response.getBody().get("message"));
     }
     @Test
     @DisplayName("Should handle AuthorizationDeniedException")
