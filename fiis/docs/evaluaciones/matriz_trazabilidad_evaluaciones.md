@@ -166,3 +166,4 @@ La respuesta confirma que se creó una evaluación asociada al proyecto con iden
 La matriz de trazabilidad evidencia que los requisitos funcionales asignados al módulo **Evaluaciones** fueron implementados mediante clases, endpoints, reglas de negocio y persistencia en base de datos.
 
 El módulo cumple con su propósito principal: permitir la asignación de evaluadores, la consulta de evaluaciones y el registro de resultados, puntajes y observaciones dentro del Sistema de Gestión de Investigación FIIS.
+

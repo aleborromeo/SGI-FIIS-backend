@@ -32,7 +32,7 @@ public class ResearchGroupController {
 
     /** RF-22: Create research group */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchGroupResponseDto> create(
             @Valid @RequestBody ResearchGroupRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,7 +57,7 @@ public class ResearchGroupController {
 
     /** RF-19: Assign coordinator to a group */
     @PatchMapping("/{id}/coordinator")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchGroupResponseDto> assignCoordinator(
             @PathVariable Integer id,
             @Valid @RequestBody AssignCoordinatorRequestDto dto) {
@@ -67,7 +67,7 @@ public class ResearchGroupController {
 
     /** RF-20: Add member to group */
     @PostMapping("/{id}/members")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MembershipResponseDto> assignMember(
             @PathVariable Integer id,
             @Valid @RequestBody AssignMemberRequestDto dto) {
@@ -78,7 +78,7 @@ public class ResearchGroupController {
 
     /** RF-20: Remove member from group (soft delete) */
     @DeleteMapping("/{id}/members/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MembershipResponseDto> removeMember(
             @PathVariable Integer id,
             @PathVariable Integer userId) {

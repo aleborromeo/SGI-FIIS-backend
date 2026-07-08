@@ -28,10 +28,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getId(),
                 user.getInstitutionalEmail(),
                 user.getPasswordHash(),
-                user.isActive(),  // enabled
+                user.isActive(), // enabled
                 Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_" + user.getRole().getCode())
-                )
-        );
+                        new SimpleGrantedAuthority("ROLE_" + user.getRole().getCode())));
     }
 }

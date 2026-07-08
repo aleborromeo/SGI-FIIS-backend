@@ -85,13 +85,13 @@ public class SaveProjectAdapter implements SaveProjectPort {
     @Override
     public Optional<String> getGroupCode(Integer groupId) {
         return groupRepository.findById(groupId)
-                .map(ResearchGroupEntity::getGroupCode);
+                .map(ResearchGroupEntity::getCode);
     }
 
     @Override
     public Optional<String> getLineName(Integer lineId) {
         return lineRepository.findById(lineId)
-                .map(ResearchLineEntity::getLineName);
+                .map(ResearchLineEntity::getName);
     }
 
     @Override
@@ -215,14 +215,14 @@ public class SaveProjectAdapter implements SaveProjectPort {
                 JsonbHelper.getText(entity.getSummaryJson(), "es"),
                 JsonbHelper.getText(entity.getGeneralObjectiveJson(), "es"),
                 entity.getResearchLine().getId(),
-                entity.getResearchLine().getLineName(),
+                entity.getResearchLine().getName(),
                 entity.getBudget(),
                 entity.getStartDate(),
                 entity.getEndDate(),
                 JsonbHelper.getText(entity.getExecutionPlaceJson(), "es"),
                 entity.getResponsible().getId(),
                 entity.getGroup().getId(),
-                entity.getGroup().getGroupCode(),
+                entity.getGroup().getCode(),
                 entity.getResearchCall() != null ? entity.getResearchCall().getId() : null,
                 entity.getDocumentId(),
                 domainStatus

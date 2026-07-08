@@ -46,7 +46,7 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
 
     @Override
     public boolean existsByName(String lineName) {
-        return springDataRepository.existsByLineName(lineName);
+        return springDataRepository.existsByName(lineName);
     }
 
     private ResearchLine toDomain(ResearchLineEntity entity) {
@@ -55,10 +55,10 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
         }
         return ResearchLine.builder()
                 .id(entity.getId())
-                .lineName(entity.getLineName())
+                .lineName(entity.getName())
                 .active(entity.isActive())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .createdAt(null)
+                .updatedAt(null)
                 .build();
     }
 
@@ -68,10 +68,8 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
         }
         ResearchLineEntity entity = new ResearchLineEntity();
         entity.setId(domain.getId());
-        entity.setLineName(domain.getLineName());
+        entity.setName(domain.getLineName());
         entity.setActive(domain.isActive());
-        entity.setCreatedAt(domain.getCreatedAt());
-        entity.setUpdatedAt(domain.getUpdatedAt());
         return entity;
     }
 }

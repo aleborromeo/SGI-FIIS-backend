@@ -36,12 +36,12 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     @Override
     public List<ResearchGroup> findAll() {
         String sql = """
-                SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
-                       g.id_coordinador_actual, g.es_activo,
-                       u.nombres AS coordinator_first_names,
-                       u.apellidos AS coordinator_last_names
-                 FROM grupos_investigacion g
-                 LEFT JOIN usuarios u ON g.id_coordinador_actual = u.id_usuario
+                 SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
+                        g.id_coordinador_actual, g.es_activo,
+                        u.nombres AS coordinator_first_names,
+                        u.apellidos AS coordinator_last_names
+                  FROM grupos_investigacion g
+                  LEFT JOIN usuarios u ON g.id_coordinador_actual = u.id_usuario
                  ORDER BY g.nombre_grupo
                 """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> ResearchGroup.builder()
@@ -58,7 +58,15 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
 
     @Override
     public boolean existsByCode(String groupCode) {
-        return jpaRepository.existsByGroupCode(groupCode);
+        return jpaRepository.existsByCode(groupCode);
+    }
+
+    @Override
+    public List<ResearchGroup> findGroupsByLineId(Integer lineId) {
+        return jpaRepository.findActiveByLineId(lineId).stream()
+                .map(this::toDomain)
+                .map(this::enrichWithCoordinator)
+                .toList();
     }
 
     @Override
@@ -100,9 +108,9 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     private ResearchGroup toDomain(ResearchGroupEntity entity) {
         return ResearchGroup.builder()
                 .id(entity.getId())
-                .groupCode(entity.getGroupCode())
-                .groupName(entity.getGroupName())
-                .currentCoordinatorId(entity.getCurrentCoordinatorId())
+                .groupCode(entity.getCode())
+                .groupName(entity.getName())
+                .currentCoordinatorId(entity.getCurrentCoordinator() != null ? entity.getCurrentCoordinator().getId().intValue() : null)
                 .active(entity.isActive())
                 .build();
     }
@@ -110,9 +118,13 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     private ResearchGroupEntity toEntity(ResearchGroup domain) {
         ResearchGroupEntity entity = new ResearchGroupEntity();
         entity.setId(domain.getId());
-        entity.setGroupCode(domain.getGroupCode());
-        entity.setGroupName(domain.getGroupName());
-        entity.setCurrentCoordinatorId(domain.getCurrentCoordinatorId());
+        entity.setCode(domain.getGroupCode());
+        entity.setName(domain.getGroupName());
+        if (domain.getCurrentCoordinatorId() != null) {
+            com.sgi.fiis.users.infrastructure.persistence.UserEntity coordinator = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+            coordinator.setId(domain.getCurrentCoordinatorId().longValue());
+            entity.setCurrentCoordinator(coordinator);
+        }
         entity.setActive(domain.isActive());
         return entity;
     }

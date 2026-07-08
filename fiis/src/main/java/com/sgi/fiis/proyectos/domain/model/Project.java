@@ -47,9 +47,7 @@ public class Project {
         // RN-12: GINSOFT group is restricted to 'Computacion' and 'Ingenieria de software' lines
         if ("GINSOFT".equalsIgnoreCase(researchGroupCode) && researchLineName != null &&
             !researchLineName.equalsIgnoreCase("Computacion") &&
-            !researchLineName.equalsIgnoreCase("Ingenieria de software") &&
-            !researchLineName.equalsIgnoreCase("ComputaciÃƒÂ³n") &&
-            !researchLineName.equalsIgnoreCase("IngenierÃƒÂ­a de software")) {
+            !researchLineName.equalsIgnoreCase("Ingenieria de software")) {
 
             throw new BusinessRuleValidationException("proyectos.error.ginsoft-restriction");
         }

@@ -93,6 +93,10 @@ public class ProjectEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now(ZoneId.of("UTC"));
         updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
+        if (titleJson == null) { titleJson = "{}"; }
+        if (summaryJson == null) { summaryJson = "{}"; }
+        if (generalObjectiveJson == null) { generalObjectiveJson = "{}"; }
+        if (executionPlaceJson == null) { executionPlaceJson = "{}"; }
     }
 
     @PreUpdate

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface SpringDataResearchLineRepository extends JpaRepository<ResearchLineEntity, Integer> {
 
-    boolean existsByLineName(String lineName);
+    boolean existsByName(String name);
 
     List<ResearchLineEntity> findByActiveTrue();
 

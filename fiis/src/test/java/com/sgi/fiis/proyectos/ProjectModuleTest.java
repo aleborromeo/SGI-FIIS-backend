@@ -13,11 +13,14 @@ import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,23 +32,26 @@ import static org.mockito.Mockito.*;
 class ProjectModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
-    private static final LocalDate FIXED_TODAY     = LocalDate.now();
-    private static final LocalDate FIXED_PAST_1D   = LocalDate.now().minusDays(30);
-    private static final LocalDate FIXED_FUTURE_6M = LocalDate.now().plusMonths(6);
-    private static final LocalDate FIXED_FUTURE_1M = LocalDate.now().plusMonths(1);
-    private static final LocalDate FIXED_FUTURE_10 = LocalDate.now().plusDays(10);
+    private static final LocalDate FIXED_TODAY     = LocalDate.of(2026, Month.JUNE, 1);
+    private static final LocalDate FIXED_PAST_1D   = LocalDate.of(2026, Month.MAY, 31);
+    private static final LocalDate FIXED_FUTURE_6M = LocalDate.of(2026, Month.DECEMBER, 1);
+    private static final LocalDate FIXED_FUTURE_1M = LocalDate.of(2026, Month.JULY, 1);
+    private static final LocalDate FIXED_FUTURE_10 = LocalDate.of(2026, Month.JUNE, 11);
 
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
     private CreateProcedurePort createProcedurePort;
     private CreateProjectInteractor createProjectInteractor;
+    private Clock fixedClock;
 
     @BeforeEach
     void setup() {
-        saveProjectPort = Mockito.mock(SaveProjectPort.class);
-        saveCallPort = Mockito.mock(SaveCallPort.class);
-        createProcedurePort = Mockito.mock(CreateProcedurePort.class);
+        saveProjectPort = mock(SaveProjectPort.class);
+        saveCallPort = mock(SaveCallPort.class);
+        createProcedurePort = mock(CreateProcedurePort.class);
+        fixedClock = Clock.fixed(Instant.parse("2026-06-01T00:00:00Z"), ZoneId.of("UTC"));
         createProjectInteractor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort);
+        createProjectInteractor.setClock(fixedClock);
     }
 
     @Test
@@ -275,5 +281,66 @@ class ProjectModuleTest {
                 .researchLineName("Computacion")
                 .build();
         assertDoesNotThrow(project::validateInvariants);
+    }
+
+    @Test
+    void testUpdateStatus_Success() {
+        Project existing = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(existing));
+        when(saveProjectPort.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ProjectResponse response = createProjectInteractor.updateStatus(1, "APROBADO");
+
+        assertEquals("APROBADO", response.getStatus());
+        verify(saveProjectPort, times(1)).save(argThat(p -> p.getStatus() == ProjectStatus.APPROVED));
+    }
+
+    @Test
+    void testUpdateStatus_InvalidStatus() {
+        Project existing = Project.builder().id(1).status(ProjectStatus.POSTULATED).build();
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(existing));
+
+        assertThrows(BusinessRuleValidationException.class,
+                () -> createProjectInteractor.updateStatus(1, "INVALID_STATUS"));
+    }
+
+    @Test
+    void validateInvariants_WhenBudgetIsNull_ThrowsException() {
+        Project project = Project.builder()
+                .title("Test")
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenTitleIsNull_ThrowsException() {
+        Project project = Project.builder()
+                .budget(new BigDecimal("100"))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenStartDateIsNull_ThrowsException() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(new BigDecimal("100"))
+                .endDate(LocalDate.of(2026, Month.JANUARY, 10))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
+    }
+
+    @Test
+    void validateInvariants_WhenEndDateIsNull_ThrowsException() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(new BigDecimal("100"))
+                .startDate(LocalDate.of(2026, Month.JANUARY, 1))
+                .build();
+        assertThrows(BusinessRuleValidationException.class, project::validateInvariants);
     }
 }

@@ -1,0 +1,31 @@
+refactor: corregir code smells reportados por SonarQube
+
+Importaciones no utilizadas:
+- Eliminados imports en LocaleConfigTest (MessageSource, ResourceBundleMessageSource, LocalValidatorFactoryBean)
+- Eliminado import LocaleContextHolder en GlobalExceptionHandlerTest
+- Eliminado import Locale no utilizado en GlobalExceptionHandler
+- Eliminados imports no utilizados en SpringDataResearchGroupLineRepository (Modifying, Query, Param)
+- Eliminado import BeforeEach no utilizado en ListResearchGroupsByLineUseCaseTest
+- Eliminados imports Mockito, Collections, anyLong, anyInt en CreateProjectInteractorTest
+
+Refactorizaciones:
+- Reemplazada lambda por referencia a metodo en SaveCallAdapter (lineRepository::findById)
+- Refactorizado ResearchCall con patron Builder para evitar constructor de 8 parametros
+- Refactorizado Evaluacion con patron Builder para evitar constructor y metodo de 9 parametros
+- Sustituido constructor de 9 parametros en ResearchLineController por @RequiredArgsConstructor
+- Fusionado if anidado en EnvLoaderConfig.cleanEnvValue()
+
+Constructores vacios:
+- Agregado UnsupportedOperationException en constructores privados de:
+  EvaluacionPersistenceMapper, ProgressReportMapper, JsonbHelper, ProcedureMapper
+
+Fechas y zonas horarias:
+- Agregado ZoneId.systemDefault() en todos los LocalDateTime.now() de Evaluacion
+- Reemplazados literales enteros de mes por constantes Month en ProjectEntityTest
+
+Convenciones de Mockito en tests:
+- Reemplazado Mockito.mock() por import estatico mock() en:
+  ResearchCallControllerTest, DeactivateDocumentUseCaseTest, DocumentUseCaseTest,
+  DocumentRepositoryAdapterTest, DocumentControllerTest, ProjectModuleTest,
+  ProjectProcedureAdapterTest
+- Reemplazados org.mockito.Mockito.when/lenient por imports estaticos en mismos archivos

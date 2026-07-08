@@ -8,7 +8,7 @@ import com.sgi.fiis.documentacion.domain.port.FileStoragePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -29,8 +29,8 @@ class DocumentUseCaseTest {
     @BeforeEach
     void setUp() {
         // Simulamos los puertos (APIs externas/infraestructura) usando Mockito
-        this.documentRepositoryPort = Mockito.mock(DocumentRepositoryPort.class);
-        this.fileStoragePort = Mockito.mock(FileStoragePort.class);
+        this.documentRepositoryPort = mock(DocumentRepositoryPort.class);
+        this.fileStoragePort = mock(FileStoragePort.class);
 
         // Instanciamos tus casos de uso bajo entorno aislado
         this.uploadDocumentUseCase = new UploadDocumentUseCase(documentRepositoryPort, fileStoragePort);

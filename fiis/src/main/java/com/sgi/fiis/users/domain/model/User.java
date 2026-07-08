@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  * Pure domain entity for User.
@@ -39,7 +40,7 @@ public class User {
      */
     public void activate() {
         this.active = true;
-        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        this.updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     /**
@@ -47,7 +48,7 @@ public class User {
      */
     public void deactivate() {
         this.active = false;
-        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        this.updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     /**
@@ -74,7 +75,7 @@ public class User {
      */
     public void markPasswordChangeRequired() {
         this.mustChangePassword = true;
-        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        this.updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     /**
@@ -82,7 +83,7 @@ public class User {
      */
     public void confirmPasswordChange() {
         this.mustChangePassword = false;
-        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        this.updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     private String normalizeText(String text) {

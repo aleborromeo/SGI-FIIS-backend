@@ -64,7 +64,7 @@ public class SaveCallAdapter implements SaveCallPort {
             return false;
         }
         long activeCount = lineIds.stream()
-                .map(id -> lineRepository.findById(id))
+                .map(lineRepository::findById)
                 .filter(opt -> opt.isPresent() && opt.get().isActive())
                 .count();
         return activeCount == lineIds.size();

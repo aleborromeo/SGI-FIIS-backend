@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-@Entity(name = "SharedDocumentEntity")
+@Entity
 @Table(name = "documentos")
 @Getter
 @Setter
