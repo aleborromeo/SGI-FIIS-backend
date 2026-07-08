@@ -53,6 +53,18 @@ class ResearchLineControllerTest {
     private ResearchLineMapper mapper;
 
     @MockitoBean
+    private AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase;
+
+    @MockitoBean
+    private RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase;
+
+    @MockitoBean
+    private com.sgi.fiis.grupos_investigacion.application.usecase.ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase;
+
+    @MockitoBean
+    private com.sgi.fiis.grupos_investigacion.presentation.mapper.ResearchGroupMapper groupMapper;
+
+    @MockitoBean
     private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
 
     @MockitoBean
@@ -142,5 +154,21 @@ class ResearchLineControllerTest {
                         .content("{\"active\": true}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(true));
+    }
+
+    @Test
+    void changeStatus_shouldReturn200_whenDeactivatesLine() throws Exception {
+        ResearchLine line = ResearchLine.builder().id(1).active(false).build();
+        ResearchLineResponseDto response = ResearchLineResponseDto.builder()
+                .id(1).active(false).build();
+
+        given(changeResearchLineStatusUseCase.execute(1, false)).willReturn(line);
+        given(mapper.toResponseDto(any())).willReturn(response);
+
+        mockMvc.perform(patch("/api/v1/research-lines/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"active\": false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false));
     }
 }

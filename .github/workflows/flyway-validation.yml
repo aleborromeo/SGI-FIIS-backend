@@ -21,46 +21,60 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      # 1. Crear el archivo .env en la RAÍZ del proyecto
+      # 1. Crear el archivo .env en la RAÍZ del proyecto para Docker
       - name: Create .env file
         run: |
           echo "${{ secrets.DOTENV_FILE }}" > .env
 
-      # 2. Construir los contenedores
+      # 2. Convertir el contenido del secreto en variables de entorno del runner (Para Maven)
+      - name: Load .env into GitHub Actions Environment
+        run: |
+          while IFS= read -r line || [ -n "$line" ]; do
+            # Ignorar líneas vacías o comentarios
+            if [[ ! -z "$line" && ! "$line" =~ ^# ]]; then
+              echo "$line" >> $GITHUB_ENV
+            fi
+          done < .env
+          
+          # Forzamos a que apunte al puerto del host mapeado por Docker y desactivamos Flyway en el test local de Maven
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/db_fiis_investigacion" >> $GITHUB_ENV
+          echo "SPRING_FLYWAY_ENABLED=false" >> $GITHUB_ENV
+
+      # 3. Construir los contenedores
       - name: Build containers
         run: docker compose build
 
-      # 3. Levantar la base de datos y la API
+      # 4. Levantar la base de datos y la API
       - name: Start containers
         run: docker compose up -d
 
-      # 4. Esperar a que la base de datos inicie por completo
+      # 5. Esperar a que la base de datos inicie por completo
       - name: Wait for database startup
         run: |
           echo "Esperando que la base de datos y los servicios estén listos..."
           sleep 30
 
-      # 5. Ejecutar los tests unitarios e integrados dentro de la carpeta fiis
+      # 6. Ejecutar los tests (Ahora heredan automáticamente todo el bloque .env de forma segura)
       - name: Run unit and integration tests
         working-directory: ./fiis
         run: mvn clean test
 
-      # 6. Verificar que el contenedor backend siga vivo
+      # 7. Verificar que el contenedor backend siga vivo
       - name: Verify backend container
         run: |
           docker ps
-          if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api)" != "true" ]; then
+          if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api-dev)" != "true" ]; then
             echo "El contenedor backend no está ejecutándose."
-            docker logs sgifiis-backend-api
+            docker logs sgifiis-backend-api-dev
             exit 1
           fi
 
-      # 7. Si algo falla en los tests, muestra los logs de Spring
+      # 8. Si algo falla en los tests, muestra los logs de Spring
       - name: Show backend logs
         if: failure()
-        run: docker logs sgifiis-backend-api
+        run: docker logs sgifiis-backend-api-dev
 
-      # 8. Limpieza absoluta (Corregido: docker compose lee el .env de la raíz automáticamente)
+      # 9. Limpieza absoluta
       - name: Stop containers
         if: always()
         run: docker compose down -v

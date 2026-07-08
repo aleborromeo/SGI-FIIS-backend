@@ -7,6 +7,7 @@ import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 /**
@@ -53,7 +54,7 @@ public class OAuthUserHandlerAdapter implements OAuthUserHandlerPort {
         String firstNames = parts[0];
         String lastNames = parts.length > 1 ? parts[1] : "";
 
-        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
         User newUser = User.builder()
                 .dni(dniPlaceholder)

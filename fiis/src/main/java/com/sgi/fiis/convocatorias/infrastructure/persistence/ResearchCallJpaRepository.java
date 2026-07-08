@@ -1,0 +1,8 @@
+package com.sgi.fiis.convocatorias.infrastructure.persistence;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface ResearchCallJpaRepository extends JpaRepository<ResearchCallEntity, Integer> {
+    List<ResearchCallEntity> findByStatus(String status);
+}

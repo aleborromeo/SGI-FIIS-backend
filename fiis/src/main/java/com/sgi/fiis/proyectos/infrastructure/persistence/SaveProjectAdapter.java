@@ -1,0 +1,231 @@
+package com.sgi.fiis.proyectos.infrastructure.persistence;
+
+import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
+import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallJpaRepository;
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipEntity;
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
+import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
+import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
+import com.sgi.fiis.proyectos.application.ports.out.SaveProjectPort;
+import com.sgi.fiis.proyectos.domain.model.Project;
+import com.sgi.fiis.proyectos.domain.model.ProjectMember;
+import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
+import com.sgi.fiis.shared.infrastructure.persistence.JsonbHelper;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+
+@Component
+public class SaveProjectAdapter implements SaveProjectPort {
+
+    private final ProjectJpaRepository projectRepository;
+    private final ResearchLineJpaRepository lineRepository;
+    private final ResearchGroupJpaRepository groupRepository;
+    private final SpringDataUserRepository userRepository;
+    private final ResearchCallJpaRepository callRepository;
+    private final GroupMembershipJpaRepository membershipRepository;
+    private final ProjectMemberJpaRepository projectMemberRepository;
+
+    public SaveProjectAdapter(ProjectJpaRepository projectRepository,
+                               ResearchLineJpaRepository lineRepository,
+                               ResearchGroupJpaRepository groupRepository,
+                               SpringDataUserRepository userRepository,
+                              ResearchCallJpaRepository callRepository,
+                              GroupMembershipJpaRepository membershipRepository,
+                              ProjectMemberJpaRepository projectMemberRepository) {
+        this.projectRepository = projectRepository;
+        this.lineRepository = lineRepository;
+        this.groupRepository = groupRepository;
+        this.userRepository = userRepository;
+        this.callRepository = callRepository;
+        this.membershipRepository = membershipRepository;
+        this.projectMemberRepository = projectMemberRepository;
+    }
+
+    @Override
+    public Project save(Project project) {
+        ProjectEntity entity = toEntity(project);
+        ProjectEntity saved = projectRepository.save(entity);
+        return toDomain(saved);
+    }
+
+    @Override
+    public List<Project> findByResponsibleId(Long responsibleId) {
+        return projectRepository.findByResponsibleId(responsibleId).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Project> findAll() {
+        return projectRepository.findAll().stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Project> findById(Integer id) {
+        return projectRepository.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public List<Project> findByGroupId(Integer groupId) {
+        return projectRepository.findByGroupId(groupId).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<String> getGroupCode(Integer groupId) {
+        return groupRepository.findById(groupId)
+                .map(ResearchGroupEntity::getGroupCode);
+    }
+
+    @Override
+    public Optional<String> getLineName(Integer lineId) {
+        return lineRepository.findById(lineId)
+                .map(ResearchLineEntity::getLineName);
+    }
+
+    @Override
+    public boolean isUserMemberOfGroup(Long userId, Integer groupId) {
+        // Query database to see if there is an active membership for user in research group
+        return membershipRepository.findByUserIdAndGroupId(userId, groupId)
+                .map(GroupMembershipEntity::getActive)
+                .orElse(false);
+    }
+
+    @Override
+    public boolean isGroupActive(Integer groupId) {
+        return groupRepository.findById(groupId)
+                .map(ResearchGroupEntity::isActive)
+                .orElse(false);
+    }
+
+    @Override
+    public void saveMembers(Integer projectId, List<ProjectMember> members) {
+        projectMemberRepository.deleteByProjectId(projectId);
+        ProjectEntity projectEntity = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found with ID: " + projectId));
+
+        for (ProjectMember member : members) {
+            UserEntity user = userRepository.findById(member.getUserId().longValue())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + member.getUserId()));
+
+            ProjectMemberEntity entity = ProjectMemberEntity.builder()
+                    .project(projectEntity)
+                    .user(user)
+                    .role(member.getRole() != null ? member.getRole() : "INVESTIGADOR")
+                    .build();
+            projectMemberRepository.save(entity);
+        }
+    }
+
+    @Override
+    public List<ProjectMember> findMembersByProjectId(Integer projectId) {
+        return projectMemberRepository.findByProjectId(projectId).stream()
+                .map(e -> new ProjectMember(e.getId(), projectId, e.getUser().getId().intValue(), e.getRole()))
+                .toList();
+    }
+
+    @Override
+    public boolean isLineActive(Integer lineId) {
+        return lineRepository.findById(lineId)
+                .map(ResearchLineEntity::isActive)
+                .orElse(false);
+    }
+
+    private ProjectEntity toEntity(Project domain) {
+        ResearchLineEntity line = lineRepository.findById(domain.getResearchLineId())
+                .orElseThrow(() -> new IllegalArgumentException("Research line not found with ID: " + domain.getResearchLineId()));
+
+        ResearchGroupEntity group = groupRepository.findById(domain.getResearchGroupId())
+                .orElseThrow(() -> new IllegalArgumentException("Research group not found with ID: " + domain.getResearchGroupId()));
+
+        UserEntity responsible = userRepository.findById(domain.getResponsibleId())
+                .orElseThrow(() -> new IllegalArgumentException("Responsible user not found with ID: " + domain.getResponsibleId()));
+
+        ResearchCallEntity call = null;
+        if (domain.getCallId() != null) {
+            call = callRepository.findById(domain.getCallId())
+                    .orElseThrow(() -> new IllegalArgumentException("Research call not found with ID: " + domain.getCallId()));
+        }
+
+        String dbStatus = "POSTULADO";
+        if (domain.getStatus() == ProjectStatus.OBSERVED) {
+            dbStatus = "OBSERVADO";
+        } else if (domain.getStatus() == ProjectStatus.APPROVED) {
+            dbStatus = "APROBADO";
+        } else if (domain.getStatus() == ProjectStatus.REJECTED) {
+            dbStatus = "RECHAZADO";
+        } else if (domain.getStatus() == ProjectStatus.IN_PROGRESS) {
+            dbStatus = "EN_EJECUCION";
+        } else if (domain.getStatus() == ProjectStatus.COMPLETED) {
+            dbStatus = "FINALIZADO";
+        }
+
+        return ProjectEntity.builder()
+                .id(domain.getId())
+                .code(domain.getCode())
+                .title(domain.getTitle())
+                .summary(domain.getSummary())
+                .generalObjective(domain.getGeneralObjective())
+                .titleJson(JsonbHelper.toJson(Map.of("es", domain.getTitle() != null ? domain.getTitle() : "")))
+                .summaryJson(JsonbHelper.toJson(Map.of("es", domain.getSummary() != null ? domain.getSummary() : "")))
+                .generalObjectiveJson(JsonbHelper.toJson(Map.of("es", domain.getGeneralObjective() != null ? domain.getGeneralObjective() : "")))
+                .executionPlaceJson(JsonbHelper.toJson(Map.of("es", domain.getExecutionPlace() != null ? domain.getExecutionPlace() : "")))
+                .researchLine(line)
+                .group(group)
+                .budget(domain.getBudget())
+                .startDate(domain.getStartDate())
+                .endDate(domain.getEndDate())
+                .executionPlace(domain.getExecutionPlace())
+                .responsible(responsible)
+                .researchCall(call)
+                .documentId(domain.getDocumentId())
+                .status(dbStatus)
+                .build();
+    }
+
+    private Project toDomain(ProjectEntity entity) {
+        ProjectStatus domainStatus = ProjectStatus.POSTULATED;
+        if ("OBSERVADO".equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.OBSERVED;
+        } else if ("APROBADO".equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.APPROVED;
+        } else if ("RECHAZADO".equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.REJECTED;
+        } else if ("EN_EJECUCION".equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.IN_PROGRESS;
+        } else if ("FINALIZADO".equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.COMPLETED;
+        }
+
+        return new Project(
+                entity.getId(),
+                entity.getCode(),
+                JsonbHelper.getText(entity.getTitleJson(), "es"),
+                JsonbHelper.getText(entity.getSummaryJson(), "es"),
+                JsonbHelper.getText(entity.getGeneralObjectiveJson(), "es"),
+                entity.getResearchLine() != null ? entity.getResearchLine().getId() : null,
+                entity.getResearchLine() != null ? entity.getResearchLine().getLineName() : "Sin asignar",
+                entity.getBudget(),
+                entity.getStartDate(),
+                entity.getEndDate(),
+                JsonbHelper.getText(entity.getExecutionPlaceJson(), "es"),
+                entity.getResponsible() != null ? entity.getResponsible().getId() : null,
+                entity.getGroup() != null ? entity.getGroup().getId() : null,
+                entity.getGroup() != null ? entity.getGroup().getGroupCode() : "Sin asignar",
+                entity.getResearchCall() != null ? entity.getResearchCall().getId() : null,
+                entity.getDocumentId(),
+                domainStatus
+        );
+    }
+}

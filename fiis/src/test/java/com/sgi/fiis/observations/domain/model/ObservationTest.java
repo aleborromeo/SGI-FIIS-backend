@@ -12,7 +12,7 @@ class ObservationTest {
     @DisplayName("Should create a valid Observation with PENDING status")
     void shouldCreateValidObservation() {
         Observation obs = Observation.create(
-                1, 10, ObservationType.TECHNICAL,
+                1, 10, ObservationType.TECNICA,
                 "Falta firma", "COORDINADOR_GRUPO"
         );
 
@@ -20,9 +20,9 @@ class ObservationTest {
         assertNull(obs.getId());
         assertEquals(1, obs.getProcedureId());
         assertEquals(10, obs.getReviewerId());
-        assertEquals(ObservationType.TECHNICAL, obs.getType());
+        assertEquals(ObservationType.TECNICA, obs.getType());
         assertEquals("Falta firma", obs.getDescription());
-        assertEquals(ObservationStatus.PENDING, obs.getStatus());
+        assertEquals(ObservationStatus.PENDIENTE, obs.getStatus());
         assertEquals("COORDINADOR_GRUPO", obs.getReviewerRole());
         assertNotNull(obs.getCreatedAt());
         assertNotNull(obs.getUpdatedAt());
@@ -32,7 +32,7 @@ class ObservationTest {
     @DisplayName("Should change status to REMEDIED when marking as remedied")
     void shouldMarkAsRemedied() {
         Observation obs = Observation.create(
-                1, 10, ObservationType.TECHNICAL,
+                1, 10, ObservationType.TECNICA,
                 "Falta firma", "COORDINADOR_GRUPO"
         );
 
@@ -40,7 +40,7 @@ class ObservationTest {
         boolean result = obs.markAsRemedied();
 
         assertTrue(result);
-        assertEquals(ObservationStatus.REMEDIED, obs.getStatus());
+        assertEquals(ObservationStatus.SUBSANADA, obs.getStatus());
         assertFalse(obs.isRemediable());
     }
 
@@ -48,13 +48,13 @@ class ObservationTest {
     @DisplayName("Should fail to mark as remedied if already remedied")
     void shouldFailToMarkIfAlreadyRemedied() {
         Observation obs = Observation.builder()
-                .status(ObservationStatus.REMEDIED)
+                .status(ObservationStatus.SUBSANADA)
                 .build();
 
         assertFalse(obs.isRemediable());
         boolean result = obs.markAsRemedied();
 
         assertFalse(result);
-        assertEquals(ObservationStatus.REMEDIED, obs.getStatus());
+        assertEquals(ObservationStatus.SUBSANADA, obs.getStatus());
     }
 }

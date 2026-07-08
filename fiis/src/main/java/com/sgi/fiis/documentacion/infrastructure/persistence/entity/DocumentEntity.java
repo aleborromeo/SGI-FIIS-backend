@@ -3,7 +3,7 @@ package com.sgi.fiis.documentacion.infrastructure.persistence.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "DocumentacionDocumentEntity")
 @Table(name = "documentos")
 public class DocumentEntity {
 

@@ -61,13 +61,13 @@ public class OpenApiConfig {
 
     // --- MÓDULOS DEL CORE ---
 
-    // El Backend Unificado al completo (Auth, Users, Documentos)
+    // El Backend Unificado al completo (Auth, Users, Documentos, etc.)
     @Bean
     public GroupedOpenApi allApi() {
         return GroupedOpenApi.builder()
                 .group("all-apis")
-                .pathsToMatch("/api/**")
-                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion", "com.sgi.fiis.grupos_investigacion", "com.sgi.fiis.lineas_investigacion", "com.sgi.fiis.dashboards", "com.sgi.fiis.reportes", "com.sgi.fiis.observations")
+                .pathsToMatch("/**")
+                .packagesToScan("com.sgi.fiis")
                 .build();
     }
 
@@ -109,21 +109,23 @@ public class OpenApiConfig {
                 .build();
     }
 
-    // Flujo de Trámites
+    // Procedures (Academic Workflow)
     @Bean
-    public GroupedOpenApi tramitesApi() {
+    public GroupedOpenApi proceduresApi() {
         return GroupedOpenApi.builder()
-                .group("tramites")
-                .pathsToMatch("/api/tramites/**")
+                .group("procedures")
+                .pathsToMatch("/api/v1/procedures/**")
+                .packagesToScan("com.sgi.fiis.tramites")
                 .build();
     }
 
-    // Planes de Tesis
+    // Planes de Tesis e Informes de Tesis
     @Bean
     public GroupedOpenApi thesisApi() {
         return GroupedOpenApi.builder()
                 .group("thesis")
-                .pathsToMatch("/api/thesis/**")
+                .pathsToMatch("/api/v1/thesis/**")
+                .packagesToScan("com.sgi.fiis.thesis")
                 .build();
     }
 
@@ -132,7 +134,7 @@ public class OpenApiConfig {
     public GroupedOpenApi progressReportsApi() {
         return GroupedOpenApi.builder()
                 .group("progress-reports")
-                .pathsToMatch("/api/progressreports/**")
+                .pathsToMatch("/api/progress-reports/**")
                 .build();
     }
 
@@ -141,7 +143,7 @@ public class OpenApiConfig {
     public GroupedOpenApi resolutionsApi() {
         return GroupedOpenApi.builder()
                 .group("resolutions")
-                .pathsToMatch("/api/resolutions/**")
+                .pathsToMatch("/api/v1/resolutions/**", "/api/resolutions/**")
                 .build();
     }
 
@@ -159,7 +161,7 @@ public class OpenApiConfig {
     public GroupedOpenApi observationsApi() {
         return GroupedOpenApi.builder()
                 .group("observations")
-                .pathsToMatch("/api/observations/**")
+                .pathsToMatch("/api/v1/observations/**", "/api/observations/**")
                 .build();
     }
 
@@ -177,7 +179,7 @@ public class OpenApiConfig {
     public GroupedOpenApi reportsApi() {
         return GroupedOpenApi.builder()
                 .group("reports")
-                .pathsToMatch("/api/reportes/**")
+                .pathsToMatch("/api/reportes/**", "/api/v1/reportes/**")
                 .build();
     }
 }

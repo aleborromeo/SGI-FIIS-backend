@@ -6,7 +6,7 @@
 
 # Tipo de cambio
 
-- [ ] Feature
+- [x] Feature
 - [ ] Bug Fix
 - [ ] Refactor
 - [ ] Documentation
@@ -16,8 +16,8 @@
 
 # Checklist
 
-- [ ] El proyecto compila correctamente
+- [x] El proyecto compila correctamente
 - [ ] No rompe endpoints existentes
 - [ ] Probado con Docker
-- [ ] Se realizó pull antes del push
+- [x] Se realizó pull antes del push
 - [ ] Código revisado

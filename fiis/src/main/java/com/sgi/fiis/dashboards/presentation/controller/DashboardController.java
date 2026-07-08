@@ -66,7 +66,7 @@ public class DashboardController {
      * Global view: users, groups, projects, procedures and resolutions.
      */
     @GetMapping("/admin/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN')")
     public ResponseEntity<DashboardAdminResponse> getAdminDashboard(
             @PathVariable Integer userId,
             Authentication authentication) {

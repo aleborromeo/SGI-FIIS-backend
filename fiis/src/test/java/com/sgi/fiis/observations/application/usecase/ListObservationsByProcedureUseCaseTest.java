@@ -42,9 +42,9 @@ class ListObservationsByProcedureUseCaseTest {
                 .id(100)
                 .procedureId(procedureId)
                 .reviewerId(10)
-                .type(ObservationType.TECHNICAL)
+                .type(ObservationType.TECNICA)
                 .description("Falta firma")
-                .status(ObservationStatus.PENDING)
+                .status(ObservationStatus.PENDIENTE)
                 .reviewerRole("COORDINADOR_GRUPO")
                 .createdAt(ahora)
                 .updatedAt(ahora)
@@ -59,8 +59,8 @@ class ListObservationsByProcedureUseCaseTest {
         ObservationResponseDTO response = result.get(0);
         assertEquals(100, response.getId());
         assertEquals(1, response.getProcedureId());
-        assertEquals("TECHNICAL", response.getType());
-        assertEquals("PENDING", response.getStatus());
+        assertEquals("TECNICA", response.getType());
+        assertEquals("PENDIENTE", response.getStatus());
         assertEquals("COORDINADOR_GRUPO", response.getReviewerRole());
 
         verify(observationRepository, times(1)).findByProcedureId(procedureId);

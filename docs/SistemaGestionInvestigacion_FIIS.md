@@ -96,7 +96,7 @@ sgifiis/                                         ← Raíz del proyecto
 ## 4. Módulo de ejemplo completo: `tramites`
 
 > **Responsable:** marco  
-> **Requisitos cubiertos:** RF-54 al RF-64, RN-04, RN-0
+> **Requisitos cubiertos:** RF-54 al RF-64, RN-04, RN-07
 
 Este módulo gestiona el **flujo de revisión**: Docente/Estudiante → Coordinador → Director → Decano.
 
