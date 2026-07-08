@@ -15,8 +15,8 @@ import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,13 +26,22 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     private final SaveProjectPort saveProjectPort;
     private final SaveCallPort saveCallPort;
     private final CreateProcedurePort createProcedurePort;
+    private final Clock clock;
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
             SaveCallPort saveCallPort,
             CreateProcedurePort createProcedurePort) {
+        this(saveProjectPort, saveCallPort, createProcedurePort, Clock.systemUTC());
+    }
+
+    public CreateProjectInteractor(SaveProjectPort saveProjectPort,
+            SaveCallPort saveCallPort,
+            CreateProcedurePort createProcedurePort,
+            Clock clock) {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
+        this.clock = clock;
     }
 
     @Override
@@ -69,11 +78,11 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                             "proyectos.error.call-not-found", request.getCallId()));
 
             // Validate that call is open and current date is within range
-            call.validateCanSubmitProject(LocalDate.now(ZoneId.of("UTC")));
+            call.validateCanSubmitProject(LocalDate.now(clock));
         }
 
         // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
-        String generatedCode = "PRJ-" + LocalDate.now(ZoneId.of("UTC")).getYear() + "-"
+        String generatedCode = "PRJ-" + LocalDate.now(clock).getYear() + "-"
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 7. Create domain model

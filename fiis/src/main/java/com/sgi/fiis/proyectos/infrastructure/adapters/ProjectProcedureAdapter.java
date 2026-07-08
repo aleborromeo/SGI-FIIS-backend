@@ -37,6 +37,9 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
                 .orElseThrow(() -> new BusinessRuleValidationException("Project not found with ID: " + project.getId()));
 
         UserEntity applicant = projectEntity.getResponsible();
+        if (applicant == null) {
+            throw new BusinessRuleValidationException("Project responsible must not be null");
+        }
         ResearchGroupEntity group = projectEntity.getGroup();
 
         // 1. Generate unique procedure code (max 30 chars). Format: TRM-YYYY-[UUID-8]
@@ -48,7 +51,7 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
                 .procedureType("PROYECTO")
                 .applicant(applicant)
                 .group(group)
-                .status("PENDING_COORDINATOR")
+                .status("PENDIENTE_COORDINADOR")
                 .reviewerRole("COORDINADOR_GRUPO")
                 .sentAt(LocalDateTime.now(ZoneId.of("UTC")))
                 .updatedAt(LocalDateTime.now(ZoneId.of("UTC")))
@@ -62,9 +65,9 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
                 .procedure(savedProcedure)
                 .actionUser(applicant)
                 .action("CREAR")
-                .previousState("REGISTERED")
-                .newState("PENDING_COORDINATOR")
-                .comment("PostulaciÃƒÂ³n de proyecto de investigaciÃƒÂ³n registrada automÃƒÂ¡ticamente.")
+                .previousState("REGISTRADO")
+                .newState("PENDIENTE_COORDINADOR")
+                .comment("Postulacion de proyecto de investigacion registrada automaticamente.")
                 .movementAt(LocalDateTime.now(ZoneId.of("UTC")))
                 .build();
 
