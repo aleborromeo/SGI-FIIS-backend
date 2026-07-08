@@ -1,0 +1,4 @@
+test: incrementar cobertura en adaptadores de trámites
+
+- Se agregaron tests para escenarios donde las relaciones de un trámite son nulas (applicant, group, references) en ProcedureRepositoryAdapter.
+- Se agregó test para el escenario de ActionUser nulo en ProcedureMovementRepositoryAdapter.

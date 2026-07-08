@@ -146,4 +146,65 @@ class ProcedureRepositoryAdapterTest {
         assertTrue(adapter.existsByCode("TRM-2026-001"));
         verify(tramiteRepository).existsByCode("TRM-2026-001");
     }
+
+    @Test
+    @DisplayName("save: handles null values correctly")
+    void save_handlesNullValuesCorrectly() {
+        Procedure minimalDomain = Procedure.builder()
+                .codigoTramite("TRM-MINIMAL")
+                .tipoTramite(ProcedureType.INFORME_AVANCE)
+                .estadoActual(ProcedureStatus.REGISTRADO)
+                .fechaEnvio(FECHA)
+                .fechaActualizacion(FECHA)
+                .movimientos(new ArrayList<>())
+                .build();
+                
+        ProcedureEntity minimalEntity = new ProcedureEntity();
+        minimalEntity.setId(1);
+        minimalEntity.setCode("TRM-MINIMAL");
+        minimalEntity.setProcedureType("INFORME_AVANCE");
+        minimalEntity.setStatus("REGISTRADO");
+        minimalEntity.setSentAt(FECHA);
+        minimalEntity.setUpdatedAt(FECHA);
+        
+        when(tramiteRepository.save(any())).thenReturn(minimalEntity);
+        
+        Procedure result = adapter.save(minimalDomain);
+        
+        assertEquals(1L, result.getId());
+        assertNull(result.getIdSolicitante());
+        assertNull(result.getIdGrupo());
+        assertNull(result.getRolRevisorActual());
+        assertNull(result.getIdReferenciaProyecto());
+    }
+    
+    @Test
+    @DisplayName("save: handles movements with null action user")
+    void save_handlesMovementsWithNullActionUser() {
+        List<com.sgi.fiis.tramites.domain.model.ProcedureMovement> movs = new ArrayList<>();
+        movs.add(com.sgi.fiis.tramites.domain.model.ProcedureMovement.builder()
+                .accion("SISTEMA_AUTO")
+                .estadoAnterior(ProcedureStatus.REGISTRADO)
+                .estadoNuevo(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .fechaMovimiento(FECHA)
+                .build());
+                
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .codigoTramite("TRM-2026-001")
+                .tipoTramite(ProcedureType.PROYECTO)
+                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movimientos(movs)
+                .build();
+                
+        when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
+        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
+        when(movimientoRepository.save(any())).thenReturn(null);
+        
+        Procedure result = adapter.save(domain);
+        
+        assertEquals(1, result.getMovements().size());
+        assertNull(result.getMovements().get(0).getIdUsuarioAccion());
+        verify(movimientoRepository, times(1)).save(any());
+    }
 }

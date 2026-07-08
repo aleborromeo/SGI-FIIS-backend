@@ -62,4 +62,17 @@ class ProcedureMovementRepositoryAdapterTest {
 
         assertTrue(adapter.findByProcedureId(99L).isEmpty());
     }
+
+    @Test
+    @DisplayName("findByProcedureId: handles null ActionUser correctly")
+    void findByProcedureId_nullActionUser() {
+        ProcedureMovementEntity e = buildMovementEntity();
+        e.setActionUser(null);
+        when(repository.findByProcedureIdOrderByDateAsc(2)).thenReturn(List.of(e));
+
+        List<ProcedureMovement> result = adapter.findByProcedureId(2L);
+
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getIdUsuarioAccion());
+    }
 }
