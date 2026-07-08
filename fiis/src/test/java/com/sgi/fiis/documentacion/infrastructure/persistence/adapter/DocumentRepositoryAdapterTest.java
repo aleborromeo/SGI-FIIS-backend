@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -23,7 +23,7 @@ class DocumentRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        this.jpaDocumentRepository = Mockito.mock(JpaDocumentRepository.class);
+        this.jpaDocumentRepository = mock(JpaDocumentRepository.class);
         this.documentRepositoryAdapter = new DocumentRepositoryAdapter(jpaDocumentRepository);
     }
 

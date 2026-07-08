@@ -10,7 +10,7 @@ import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+
 
 import java.util.Optional;
 
@@ -27,9 +27,9 @@ class ProjectProcedureAdapterTest {
 
     @BeforeEach
     void setUp() {
-        projectRepository = Mockito.mock(ProjectJpaRepository.class);
-        procedureRepository = Mockito.mock(SpringDataProcedureRepository.class);
-        movementRepository = Mockito.mock(ProcedureMovementJpaRepository.class);
+        projectRepository = mock(ProjectJpaRepository.class);
+        procedureRepository = mock(SpringDataProcedureRepository.class);
+        movementRepository = mock(ProcedureMovementJpaRepository.class);
         adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository);
     }
 

@@ -34,9 +34,11 @@ class ResearchGroupRepositoryAdapterTest {
     private ResearchGroupEntity getTestGroupEntity() {
         ResearchGroupEntity entity = new ResearchGroupEntity();
         entity.setId(1);
-        entity.setGroupCode("GI-001");
-        entity.setGroupName("Grupo de Inteligencia Artificial");
-        entity.setCurrentCoordinatorId(10);
+        entity.setCode("GI-001");
+        entity.setName("Grupo de Inteligencia Artificial");
+        com.sgi.fiis.users.infrastructure.persistence.UserEntity coordinator = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        coordinator.setId(10L);
+        entity.setCurrentCoordinator(coordinator);
         entity.setActive(true);
         return entity;
     }
@@ -91,7 +93,7 @@ class ResearchGroupRepositoryAdapterTest {
                 .build();
 
         ResearchGroupEntity entity = getTestGroupEntity();
-        entity.setCurrentCoordinatorId(null);
+        entity.setCurrentCoordinator(null);
 
         when(jpaRepository.save(any(ResearchGroupEntity.class))).thenReturn(entity);
 
@@ -171,7 +173,7 @@ class ResearchGroupRepositoryAdapterTest {
     @Test
     @DisplayName("Should check if group exists by code")
     void testExistsByCode() {
-        when(jpaRepository.existsByGroupCode("GI-001")).thenReturn(true);
+        when(jpaRepository.existsByCode("GI-001")).thenReturn(true);
 
         assertTrue(adapter.existsByCode("GI-001"));
     }

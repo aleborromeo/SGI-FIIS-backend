@@ -117,12 +117,12 @@ class LoginUseCaseTest {
     @Test
     @DisplayName("Should handle null email gracefully by throwing BadCredentialsException")
     void testLoginNullEmail() {
-        when(userRepository.findByEmail("")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
 
         assertThrows(BadCredentialsException.class, () ->
                 loginUseCase.execute(null, "password"));
 
-        verify(userRepository).findByEmail("");
+        verify(userRepository).findByEmail(null);
         verifyNoInteractions(passwordEncoder, tokenProvider);
     }
 
@@ -137,10 +137,13 @@ class LoginUseCaseTest {
 
         when(userRepository.findByEmail("oauth@unas.edu.pe")).thenReturn(Optional.of(user));
 
+        when(passwordEncoder.matches("password", null)).thenReturn(false);
+
         assertThrows(BadCredentialsException.class, () ->
                 loginUseCase.execute("oauth@unas.edu.pe", "password"));
 
         verify(userRepository).findByEmail("oauth@unas.edu.pe");
-        verifyNoInteractions(passwordEncoder, tokenProvider);
+        verify(passwordEncoder).matches("password", null);
+        verifyNoInteractions(tokenProvider);
     }
 }
