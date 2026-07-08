@@ -1,0 +1,26 @@
+{
+  "properties": [
+    {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret key used to sign JWT tokens (minimum 32 characters)."
+    },
+    {
+      "name": "app.jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "JWT token expiration time in milliseconds."
+    },
+    {
+      "name": "app.mail.mock",
+      "type": "java.lang.Boolean",
+      "description": "When true, email sending is mocked (no real SMTP calls).",
+      "defaultValue": true
+    },
+    {
+      "name": "app.frontend-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the frontend application, used for CORS and redirect links.",
+      "defaultValue": "http://localhost:3000"
+    }
+  ]
+}
