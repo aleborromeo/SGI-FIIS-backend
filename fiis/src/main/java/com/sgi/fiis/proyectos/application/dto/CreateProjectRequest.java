@@ -42,7 +42,6 @@ public class CreateProjectRequest {
     @NotBlank(message = "{proyectos.validation.place.required}")
     private String executionPlace;
 
-    @NotNull(message = "{proyectos.validation.responsible.required}")
     private Integer responsibleId;
 
     @NotNull(message = "{proyectos.validation.group.required}")
