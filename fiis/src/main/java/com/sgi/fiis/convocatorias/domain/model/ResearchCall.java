@@ -1,9 +1,11 @@
 package com.sgi.fiis.convocatorias.domain.model;
 
-import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 /**
  * Domain model representing a research call (convocatoria).
@@ -30,9 +32,10 @@ public class ResearchCall {
         this.endDate = builder.endDate;
         this.status = builder.status;
         this.documentId = builder.documentId;
+        // Mantenemos la inmutabilidad interna de la lista del modelo de dominio
         this.researchLineIds = builder.researchLineIds != null
-                ? new ArrayList<>(builder.researchLineIds)
-                : new ArrayList<>();
+                ? List.copyOf(builder.researchLineIds)
+                : Collections.emptyList();
     }
 
     /** Convenience constructor kept for backward compatibility with existing callers. */
@@ -68,7 +71,12 @@ public class ResearchCall {
         public Builder endDate(LocalDate endDate)               { this.endDate = endDate; return this; }
         public Builder status(CallStatus status)                { this.status = status; return this; }
         public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
-        public Builder researchLineIds(List<Integer> lineIds)   { this.researchLineIds = lineIds; return this; }
+        
+        // CORRECCIÓN DE DEEPSOURCE: Copia defensiva en el Setter del Builder
+        public Builder researchLineIds(List<Integer> lineIds) { 
+            this.researchLineIds = lineIds != null ? new ArrayList<>(lineIds) : null; 
+            return this; 
+        }
 
         public ResearchCall build() { return new ResearchCall(this); }
     }
