@@ -2,7 +2,6 @@ package com.sgi.fiis.convocatorias.domain.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
@@ -32,10 +31,8 @@ public class ResearchCall {
         this.endDate = builder.endDate;
         this.status = builder.status;
         this.documentId = builder.documentId;
-        // Mantenemos la inmutabilidad interna de la lista del modelo de dominio
-        this.researchLineIds = builder.researchLineIds != null
-                ? List.copyOf(builder.researchLineIds)
-                : Collections.emptyList();
+        // Almacenamos una lista completamente inmutable en el dominio
+        this.researchLineIds = List.copyOf(builder.researchLineIds);
     }
 
     /** Convenience constructor kept for backward compatibility with existing callers. */
@@ -60,7 +57,8 @@ public class ResearchCall {
         private LocalDate endDate;
         private CallStatus status;
         private Integer documentId;
-        private List<Integer> researchLineIds;
+        // Inicializamos la lista vacía por defecto para evitar nulos molestos
+        private List<Integer> researchLineIds = new ArrayList<>();
 
         private Builder() {}
 
@@ -72,9 +70,13 @@ public class ResearchCall {
         public Builder status(CallStatus status)                { this.status = status; return this; }
         public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
         
-        // CORRECCIÓN DE DEEPSOURCE: Copia defensiva en el Setter del Builder
+        // SOLUCIÓN DEFINITIVA PARA DEEPSOURCE
         public Builder researchLineIds(List<Integer> lineIds) { 
-            this.researchLineIds = lineIds != null ? new ArrayList<>(lineIds) : null; 
+            if (lineIds == null) {
+                this.researchLineIds = new ArrayList<>();
+            } else {
+                this.researchLineIds = new ArrayList<>(lineIds); 
+            }
             return this; 
         }
 
@@ -86,7 +88,7 @@ public class ResearchCall {
      *
      * @param submissionDate the date the project is being submitted
      * @throws BusinessRuleValidationException if the call is not open or the
-     *                                         date is outside the submission period
+     * date is outside the submission period
      */
     public void validateCanSubmitProject(LocalDate submissionDate) {
         if (status != CallStatus.OPEN) {
