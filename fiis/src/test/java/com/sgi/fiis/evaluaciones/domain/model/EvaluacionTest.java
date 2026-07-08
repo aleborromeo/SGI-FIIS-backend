@@ -109,57 +109,63 @@ class EvaluacionTest {
         );
     }
 
-    @Test
+    @Test 
     void reconstruirConProyectoYPlanTesisDebeLanzarExcepcion() {
-        assertThrows(
-                EvaluacionException.class,
-                () -> Evaluacion.reconstruir(
-                        1L,
-                        1L,
-                        1L,
-                        2L,
-                        null,
-                        null,
-                        null,
-                        LocalDateTime.now(),
-                        null
-                )
-        );
-    }
+        LocalDateTime fechaAsignacion = LocalDateTime.now();
 
-    @Test
+        assertThrows(
+            EvaluacionException.class,
+            () -> Evaluacion.reconstruir(
+                    1L,
+                    1L,
+                    1L,
+                    2L,
+                    null,
+                    null,
+                    null,
+                    fechaAsignacion,
+                    null
+            )
+        );
+     }
+
+    @Test 
     void reconstruirSinProyectoNiPlanTesisDebeLanzarExcepcion() {
+        LocalDateTime fechaAsignacion = LocalDateTime.now();
+
         assertThrows(
-                EvaluacionException.class,
-                () -> Evaluacion.reconstruir(
-                        1L,
-                        null,
-                        null,
-                        2L,
-                        null,
-                        null,
-                        null,
-                        LocalDateTime.now(),
-                        null
-                )
+            EvaluacionException.class,
+            () -> Evaluacion.reconstruir(
+                    1L,
+                    null,
+                    null,
+                    2L,
+                    null,
+                    null,
+                    null,
+                    fechaAsignacion,
+                    null
+            )
         );
     }
 
-    @Test
+    @Test  
     void reconstruirSinEvaluadorDebeLanzarExcepcion() {
+        LocalDateTime fechaAsignacion = LocalDateTime.now();
+
         assertThrows(
-                EvaluacionException.class,
-                () -> Evaluacion.reconstruir(
-                        1L,
-                        1L,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        LocalDateTime.now(),
-                        null
-                )
+            EvaluacionException.class,
+            () -> Evaluacion.reconstruir(
+                    1L,
+                    1L,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    fechaAsignacion,
+                    null
+            )
         );
     }
 
