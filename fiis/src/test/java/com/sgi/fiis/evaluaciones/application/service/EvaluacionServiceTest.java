@@ -349,4 +349,126 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
 
     assertThrows(EvaluacionException.class, () -> evaluacionService.registrarResultado(command));
 }
+
+    @Test
+    void asignarEvaluadorConSoloProyectoValidoDebeCumplirArcoExcluyente() {
+        AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, null, 20L);
+        LocalDateTime fechaAsignacion = LocalDateTime.now();
+
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
+                .thenReturn(false);
+
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenReturn(Evaluacion.reconstruir(
+                        1L,
+                        10L,
+                        null,
+                        20L,
+                        null,
+                        null,
+                        null,
+                        fechaAsignacion,
+                        null
+                ));
+
+        EvaluacionResponse response = evaluacionService.asignarEvaluador(command);
+
+        assertEquals(10L, response.idProyecto());
+        assertNull(response.idPlanTesis());
+        assertEquals(20L, response.idEvaluador());
+        assertTrue(response.pendiente());
+
+        verify(evaluacionRepositoryPort).existeEvaluacionPendienteParaProyecto(10L, 20L);
+        verify(evaluacionRepositoryPort, never()).existeEvaluacionPendienteParaPlanTesis(any(), any());
+        verify(evaluacionRepositoryPort).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void asignarEvaluadorConSoloPlanTesisValidoDebeCumplirArcoExcluyente() {
+        AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 30L, 20L);
+        LocalDateTime fechaAsignacion = LocalDateTime.now();
+
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(30L, 20L))
+                .thenReturn(false);
+
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenReturn(Evaluacion.reconstruir(
+                        1L,
+                        null,
+                        30L,
+                        20L,
+                        null,
+                        null,
+                        null,
+                        fechaAsignacion,
+                        null
+                ));
+
+        EvaluacionResponse response = evaluacionService.asignarEvaluador(command);
+
+        assertNull(response.idProyecto());
+        assertEquals(30L, response.idPlanTesis());
+        assertEquals(20L, response.idEvaluador());
+        assertTrue(response.pendiente());
+
+        verify(evaluacionRepositoryPort).existeEvaluacionPendienteParaPlanTesis(30L, 20L);
+        verify(evaluacionRepositoryPort, never()).existeEvaluacionPendienteParaProyecto(any(), any());
+        verify(evaluacionRepositoryPort).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void asignarEvaluadorConProyectoYPlanTesisDebeRechazarArcoExcluyente() {
+        AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, 30L, 20L);
+
+        EvaluacionException exception = assertThrows(
+                EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluador(command)
+        );
+
+        assertEquals(
+                "Debe asignar la evaluación a un proyecto o a un plan de tesis, no a ambos.",
+                exception.getMessage()
+        );
+
+        verify(evaluacionRepositoryPort, never()).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void asignarEvaluadorSinProyectoNiPlanTesisDebeRechazarArcoExcluyente() {
+        AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, null, 20L);
+
+        EvaluacionException exception = assertThrows(
+                EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluador(command)
+        );
+
+        assertEquals(
+                "Debe indicar un proyecto o un plan de tesis para la evaluación.",
+                exception.getMessage()
+        );
+
+        verify(evaluacionRepositoryPort, never()).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void asignarEvaluadorDuplicadoDebeLanzarExcepcion() {
+        AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, null, 20L);
+
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
+                .thenReturn(true);
+
+        EvaluacionException exception = assertThrows(
+                EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluador(command)
+        );
+
+        assertEquals(
+                "El evaluador ya tiene una evaluación pendiente para este proyecto.",
+                exception.getMessage()
+        );
+
+        verify(evaluacionRepositoryPort).existeEvaluacionPendienteParaProyecto(10L, 20L);
+        verify(evaluacionRepositoryPort, never()).guardar(any(Evaluacion.class));
+    }
+
 }
