@@ -1,85 +1,16 @@
-HELP.md
-
-### Maven / Java
-
-target/
-**/target/
-*.class
-*.jar
-*.war
-*.ear
-
-### Maven Wrapper
-
-.mvn/wrapper/maven-wrapper.jar
-**/.mvn/wrapper/maven-wrapper.jar
-
-### STS / Eclipse
-
-.apt_generated/
-.classpath
-.factorypath
-.project
-.settings/
-.springBeans
-.sts4-cache/
-
-### IntelliJ IDEA
-
-.idea/
-*.iws
-*.iml
-*.ipr
-
-### NetBeans
-
-nbproject/private/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-build/
-**/build/
-
-### VS Code
-
-.vscode/
-
-### Logs
-
-*.log
-logs/
-
-### Local environment
-
+# Variables de entorno y secretos
 .env
-.env.*
-!.env.example
+fiis/.env
 
+# IDEs y editores
+.idea/
+.vscode/
+*.swp
+*.swo
 
+# Maven builds (si se ejecutan en raíz, aunque están en fiis/)
+fiis/target/
+fiis/build/
 
-### Local module files
-
-local/
-
-### Local test payloads
-
-body-*.json
-test-payloads/
-
-### Local database dumps / backups
-
-db-local/
-*.backup
-*.dump
-*.sql~
-*.bak
-
-### Docker local overrides
-
-docker-compose.override.yml
-
-### OS files
-
-.DS_Store
-Thumbs.db
+# Contexto local de Claude Code
+CLAUDE.md

@@ -121,7 +121,10 @@ public class GlobalExceptionHandler {
         org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class).error("Excepción no manejada capturada: ", ex);
         
         Locale locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("exception.internal-error", null, "Error interno del servidor", locale);
+        String message = ex.getMessage() + (ex.getCause() != null ? " - Cause: " + ex.getCause().getMessage() : "");
+        if (ex.getCause() != null && ex.getCause().getCause() != null) {
+            message += " - Root Cause: " + ex.getCause().getCause().getMessage();
+        }
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }
 

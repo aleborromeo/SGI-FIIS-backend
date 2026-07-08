@@ -167,15 +167,13 @@ class GlobalExceptionHandlerTest {
     @DisplayName("Should handle generic Exception")
     void handleGeneral_shouldReturn500() {
         Exception ex = new Exception("unexpected error");
-        when(messageSource.getMessage(eq("exception.internal-error"), any(), anyString(), any(Locale.class)))
-                .thenReturn("Error interno del servidor");
 
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleGeneral(ex);
 
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(500, response.getBody().get("status"));
-        assertEquals("Error interno del servidor", response.getBody().get("message"));
+        assertEquals("unexpected error", response.getBody().get("message"));
     }
     @Test
     @DisplayName("Should handle AuthorizationDeniedException")
@@ -209,5 +207,74 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertEquals(403, response.getBody().get("status"));
         assertEquals("Acceso denegado", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle BusinessRuleValidationException")
+    void handleBusinessRuleValidation_shouldReturn400() {
+        com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException ex = 
+            new com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException("rule.error", new Object[]{"val"}, "Default message");
+        when(messageSource.getMessage(eq("rule.error"), any(), anyString(), any(Locale.class)))
+                .thenReturn("Regla de negocio falló");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleBusinessRuleValidation(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(400, response.getBody().get("status"));
+        assertEquals("Regla de negocio falló", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle IllegalArgumentException")
+    void handleIllegalArgumentAndState_shouldReturn400() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid argument");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleIllegalArgumentAndState(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(400, response.getBody().get("status"));
+        assertEquals("Invalid argument", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle generic Exception with cause and root cause")
+    void handleGeneral_withCause_shouldReturn500() {
+        Exception rootCause = new RuntimeException("db down");
+        Exception cause = new RuntimeException("service failed", rootCause);
+        Exception ex = new Exception("unexpected error", cause);
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleGeneral(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("unexpected error - Cause: service failed - Root Cause: db down", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle BusinessRuleValidationException without errorKey")
+    void handleBusinessRuleValidation_noKey_shouldReturn400() {
+        com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException ex = 
+            new com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException("Default fallback message");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleBusinessRuleValidation(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Default fallback message", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle MailException without rootCause")
+    void handleMailException_noRootCause_shouldReturn502() {
+        org.springframework.mail.MailException ex = new org.springframework.mail.MailException("Mail error") {};
+
+        when(messageSource.getMessage(eq("exception.mail-failed"), any(), anyString(), any(Locale.class)))
+                .thenReturn("Error al enviar correo: Mail error");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleMailException(ex);
+
+        assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
+        assertEquals("Error al enviar correo: Mail error", response.getBody().get("message"));
     }
 }
