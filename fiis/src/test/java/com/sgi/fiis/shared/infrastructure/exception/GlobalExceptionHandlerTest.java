@@ -208,4 +208,33 @@ class GlobalExceptionHandlerTest {
         assertEquals(403, response.getBody().get("status"));
         assertEquals("Acceso denegado", response.getBody().get("message"));
     }
+
+    @Test
+    @DisplayName("Should handle BusinessRuleValidationException")
+    void handleBusinessRuleValidation_shouldReturn400() {
+        com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException ex = 
+            new com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException("rule.error", new Object[]{"val"}, "Default message");
+        when(messageSource.getMessage(eq("rule.error"), any(), anyString(), any(Locale.class)))
+                .thenReturn("Regla de negocio falló");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleBusinessRuleValidation(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(400, response.getBody().get("status"));
+        assertEquals("Regla de negocio falló", response.getBody().get("message"));
+    }
+
+    @Test
+    @DisplayName("Should handle IllegalArgumentException")
+    void handleIllegalArgumentAndState_shouldReturn400() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid argument");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleIllegalArgumentAndState(ex);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(400, response.getBody().get("status"));
+        assertEquals("Invalid argument", response.getBody().get("message"));
+    }
 }
