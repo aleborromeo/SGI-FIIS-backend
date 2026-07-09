@@ -80,7 +80,7 @@ public class ProjectEntity {
     @Column(name = "id_documento_actual")
     private Integer documentId;
 
-    @Column(name = "estado", nullable = false, length = 50)
+    @Column(name = "estado_proyecto", nullable = false, length = 50)
     private String status;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
