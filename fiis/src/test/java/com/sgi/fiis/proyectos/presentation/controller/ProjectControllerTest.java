@@ -43,11 +43,12 @@ class ProjectControllerTest {
     private MockMvc mockMvc;
     private CreateProjectUseCase createProjectUseCase;
     private ObjectMapper objectMapper;
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setup() {
         createProjectUseCase = Mockito.mock(CreateProjectUseCase.class);
-        org.springframework.jdbc.core.JdbcTemplate jdbcTemplate = Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class);
+        jdbcTemplate = Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class);
         ProjectController projectController = new ProjectController(createProjectUseCase, jdbcTemplate);
         MessageSource messageSource = Mockito.mock(MessageSource.class);
         Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
@@ -64,15 +65,12 @@ class ProjectControllerTest {
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getUsername()).thenReturn("testuser");
                         String mockRole = webRequest.getHeader("X-Mock-Role");
-                        if ("DOCENTE_INVESTIGADOR".equals(mockRole)) {
-                            when(userDetails.getAuthorities()).thenAnswer(inv -> 
-                                Collections.singletonList(
-                                    (org.springframework.security.core.GrantedAuthority) () -> "ROLE_DOCENTE_INVESTIGADOR"
-                                )
-                            );
-                        } else {
-                            when(userDetails.getAuthorities()).thenAnswer(inv -> Collections.emptyList());
-                        }
+                        String role = mockRole != null ? mockRole : "ADMIN";
+                        when(userDetails.getAuthorities()).thenAnswer(inv -> 
+                            Collections.singletonList(
+                                (org.springframework.security.core.GrantedAuthority) () -> "ROLE_" + role
+                            )
+                        );
                         return userDetails;
                     }
                 })
@@ -172,5 +170,75 @@ class ProjectControllerTest {
 
         mockMvc.perform(get("/api/v1/projects/99"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetProjects_asDocenteInvestigador() throws Exception {
+        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "DOCENTE_INVESTIGADOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void testGetProjects_asEstudiante() throws Exception {
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "ESTUDIANTE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testGetProjectById_asDocenteInvestigador_forbidden() throws Exception {
+        when(createProjectUseCase.getProjectById(1)).thenReturn(ProjectResponse.builder().id(1).responsibleId(99L).build());
+
+        mockMvc.perform(get("/api/v1/projects/1")
+                        .header("X-Mock-Role", "DOCENTE_INVESTIGADOR"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testGetProjectById_asDocenteInvestigador_ownProject() throws Exception {
+        when(createProjectUseCase.getProjectById(1)).thenReturn(ProjectResponse.builder().id(1).responsibleId(3L).build());
+
+        mockMvc.perform(get("/api/v1/projects/1")
+                        .header("X-Mock-Role", "DOCENTE_INVESTIGADOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void testUpdateProjectStatus() throws Exception {
+        ProjectResponse response = ProjectResponse.builder().id(1).status("APROBADO").build();
+        when(createProjectUseCase.updateStatus(eq(1), eq("APROBADO"))).thenReturn(response);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/api/v1/projects/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APROBADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APROBADO"));
+    }
+
+    @Test
+    void testGetProjects_asCoordinadorGrupo_hasGroup() throws Exception {
+        when(jdbcTemplate.queryForList(anyString(), eq(Integer.class), eq(3L))).thenReturn(Collections.singletonList(12));
+        when(createProjectUseCase.getProjectsByGroup(12)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "COORDINADOR_GRUPO"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void testGetProjects_asCoordinadorGrupo_noGroup() throws Exception {
+        when(jdbcTemplate.queryForList(anyString(), eq(Integer.class), eq(3L))).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "COORDINADOR_GRUPO"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }

@@ -80,11 +80,12 @@ public class ProjectController {
             response = createProjectUseCase.getProjectsByResponsible(currentUser.getId());
         } else if ("COORDINADOR_GRUPO".equals(role)) {
             // Coordinador can only see projects of the research group they coordinate
-            Integer coordGroupId = jdbcTemplate.query(
+            java.util.List<Integer> ids = jdbcTemplate.queryForList(
                 "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
-                rs -> rs.next() ? rs.getObject("id_grupo", Integer.class) : null,
+                Integer.class,
                 currentUser.getId()
             );
+            Integer coordGroupId = ids.isEmpty() ? null : ids.get(0);
             if (coordGroupId != null) {
                 response = createProjectUseCase.getProjectsByGroup(coordGroupId);
             } else {

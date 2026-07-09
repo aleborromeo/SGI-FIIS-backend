@@ -51,8 +51,46 @@ class ResolutionsProcedureRepositoryAdapterTest {
 
     @Test
     void updateStatusToApprovedWithResolution_shouldExecuteUpdate() {
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
         adapter.updateStatusToApprovedWithResolution(1L);
 
         verify(registerResolutionUseCase).execute(1L, 1L);
+    }
+
+    @Test
+    void updateStatusToApprovedWithResolution_withSecurityContext_shouldUseUserId() {
+        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
+        com.sgi.fiis.auth.infrastructure.security.CustomUserDetails userDetails = org.mockito.Mockito.mock(com.sgi.fiis.auth.infrastructure.security.CustomUserDetails.class);
+        
+        org.mockito.Mockito.when(userDetails.getId()).thenReturn(99L);
+        org.mockito.Mockito.when(auth.getPrincipal()).thenReturn(userDetails);
+        
+        org.springframework.security.core.context.SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        org.springframework.security.core.context.SecurityContextHolder.setContext(context);
+        
+        try {
+            adapter.updateStatusToApprovedWithResolution(1L);
+            verify(registerResolutionUseCase).execute(1L, 99L);
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    void updateStatusToApprovedWithResolution_withAnonymousSecurityContext_shouldUseFallbackId() {
+        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
+        org.mockito.Mockito.when(auth.getPrincipal()).thenReturn("anonymousUser");
+        
+        org.springframework.security.core.context.SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        org.springframework.security.core.context.SecurityContextHolder.setContext(context);
+        
+        try {
+            adapter.updateStatusToApprovedWithResolution(1L);
+            verify(registerResolutionUseCase).execute(1L, 1L);
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
     }
 }
