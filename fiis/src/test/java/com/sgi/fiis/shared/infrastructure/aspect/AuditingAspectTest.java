@@ -197,4 +197,70 @@ class AuditingAspectTest {
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
         assertEquals("10.0.0.1", argsCaptor.getValue()[4]);
     }
+
+    @Test
+    @DisplayName("Should map various actions correctly")
+    void audit_mapAction_variousActions() {
+        String[] actions = {"DELETE", "DESACTIVAR", "ACTIVAR", "LOGOUT", "UNKNOWN"};
+        String[] expectedMapped = {"ELIMINAR", "DESACTIVAR", "ACTIVAR", "LOGOUT", "EDITAR"};
+
+        for (int i = 0; i < actions.length; i++) {
+            Auditable auditable = mock(Auditable.class);
+            when(auditable.action()).thenReturn(actions[i]);
+
+            auditingAspect.audit(joinPoint, auditable, new Object());
+
+            verify(jdbcTemplate, atLeastOnce()).update(anyString(), argsCaptor.capture());
+            assertEquals(expectedMapped[i], argsCaptor.getValue()[2]);
+        }
+    }
+
+    @Test
+    @DisplayName("Should handle various return types for register ID extraction")
+    void audit_extractRegisterId_variousResults() {
+        Auditable auditable = mock(Auditable.class);
+        when(auditable.action()).thenReturn("UPDATE");
+
+        // 1. Null result
+        auditingAspect.audit(joinPoint, auditable, null);
+        verify(jdbcTemplate, atLeastOnce()).update(anyString(), argsCaptor.capture());
+        assertEquals(0L, argsCaptor.getValue()[1]);
+
+        // 2. Result with String ID (non-Number)
+        class StringIdObj {
+            public String getId() { return "abc"; }
+        }
+        auditingAspect.audit(joinPoint, auditable, new StringIdObj());
+        verify(jdbcTemplate, atLeastOnce()).update(anyString(), argsCaptor.capture());
+        assertEquals(0L, argsCaptor.getValue()[1]);
+
+        // 3. Result with valid Long ID
+        class LongIdObj {
+            public Long getUserId() { return 55L; }
+        }
+        auditingAspect.audit(joinPoint, auditable, new LongIdObj());
+        verify(jdbcTemplate, atLeastOnce()).update(anyString(), argsCaptor.capture());
+        assertEquals(55L, argsCaptor.getValue()[1]);
+    }
+
+    @Test
+    @DisplayName("Should fallback to general when table name is empty or too long")
+    void audit_tablaAfectada_fallbackToGeneral() {
+        Auditable auditable = mock(Auditable.class);
+        when(auditable.action()).thenReturn("UPDATE");
+
+        // Create a target with a class name longer than 100 characters
+        Object target = new Object() {
+            @Override
+            public String toString() { return super.toString(); }
+        };
+        JoinPoint mockJoinPoint = mock(JoinPoint.class);
+        // A very long class name
+        class A12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 {}
+        when(mockJoinPoint.getTarget()).thenReturn(new A12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890());
+
+        auditingAspect.audit(mockJoinPoint, auditable, null);
+        verify(jdbcTemplate, atLeastOnce()).update(anyString(), argsCaptor.capture());
+        assertEquals("general", argsCaptor.getValue()[0]);
+    }
 }

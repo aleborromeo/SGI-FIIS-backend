@@ -148,4 +148,54 @@ class LocalDocumentStorageAdapterTest {
             adapter.saveDocument(new byte[]{1, 2}, "some..path.pdf", "application/pdf");
         });
     }
+
+    @Test
+    void constructor_whenCannotCreateDirectories_shouldThrowIllegalStateException() throws java.io.IOException {
+        java.io.File tempFile = java.io.File.createTempFile("fiis-test-file", ".tmp");
+        try {
+            assertThrows(IllegalStateException.class, () -> {
+                new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, tempFile.getAbsolutePath());
+            });
+        } finally {
+            tempFile.delete();
+        }
+    }
+
+    @Test
+    void saveDocument_withActiveSecurityContext_shouldUseUserIdFromContext() throws SQLException {
+        // Arrange
+        org.springframework.security.core.Authentication auth = mock(org.springframework.security.core.Authentication.class);
+        com.sgi.fiis.auth.infrastructure.security.CustomUserDetails userDetails = mock(com.sgi.fiis.auth.infrastructure.security.CustomUserDetails.class);
+        when(userDetails.getId()).thenReturn(88L);
+        when(auth.getPrincipal()).thenReturn(userDetails);
+        
+        org.springframework.security.core.context.SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        org.springframework.security.core.context.SecurityContextHolder.setContext(context);
+
+        try {
+            when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS)))
+                    .thenReturn(preparedStatement);
+
+            doAnswer(invocation -> {
+                PreparedStatementCreator psc = invocation.getArgument(0);
+                KeyHolder keyHolder = invocation.getArgument(1);
+                psc.createPreparedStatement(connection);
+                
+                Map<String, Object> keys = new HashMap<>();
+                keys.put("id_documento", 45L);
+                keyHolder.getKeyList().add(keys);
+                return 1;
+            }).when(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
+
+            // Act
+            Long result = adapter.saveDocument(new byte[]{1, 2}, "test.pdf", "application/pdf");
+
+            // Assert
+            assertEquals(45L, result);
+            verify(preparedStatement).setLong(5, 88L); // userId should be 88L
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
 }

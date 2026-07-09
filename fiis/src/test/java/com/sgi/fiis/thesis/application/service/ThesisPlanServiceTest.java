@@ -483,4 +483,100 @@ class ThesisPlanServiceTest {
         RegisterResolutionCommand cmd = new RegisterResolutionCommand("RES-01", java.time.LocalDate.now(), "Asunto", 99);
         assertThrows(BusinessRuleViolationException.class, () -> service.registrarResolucion(12, cmd));
     }
+
+    @Test
+    @DisplayName("registrarPlan - throws exception when group is not active")
+    void registrarPlanGroupNotActive() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
+        when(grupoValidation.existeGrupoActivo(2)).thenReturn(false);
+        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
+    }
+
+    @Test
+    @DisplayName("registrarPlan - throws exception when line is not active")
+    void registrarPlanLineNotActive() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
+        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
+        when(grupoValidation.existeLineaActiva(1)).thenReturn(false);
+        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
+    }
+
+    @Test
+    @DisplayName("registrarPlan - throws exception when line does not belong to group")
+    void registrarPlanLineNotBelongsToGroup() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
+        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
+        when(grupoValidation.existeLineaActiva(1)).thenReturn(true);
+        when(grupoValidation.lineaPerteneceAlGrupo(2, 1)).thenReturn(false);
+        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
+    }
+
+    @Test
+    @DisplayName("registrarPlan - throws exception when document is not active")
+    void registrarPlanDocNotActive() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
+        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
+        when(grupoValidation.existeLineaActiva(1)).thenReturn(true);
+        when(grupoValidation.lineaPerteneceAlGrupo(2, 1)).thenReturn(true);
+        when(documentoValidation.existeDocumentoActivo(99)).thenReturn(false);
+        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
+    }
+
+    @Test
+    @DisplayName("registrarPlan - throws exception when document does not belong to student")
+    void registrarPlanDocNotBelongsToStudent() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
+        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
+        when(grupoValidation.existeLineaActiva(1)).thenReturn(true);
+        when(grupoValidation.lineaPerteneceAlGrupo(2, 1)).thenReturn(true);
+        when(documentoValidation.existeDocumentoActivo(99)).thenReturn(true);
+        when(documentoValidation.documentoPerteneceAUsuario(99, 101L)).thenReturn(false);
+        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
+    }
+
+    @Test
+    @DisplayName("listarPorGrupo - student is blocked")
+    void listarPorGrupoStudentBlocked() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        assertThrows(BusinessRuleViolationException.class, () -> service.listarPorGrupo(2));
+    }
+
+    @Test
+    @DisplayName("listarPorGrupo - coordinator of other group is blocked")
+    void listarPorGrupoOtherGroupCoordinatorBlocked() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
+        assertThrows(BusinessRuleViolationException.class, () -> service.listarPorGrupo(2));
+    }
+
+    @Test
+    @DisplayName("listarPorGrupo - coordinator of same group is allowed")
+    void listarPorGrupoSameGroupCoordinatorAllowed() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
+        when(planRepository.findByGrupo(2)).thenReturn(List.of());
+        List<ThesisPlanResponse> list = service.listarPorGrupo(2);
+        assertNotNull(list);
+    }
+
+    @Test
+    @DisplayName("validarRevisorParaRol - check all cases")
+    void checkAllRevisorRoleMappings() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        assertNotNull(service.listarPendientesPorRevisor(ReviewerRole.ESTUDIANTE));
+
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        assertNotNull(service.listarPendientesPorRevisor(ReviewerRole.COORDINADOR_GRUPO));
+
+        mockAuthentication(404L, "ROLE_DIRECTOR_INVESTIGACION");
+        assertNotNull(service.listarPendientesPorRevisor(ReviewerRole.DIRECTOR_INVESTIGACION));
+
+        mockAuthentication(505L, "ROLE_DECANO");
+        assertNotNull(service.listarPendientesPorRevisor(ReviewerRole.DECANO));
+    }
 }
