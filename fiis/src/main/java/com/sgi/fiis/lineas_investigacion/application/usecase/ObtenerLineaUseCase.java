@@ -16,6 +16,6 @@ public class ObtenerLineaUseCase {
 
     public LineaInvestigacion execute(Integer id) {
         return lineaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("LineaInvestigacion", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("lineas.error.not-found", id));
     }
 }

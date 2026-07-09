@@ -47,7 +47,11 @@ class AssignMemberUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("5");
+                .satisfies(ex -> {
+                    BusinessException business = (BusinessException) ex;
+                    assertThat(business.getErrorKey()).isEqualTo("grupos.error.member-invalid-role");
+                    assertThat(business.getArgs()).containsExactly(5);
+                });
     }
 
     @Test
@@ -59,7 +63,11 @@ class AssignMemberUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(1, 2))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("RF-21");
+                .satisfies(ex -> {
+                    BusinessException business = (BusinessException) ex;
+                    assertThat(business.getErrorKey()).isEqualTo("grupos.error.member-already-active");
+                    assertThat(business.getArgs()).containsExactly(2);
+                });
     }
 
     @Test
