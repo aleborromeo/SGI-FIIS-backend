@@ -1,8 +1,10 @@
 package com.sgi.fiis.shared.infrastructure.aspect;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.JoinPoint;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -36,6 +40,12 @@ class AuditingAspectTest {
     @Captor
     private ArgumentCaptor<Object[]> argsCaptor;
 
+    @BeforeEach
+    void setUp() {
+        Object target = new Object();
+        lenient().when(joinPoint.getTarget()).thenReturn(target);
+    }
+
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
@@ -50,7 +60,9 @@ class AuditingAspectTest {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("john.doe");
+        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+        when(userDetails.getId()).thenReturn(42L);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -62,13 +74,15 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(
-                eq("INSERT INTO auditoria_general (usuario, accion, fecha, ip_origen) VALUES (?, ?, ?, ?)"),
+                eq("INSERT INTO auditoria_general (tabla_afectada, id_registro, accion, id_usuario, ip_origen, fecha_accion) VALUES (?, ?, ?, ?, ?, ?)"),
                 argsCaptor.capture());
         Object[] args = argsCaptor.getValue();
-        assertEquals("john.doe", args[0]);
-        assertEquals("CREATE_USER", args[1]);
-        assertNotNull(args[2]);
-        assertEquals("192.168.1.10", args[3]);
+        assertEquals("object", args[0]);
+        assertEquals(0L, args[1]);
+        assertEquals("CREAR", args[2]);
+        assertEquals(42L, args[3]);
+        assertEquals("192.168.1.10", args[4]);
+        assertNotNull(args[5]);
     }
 
     @Test
@@ -79,7 +93,9 @@ class AuditingAspectTest {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("admin");
+        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+        when(userDetails.getId()).thenReturn(42L);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -91,11 +107,11 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
-        assertEquals("203.0.113.5", argsCaptor.getValue()[3]);
+        assertEquals("203.0.113.5", argsCaptor.getValue()[4]);
     }
 
     @Test
-    @DisplayName("Should default to SYSTEM when no authentication is present")
+    @DisplayName("Should default to SYSTEM ID when no authentication is present")
     void auditWithNoAuthentication() {
         Auditable auditable = mock(Auditable.class);
         when(auditable.action()).thenReturn("DELETE_USER");
@@ -111,11 +127,11 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
-        assertEquals("SYSTEM", argsCaptor.getValue()[0]);
+        assertEquals(1L, argsCaptor.getValue()[3]);
     }
 
     @Test
-    @DisplayName("Should default to SYSTEM when authentication is not authenticated")
+    @DisplayName("Should default to SYSTEM ID when authentication is not authenticated")
     void auditWithUnauthenticatedAuthentication() {
         Auditable auditable = mock(Auditable.class);
         when(auditable.action()).thenReturn("VIEW");
@@ -133,7 +149,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
-        assertEquals("SYSTEM", argsCaptor.getValue()[0]);
+        assertEquals(1L, argsCaptor.getValue()[3]);
     }
 
     @Test
@@ -144,7 +160,9 @@ class AuditingAspectTest {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("user");
+        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+        when(userDetails.getId()).thenReturn(42L);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         RequestContextHolder.resetRequestAttributes();
@@ -152,7 +170,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
-        assertEquals("0.0.0.0", argsCaptor.getValue()[3]);
+        assertEquals("0.0.0.0", argsCaptor.getValue()[4]);
     }
 
     @Test
@@ -163,7 +181,9 @@ class AuditingAspectTest {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("user");
+        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+        when(userDetails.getId()).thenReturn(42L);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -175,6 +195,6 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
-        assertEquals("10.0.0.1", argsCaptor.getValue()[3]);
+        assertEquals("10.0.0.1", argsCaptor.getValue()[4]);
     }
 }

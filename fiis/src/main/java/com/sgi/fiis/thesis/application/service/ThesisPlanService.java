@@ -64,12 +64,15 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     public ThesisPlanResponse aprobarPorCoordinador(Integer idPlanTesis) {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolCoordinador();
+        Long idUsuarioAccion = extraerIdUsuarioDelContexto();
+        if (!grupoValidation.esCoordinadorDelGrupo(idUsuarioAccion, plan.getIdGrupo())) {
+            throw new BusinessRuleViolationException("No tiene permisos para gestionar planes de tesis fuera de su grupo de investigación");
+        }
         if (plan.getEstadoPlan() != ThesisPlanStatus.POSTULADO) {
             throw new BusinessRuleViolationException("Solo se pueden aprobar planes en estado POSTULADO");
         }
         plan.marcarAprobado();
         ThesisPlan guardado = planRepository.save(plan);
-        Long idUsuarioAccion = extraerIdUsuarioDelContexto();
         tramiteWorkflow.derivarPlanTesis(idPlanTesis, idUsuarioAccion, ThesisProcedureStatus.PENDIENTE_DIRECCION,
                 ReviewerRole.DIRECTOR_INVESTIGACION, "APROBAR_COORDINADOR", null, null);
         return toResponse(guardado);
@@ -79,9 +82,12 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     public ThesisPlanResponse observarPorCoordinador(Integer idPlanTesis, ObserveThesisPlanCommand command) {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolCoordinador();
+        Long idUsuarioAccion = extraerIdUsuarioDelContexto();
+        if (!grupoValidation.esCoordinadorDelGrupo(idUsuarioAccion, plan.getIdGrupo())) {
+            throw new BusinessRuleViolationException("No tiene permisos para observar planes de tesis fuera de su grupo de investigación");
+        }
         plan.marcarObservado();
         ThesisPlan guardado = planRepository.save(plan);
-        Long idUsuarioAccion = extraerIdUsuarioDelContexto();
         tramiteWorkflow.derivarPlanTesis(idPlanTesis, idUsuarioAccion, ThesisProcedureStatus.OBSERVADO,
                 ReviewerRole.ESTUDIANTE, "OBSERVAR_COORDINADOR", command.observacion(), command.idDocumentoAdjunto());
         return toResponse(guardado);
@@ -91,12 +97,15 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     public ThesisPlanResponse rechazarPorCoordinador(Integer idPlanTesis, String motivo) {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolCoordinador();
+        Long idUsuarioAccion = extraerIdUsuarioDelContexto();
+        if (!grupoValidation.esCoordinadorDelGrupo(idUsuarioAccion, plan.getIdGrupo())) {
+            throw new BusinessRuleViolationException("No tiene permisos para rechazar planes de tesis fuera de su grupo de investigación");
+        }
         if (motivo == null || motivo.isBlank()) {
             throw new BusinessRuleViolationException("El motivo de rechazo es obligatorio");
         }
         plan.marcarRechazado();
         ThesisPlan guardado = planRepository.save(plan);
-        Long idUsuarioAccion = extraerIdUsuarioDelContexto();
         tramiteWorkflow.derivarPlanTesis(idPlanTesis, idUsuarioAccion, ThesisProcedureStatus.RECHAZADO,
                 ReviewerRole.SIN_REVISOR, "RECHAZAR_COORDINADOR", motivo, null);
         return toResponse(guardado);
@@ -184,6 +193,22 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<ThesisPlanResponse> listarPorGrupo(Integer idGrupo) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            boolean esCoordinador = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
+            boolean esEstudiante = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
+            
+            if (esEstudiante) {
+                throw new BusinessRuleViolationException("Los estudiantes no tienen permisos para listar planes de tesis de un grupo");
+            }
+            if (esCoordinador) {
+                if (!grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), idGrupo)) {
+                    throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otro grupo de investigación");
+                }
+            }
+        }
         return planRepository.findByGrupo(idGrupo).stream().map(this::toResponse).toList();
     }
 

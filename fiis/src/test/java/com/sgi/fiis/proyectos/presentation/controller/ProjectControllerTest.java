@@ -47,7 +47,8 @@ class ProjectControllerTest {
     @BeforeEach
     void setup() {
         createProjectUseCase = Mockito.mock(CreateProjectUseCase.class);
-        ProjectController projectController = new ProjectController(createProjectUseCase);
+        org.springframework.jdbc.core.JdbcTemplate jdbcTemplate = Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class);
+        ProjectController projectController = new ProjectController(createProjectUseCase, jdbcTemplate);
         MessageSource messageSource = Mockito.mock(MessageSource.class);
         Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(projectController)
@@ -62,6 +63,16 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getUsername()).thenReturn("testuser");
+                        String mockRole = webRequest.getHeader("X-Mock-Role");
+                        if ("DOCENTE_INVESTIGADOR".equals(mockRole)) {
+                            when(userDetails.getAuthorities()).thenAnswer(inv -> 
+                                java.util.Collections.singletonList(
+                                    (org.springframework.security.core.GrantedAuthority) () -> "ROLE_DOCENTE_INVESTIGADOR"
+                                )
+                            );
+                        } else {
+                            when(userDetails.getAuthorities()).thenAnswer(inv -> java.util.Collections.emptyList());
+                        }
                         return userDetails;
                     }
                 })
@@ -95,6 +106,7 @@ class ProjectControllerTest {
         when(createProjectUseCase.execute(any(CreateProjectRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/projects")
+                .header("X-Mock-Role", "DOCENTE_INVESTIGADOR")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())

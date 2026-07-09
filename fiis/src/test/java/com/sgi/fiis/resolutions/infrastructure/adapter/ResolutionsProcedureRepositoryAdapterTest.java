@@ -19,6 +19,9 @@ class ResolutionsProcedureRepositoryAdapterTest {
     @Mock
     private JdbcTemplate jdbcTemplate;
 
+    @Mock
+    private com.sgi.fiis.tramites.application.usecase.RegisterResolutionUseCase registerResolutionUseCase;
+
     @InjectMocks
     private ResolutionsProcedureRepositoryAdapter adapter;
 
@@ -50,9 +53,6 @@ class ResolutionsProcedureRepositoryAdapterTest {
     void updateStatusToApprovedWithResolution_shouldExecuteUpdate() {
         adapter.updateStatusToApprovedWithResolution(1L);
 
-        verify(jdbcTemplate).update(
-                "UPDATE tramites SET estado_actual = 'APROBADO_CON_RESOLUCION' WHERE id_tramite = ?",
-                1L
-        );
+        verify(registerResolutionUseCase).execute(1L, 1L);
     }
 }

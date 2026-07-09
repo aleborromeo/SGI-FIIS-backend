@@ -28,8 +28,9 @@ public class AssignMemberUseCase {
             throw new ResourceNotFoundException("ResearchGroup", "id", groupId);
         }
 
-        if (!groupRepository.existsActiveUserWithRole(userId, "DOCENTE_INVESTIGADOR")) {
-            throw new BusinessException("User with id " + userId + " does not exist, is not active, or does not have the DOCENTE_INVESTIGADOR role");
+        if (!groupRepository.existsActiveUserWithRole(userId, "DOCENTE_INVESTIGADOR") &&
+            !groupRepository.existsActiveUserWithRole(userId, "ESTUDIANTE")) {
+            throw new BusinessException("User with id " + userId + " does not exist, is not active, or does not have the DOCENTE_INVESTIGADOR or ESTUDIANTE role");
         }
 
         if (membershipRepository.existsActiveByUser(userId)) {

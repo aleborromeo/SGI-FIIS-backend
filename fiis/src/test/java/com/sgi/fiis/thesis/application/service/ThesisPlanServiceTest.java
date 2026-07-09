@@ -131,6 +131,7 @@ class ThesisPlanServiceTest {
         );
 
         when(planRepository.findById(12)).thenReturn(Optional.of(existingPlan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
         when(planRepository.save(any(ThesisPlan.class))).thenAnswer(inv -> inv.getArgument(0));
 
         ThesisPlanResponse response = service.aprobarPorCoordinador(12);
@@ -152,6 +153,7 @@ class ThesisPlanServiceTest {
                 ThesisPlanStatus.POSTULADO, null, null
         );
         when(planRepository.findById(12)).thenReturn(Optional.of(existingPlan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
         when(planRepository.save(any(ThesisPlan.class))).thenAnswer(inv -> inv.getArgument(0));
 
         ObserveThesisPlanCommand cmd = new ObserveThesisPlanCommand("Falta bibliografía", 100);
@@ -174,6 +176,7 @@ class ThesisPlanServiceTest {
                 ThesisPlanStatus.POSTULADO, null, null
         );
         when(planRepository.findById(12)).thenReturn(Optional.of(existingPlan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
         when(planRepository.save(any(ThesisPlan.class))).thenAnswer(inv -> inv.getArgument(0));
 
         ThesisPlanResponse response = service.rechazarPorCoordinador(12, "Fuera de ámbito");

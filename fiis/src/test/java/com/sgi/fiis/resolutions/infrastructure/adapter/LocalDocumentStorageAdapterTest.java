@@ -1,8 +1,8 @@
 package com.sgi.fiis.resolutions.infrastructure.adapter;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
@@ -40,8 +40,12 @@ class LocalDocumentStorageAdapterTest {
     @Mock
     private PreparedStatement preparedStatement;
 
-    @InjectMocks
     private LocalDocumentStorageAdapter adapter;
+
+    @BeforeEach
+    void setUp() {
+        adapter = new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, "target/test-uploads");
+    }
 
     @Test
     void saveDocument_shouldReturnGeneratedId_andExecuteLambda() throws SQLException {

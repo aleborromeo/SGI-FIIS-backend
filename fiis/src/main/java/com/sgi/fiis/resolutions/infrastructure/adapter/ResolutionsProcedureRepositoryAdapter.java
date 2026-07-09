@@ -1,16 +1,24 @@
 package com.sgi.fiis.resolutions.infrastructure.adapter;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.resolutions.domain.port.out.ProcedureRepositoryPort;
+import com.sgi.fiis.tramites.application.usecase.RegisterResolutionUseCase;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component("resolutionsProcedureRepositoryAdapter")
 public class ResolutionsProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     private final JdbcTemplate jdbcTemplate;
+    private final RegisterResolutionUseCase registerResolutionUseCase;
 
-    public ResolutionsProcedureRepositoryAdapter(JdbcTemplate jdbcTemplate) {
+    public ResolutionsProcedureRepositoryAdapter(
+            JdbcTemplate jdbcTemplate,
+            RegisterResolutionUseCase registerResolutionUseCase) {
         this.jdbcTemplate = jdbcTemplate;
+        this.registerResolutionUseCase = registerResolutionUseCase;
     }
 
     @Override
@@ -22,7 +30,11 @@ public class ResolutionsProcedureRepositoryAdapter implements ProcedureRepositor
 
     @Override
     public void updateStatusToApprovedWithResolution(Long idTramite) {
-        String sql = "UPDATE tramites SET estado_actual = 'APROBADO_CON_RESOLUCION' WHERE id_tramite = ?";
-        jdbcTemplate.update(sql, idTramite);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long decanoId = 1L; // Fallback if no security context exists (e.g. tests)
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            decanoId = userDetails.getId();
+        }
+        registerResolutionUseCase.execute(idTramite, decanoId);
     }
 }

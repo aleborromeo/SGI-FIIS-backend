@@ -14,8 +14,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.util.List;
 import java.util.Map;
+
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -24,9 +28,11 @@ import java.util.Map;
 public class ProjectController {
 
     private final CreateProjectUseCase createProjectUseCase;
+    private final JdbcTemplate jdbcTemplate;
 
-    public ProjectController(CreateProjectUseCase createProjectUseCase) {
+    public ProjectController(CreateProjectUseCase createProjectUseCase, JdbcTemplate jdbcTemplate) {
         this.createProjectUseCase = createProjectUseCase;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @PostMapping
@@ -37,6 +43,15 @@ public class ProjectController {
             @Valid @RequestBody CreateProjectRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         
+        String role = currentUser.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("");
+        
+        if (!"DOCENTE_INVESTIGADOR".equals(role)) {
+            throw new BusinessRuleValidationException("Solo los docentes investigadores pueden registrar proyectos de investigación.");
+        }
+
         // RF-39: Associate the project with the logged-in user as the responsible investigator
         request.setResponsibleId(currentUser.getId().intValue());
         
@@ -63,6 +78,21 @@ public class ProjectController {
         if ("DOCENTE_INVESTIGADOR".equals(role)) {
             // Docente can only see their own projects
             response = createProjectUseCase.getProjectsByResponsible(currentUser.getId());
+        } else if ("COORDINADOR_GRUPO".equals(role)) {
+            // Coordinador can only see projects of the research group they coordinate
+            Integer coordGroupId = jdbcTemplate.query(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                rs -> rs.next() ? rs.getInt("id_grupo") : null,
+                currentUser.getId()
+            );
+            if (coordGroupId != null) {
+                response = createProjectUseCase.getProjectsByGroup(coordGroupId);
+            } else {
+                response = List.of();
+            }
+        } else if ("ESTUDIANTE".equals(role)) {
+            // Students do not coordinate or lead research projects
+            response = List.of();
         } else if (responsibleId != null) {
             response = createProjectUseCase.getProjectsByResponsible(responsibleId);
         } else if (groupId != null) {
@@ -91,7 +121,7 @@ public class ProjectController {
                 .map(a -> a.getAuthority().replace("ROLE_", ""))
                 .orElse("");
 
-        if ("DOCENTE_INVESTIGADOR".equals(role) && !project.getResponsibleId().equals(currentUser.getId())) {
+        if ("DOCENTE_INVESTIGADOR".equals(role) && (project.getResponsibleId() == null || !project.getResponsibleId().equals(currentUser.getId()))) {
             return ResponseEntity.status(403).build();
         }
 
