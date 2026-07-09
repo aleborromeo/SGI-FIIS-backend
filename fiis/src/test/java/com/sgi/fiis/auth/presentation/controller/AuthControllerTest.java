@@ -25,8 +25,10 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,6 +43,8 @@ class AuthControllerTest {
     private VerifyRegistrationUseCase verifyRegistrationUseCase;
     private ResendCodeUseCase resendCodeUseCase;
     private ChangePasswordUseCase changePasswordUseCase;
+    private ForgotPasswordUseCase forgotPasswordUseCase;
+    private SelfResetPasswordUseCase selfResetPasswordUseCase;
     private UserRepositoryPort userRepository;
     private UserMapper userMapper;
     private MessageSource messageSource;
@@ -53,13 +57,16 @@ class AuthControllerTest {
         verifyRegistrationUseCase = mock(VerifyRegistrationUseCase.class);
         resendCodeUseCase = mock(ResendCodeUseCase.class);
         changePasswordUseCase = mock(ChangePasswordUseCase.class);
+        forgotPasswordUseCase = mock(ForgotPasswordUseCase.class);
+        selfResetPasswordUseCase = mock(SelfResetPasswordUseCase.class);
         userRepository = mock(UserRepositoryPort.class);
         userMapper = mock(UserMapper.class);
         messageSource = mock(MessageSource.class);
 
         AuthController controller = new AuthController(
                 loginUseCase, registerUseCase, verifyRegistrationUseCase, resendCodeUseCase,
-                changePasswordUseCase, userRepository, userMapper, messageSource
+                changePasswordUseCase, forgotPasswordUseCase, selfResetPasswordUseCase,
+                userRepository, userMapper, messageSource
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
@@ -218,5 +225,35 @@ class AuthControllerTest {
             org.junit.jupiter.api.Assertions.assertTrue(e.getCause() instanceof RuntimeException);
             org.junit.jupiter.api.Assertions.assertEquals("Usuario no encontrado", e.getCause().getMessage());
         }
+    }
+
+    @Test
+    void forgotPassword_Success() throws Exception {
+        ForgotPasswordRequestDto req = new ForgotPasswordRequestDto("test@unas.edu.pe");
+        when(messageSource.getMessage(eq("auth.forgot-password.success"), eq(null), anyString(), any(Locale.class)))
+                .thenReturn("Código de recuperación enviado con éxito.");
+
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Código de recuperación enviado con éxito."));
+
+        verify(forgotPasswordUseCase).execute("test@unas.edu.pe");
+    }
+
+    @Test
+    void resetPassword_Success() throws Exception {
+        ResetPasswordRequestDto req = new ResetPasswordRequestDto("test@unas.edu.pe", "123456", "NewPass123!", "NewPass123!");
+        when(messageSource.getMessage(eq("auth.reset-password.success"), eq(null), anyString(), any(Locale.class)))
+                .thenReturn("Contraseña restablecida con éxito.");
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Contraseña restablecida con éxito."));
+
+        verify(selfResetPasswordUseCase).execute("test@unas.edu.pe", "123456", "NewPass123!", "NewPass123!");
     }
 }

@@ -48,6 +48,10 @@ class GetGroupUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(99))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("99");
+                .satisfies(ex -> {
+                    ResourceNotFoundException notFound = (ResourceNotFoundException) ex;
+                    assertThat(notFound.getErrorKey()).isEqualTo("grupos.error.not-found");
+                    assertThat(notFound.getArgs()).containsExactly(99);
+                });
     }
 }

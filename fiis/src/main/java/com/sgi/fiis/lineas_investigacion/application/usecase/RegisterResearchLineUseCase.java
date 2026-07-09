@@ -20,7 +20,7 @@ public class RegisterResearchLineUseCase {
     @Transactional
     public ResearchLine execute(ResearchLine line) {
         if (repository.existsByName(line.getLineName())) {
-            throw new DuplicateResourceException("ResearchLine", "name", line.getLineName());
+            throw new DuplicateResourceException("lineas.error.duplicate-name", line.getLineName());
         }
         line.setActive(true);
         line.setCreatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));

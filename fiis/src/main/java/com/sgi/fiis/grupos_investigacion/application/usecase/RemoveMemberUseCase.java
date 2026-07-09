@@ -19,8 +19,7 @@ public class RemoveMemberUseCase {
     public Membership execute(Integer groupId, Integer userId) {
         Membership membership = membershipRepository.findActiveByUserInGroup(userId, groupId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "No active membership found for user " + userId
-                        + " in group " + groupId));
+                        "grupos.error.membership-not-found", userId, groupId));
         membership.remove();
         return membershipRepository.save(membership);
     }
