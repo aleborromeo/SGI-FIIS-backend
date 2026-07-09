@@ -32,9 +32,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Deprecated
 @RestController
 @RequestMapping("/api/v1/files")
-@Tag(name = "Files", description = "Endpoints for uploading and downloading documents")
+@Tag(name = "Files", description = "DEPRECATED: Use DocumentController (/api/documents) instead")
 @SecurityRequirement(name = "bearerAuth")
 public class FileController {
 

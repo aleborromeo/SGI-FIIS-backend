@@ -6,6 +6,7 @@ import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedExce
 import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundException;
 import com.sgi.fiis.documentacion.application.usecase.DeactivateDocumentUseCase;
 import com.sgi.fiis.documentacion.application.usecase.DownloadDocumentUseCase;
+import com.sgi.fiis.documentacion.application.usecase.ListDocumentsUseCase;
 import com.sgi.fiis.documentacion.application.usecase.UploadDocumentUseCase;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import com.sgi.fiis.documentacion.application.usecase.DocumentDownloadResult;
@@ -60,6 +61,9 @@ class DocumentControllerTest {
 
     @MockitoBean
     private DeactivateDocumentUseCase deactivateDocumentUseCase;
+
+    @MockitoBean
+    private ListDocumentsUseCase listDocumentsUseCase;
 
     @MockitoBean
     private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;

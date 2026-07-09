@@ -30,7 +30,8 @@ class ProcedureEntityTest {
         ProcedureEntity entity = new ProcedureEntity(
                 1, "TRAM-001", "SOLICITUD_CREACION",
                 applicant, group, "PENDIENTE",
-                "COORDINADOR", null, null, projectRef
+                "COORDINADOR", null, null, projectRef,
+                null, null
         );
 
         assertEquals(1, entity.getId());
@@ -43,6 +44,8 @@ class ProcedureEntityTest {
         assertSame(projectRef, entity.getProjectReference());
         assertNull(entity.getSentAt());
         assertNull(entity.getUpdatedAt());
+        assertNull(entity.getThesisReferenceId());
+        assertNull(entity.getReportReferenceId());
     }
 
     @Test

@@ -5,6 +5,8 @@ import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundExceptio
 import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
 import com.sgi.fiis.documentacion.domain.port.FileStoragePort;
+import com.sgi.fiis.resolutions.domain.port.out.ResolutionRepositoryPort;
+import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,17 +23,23 @@ class DownloadDocumentUseCaseTest {
 
     private DocumentRepositoryPort documentRepositoryPort;
     private FileStoragePort fileStoragePort;
+    private ResolutionRepositoryPort resolutionRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
     private DownloadDocumentUseCase downloadDocumentUseCase;
 
     @BeforeEach
     void setUp() {
         documentRepositoryPort = mock(DocumentRepositoryPort.class);
         fileStoragePort = mock(FileStoragePort.class);
+        resolutionRepositoryPort = mock(ResolutionRepositoryPort.class);
+        procedureRepositoryPort = mock(ProcedureRepositoryPort.class);
 
         downloadDocumentUseCase =
                 new DownloadDocumentUseCase(
                         documentRepositoryPort,
-                        fileStoragePort
+                        fileStoragePort,
+                        resolutionRepositoryPort,
+                        procedureRepositoryPort
                 );
     }
 

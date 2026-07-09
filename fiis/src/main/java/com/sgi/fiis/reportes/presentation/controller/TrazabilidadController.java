@@ -3,6 +3,7 @@ package com.sgi.fiis.reportes.presentation.controller;
 import com.sgi.fiis.reportes.application.service.TrazabilidadService;
 import com.sgi.fiis.reportes.domain.model.TrazabilidadMovimiento;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/reportes")
+@PreAuthorize("isAuthenticated()")
 public class TrazabilidadController {
 
     private final TrazabilidadService service;
