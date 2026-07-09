@@ -2,37 +2,41 @@ spring:
   application:
     name: fiis
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:db_fiis_investigacion}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:postgres}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:}}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/db_fiis_investigacion}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1tesla}
+    driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
   messages:
-    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages,i18n/reports/messages
+    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages,i18n/dashboards/messages,i18n/reports/messages
+
+
+
     use-code-as-default-message: true
     fallback-to-system-locale: true
+
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
     time-zone: UTC
-  servlet:
-    multipart:
-      max-file-size: 5MB       # Tamaño máximo permitido por cada archivo individual
-      max-request-size: 10MB     # Tamaño máximo total permitido para toda la petición HTTP
+
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
   # Java Mail Sender Config
   mail:
     host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME:}
-    password: ${SPRING_MAIL_PASSWORD:}
+    username: ${SPRING_MAIL_USERNAME:tu_correo@unas.edu.pe}
+    password: ${SPRING_MAIL_PASSWORD:tu_contraseña}
     properties:
       mail:
         smtp:
@@ -59,17 +63,8 @@ spring:
             user-info-uri: https://graph.microsoft.com/oidc/userinfo
             user-name-attribute: email
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: alpha
-    tagsSorter: alpha
 
 app:
-  mail:
-    mock: ${APP_MAIL_MOCK:true}
   jwt:
     secret: ${JWT_SECRET:default-dev-secret-key-change-in-production-min-32-chars}
     expiration-ms: 86400000

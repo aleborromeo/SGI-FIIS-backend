@@ -8,6 +8,7 @@ import com.sgi.fiis.users.domain.port.RoleRepositoryPort;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.ZoneId;
 
 import java.time.LocalDateTime;
 
@@ -59,7 +60,7 @@ public class UpdateUserUseCase {
             user.setRoleCode(roleCode);
         }
 
-        user.setUpdatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
+        user.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         return userRepository.save(user);
     }
 }

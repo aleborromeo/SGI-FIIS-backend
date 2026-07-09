@@ -1,27 +1,27 @@
 package com.sgi.fiis.shared.domain.exception;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public class BusinessException extends RuntimeException {
-    private final transient List<Object> args;
+
+    private final String errorKey;
+    private final transient Object[] args;
 
     public BusinessException(String message) {
         super(message);
-        this.args = Collections.emptyList();
+        this.errorKey = null;
+        this.args = null;
     }
 
-    public BusinessException(String message, Object[] args) {
-        super(message);
-        if (args == null) {
-            this.args = Collections.emptyList();
-        } else {
-            this.args = Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(args, args.length)));
-        }
+    public BusinessException(String errorKey, Object... args) {
+        super(errorKey);
+        this.errorKey = errorKey;
+        this.args = args;
+    }
+
+    public String getErrorKey() {
+        return errorKey;
     }
 
     public Object[] getArgs() {
-        return args.isEmpty() ? null : args.toArray();
+        return args != null ? args.clone() : null;
     }
 }

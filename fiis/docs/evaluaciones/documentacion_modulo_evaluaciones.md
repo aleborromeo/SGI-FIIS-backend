@@ -529,3 +529,4 @@ El módulo Evaluaciones se encuentra en estado funcional inicial. Actualmente pe
 * Ejecutarse correctamente dentro del entorno Docker del proyecto.
 
 El módulo queda preparado para integrarse posteriormente con seguridad, roles institucionales, trazabilidad y reportes.
+

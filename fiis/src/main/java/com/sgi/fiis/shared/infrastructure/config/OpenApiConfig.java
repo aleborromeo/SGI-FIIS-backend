@@ -61,16 +61,13 @@ public class OpenApiConfig {
 
     // --- MÓDULOS DEL CORE ---
 
-    // El Backend Unificado al completo (Auth, Users, Documentos)
+    // El Backend Unificado al completo (Auth, Users, Documentos, etc.)
     @Bean
     public GroupedOpenApi allApi() {
         return GroupedOpenApi.builder()
                 .group("all-apis")
-                .pathsToMatch("/api/**")
-                .packagesToScan("com.sgi.fiis.auth", "com.sgi.fiis.users", "com.sgi.fiis.documentacion",
-                        "com.sgi.fiis.tramites", "com.sgi.fiis.grupos_investigacion",
-                        "com.sgi.fiis.lineas_investigacion", "com.sgi.fiis.dashboards",
-                        "com.sgi.fiis.reportes", "com.sgi.fiis.observations", "com.sgi.fiis.thesis")
+                .pathsToMatch("/**")
+                .packagesToScan("com.sgi.fiis")
                 .build();
     }
 
@@ -146,7 +143,7 @@ public class OpenApiConfig {
     public GroupedOpenApi resolutionsApi() {
         return GroupedOpenApi.builder()
                 .group("resolutions")
-                .pathsToMatch("/api/resolutions/**")
+                .pathsToMatch("/api/v1/resolutions/**", "/api/resolutions/**")
                 .build();
     }
 
@@ -164,7 +161,7 @@ public class OpenApiConfig {
     public GroupedOpenApi observationsApi() {
         return GroupedOpenApi.builder()
                 .group("observations")
-                .pathsToMatch("/api/observations/**")
+                .pathsToMatch("/api/v1/observations/**", "/api/observations/**")
                 .build();
     }
 

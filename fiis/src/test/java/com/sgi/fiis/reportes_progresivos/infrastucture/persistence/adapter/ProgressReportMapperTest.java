@@ -124,4 +124,55 @@ class ProgressReportMapperTest {
         assertEquals(domain.getRegistrationDate(), response.getRegistrationDate());
         assertEquals(domain.getLastUpdatedDate(), response.getLastUpdatedDate());
     }
+
+    @Test
+    @DisplayName("Should verify constructor is private")
+    void testConstructorIsPrivate() throws NoSuchMethodException {
+        java.lang.reflect.Constructor<ProgressReportMapper> constructor = ProgressReportMapper.class.getDeclaredConstructor();
+        assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);
+    }
+
+    @Test
+    @DisplayName("Should map null values in type and status mapping functions")
+    void shouldMapNullValues() {
+        ProgressReportEntity entity = ProgressReportEntity.builder()
+                .id(1L)
+                .reportType(null)
+                .reportStatus(null)
+                .progressPercentage(java.math.BigDecimal.ZERO)
+                .build();
+        ProgressReport domain = ProgressReportMapper.toDomain(entity);
+        assertNull(domain.getReportType());
+        assertNull(domain.getReportStatus());
+
+        ProgressReport domain2 = new ProgressReport();
+        domain2.setReportType(null);
+        domain2.setReportStatus(null);
+        domain2.setProgressPercentage(java.math.BigDecimal.ZERO);
+        ProgressReportEntity entity2 = ProgressReportMapper.toEntity(domain2);
+        assertNull(entity2.getReportType());
+        assertNull(entity2.getReportStatus());
+    }
+
+
+    @Test
+    @DisplayName("Should throw exception for unknown report type string")
+    void shouldThrowOnUnknownType() {
+        ProgressReportEntity entity = ProgressReportEntity.builder()
+                .reportType("UNKNOWN_TYPE")
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> ProgressReportMapper.toDomain(entity));
+    }
+
+    @Test
+    @DisplayName("Should throw exception for unknown report status string")
+    void shouldThrowOnUnknownStatus() {
+        ProgressReportEntity entity = ProgressReportEntity.builder()
+                .reportStatus("UNKNOWN_STATUS")
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> ProgressReportMapper.toDomain(entity));
+    }
 }
+

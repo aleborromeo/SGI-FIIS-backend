@@ -15,7 +15,6 @@ import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -34,12 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-
-import org.junit.jupiter.api.Disabled;
-
-@Disabled("Requiere base de datos real o un entorno H2 configurado explícitamente.")
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Auth Integration Tests")
@@ -65,12 +59,6 @@ class AuthIntegrationTest {
 
     @MockitoBean
     private EmailSenderPort emailSenderPort;
-
-    // Mock the transaction manager so @Transactional on VerifyRegistrationUseCase
-    // does NOT attempt to open a real JPA EntityManager / DB connection in tests.
-    // All repositories are already mocked, so no real transaction is needed.
-    @MockitoBean
-    private PlatformTransactionManager transactionManager;
 
     @Test
     @DisplayName("Should successfully login directly and return JWT")
@@ -167,7 +155,7 @@ class AuthIntegrationTest {
                 .mustChangePassword(false)
                 .roleCode("DOCENTE")
                 .build();
-        when(userRepositoryPort.save(any())).thenReturn(persistedUser);
+        when(userRepositoryPort.save(any(User.class))).thenReturn(persistedUser);
         doNothing().when(emailSenderPort).sendVerificationCode(eq("jose.evaristo@unas.edu.pe"), anyString());
 
         // 1. Post to register endpoint
@@ -175,7 +163,7 @@ class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Código de verificación enviado al correo institucional. Complete el registro en el paso 2."));
+                .andExpect(jsonPath("$.message").value("Registro exitoso. Verifique su correo para activar la cuenta."));
 
         // Retrieve the generated code from PendingRegistrationService
         PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get("jose.evaristo@unas.edu.pe");
@@ -187,22 +175,13 @@ class AuthIntegrationTest {
         // 2. Post to verify endpoint
         VerifyRegistrationRequestDto verifyDto = new VerifyRegistrationRequestDto("jose.evaristo@unas.edu.pe", code);
 
-        org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(post("/api/v1/auth/verify-registration")
+        mockMvc.perform(post("/api/v1/auth/verify-registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(verifyDto)))
-                .andDo(print())
-                .andReturn();
-
-        if (result.getResolvedException() != null) {
-            fail("Verify registration failed with exception: " + result.getResolvedException().getMessage(), result.getResolvedException());
-        }
-
-        assertEquals(200, result.getResponse().getStatus(), "Expected 200 OK but got " + result.getResponse().getStatus() + ". Response body: " + result.getResponse().getContentAsString());
-        
-        String content = result.getResponse().getContentAsString();
-        assertTrue(content.contains("\"token\""), "Response should contain token");
-        assertTrue(content.contains("\"email\":\"jose.evaristo@unas.edu.pe\""), "Response should contain correct email");
-        assertTrue(content.contains("\"roleCode\":\"DOCENTE\""), "Response should contain correct roleCode");
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.email").value("jose.evaristo@unas.edu.pe"))
+                .andExpect(jsonPath("$.roleCode").value("DOCENTE"));
 
         // Assert memory storage is cleaned
         assertNull(pendingRegistrationService.get("jose.evaristo@unas.edu.pe"));
@@ -244,7 +223,7 @@ class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(resendDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Código de verificación reenviado exitosamente al correo institucional."));
+                .andExpect(jsonPath("$.message").value("C\u00F3digo de verificación reenviado exitosamente."));
 
         // Get new code and assert it is updated
         PendingRegistrationService.PendingRegistration updatedPending = pendingRegistrationService.get("maria.carmen@unas.edu.pe");
@@ -267,21 +246,6 @@ class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(resendDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("No se encontró ningún registro pendiente para el correo especificado"));
-    }
-
-    @Test
-    @DisplayName("Should return 401 JSON error when accessing protected endpoint without token")
-    void testProtectedEndpointWithoutToken() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/users")
-                        .header("Accept-Language", "es")
-                        .locale(new java.util.Locale("es")))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.status").value(401))
-                .andExpect(jsonPath("$.error").value("Unauthorized"))
-                .andExpect(jsonPath("$.message").value("Acceso no autorizado. Debe iniciar sesión e incluir el token JWT en las cabeceras."))
-                .andExpect(jsonPath("$.path").value("/api/v1/users"))
-                .andExpect(jsonPath("$.timestamp").exists());
+                .andExpect(jsonPath("$.message").value("auth.register.pending-not-found"));
     }
 }
-

@@ -53,6 +53,18 @@ class ResearchLineControllerTest {
     private ResearchLineMapper mapper;
 
     @MockitoBean
+    private AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase;
+
+    @MockitoBean
+    private RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase;
+
+    @MockitoBean
+    private com.sgi.fiis.grupos_investigacion.application.usecase.ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase;
+
+    @MockitoBean
+    private com.sgi.fiis.grupos_investigacion.presentation.mapper.ResearchGroupMapper groupMapper;
+
+    @MockitoBean
     private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
 
     @MockitoBean
@@ -158,5 +170,38 @@ class ResearchLineControllerTest {
                         .content("{\"active\": false}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
+    }
+
+    @Test
+    void listGroups_shouldReturn200_withGroupsList() throws Exception {
+        com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup group = 
+            com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup.builder().id(1).groupName("Group 1").build();
+        com.sgi.fiis.grupos_investigacion.application.dto.ResearchGroupResponseDto dto = 
+            com.sgi.fiis.grupos_investigacion.application.dto.ResearchGroupResponseDto.builder().id(1).groupName("Group 1").build();
+
+        given(getResearchLineUseCase.execute(1)).willReturn(ResearchLine.builder().id(1).build());
+        given(listResearchGroupsByLineUseCase.execute(1)).willReturn(List.of(group));
+        given(groupMapper.toResponseDto(any())).willReturn(dto);
+
+        mockMvc.perform(get("/api/v1/research-lines/1/groups"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].groupName").value("Group 1"));
+    }
+
+    @Test
+    void assignGroup_shouldReturn201() throws Exception {
+        doNothing().when(assignGroupToResearchLineUseCase).execute(1, 2);
+
+        mockMvc.perform(post("/api/v1/research-lines/1/groups/2"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void removeGroup_shouldReturn204() throws Exception {
+        doNothing().when(removeGroupFromResearchLineUseCase).execute(1, 2);
+
+        mockMvc.perform(delete("/api/v1/research-lines/1/groups/2"))
+                .andExpect(status().isNoContent());
     }
 }

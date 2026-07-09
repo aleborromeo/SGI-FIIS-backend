@@ -7,15 +7,16 @@ import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.users.domain.model.User;
+import java.time.ZoneId;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 /**
  * Use case: Verify self-registration (Step 2).
- * Validates the temporary verification code. If correct, persists the user in DB and generates the final JWT.
+ * Validates the temporary verification code. If correct, persists the user in
+ * DB and generates the final JWT.
  */
 @Service
 public class VerifyRegistrationUseCase {
@@ -26,16 +27,15 @@ public class VerifyRegistrationUseCase {
     private final TokenProviderPort tokenProvider;
 
     public VerifyRegistrationUseCase(PendingRegistrationService pendingRegistrationService,
-                                     UserRepositoryPort userRepository,
-                                     PasswordEncoderPort passwordEncoder,
-                                     TokenProviderPort tokenProvider) {
+            UserRepositoryPort userRepository,
+            PasswordEncoderPort passwordEncoder,
+            TokenProviderPort tokenProvider) {
         this.pendingRegistrationService = pendingRegistrationService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
     }
 
-    @Transactional
     public LoginResponseDto execute(String email, String code) {
         PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get(email);
 
@@ -57,7 +57,7 @@ public class VerifyRegistrationUseCase {
 
         // 4. Persist the user in the database
         RegisterRequestDto dto = pending.getRequestDto();
-        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
         User newUser = User.builder()
                 .dni(dto.getDni())

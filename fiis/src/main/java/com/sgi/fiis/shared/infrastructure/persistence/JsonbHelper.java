@@ -11,7 +11,9 @@ public class JsonbHelper {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private JsonbHelper() {}
+    private JsonbHelper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static String toJson(Map<String, String> map) {
         try {
@@ -30,7 +32,9 @@ public class JsonbHelper {
         try {
             return MAPPER.readValue(json, new TypeReference<Map<String, String>>() {});
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to deserialize JSONB string: " + json, e);
+            Map<String, String> legacyMap = new HashMap<>();
+            legacyMap.put("es", json);
+            return legacyMap;
         }
     }
 
