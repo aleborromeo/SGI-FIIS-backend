@@ -108,12 +108,14 @@ public class AuditingAspect {
             for (java.lang.reflect.Method m : result.getClass().getMethods()) {
                 if (m.getName().startsWith("get") && (m.getName().endsWith("Id") || m.getName().contains("Id")) && m.getParameterCount() == 0) {
                     Object idVal = m.invoke(result);
-                    if (idVal instanceof Number) {
-                        return ((Number) idVal).longValue();
+                    if (idVal instanceof Number number) {
+                        return number.longValue();
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            // Ignored because reflection errors default to return 0L
+        }
         return 0L;
     }
 }

@@ -203,10 +203,8 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             if (esEstudiante) {
                 throw new BusinessRuleViolationException("Los estudiantes no tienen permisos para listar planes de tesis de un grupo");
             }
-            if (esCoordinador) {
-                if (!grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), idGrupo)) {
-                    throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otro grupo de investigación");
-                }
+            if (esCoordinador && !grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), idGrupo)) {
+                throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otro grupo de investigación");
             }
         }
         return planRepository.findByGrupo(idGrupo).stream().map(this::toResponse).toList();

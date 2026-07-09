@@ -47,11 +47,11 @@ class ProjectControllerTest {
 
     @BeforeEach
     void setup() {
-        createProjectUseCase = Mockito.mock(CreateProjectUseCase.class);
-        jdbcTemplate = Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class);
+        createProjectUseCase = mock(CreateProjectUseCase.class);
+        jdbcTemplate = mock(org.springframework.jdbc.core.JdbcTemplate.class);
         ProjectController projectController = new ProjectController(createProjectUseCase, jdbcTemplate);
-        MessageSource messageSource = Mockito.mock(MessageSource.class);
-        Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
+        MessageSource messageSource = mock(MessageSource.class);
+        lenient().when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(projectController)
                 .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
@@ -212,7 +212,7 @@ class ProjectControllerTest {
     @Test
     void testUpdateProjectStatus() throws Exception {
         ProjectResponse response = ProjectResponse.builder().id(1).status("APROBADO").build();
-        when(createProjectUseCase.updateStatus(eq(1), eq("APROBADO"))).thenReturn(response);
+        when(createProjectUseCase.updateStatus(1, "APROBADO")).thenReturn(response);
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/api/v1/projects/1/status")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -223,7 +223,11 @@ class ProjectControllerTest {
 
     @Test
     void testGetProjects_asCoordinadorGrupo_hasGroup() throws Exception {
-        when(jdbcTemplate.queryForList(anyString(), eq(Integer.class), eq(3L))).thenReturn(Collections.singletonList(12));
+        when(jdbcTemplate.queryForList(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                Integer.class,
+                3L
+        )).thenReturn(Collections.singletonList(12));
         when(createProjectUseCase.getProjectsByGroup(12)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
 
         mockMvc.perform(get("/api/v1/projects")
@@ -234,7 +238,11 @@ class ProjectControllerTest {
 
     @Test
     void testGetProjects_asCoordinadorGrupo_noGroup() throws Exception {
-        when(jdbcTemplate.queryForList(anyString(), eq(Integer.class), eq(3L))).thenReturn(Collections.emptyList());
+        when(jdbcTemplate.queryForList(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                Integer.class,
+                3L
+        )).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/v1/projects")
                         .header("X-Mock-Role", "COORDINADOR_GRUPO"))

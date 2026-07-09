@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class ResolutionsProcedureRepositoryAdapterTest {
@@ -59,11 +60,11 @@ class ResolutionsProcedureRepositoryAdapterTest {
 
     @Test
     void updateStatusToApprovedWithResolution_withSecurityContext_shouldUseUserId() {
-        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
-        com.sgi.fiis.auth.infrastructure.security.CustomUserDetails userDetails = org.mockito.Mockito.mock(com.sgi.fiis.auth.infrastructure.security.CustomUserDetails.class);
+        org.springframework.security.core.Authentication auth = mock(org.springframework.security.core.Authentication.class);
+        com.sgi.fiis.auth.infrastructure.security.CustomUserDetails userDetails = mock(com.sgi.fiis.auth.infrastructure.security.CustomUserDetails.class);
         
-        org.mockito.Mockito.when(userDetails.getId()).thenReturn(99L);
-        org.mockito.Mockito.when(auth.getPrincipal()).thenReturn(userDetails);
+        when(userDetails.getId()).thenReturn(99L);
+        when(auth.getPrincipal()).thenReturn(userDetails);
         
         org.springframework.security.core.context.SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
@@ -79,8 +80,8 @@ class ResolutionsProcedureRepositoryAdapterTest {
 
     @Test
     void updateStatusToApprovedWithResolution_withAnonymousSecurityContext_shouldUseFallbackId() {
-        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
-        org.mockito.Mockito.when(auth.getPrincipal()).thenReturn("anonymousUser");
+        org.springframework.security.core.Authentication auth = mock(org.springframework.security.core.Authentication.class);
+        when(auth.getPrincipal()).thenReturn("anonymousUser");
         
         org.springframework.security.core.context.SecurityContext context = org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);

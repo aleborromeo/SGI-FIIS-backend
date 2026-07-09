@@ -152,10 +152,9 @@ class LocalDocumentStorageAdapterTest {
     @Test
     void constructor_whenCannotCreateDirectories_shouldThrowIllegalStateException() throws java.io.IOException {
         java.io.File tempFile = java.io.File.createTempFile("fiis-test-file", ".tmp");
+        String tempPath = tempFile.getAbsolutePath();
         try {
-            assertThrows(IllegalStateException.class, () -> {
-                new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, tempFile.getAbsolutePath());
-            });
+            assertThrows(IllegalStateException.class, () -> new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, tempPath));
         } finally {
             tempFile.delete();
         }

@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -249,11 +248,6 @@ class AuditingAspectTest {
         Auditable auditable = mock(Auditable.class);
         when(auditable.action()).thenReturn("UPDATE");
 
-        // Create a target with a class name longer than 100 characters
-        Object target = new Object() {
-            @Override
-            public String toString() { return super.toString(); }
-        };
         JoinPoint mockJoinPoint = mock(JoinPoint.class);
         // A very long class name
         class A12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 {}

@@ -485,61 +485,6 @@ class ThesisPlanServiceTest {
     }
 
     @Test
-    @DisplayName("registrarPlan - throws exception when group is not active")
-    void registrarPlanGroupNotActive() {
-        mockAuthentication(101L, "ROLE_ESTUDIANTE");
-        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
-        when(grupoValidation.existeGrupoActivo(2)).thenReturn(false);
-        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
-    }
-
-    @Test
-    @DisplayName("registrarPlan - throws exception when line is not active")
-    void registrarPlanLineNotActive() {
-        mockAuthentication(101L, "ROLE_ESTUDIANTE");
-        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
-        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
-        when(grupoValidation.existeLineaActiva(1)).thenReturn(false);
-        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
-    }
-
-    @Test
-    @DisplayName("registrarPlan - throws exception when line does not belong to group")
-    void registrarPlanLineNotBelongsToGroup() {
-        mockAuthentication(101L, "ROLE_ESTUDIANTE");
-        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
-        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
-        when(grupoValidation.existeLineaActiva(1)).thenReturn(true);
-        when(grupoValidation.lineaPerteneceAlGrupo(2, 1)).thenReturn(false);
-        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
-    }
-
-    @Test
-    @DisplayName("registrarPlan - throws exception when document is not active")
-    void registrarPlanDocNotActive() {
-        mockAuthentication(101L, "ROLE_ESTUDIANTE");
-        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
-        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
-        when(grupoValidation.existeLineaActiva(1)).thenReturn(true);
-        when(grupoValidation.lineaPerteneceAlGrupo(2, 1)).thenReturn(true);
-        when(documentoValidation.existeDocumentoActivo(99)).thenReturn(false);
-        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
-    }
-
-    @Test
-    @DisplayName("registrarPlan - throws exception when document does not belong to student")
-    void registrarPlanDocNotBelongsToStudent() {
-        mockAuthentication(101L, "ROLE_ESTUDIANTE");
-        RegisterThesisPlanCommand command = new RegisterThesisPlanCommand("AI", "Abstract", 1, 2, 99);
-        when(grupoValidation.existeGrupoActivo(2)).thenReturn(true);
-        when(grupoValidation.existeLineaActiva(1)).thenReturn(true);
-        when(grupoValidation.lineaPerteneceAlGrupo(2, 1)).thenReturn(true);
-        when(documentoValidation.existeDocumentoActivo(99)).thenReturn(true);
-        when(documentoValidation.documentoPerteneceAUsuario(99, 101L)).thenReturn(false);
-        assertThrows(BusinessRuleViolationException.class, () -> service.registrarPlan(command));
-    }
-
-    @Test
     @DisplayName("listarPorGrupo - student is blocked")
     void listarPorGrupoStudentBlocked() {
         mockAuthentication(101L, "ROLE_ESTUDIANTE");

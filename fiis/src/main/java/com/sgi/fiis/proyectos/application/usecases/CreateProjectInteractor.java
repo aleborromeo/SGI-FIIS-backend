@@ -69,33 +69,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.line-name-not-found"));
 
         // 5. If linked to a call, fetch call and validate it (RF-33 & RF-34)
-        Integer callId = request.getCallId();
-        ResearchCall call = null;
-        if (callId != null) {
-            call = saveCallPort.findById(callId)
-                    .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.call-not-found", callId));
-        } else {
-            // Find any open call
-            List<ResearchCall> openCalls = saveCallPort.findByStatus(CallStatus.OPEN);
-            if (openCalls.isEmpty()) {
-                throw new BusinessRuleValidationException("No existe ninguna convocatoria en estado ABIERTA");
-            }
-            LocalDate today = LocalDate.now(clock);
-            for (ResearchCall c : openCalls) {
-                try {
-                    c.validateCanSubmitProject(today);
-                    call = c;
-                    break;
-                } catch (BusinessRuleValidationException e) {
-                    // Check next
-                }
-            }
-            if (call == null) {
-                throw new BusinessRuleValidationException("No existe ninguna convocatoria abierta dentro del rango de fechas permitido");
-            }
-        }
-
-        call.validateCanSubmitProject(LocalDate.now(clock));
+        ResearchCall call = getAndValidateCall(request.getCallId());
         request.setCallId(call.getId());
 
         // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
@@ -248,5 +222,33 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 project.getDocumentId(),
                 dbStatus,
                 members);
+    }
+
+    private ResearchCall getAndValidateCall(Integer callId) {
+        ResearchCall call = null;
+        if (callId != null) {
+            call = saveCallPort.findById(callId)
+                    .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.call-not-found", callId));
+        } else {
+            List<ResearchCall> openCalls = saveCallPort.findByStatus(CallStatus.OPEN);
+            if (openCalls.isEmpty()) {
+                throw new BusinessRuleValidationException("No existe ninguna convocatoria en estado ABIERTA");
+            }
+            LocalDate today = LocalDate.now(clock);
+            for (ResearchCall c : openCalls) {
+                try {
+                    c.validateCanSubmitProject(today);
+                    call = c;
+                    break;
+                } catch (BusinessRuleValidationException e) {
+                    // Check next
+                }
+            }
+            if (call == null) {
+                throw new BusinessRuleValidationException("No existe ninguna convocatoria abierta dentro del rango de fechas permitido");
+            }
+        }
+        call.validateCanSubmitProject(LocalDate.now(clock));
+        return call;
     }
 }
