@@ -11,7 +11,7 @@ import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
 import com.sgi.fiis.lineas_investigacion.presentation.mapper.LineaInvestigacionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -37,11 +37,11 @@ class LineaInvestigacionControllerTest {
 
     @BeforeEach
     void setup() {
-        registrarLineaUseCase = Mockito.mock(RegistrarLineaUseCase.class);
-        listarLineasUseCase = Mockito.mock(ListarLineasUseCase.class);
-        obtenerLineaUseCase = Mockito.mock(ObtenerLineaUseCase.class);
-        cambiarEstadoLineaUseCase = Mockito.mock(CambiarEstadoLineaUseCase.class);
-        mapper = Mockito.mock(LineaInvestigacionMapper.class);
+        registrarLineaUseCase = mock(RegistrarLineaUseCase.class);
+        listarLineasUseCase = mock(ListarLineasUseCase.class);
+        obtenerLineaUseCase = mock(ObtenerLineaUseCase.class);
+        cambiarEstadoLineaUseCase = mock(CambiarEstadoLineaUseCase.class);
+        mapper = mock(LineaInvestigacionMapper.class);
         LineaInvestigacionController controller = new LineaInvestigacionController(
                 registrarLineaUseCase, listarLineasUseCase, obtenerLineaUseCase, cambiarEstadoLineaUseCase, mapper);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();

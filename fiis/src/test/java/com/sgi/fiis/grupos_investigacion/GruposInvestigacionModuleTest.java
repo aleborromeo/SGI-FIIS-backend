@@ -10,7 +10,7 @@ import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,8 +34,8 @@ class GruposInvestigacionModuleTest {
 
     @BeforeEach
     void setup() {
-        grupoRepository = Mockito.mock(GrupoInvestigacionRepositoryPort.class);
-        membresiaRepository = Mockito.mock(MembresiaRepositoryPort.class);
+        grupoRepository = mock(GrupoInvestigacionRepositoryPort.class);
+        membresiaRepository = mock(MembresiaRepositoryPort.class);
         crearGrupoUseCase = new CrearGrupoUseCase(grupoRepository);
         listarGruposUseCase = new ListarGruposUseCase(grupoRepository);
         obtenerGrupoUseCase = new ObtenerGrupoUseCase(grupoRepository);

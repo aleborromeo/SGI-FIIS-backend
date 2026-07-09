@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -45,11 +46,11 @@ class ResolutionControllerTest {
         sampleResolution = new Resolution(
                 1L,
                 "RES-2023-001",
-                LocalDate.of(2023, 10, 1),
+                LocalDate.of(2023, Month.OCTOBER, 1),
                 "Thesis approval",
                 10L,
                 100L,
-                LocalDateTime.of(2023, 10, 1, 10, 0)
+                LocalDateTime.of(2023, Month.OCTOBER, 1, 10, 0)
         );
     }
 

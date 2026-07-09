@@ -35,6 +35,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
     private static final String FILTER_ACTIVE = " AND es_activo = TRUE";
     private static final String FILTER_PROCEDURE_NOT_CLOSED =
             " AND estado_actual NOT IN ('APROBADO','RECHAZADO')";
+    private static final String ALERT_ACTIVE_CALL_TITLE = "dashboard.alert.active-call.title";
 
     private final JdbcTemplate jdbcTemplate;
     private final DashboardMessageService messages;
@@ -80,7 +81,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.admin.description", openCalls))
                     .build());
         }
@@ -145,7 +146,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.director.description"))
                     .build());
         }
@@ -306,7 +307,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.general.description", openCalls))
                     .build());
         }
@@ -399,7 +400,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (activeCallsForApplication > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.faculty.description", activeCallsForApplication))
                     .build());
         }
@@ -475,7 +476,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.general.description", openCalls))
                     .build());
         }

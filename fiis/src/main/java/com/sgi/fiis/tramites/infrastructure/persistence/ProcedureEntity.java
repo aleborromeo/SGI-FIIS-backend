@@ -52,6 +52,12 @@ public class ProcedureEntity {
     @JoinColumn(name = "id_referencia_proyecto")
     private ProjectEntity projectReference;
 
+    @Column(name = "id_referencia_tesis")
+    private Long thesisReferenceId;
+
+    @Column(name = "id_referencia_informe")
+    private Long reportReferenceId;
+
     @PrePersist
     protected void onCreate() {
         sentAt = LocalDateTime.now(ZoneId.of("UTC"));

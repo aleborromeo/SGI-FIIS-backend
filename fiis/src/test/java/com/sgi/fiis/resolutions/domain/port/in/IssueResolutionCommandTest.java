@@ -3,6 +3,7 @@ package com.sgi.fiis.resolutions.domain.port.in;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +29,7 @@ class IssueResolutionCommandTest {
         assertEquals(command1, command1);
         assertEquals(command1, command2);
         assertNotEquals(command1, command3);
-        assertNotEquals(command1, null);
+        assertNotEquals(null, command1);
         assertNotEquals(command1, new Object());
         
         assertEquals(command1.hashCode(), command2.hashCode());
@@ -38,7 +39,7 @@ class IssueResolutionCommandTest {
     @Test
     void testToString() {
         IssueResolutionCommand command = new IssueResolutionCommand(
-                "RES-001", LocalDate.of(2023, 10, 1), "Asunto", 1L, new byte[]{1}, "test.pdf", "application/pdf"
+                "RES-001", LocalDate.of(2023, Month.OCTOBER, 1), "Asunto", 1L, new byte[]{1}, "test.pdf", "application/pdf"
         );
         
         String toString = command.toString();
@@ -48,7 +49,7 @@ class IssueResolutionCommandTest {
         assertTrue(toString.contains("array of size 1"));
         
         IssueResolutionCommand commandNullBytes = new IssueResolutionCommand(
-                "RES-001", LocalDate.of(2023, 10, 1), "Asunto", 1L, null, "test.pdf", "application/pdf"
+                "RES-001", LocalDate.of(2023, Month.OCTOBER, 1), "Asunto", 1L, null, "test.pdf", "application/pdf"
         );
         assertTrue(commandNullBytes.toString().contains("null"));
     }

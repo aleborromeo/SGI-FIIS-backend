@@ -3,7 +3,7 @@ package com.sgi.fiis.lineas_investigacion.infrastructure.persistence;
 import com.sgi.fiis.lineas_investigacion.domain.model.LineaInvestigacion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +20,7 @@ class LineaInvestigacionRepositoryAdapterTest {
 
     @BeforeEach
     void setup() {
-        springDataRepository = Mockito.mock(SpringDataLineaRepository.class);
+        springDataRepository = mock(SpringDataLineaRepository.class);
         adapter = new LineaInvestigacionRepositoryAdapter(springDataRepository);
     }
 

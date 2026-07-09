@@ -36,6 +36,7 @@ public class ResearchCall {
     }
 
     /** Convenience constructor kept for backward compatibility with existing callers. */
+    @SuppressWarnings("java:S107")
     public ResearchCall(Integer id, String title, String description, LocalDate startDate,
                         LocalDate endDate, CallStatus status, Integer documentId,
                         List<Integer> researchLineIds) {

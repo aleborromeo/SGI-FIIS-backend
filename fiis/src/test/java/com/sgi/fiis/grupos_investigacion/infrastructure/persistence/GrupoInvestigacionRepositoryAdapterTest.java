@@ -3,7 +3,7 @@ package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 import com.sgi.fiis.grupos_investigacion.domain.model.GrupoInvestigacion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -26,8 +26,8 @@ class GrupoInvestigacionRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        jpaRepository = Mockito.mock(SpringDataGrupoRepository.class);
-        jdbcTemplate = Mockito.mock(JdbcTemplate.class);
+        jpaRepository = mock(SpringDataGrupoRepository.class);
+        jdbcTemplate = mock(JdbcTemplate.class);
         adapter = new GrupoInvestigacionRepositoryAdapter(jpaRepository, jdbcTemplate);
     }
 

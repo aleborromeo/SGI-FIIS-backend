@@ -79,6 +79,7 @@ public class Evaluacion {
                 .build();
     }
 
+    @SuppressWarnings("java:S107")
     public static Evaluacion reconstruir(
             Long idEvaluacion,
             Long idProyecto,

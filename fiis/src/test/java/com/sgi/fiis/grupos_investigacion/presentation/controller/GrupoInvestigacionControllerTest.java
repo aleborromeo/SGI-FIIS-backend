@@ -12,7 +12,7 @@ import com.sgi.fiis.lineas_investigacion.application.dto.LineaInvestigacionRespo
 import com.sgi.fiis.lineas_investigacion.presentation.mapper.LineaInvestigacionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -42,16 +42,16 @@ class GrupoInvestigacionControllerTest {
 
     @BeforeEach
     void setup() {
-        crearGrupoUseCase = Mockito.mock(CrearGrupoUseCase.class);
-        listarGruposUseCase = Mockito.mock(ListarGruposUseCase.class);
-        obtenerGrupoUseCase = Mockito.mock(ObtenerGrupoUseCase.class);
-        asignarCoordinadorUseCase = Mockito.mock(AsignarCoordinadorUseCase.class);
-        asignarMiembroUseCase = Mockito.mock(AsignarMiembroUseCase.class);
-        retirarMiembroUseCase = Mockito.mock(RetirarMiembroUseCase.class);
-        listarMiembrosUseCase = Mockito.mock(ListarMiembrosUseCase.class);
-        listarLineasPorGrupoUseCase = Mockito.mock(ListarLineasPorGrupoUseCase.class);
-        mapper = Mockito.mock(GrupoInvestigacionMapper.class);
-        lineaMapper = Mockito.mock(LineaInvestigacionMapper.class);
+        crearGrupoUseCase = mock(CrearGrupoUseCase.class);
+        listarGruposUseCase = mock(ListarGruposUseCase.class);
+        obtenerGrupoUseCase = mock(ObtenerGrupoUseCase.class);
+        asignarCoordinadorUseCase = mock(AsignarCoordinadorUseCase.class);
+        asignarMiembroUseCase = mock(AsignarMiembroUseCase.class);
+        retirarMiembroUseCase = mock(RetirarMiembroUseCase.class);
+        listarMiembrosUseCase = mock(ListarMiembrosUseCase.class);
+        listarLineasPorGrupoUseCase = mock(ListarLineasPorGrupoUseCase.class);
+        mapper = mock(GrupoInvestigacionMapper.class);
+        lineaMapper = mock(LineaInvestigacionMapper.class);
         GrupoInvestigacionController controller = new GrupoInvestigacionController(
                 crearGrupoUseCase, listarGruposUseCase, obtenerGrupoUseCase,
                 asignarCoordinadorUseCase, asignarMiembroUseCase, retirarMiembroUseCase,

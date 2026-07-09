@@ -10,7 +10,7 @@ import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -39,7 +39,7 @@ class ResearchCallModuleTest {
 
     @BeforeEach
     void setup() {
-        saveCallPort = Mockito.mock(SaveCallPort.class);
+        saveCallPort = mock(SaveCallPort.class);
         createCallInteractor = new CreateCallInteractor(saveCallPort);
         callInteractor = new CallInteractor(saveCallPort);
     }

@@ -4,7 +4,7 @@ import com.sgi.fiis.grupos_investigacion.domain.model.Membresia;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -27,8 +27,8 @@ class MembresiaRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        jpaRepository = Mockito.mock(SpringDataMembresiaRepository.class);
-        jdbcTemplate = Mockito.mock(JdbcTemplate.class);
+        jpaRepository = mock(SpringDataMembresiaRepository.class);
+        jdbcTemplate = mock(JdbcTemplate.class);
         adapter = new MembresiaRepositoryAdapter(jpaRepository, jdbcTemplate);
     }
 

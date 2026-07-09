@@ -11,7 +11,7 @@ import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +32,7 @@ class LineasInvestigacionModuleTest {
 
     @BeforeEach
     void setup() {
-        repository = Mockito.mock(LineaInvestigacionRepositoryPort.class);
+        repository = mock(LineaInvestigacionRepositoryPort.class);
         registrarLineaUseCase = new RegistrarLineaUseCase(repository);
         obtenerLineaUseCase = new ObtenerLineaUseCase(repository);
         listarLineasUseCase = new ListarLineasUseCase(repository);
