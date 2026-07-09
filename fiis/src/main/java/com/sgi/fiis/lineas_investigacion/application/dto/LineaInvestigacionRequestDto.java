@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LineaInvestigacionRequestDto {
 
-    @NotBlank(message = "El nombre de la línea es obligatorio")
-    @Size(max = 150, message = "El nombre no debe exceder 150 caracteres")
+    @NotBlank(message = "{lineas.validation.nombre.required}")
+    @Size(max = 150, message = "{lineas.validation.nombre.max-size}")
     private String nombreLinea;
 }

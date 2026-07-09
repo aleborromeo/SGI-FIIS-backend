@@ -2,7 +2,7 @@ spring:
   application:
     name: fiis
   messages:
-    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages
+    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages,i18n/lineas_investigacion/messages,i18n/grupos_investigacion/messages
     use-code-as-default-message: true
     fallback-to-system-locale: true
   datasource:

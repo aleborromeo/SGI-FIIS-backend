@@ -26,15 +26,15 @@ public class AsignarMiembroUseCase {
     @Transactional
     public Membresia execute(Integer idGrupo, Integer idUsuario) {
         if (grupoRepository.findById(idGrupo).isEmpty()) {
-            throw new ResourceNotFoundException("GrupoInvestigacion", "id", idGrupo);
+            throw new ResourceNotFoundException("grupos.error.not-found", idGrupo);
         }
 
         if (!grupoRepository.existeUsuarioActivo(idUsuario)) {
-            throw new BusinessException("El usuario con id " + idUsuario + " no existe o no está activo");
+            throw new BusinessException("grupos.error.member-invalid", idUsuario);
         }
 
         if (membresiaRepository.existsActivaByUsuario(idUsuario)) {
-            throw new BusinessException("El usuario con id " + idUsuario + " ya pertenece a un grupo de investigación activo (RF-21)");
+            throw new BusinessException("grupos.error.member-already-active", idUsuario);
         }
 
         Membresia membresia = Membresia.builder()

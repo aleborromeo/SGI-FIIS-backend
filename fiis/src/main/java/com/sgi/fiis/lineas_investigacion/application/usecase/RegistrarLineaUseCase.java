@@ -21,7 +21,7 @@ public class RegistrarLineaUseCase {
     @Transactional
     public LineaInvestigacion execute(LineaInvestigacion linea) {
         if (lineaRepository.existsByNombre(linea.getNombreLinea())) {
-            throw new DuplicateResourceException("LineaInvestigacion", "nombre", linea.getNombreLinea());
+            throw new DuplicateResourceException("lineas.error.duplicate-name", linea.getNombreLinea());
         }
         linea.setEsActiva(true);
         linea.setFechaCreacion(LocalDateTime.now(ZoneId.of("UTC")));

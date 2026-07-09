@@ -19,10 +19,10 @@ public class AssignCoordinatorUseCase {
     @Transactional
     public ResearchGroup execute(Integer groupId, Integer userId) {
         ResearchGroup group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResourceNotFoundException("ResearchGroup", "id", groupId));
+                .orElseThrow(() -> new ResourceNotFoundException("grupos.error.not-found", groupId));
 
         if (!groupRepository.existsActiveUserWithRole(userId, "COORDINADOR_GRUPO")) {
-            throw new BusinessException("User with id " + userId + " does not exist, is not active, or does not have the COORDINADOR_GRUPO role");
+            throw new BusinessException("grupos.error.coordinator-invalid-role", userId);
         }
 
         group.setCurrentCoordinatorId(userId);

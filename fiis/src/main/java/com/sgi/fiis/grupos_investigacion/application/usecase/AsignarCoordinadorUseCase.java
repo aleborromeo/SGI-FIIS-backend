@@ -19,10 +19,10 @@ public class AsignarCoordinadorUseCase {
     @Transactional
     public GrupoInvestigacion execute(Integer idGrupo, Integer idUsuario) {
         GrupoInvestigacion grupo = grupoRepository.findById(idGrupo)
-                .orElseThrow(() -> new ResourceNotFoundException("GrupoInvestigacion", "id", idGrupo));
+                .orElseThrow(() -> new ResourceNotFoundException("grupos.error.not-found", idGrupo));
 
         if (!grupoRepository.existeUsuarioActivo(idUsuario)) {
-            throw new BusinessException("El usuario con id " + idUsuario + " no existe o no está activo");
+            throw new BusinessException("grupos.error.coordinator-invalid", idUsuario);
         }
 
         grupo.setIdCoordinadorActual(idUsuario);
