@@ -31,10 +31,8 @@ class ResearchLineRepositoryAdapterTest {
     private ResearchLineEntity getTestLineEntity() {
         ResearchLineEntity entity = new ResearchLineEntity();
         entity.setId(1);
-        entity.setLineName("Tecnologia y Comunicaciones");
+        entity.setName("Tecnologia y Comunicaciones");
         entity.setActive(true);
-        entity.setCreatedAt(LocalDateTime.of(2026, Month.JANUARY, 1, 12, 0));
-        entity.setUpdatedAt(LocalDateTime.of(2026, Month.JANUARY, 2, 12, 0));
         return entity;
     }
 
@@ -139,9 +137,9 @@ class ResearchLineRepositoryAdapterTest {
     @Test
     @DisplayName("Should check if research line exists by name")
     void testExistsByName() {
-        when(springDataRepository.existsByLineName("Tecnologia y Comunicaciones")).thenReturn(true);
+        when(springDataRepository.existsByName("Tecnologia y Comunicaciones")).thenReturn(true);
 
         assertTrue(adapter.existsByName("Tecnologia y Comunicaciones"));
-        verify(springDataRepository).existsByLineName("Tecnologia y Comunicaciones");
+        verify(springDataRepository).existsByName("Tecnologia y Comunicaciones");
     }
 }

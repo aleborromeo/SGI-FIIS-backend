@@ -43,13 +43,15 @@ class ProjectControllerTest {
     private MockMvc mockMvc;
     private CreateProjectUseCase createProjectUseCase;
     private ObjectMapper objectMapper;
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setup() {
-        createProjectUseCase = Mockito.mock(CreateProjectUseCase.class);
-        ProjectController projectController = new ProjectController(createProjectUseCase);
-        MessageSource messageSource = Mockito.mock(MessageSource.class);
-        Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
+        createProjectUseCase = mock(CreateProjectUseCase.class);
+        jdbcTemplate = mock(org.springframework.jdbc.core.JdbcTemplate.class);
+        ProjectController projectController = new ProjectController(createProjectUseCase, jdbcTemplate);
+        MessageSource messageSource = mock(MessageSource.class);
+        lenient().when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(projectController)
                 .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
@@ -62,6 +64,13 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getUsername()).thenReturn("testuser");
+                        String mockRole = webRequest.getHeader("X-Mock-Role");
+                        String role = mockRole != null ? mockRole : "ADMIN";
+                        when(userDetails.getAuthorities()).thenAnswer(inv -> 
+                            Collections.singletonList(
+                                (org.springframework.security.core.GrantedAuthority) () -> "ROLE_" + role
+                            )
+                        );
                         return userDetails;
                     }
                 })
@@ -95,6 +104,7 @@ class ProjectControllerTest {
         when(createProjectUseCase.execute(any(CreateProjectRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/projects")
+                .header("X-Mock-Role", "DOCENTE_INVESTIGADOR")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -160,5 +170,83 @@ class ProjectControllerTest {
 
         mockMvc.perform(get("/api/v1/projects/99"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetProjects_asDocenteInvestigador() throws Exception {
+        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "DOCENTE_INVESTIGADOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void testGetProjects_asEstudiante() throws Exception {
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "ESTUDIANTE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testGetProjectById_asDocenteInvestigador_forbidden() throws Exception {
+        when(createProjectUseCase.getProjectById(1)).thenReturn(ProjectResponse.builder().id(1).responsibleId(99L).build());
+
+        mockMvc.perform(get("/api/v1/projects/1")
+                        .header("X-Mock-Role", "DOCENTE_INVESTIGADOR"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testGetProjectById_asDocenteInvestigador_ownProject() throws Exception {
+        when(createProjectUseCase.getProjectById(1)).thenReturn(ProjectResponse.builder().id(1).responsibleId(3L).build());
+
+        mockMvc.perform(get("/api/v1/projects/1")
+                        .header("X-Mock-Role", "DOCENTE_INVESTIGADOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void testUpdateProjectStatus() throws Exception {
+        ProjectResponse response = ProjectResponse.builder().id(1).status("APROBADO").build();
+        when(createProjectUseCase.updateStatus(1, "APROBADO")).thenReturn(response);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/api/v1/projects/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APROBADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APROBADO"));
+    }
+
+    @Test
+    void testGetProjects_asCoordinadorGrupo_hasGroup() throws Exception {
+        when(jdbcTemplate.queryForList(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                Integer.class,
+                3L
+        )).thenReturn(Collections.singletonList(12));
+        when(createProjectUseCase.getProjectsByGroup(12)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "COORDINADOR_GRUPO"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void testGetProjects_asCoordinadorGrupo_noGroup() throws Exception {
+        when(jdbcTemplate.queryForList(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                Integer.class,
+                3L
+        )).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .header("X-Mock-Role", "COORDINADOR_GRUPO"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }

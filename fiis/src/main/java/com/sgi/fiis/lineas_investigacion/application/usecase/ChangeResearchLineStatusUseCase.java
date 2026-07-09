@@ -18,7 +18,7 @@ public class ChangeResearchLineStatusUseCase {
     @Transactional
     public ResearchLine execute(Integer id, boolean active) {
         ResearchLine line = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ResearchLine", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("lineas.error.not-found", id));
         if (active) {
             line.activate();
         } else {

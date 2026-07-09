@@ -16,7 +16,7 @@ public class ProcedureMovementRepositoryAdapter implements ProcedureMovementRepo
 
     @Override
     public List<ProcedureMovement> findByProcedureId(Long idTramite) {
-        return repository.findByProcedureIdOrderByDateAsc(idTramite)
+        return repository.findByProcedureIdOrderByDateAsc(idTramite.intValue())
                 .stream()
                 .map(this::toDomain)
                 .toList();
@@ -24,12 +24,12 @@ public class ProcedureMovementRepositoryAdapter implements ProcedureMovementRepo
 
     private ProcedureMovement toDomain(ProcedureMovementEntity entity) {
         return ProcedureMovement.builder()
-                .idUsuarioAccion(entity.getIdUsuarioAccion())
-                .accion(entity.getAccion())
-                .estadoAnterior(ProcedureStatus.valueOf(entity.getEstadoAnterior()))
-                .estadoNuevo(ProcedureStatus.valueOf(entity.getEstadoNuevo()))
-                .observacion(entity.getObservacion())
-                .fechaMovimiento(entity.getFechaMovimiento())
+                .idUsuarioAccion(entity.getActionUser() != null ? entity.getActionUser().getId().longValue() : null)
+                .accion(entity.getAction())
+                .estadoAnterior(ProcedureStatus.valueOf(entity.getPreviousState()))
+                .estadoNuevo(ProcedureStatus.valueOf(entity.getNewState()))
+                .observacion(entity.getComment())
+                .fechaMovimiento(entity.getMovementAt())
                 .build();
     }
 }

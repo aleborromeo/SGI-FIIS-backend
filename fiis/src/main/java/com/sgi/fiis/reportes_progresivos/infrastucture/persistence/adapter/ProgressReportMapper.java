@@ -11,7 +11,9 @@ import com.sgi.fiis.reportes_progresivos.infrastucture.persistence.entity.Progre
  */
 public final class ProgressReportMapper {
 
-    private ProgressReportMapper() {}
+    private ProgressReportMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static ProgressReport toDomain(ProgressReportEntity entity) {
         ProgressReport domain = new ProgressReport();

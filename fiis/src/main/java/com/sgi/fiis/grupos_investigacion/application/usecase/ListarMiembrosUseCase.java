@@ -22,7 +22,7 @@ public class ListarMiembrosUseCase {
 
     public List<Membresia> execute(Integer idGrupo) {
         if (grupoRepository.findById(idGrupo).isEmpty()) {
-            throw new ResourceNotFoundException("GrupoInvestigacion", "id", idGrupo);
+            throw new ResourceNotFoundException("grupos.error.not-found", idGrupo);
         }
         return membresiaRepository.findActivasByGrupo(idGrupo);
     }

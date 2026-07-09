@@ -18,7 +18,7 @@ public class CrearGrupoUseCase {
     @Transactional
     public GrupoInvestigacion execute(GrupoInvestigacion grupo) {
         if (grupoRepository.existsByCodigo(grupo.getCodigoGrupo())) {
-            throw new DuplicateResourceException("GrupoInvestigacion", "codigoGrupo", grupo.getCodigoGrupo());
+            throw new DuplicateResourceException("grupos.error.duplicate-code", grupo.getCodigoGrupo());
         }
         grupo.setEsActivo(true);
         return grupoRepository.save(grupo);

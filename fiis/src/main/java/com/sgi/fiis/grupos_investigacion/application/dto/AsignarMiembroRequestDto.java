@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AsignarMiembroRequestDto {
 
-    @NotNull(message = "El id del usuario es obligatorio")
+    @NotNull(message = "{grupos.validation.usuario.required}")
     private Integer idUsuario;
 }

@@ -3,7 +3,7 @@ package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SpringDataResearchGroupRepository extends JpaRepository<ResearchGroupEntity, Integer> {
-    boolean existsByGroupCode(String groupCode);
+    boolean existsByCode(String code);
 
     @org.springframework.data.jpa.repository.Query(value = """
             SELECT g.* FROM grupos_investigacion g

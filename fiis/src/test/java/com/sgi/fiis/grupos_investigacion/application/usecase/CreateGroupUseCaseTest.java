@@ -30,7 +30,11 @@ class CreateGroupUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(input))
                 .isInstanceOf(DuplicateResourceException.class)
-                .hasMessageContaining("GI-001");
+                .satisfies(ex -> {
+                    DuplicateResourceException duplicate = (DuplicateResourceException) ex;
+                    assertThat(duplicate.getErrorKey()).isEqualTo("grupos.error.duplicate-code");
+                    assertThat(duplicate.getArgs()).containsExactly("GI-001");
+                });
 
         then(repository).should(never()).save(any());
     }
