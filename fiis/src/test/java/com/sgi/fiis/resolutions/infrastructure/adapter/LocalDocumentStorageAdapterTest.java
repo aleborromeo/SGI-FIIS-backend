@@ -120,4 +120,32 @@ class LocalDocumentStorageAdapterTest {
         
         assertEquals("Failed to save the attached document.", ex.getMessage());
     }
+
+    @Test
+    void saveDocument_withNullFileName_shouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            adapter.saveDocument(new byte[]{1, 2}, null, "application/pdf");
+        });
+    }
+
+    @Test
+    void saveDocument_withEmptyFileName_shouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            adapter.saveDocument(new byte[]{1, 2}, "", "application/pdf");
+        });
+    }
+
+    @Test
+    void saveDocument_withPathTraversalFileName_shouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            adapter.saveDocument(new byte[]{1, 2}, "../escaped.pdf", "application/pdf");
+        });
+    }
+
+    @Test
+    void saveDocument_withPathTraversalFileNameContainsDoubleDot_shouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            adapter.saveDocument(new byte[]{1, 2}, "some..path.pdf", "application/pdf");
+        });
+    }
 }
