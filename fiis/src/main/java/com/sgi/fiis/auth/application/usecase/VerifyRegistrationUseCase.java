@@ -6,89 +6,89 @@ import com.sgi.fiis.auth.application.service.PendingRegistrationService;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.auth.domain.port.TokenProviderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
-import com.sgi.fiis.users.domain.model.Usuario;
-import com.sgi.fiis.users.domain.port.UsuarioRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import java.time.ZoneId;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 /**
- * Caso de uso: Verificar auto-registro (Paso 2).
- * Valida el código de verificación temporal. Si es correcto, persiste al usuario en base de datos y le genera el JWT final.
+ * Use case: Verify self-registration (Step 2).
+ * Validates the temporary verification code. If correct, persists the user in
+ * DB and generates the final JWT.
  */
 @Service
 public class VerifyRegistrationUseCase {
 
     private final PendingRegistrationService pendingRegistrationService;
-    private final UsuarioRepositoryPort usuarioRepository;
+    private final UserRepositoryPort userRepository;
     private final PasswordEncoderPort passwordEncoder;
     private final TokenProviderPort tokenProvider;
 
     public VerifyRegistrationUseCase(PendingRegistrationService pendingRegistrationService,
-                                      UsuarioRepositoryPort usuarioRepository,
-                                      PasswordEncoderPort passwordEncoder,
-                                      TokenProviderPort tokenProvider) {
+            UserRepositoryPort userRepository,
+            PasswordEncoderPort passwordEncoder,
+            TokenProviderPort tokenProvider) {
         this.pendingRegistrationService = pendingRegistrationService;
-        this.usuarioRepository = usuarioRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
     }
 
-    @Transactional
-    public LoginResponseDto execute(String correo, String codigo) {
-        PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get(correo);
+    public LoginResponseDto execute(String email, String code) {
+        PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get(email);
 
-        // 1. Validar que exista un registro pendiente
+        // 1. Validate that a pending registration exists
         if (pending == null) {
-            throw new BusinessException("No se encontró ningún registro pendiente o ya ha sido verificado");
+            throw new BusinessException("auth.register.pending-not-found");
         }
 
-        // 2. Validar que el código no haya expirado
+        // 2. Validate that the code has not expired
         if (pending.isExpired()) {
-            pendingRegistrationService.remove(correo);
-            throw new BusinessException("El código de verificación ha expirado");
+            pendingRegistrationService.remove(email);
+            throw new BusinessException("auth.register.expired");
         }
 
-        // 3. Validar el código de verificación
-        if (!pending.getCode().equals(codigo)) {
-            throw new BusinessException("Código de verificación inválido");
+        // 3. Validate the verification code
+        if (!pending.getCode().equals(code)) {
+            throw new BusinessException("auth.register.invalid-code");
         }
 
-        // 4. Persistir al usuario en la base de datos
+        // 4. Persist the user in the database
         RegisterRequestDto dto = pending.getRequestDto();
-        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
-        Usuario nuevoUsuario = Usuario.builder()
+        User newUser = User.builder()
                 .dni(dto.getDni())
-                .nombres(dto.getNombres())
-                .apellidos(dto.getApellidos())
-                .correoInstitucional(dto.getCorreoInstitucional().trim())
-                .telefono(dto.getTelefono())
+                .firstNames(dto.getFirstNames())
+                .lastNames(dto.getLastNames())
+                .institutionalEmail(dto.getInstitutionalEmail().trim())
+                .phone(dto.getPhone())
                 .passwordHash(passwordEncoder.encode(dto.getPassword()))
-                .activo(true) // Se activa al verificar su correo
-                .mustChangePassword(false) // Auto-registro no obliga a cambiar contraseña inicial
-                .rolCodigo(dto.getRolCodigo())
-                .fechaCreacion(now)
-                .fechaActualizacion(now)
+                .active(true) // Activated upon verifying email
+                .mustChangePassword(false) // Self-registration doesn't require initial password change
+                .roleCode(dto.getRoleCode())
+                .createdAt(now)
+                .updatedAt(now)
                 .build();
 
-        Usuario guardado = usuarioRepository.save(nuevoUsuario);
+        User saved = userRepository.save(newUser);
 
-        // 5. Limpiar el registro pendiente en memoria
-        pendingRegistrationService.remove(correo);
+        // 5. Clean up the pending registration in memory
+        pendingRegistrationService.remove(email);
 
-        // 6. Generar JWT para iniciar sesión de inmediato
-        String token = tokenProvider.generateToken(guardado.getCorreoInstitucional(), guardado.getRolCodigo());
+        // 6. Generate JWT to log in immediately
+        String token = tokenProvider.generateToken(saved.getInstitutionalEmail(), saved.getRoleCode());
 
         return LoginResponseDto.builder()
                 .token(token)
-                .tipo("Bearer")
-                .correo(guardado.getCorreoInstitucional())
-                .nombres(guardado.getNombres())
-                .apellidos(guardado.getApellidos())
-                .rolCodigo(guardado.getRolCodigo())
-                .mustChangePassword(guardado.isMustChangePassword())
+                .type("Bearer")
+                .email(saved.getInstitutionalEmail())
+                .firstNames(saved.getFirstNames())
+                .lastNames(saved.getLastNames())
+                .roleCode(saved.getRoleCode())
+                .mustChangePassword(saved.isMustChangePassword())
                 .requiresVerification(false)
                 .build();
     }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -23,7 +23,7 @@ class DocumentRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        this.jpaDocumentRepository = Mockito.mock(JpaDocumentRepository.class);
+        this.jpaDocumentRepository = mock(JpaDocumentRepository.class);
         this.documentRepositoryAdapter = new DocumentRepositoryAdapter(jpaDocumentRepository);
     }
 
@@ -48,7 +48,7 @@ class DocumentRepositoryAdapterTest {
         savedEntity.setExtension("DOCX");
         savedEntity.setSizeBytes(2048L);
         savedEntity.setUploadedById(15L);
-        savedEntity.setUploadDate(LocalDateTime.of(2026, 6, 17, 10, 0));
+        savedEntity.setUploadDate(LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0));
         savedEntity.setActive(true);
 
         when(jpaDocumentRepository.save(any(DocumentEntity.class))).thenReturn(savedEntity);
@@ -81,7 +81,7 @@ class DocumentRepositoryAdapterTest {
         entity.setExtension("PDF");
         entity.setSizeBytes(5000L);
         entity.setUploadedById(1L);
-        entity.setUploadDate(LocalDateTime.of(2026, 6, 17, 10, 0));
+        entity.setUploadDate(LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0));
         entity.setActive(true);
 
         when(jpaDocumentRepository.findById(searchId)).thenReturn(Optional.of(entity));

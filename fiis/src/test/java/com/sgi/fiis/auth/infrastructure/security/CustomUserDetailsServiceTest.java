@@ -1,8 +1,8 @@
 package com.sgi.fiis.auth.infrastructure.security;
 
-import com.sgi.fiis.users.infrastructure.persistence.RolEntity;
-import com.sgi.fiis.users.infrastructure.persistence.SpringDataUsuarioRepository;
-import com.sgi.fiis.users.infrastructure.persistence.UsuarioEntity;
+import com.sgi.fiis.users.infrastructure.persistence.RoleEntity;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class CustomUserDetailsServiceTest {
 
     @Mock
-    private SpringDataUsuarioRepository usuarioRepository;
+    private SpringDataUserRepository userRepository;
 
     @InjectMocks
     private CustomUserDetailsService service;
@@ -30,19 +30,19 @@ class CustomUserDetailsServiceTest {
     @Test
     @DisplayName("Should load user successfully by username")
     void testLoadUserByUsernameSuccess() {
-        RolEntity rol = new RolEntity();
-        rol.setId(1L);
-        rol.setCodigoRol("ADMIN");
-        rol.setDescripcion("Administrador");
+        RoleEntity role = new RoleEntity();
+        role.setId(1L);
+        role.setCode("ADMIN");
+        role.setDescription("Administrador");
 
-        UsuarioEntity entity = new UsuarioEntity();
+        UserEntity entity = new UserEntity();
         entity.setId(42L);
-        entity.setCorreoInstitucional("admin@unas.edu.pe");
+        entity.setInstitutionalEmail("admin@unas.edu.pe");
         entity.setPasswordHash("hashed-password");
-        entity.setActivo(true);
-        entity.setRol(rol);
+        entity.setActive(true);
+        entity.setRole(role);
 
-        when(usuarioRepository.findByCorreoInstitucional("admin@unas.edu.pe")).thenReturn(Optional.of(entity));
+        when(userRepository.findByInstitutionalEmail("admin@unas.edu.pe")).thenReturn(Optional.of(entity));
 
         UserDetails userDetails = service.loadUserByUsername("admin@unas.edu.pe");
 
@@ -54,17 +54,17 @@ class CustomUserDetailsServiceTest {
         assertEquals("hashed-password", customDetails.getPassword());
         assertTrue(customDetails.isEnabled());
         assertTrue(customDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
-        verify(usuarioRepository).findByCorreoInstitucional("admin@unas.edu.pe");
+        verify(userRepository).findByInstitutionalEmail("admin@unas.edu.pe");
     }
 
     @Test
     @DisplayName("Should throw UsernameNotFoundException when user is not found")
     void testLoadUserByUsernameNotFound() {
-        when(usuarioRepository.findByCorreoInstitucional("notfound@unas.edu.pe")).thenReturn(Optional.empty());
+        when(userRepository.findByInstitutionalEmail("notfound@unas.edu.pe")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () ->
                 service.loadUserByUsername("notfound@unas.edu.pe"));
 
-        verify(usuarioRepository).findByCorreoInstitucional("notfound@unas.edu.pe");
+        verify(userRepository).findByInstitutionalEmail("notfound@unas.edu.pe");
     }
 }

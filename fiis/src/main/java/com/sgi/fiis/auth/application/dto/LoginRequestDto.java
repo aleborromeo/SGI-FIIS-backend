@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequestDto {
-    @NotBlank(message = "El correo es obligatorio")
-    private String correo;
+    @NotBlank(message = "{validation.correo.required}")
+    private String email;
 
-    @NotBlank(message = "La contraseña es obligatoria")
+    @NotBlank(message = "{validation.password.required}")
     private String password;
 }

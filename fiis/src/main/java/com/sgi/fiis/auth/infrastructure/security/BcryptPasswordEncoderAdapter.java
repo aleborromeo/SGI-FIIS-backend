@@ -16,6 +16,9 @@ public class BcryptPasswordEncoderAdapter implements PasswordEncoderPort {
 
     @Override
     public boolean matches(String rawPassword, String encodedPassword) {
+        if (encodedPassword == null) {
+            throw new IllegalArgumentException("encodedPassword cannot be null");
+        }
         return encoder.matches(rawPassword, encodedPassword);
     }
 }
