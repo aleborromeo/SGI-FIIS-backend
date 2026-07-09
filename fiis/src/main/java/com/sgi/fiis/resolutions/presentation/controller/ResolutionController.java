@@ -9,6 +9,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,7 @@ public class ResolutionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('DECANO')")
     public ResponseEntity<Map<String, Object>> issueResolution(
             @RequestParam("numeroResolucion") String numeroResolucion,
             @RequestParam("fechaEmision") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaEmision,

@@ -28,14 +28,18 @@ public class DocumentEntity {
     @Column(name = "tamano_bytes", nullable = false)
     private Long sizeBytes;
 
-    @Column(name = "extension", nullable = false, length = 10)
+    @Column(name = "tipo_extension", nullable = false, length = 10)
     private String fileExtension;
 
-    @Column(name = "id_usuario_creador", nullable = false)
+    @Column(name = "id_usuario_subio", nullable = false)
     private Long creatorId;
 
-    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    @Column(name = "fecha_carga", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "es_activo", nullable = false)
+    @Builder.Default
+    private boolean active = true;
 
     @PrePersist
     protected void onCreate() {

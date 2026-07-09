@@ -87,6 +87,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        String message = messageSource.getMessage("shared.error.forbidden", null, "Acceso denegado", resolveLocale());
+        return buildResponse(HttpStatus.FORBIDDEN, message);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         String message = messageSource.getMessage("shared.error.internal", null, "Error interno del servidor", resolveLocale());
