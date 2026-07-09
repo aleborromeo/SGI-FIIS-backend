@@ -18,7 +18,7 @@ public class CambiarEstadoLineaUseCase {
     @Transactional
     public LineaInvestigacion execute(Integer id, boolean activar) {
         LineaInvestigacion linea = lineaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("LineaInvestigacion", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("lineas.error.not-found", id));
         if (activar) {
             linea.activar();
         } else {

@@ -31,7 +31,11 @@ class RegisterResearchLineUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(input))
                 .isInstanceOf(DuplicateResourceException.class)
-                .hasMessageContaining("IA Aplicada");
+                .satisfies(ex -> {
+                    DuplicateResourceException duplicate = (DuplicateResourceException) ex;
+                    assertThat(duplicate.getErrorKey()).isEqualTo("lineas.error.duplicate-name");
+                    assertThat(duplicate.getArgs()).containsExactly("IA Aplicada");
+                });
 
         then(repository).should(never()).save(any());
     }

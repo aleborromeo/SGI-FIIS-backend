@@ -72,4 +72,14 @@ class JsonbHelperTest {
         assertEquals("Hola", map.get("es"));
         assertEquals("Hello", map.get("en"));
     }
+
+    @Test
+    @DisplayName("Should verify constructor is private")
+    void testConstructorIsPrivate() throws NoSuchMethodException {
+        java.lang.reflect.Constructor<JsonbHelper> constructor = JsonbHelper.class.getDeclaredConstructor();
+        assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);
+    }
 }
+
