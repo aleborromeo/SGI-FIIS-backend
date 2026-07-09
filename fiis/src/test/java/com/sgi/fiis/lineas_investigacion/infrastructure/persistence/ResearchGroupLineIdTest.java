@@ -64,6 +64,6 @@ class ResearchGroupLineIdTest {
     void shouldBeEqualToItself() {
         ResearchGroupLineId id = new ResearchGroupLineId(1, 2);
 
-        assertTrue(id.equals(id));
+        assertTrue(id.equals(id)); // skipcq: JAVA-E1012
     }
 }
