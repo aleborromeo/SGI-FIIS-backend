@@ -1,5 +1,9 @@
 package com.sgi.fiis.thesis.domain.exception;
 
-public class ThesisPlanNotFoundException extends RuntimeException {
-    public ThesisPlanNotFoundException(Integer id) { super("No existe el plan de tesis con id: " + id); }
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+
+public class ThesisPlanNotFoundException extends ResourceNotFoundException {
+    public ThesisPlanNotFoundException(Integer id) {
+        super("thesis.error.plan-not-found", id);
+    }
 }

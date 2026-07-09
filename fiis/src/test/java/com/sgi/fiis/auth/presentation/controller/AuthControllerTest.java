@@ -9,7 +9,6 @@ import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import com.sgi.fiis.users.presentation.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;

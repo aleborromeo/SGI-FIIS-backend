@@ -31,7 +31,7 @@ class ListResearchLinesUseCaseTest {
 
         List<ResearchLine> result = useCase.execute(true);
 
-        assertThat(result).hasSize(1).allMatch(ResearchLine::isActive);
+        assertThat(result).hasSize(1).allMatch(l -> l.isActive());
         then(repository).should().findAllActive();
         then(repository).should(never()).findAll();
     }

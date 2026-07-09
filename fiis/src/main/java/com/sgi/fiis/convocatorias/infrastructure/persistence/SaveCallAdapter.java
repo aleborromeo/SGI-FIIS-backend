@@ -123,7 +123,7 @@ public class SaveCallAdapter implements SaveCallPort {
         List<Integer> lineIds = null;
         if (entity.getResearchLines() != null) {
             lineIds = entity.getResearchLines().stream()
-                    .map(ResearchLineEntity::getId)
+                    .map(l -> l.getId())
                     .toList();
         }
 
