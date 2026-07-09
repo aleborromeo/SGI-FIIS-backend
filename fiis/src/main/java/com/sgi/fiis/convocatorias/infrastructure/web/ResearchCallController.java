@@ -57,7 +57,7 @@ public class ResearchCallController {
         return ResponseEntity.ok(calls);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @Operation(summary = "Get research call by ID", description = "Retrieves a single research call by its ID.")
     @ApiResponse(responseCode = "200", description = "Research call found")
     @ApiResponse(responseCode = "404", description = "Research call not found")
@@ -66,7 +66,7 @@ public class ResearchCallController {
         return ResponseEntity.ok(call);
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{id:\\d+}/status")
     @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     @Operation(summary = "Update research call status", description = "Allows the research director to change the status of a research call (ABIERTA, CERRADA, FINALIZADA).")
     @ApiResponse(responseCode = "200", description = "Status updated successfully")
