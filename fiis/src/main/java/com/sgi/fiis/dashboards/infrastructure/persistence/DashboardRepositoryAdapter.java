@@ -2,6 +2,7 @@ package com.sgi.fiis.dashboards.infrastructure.persistence;
 
 import com.sgi.fiis.dashboards.domain.model.*;
 import com.sgi.fiis.dashboards.domain.port.DashboardRepositoryPort;
+import com.sgi.fiis.dashboards.infrastructure.i18n.DashboardMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,10 +17,6 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
     private static final String ALERT_TYPE = "ALERT";
     private static final String REVIEW_TYPE = "REVIEW";
     private static final String INFO_TYPE = "INFO";
-
-    private static final String ACTIVE_CALL_TITLE = "Active call for applications";
-    private static final String OPEN_CALLS_SUFFIX = " open call(s) for applications.";
-    private static final String THERE_ARE_PREFIX = "There are ";
 
     private static final String SQL_COUNT_PROJECTS = "SELECT COUNT(*) FROM proyectos";
     private static final String SQL_COUNT_PROJECTS_IN_EXECUTION =
@@ -40,6 +37,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             " AND estado_actual NOT IN ('APROBADO','RECHAZADO')";
 
     private final JdbcTemplate jdbcTemplate;
+    private final DashboardMessageService messages;
 
     // =========================================================================
     // ADMIN (RF-88)
@@ -65,16 +63,16 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (observedProjects > 0) {
             alerts.add(AlertItem.builder()
                     .type(ALERT_TYPE)
-                    .title("Observed projects")
-                    .description(observedProjects + " project(s) require correction.")
+                    .title(messages.get("dashboard.alert.observed-projects.title"))
+                    .description(messages.get("dashboard.alert.observed-projects.description", observedProjects))
                     .build());
         }
 
         if (pendingProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Pending procedures")
-                    .description(pendingProcedures + " procedure(s) unresolved.")
+                    .title(messages.get("dashboard.alert.pending-procedures.title"))
+                    .description(messages.get("dashboard.alert.pending-procedures.description", pendingProcedures))
                     .build());
         }
 
@@ -82,8 +80,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(ACTIVE_CALL_TITLE)
-                    .description(openCalls + OPEN_CALLS_SUFFIX)
+                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .description(messages.get("dashboard.alert.active-call.admin.description", openCalls))
                     .build());
         }
 
@@ -131,24 +129,24 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (pendingReviewProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Procedures pending review")
-                    .description(pendingReviewProcedures + " procedure(s) awaiting your review.")
+                    .title(messages.get("dashboard.alert.pending-review-procedures.title"))
+                    .description(messages.get("dashboard.alert.pending-review-procedures.description", pendingReviewProcedures))
                     .build());
         }
 
         if (reportsNearingDeadline > 0) {
             alerts.add(AlertItem.builder()
                     .type(ALERT_TYPE)
-                    .title("Pending progress reports")
-                    .description(reportsNearingDeadline + " progress report(s) not yet approved.")
+                    .title(messages.get("dashboard.alert.pending-progress-reports.title"))
+                    .description(messages.get("dashboard.alert.pending-progress-reports.description", reportsNearingDeadline))
                     .build());
         }
 
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(ACTIVE_CALL_TITLE)
-                    .description("FIIS competitive fund available.")
+                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .description(messages.get("dashboard.alert.active-call.director.description"))
                     .build());
         }
 
@@ -198,12 +196,12 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
 
         if (groupId == null) {
             return DashboardCoordinator.builder()
-                    .groupName("No group assigned")
+                    .groupName(messages.get("dashboard.default.no-group-assigned"))
                     .groupCode("")
                     .alerts(List.of(AlertItem.builder()
                             .type(ALERT_TYPE)
-                            .title("No group assigned")
-                            .description("No active group found coordinated by this user.")
+                            .title(messages.get("dashboard.alert.no-group-assigned.title"))
+                            .description(messages.get("dashboard.alert.no-group-assigned.description"))
                             .build()))
                     .build();
         }
@@ -229,16 +227,16 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (pendingGroupProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Pending procedures in your group")
-                    .description(pendingGroupProcedures + " procedure(s) from your group unresolved.")
+                    .title(messages.get("dashboard.alert.pending-group-procedures.title"))
+                    .description(messages.get("dashboard.alert.pending-group-procedures.description", pendingGroupProcedures))
                     .build());
         }
 
         if (observedProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(ALERT_TYPE)
-                    .title("Observed procedures")
-                    .description(observedProcedures + " procedure(s) require corrections.")
+                    .title(messages.get("dashboard.alert.observed-procedures.title"))
+                    .description(messages.get("dashboard.alert.observed-procedures.description", observedProcedures))
                     .build());
         }
 
@@ -291,16 +289,16 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (pendingProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Procedures in progress")
-                    .description(pendingProcedures + " procedure(s) still under review.")
+                    .title(messages.get("dashboard.alert.procedures-in-progress.title"))
+                    .description(messages.get("dashboard.alert.procedures-in-progress.teacher.description", pendingProcedures))
                     .build());
         }
 
         if (pendingProgressReports > 0) {
             alerts.add(AlertItem.builder()
                     .type(ALERT_TYPE)
-                    .title("Pending progress reports")
-                    .description(pendingProgressReports + " progress report(s) not yet approved.")
+                    .title(messages.get("dashboard.alert.pending-progress-reports.title"))
+                    .description(messages.get("dashboard.alert.pending-progress-reports.description", pendingProgressReports))
                     .build());
         }
 
@@ -308,8 +306,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(ACTIVE_CALL_TITLE)
-                    .description(THERE_ARE_PREFIX + openCalls + OPEN_CALLS_SUFFIX)
+                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .description(messages.get("dashboard.alert.active-call.general.description", openCalls))
                     .build());
         }
 
@@ -349,8 +347,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (pendingEvaluations > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Pending evaluations")
-                    .description(pendingEvaluations + " assigned evaluation(s) not yet completed.")
+                    .title(messages.get("dashboard.alert.pending-evaluations.title"))
+                    .description(messages.get("dashboard.alert.pending-evaluations.description", pendingEvaluations))
                     .build());
         }
 
@@ -393,16 +391,16 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (pendingSignatureProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Procedures pending signature")
-                    .description(pendingSignatureProcedures + " procedure(s) awaiting Dean's approval.")
+                    .title(messages.get("dashboard.alert.pending-signature-procedures.title"))
+                    .description(messages.get("dashboard.alert.pending-signature-procedures.description", pendingSignatureProcedures))
                     .build());
         }
 
         if (activeCallsForApplication > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(ACTIVE_CALL_TITLE)
-                    .description(THERE_ARE_PREFIX + activeCallsForApplication + " open call(s) for applications in the faculty.")
+                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .description(messages.get("dashboard.alert.active-call.faculty.description", activeCallsForApplication))
                     .build());
         }
 
@@ -461,24 +459,24 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (pendingProcedures > 0) {
             alerts.add(AlertItem.builder()
                     .type(REVIEW_TYPE)
-                    .title("Procedures in progress")
-                    .description(pendingProcedures + " procedure(s) under review.")
+                    .title(messages.get("dashboard.alert.procedures-in-progress.title"))
+                    .description(messages.get("dashboard.alert.procedures-in-progress.student.description", pendingProcedures))
                     .build());
         }
 
         if ("OBSERVADO".equals(currentPlanStatus)) {
             alerts.add(AlertItem.builder()
                     .type(ALERT_TYPE)
-                    .title("Thesis plan observed")
-                    .description("Your thesis plan has observations that you must address.")
+                    .title(messages.get("dashboard.alert.thesis-plan-observed.title"))
+                    .description(messages.get("dashboard.alert.thesis-plan-observed.description"))
                     .build());
         }
 
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(ACTIVE_CALL_TITLE)
-                    .description(THERE_ARE_PREFIX + openCalls + OPEN_CALLS_SUFFIX)
+                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .description(messages.get("dashboard.alert.active-call.general.description", openCalls))
                     .build());
         }
 
@@ -488,7 +486,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
                 .pendingProcedures(pendingProcedures)
                 .uploadedDocuments(uploadedDocuments)
                 .openCallsForApplication(openCalls)
-                .groupName(groupName != null ? groupName : "No group")
+                .groupName(groupName != null ? groupName : messages.get("dashboard.default.no-group"))
                 .groupCode(groupCode != null ? groupCode : "")
                 .alerts(alerts)
                 .build();
