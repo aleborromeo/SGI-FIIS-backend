@@ -1,4 +1,3 @@
-<<<<<<<< HEAD:.gitignore
 HELP.md
 desarrollo/
 
@@ -15,7 +14,6 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
 
 ### IntelliJ IDEA ###
 .idea
@@ -37,21 +35,25 @@ build/
 .vscode/
 
 ### Variables de entorno (secretos) ###
-========
-# Variables de entorno y secretos
->>>>>>>> origin/develop:fiis/.gitignore
 .env
 fiis/.env
 
-# IDEs y editores
-.idea/
-.vscode/
-*.swp
-*.swo
+### Docker ###
+docker-compose.override.yml
 
-# Maven builds (si se ejecutan en raíz, aunque están en fiis/)
-fiis/target/
-fiis/build/
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
 
-# Contexto local de Claude Code
+### Logs ###
+*.log
+logs/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Claude Code ###
 CLAUDE.md
