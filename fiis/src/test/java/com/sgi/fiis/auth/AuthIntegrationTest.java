@@ -39,6 +39,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Auth Integration Tests")
 class AuthIntegrationTest {
 
+    private static final String ADMIN_EMAIL = "admin@unas.edu.pe";
+    private static final String ADMIN_DNI = "00000000";
+    private static final String JOSE_EMAIL = "jose.evaristo@unas.edu.pe";
+    private static final String JOSE_DNI = "76543210";
+    private static final String SECURE_PASSWORD = "securePassword123";
+    private static final String MARIA_EMAIL = "maria.carmen@unas.edu.pe";
+    private static final String ROLE_DOCENTE = "DOCENTE";
+    private static final String ROLE_ADMIN = "ADMIN";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -65,59 +74,59 @@ class AuthIntegrationTest {
     void testLoginSuccess() throws Exception {
         RoleEntity roleAdminEntity = new RoleEntity();
         roleAdminEntity.setId(1L);
-        roleAdminEntity.setCode("ADMIN");
+        roleAdminEntity.setCode(ROLE_ADMIN);
         roleAdminEntity.setDescription("Administrador");
 
         UserEntity adminEntity = new UserEntity();
         adminEntity.setId(1L);
-        adminEntity.setDni("00000000");
+        adminEntity.setDni(ADMIN_DNI);
         adminEntity.setFirstNames("Admin");
         adminEntity.setLastNames("Sistema");
-        adminEntity.setInstitutionalEmail("admin@unas.edu.pe");
-        adminEntity.setPasswordHash(passwordEncoder.encode("00000000"));
+        adminEntity.setInstitutionalEmail(ADMIN_EMAIL);
+        adminEntity.setPasswordHash(passwordEncoder.encode(ADMIN_DNI));
         adminEntity.setActive(true);
         adminEntity.setMustChangePassword(true);
         adminEntity.setRole(roleAdminEntity);
 
         // Stub Spring Data repository used by CustomUserDetailsService
-        when(springDataUserRepository.findByInstitutionalEmail("admin@unas.edu.pe"))
+        when(springDataUserRepository.findByInstitutionalEmail(ADMIN_EMAIL))
                 .thenReturn(Optional.of(adminEntity));
 
         // Stub domain repository used by UseCase or Controller
         User adminDomain = User.builder()
                 .id(1L)
-                .dni("00000000")
+                .dni(ADMIN_DNI)
                 .firstNames("Admin")
                 .lastNames("Sistema")
-                .institutionalEmail("admin@unas.edu.pe")
-                .passwordHash(passwordEncoder.encode("00000000"))
+                .institutionalEmail(ADMIN_EMAIL)
+                .passwordHash(passwordEncoder.encode(ADMIN_DNI))
                 .active(true)
                 .mustChangePassword(true)
-                .roleCode("ADMIN")
+                .roleCode(ROLE_ADMIN)
                 .roleDescription("Administrador")
                 .build();
-        when(userRepositoryPort.findByEmail("admin@unas.edu.pe")).thenReturn(Optional.of(adminDomain));
+        when(userRepositoryPort.findByEmail(ADMIN_EMAIL)).thenReturn(Optional.of(adminDomain));
 
         // Make login request
-        LoginRequestDto request = new LoginRequestDto("admin@unas.edu.pe", "00000000");
+        LoginRequestDto request = new LoginRequestDto(ADMIN_EMAIL, ADMIN_DNI);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value("admin@unas.edu.pe"))
-                .andExpect(jsonPath("$.roleCode").value("ADMIN"))
+                .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
+                .andExpect(jsonPath("$.roleCode").value(ROLE_ADMIN))
                 .andExpect(jsonPath("$.requiresVerification").value(false));
     }
 
     @Test
     @DisplayName("Should return 401 Unauthorized for invalid credentials")
     void testLoginFailure() throws Exception {
-        when(springDataUserRepository.findByInstitutionalEmail("admin@unas.edu.pe"))
+        when(springDataUserRepository.findByInstitutionalEmail(ADMIN_EMAIL))
                 .thenReturn(Optional.empty());
 
-        LoginRequestDto request = new LoginRequestDto("admin@unas.edu.pe", "wrong-password");
+        LoginRequestDto request = new LoginRequestDto(ADMIN_EMAIL, "wrong-password");
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,33 +139,33 @@ class AuthIntegrationTest {
     void testRegisterAndVerifySuccess() throws Exception {
         // Setup registration DTO
         RegisterRequestDto registerDto = RegisterRequestDto.builder()
-                .dni("76543210")
+                .dni(JOSE_DNI)
                 .firstNames("Jose")
                 .lastNames("Evaristo")
-                .institutionalEmail("jose.evaristo@unas.edu.pe")
+                .institutionalEmail(JOSE_EMAIL)
                 .phone("999888777")
-                .password("securePassword123")
-                .confirmPassword("securePassword123")
-                .roleCode("DOCENTE")
+                .password(SECURE_PASSWORD)
+                .confirmPassword(SECURE_PASSWORD)
+                .roleCode(ROLE_DOCENTE)
                 .build();
 
         // Stub exists check and save check
-        when(userRepositoryPort.existsByDni("76543210")).thenReturn(false);
-        when(userRepositoryPort.existsByEmail("jose.evaristo@unas.edu.pe")).thenReturn(false);
+        when(userRepositoryPort.existsByDni(JOSE_DNI)).thenReturn(false);
+        when(userRepositoryPort.existsByEmail(JOSE_EMAIL)).thenReturn(false);
 
         User persistedUser = User.builder()
                 .id(2L)
-                .dni("76543210")
+                .dni(JOSE_DNI)
                 .firstNames("Jose")
                 .lastNames("Evaristo")
-                .institutionalEmail("jose.evaristo@unas.edu.pe")
+                .institutionalEmail(JOSE_EMAIL)
                 .phone("999888777")
                 .active(true)
                 .mustChangePassword(false)
-                .roleCode("DOCENTE")
+                .roleCode(ROLE_DOCENTE)
                 .build();
         when(userRepositoryPort.save(any(User.class))).thenReturn(persistedUser);
-        doNothing().when(emailSenderPort).sendVerificationCode(eq("jose.evaristo@unas.edu.pe"), anyString());
+        doNothing().when(emailSenderPort).sendVerificationCode(eq(JOSE_EMAIL), anyString());
 
         // 1. Post to register endpoint
         mockMvc.perform(post("/api/v1/auth/register")
@@ -166,25 +175,25 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.message").value("Registro exitoso. Verifique su correo para activar la cuenta."));
 
         // Retrieve the generated code from PendingRegistrationService
-        PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get("jose.evaristo@unas.edu.pe");
+        PendingRegistrationService.PendingRegistration pending = pendingRegistrationService.get(JOSE_EMAIL);
         assertNotNull(pending);
         String code = pending.getCode();
         assertNotNull(code);
         assertEquals(6, code.length());
 
         // 2. Post to verify endpoint
-        VerifyRegistrationRequestDto verifyDto = new VerifyRegistrationRequestDto("jose.evaristo@unas.edu.pe", code);
+        VerifyRegistrationRequestDto verifyDto = new VerifyRegistrationRequestDto(JOSE_EMAIL, code);
 
         mockMvc.perform(post("/api/v1/auth/verify-registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(verifyDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value("jose.evaristo@unas.edu.pe"))
-                .andExpect(jsonPath("$.roleCode").value("DOCENTE"));
+                .andExpect(jsonPath("$.email").value(JOSE_EMAIL))
+                .andExpect(jsonPath("$.roleCode").value(ROLE_DOCENTE));
 
         // Assert memory storage is cleaned
-        assertNull(pendingRegistrationService.get("jose.evaristo@unas.edu.pe"));
+        assertNull(pendingRegistrationService.get(JOSE_EMAIL));
     }
 
     @Test
@@ -194,16 +203,16 @@ class AuthIntegrationTest {
                 .dni("87654321")
                 .firstNames("Maria")
                 .lastNames("Del Carmen")
-                .institutionalEmail("maria.carmen@unas.edu.pe")
+                .institutionalEmail(MARIA_EMAIL)
                 .phone("999111222")
-                .password("securePassword123")
-                .confirmPassword("securePassword123")
-                .roleCode("DOCENTE")
+                .password(SECURE_PASSWORD)
+                .confirmPassword(SECURE_PASSWORD)
+                .roleCode(ROLE_DOCENTE)
                 .build();
 
         when(userRepositoryPort.existsByDni("87654321")).thenReturn(false);
-        when(userRepositoryPort.existsByEmail("maria.carmen@unas.edu.pe")).thenReturn(false);
-        doNothing().when(emailSenderPort).sendVerificationCode(eq("maria.carmen@unas.edu.pe"), anyString());
+        when(userRepositoryPort.existsByEmail(MARIA_EMAIL)).thenReturn(false);
+        doNothing().when(emailSenderPort).sendVerificationCode(eq(MARIA_EMAIL), anyString());
 
         // 1. Post to register endpoint
         mockMvc.perform(post("/api/v1/auth/register")
@@ -212,12 +221,12 @@ class AuthIntegrationTest {
                 .andExpect(status().isOk());
 
         // Get initial code
-        PendingRegistrationService.PendingRegistration initialPending = pendingRegistrationService.get("maria.carmen@unas.edu.pe");
+        PendingRegistrationService.PendingRegistration initialPending = pendingRegistrationService.get(MARIA_EMAIL);
         assertNotNull(initialPending);
         String initialCode = initialPending.getCode();
 
         // 2. Post to resend endpoint
-        ResendCodeRequestDto resendDto = new ResendCodeRequestDto("maria.carmen@unas.edu.pe");
+        ResendCodeRequestDto resendDto = new ResendCodeRequestDto(MARIA_EMAIL);
 
         mockMvc.perform(post("/api/v1/auth/resend-code")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +235,7 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.message").value("C\u00F3digo de verificación reenviado exitosamente."));
 
         // Get new code and assert it is updated
-        PendingRegistrationService.PendingRegistration updatedPending = pendingRegistrationService.get("maria.carmen@unas.edu.pe");
+        PendingRegistrationService.PendingRegistration updatedPending = pendingRegistrationService.get(MARIA_EMAIL);
         assertNotNull(updatedPending);
         String updatedCode = updatedPending.getCode();
         assertNotNull(updatedCode);
@@ -234,7 +243,7 @@ class AuthIntegrationTest {
         assertNotEquals(initialCode, updatedCode);
 
         // Cleanup
-        pendingRegistrationService.remove("maria.carmen@unas.edu.pe");
+        pendingRegistrationService.remove(MARIA_EMAIL);
     }
 
     @Test
