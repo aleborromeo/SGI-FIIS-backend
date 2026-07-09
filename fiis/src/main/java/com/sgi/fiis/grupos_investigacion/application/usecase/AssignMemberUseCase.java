@@ -25,15 +25,16 @@ public class AssignMemberUseCase {
     @Transactional
     public Membership execute(Integer groupId, Integer userId) {
         if (groupRepository.findById(groupId).isEmpty()) {
-            throw new ResourceNotFoundException("ResearchGroup", "id", groupId);
+            throw new ResourceNotFoundException("grupos.error.not-found", groupId);
         }
 
-        if (!groupRepository.existsActiveUserWithRole(userId, "DOCENTE_INVESTIGADOR")) {
-            throw new BusinessException("User with id " + userId + " does not exist, is not active, or does not have the DOCENTE_INVESTIGADOR role");
+        if (!groupRepository.existsActiveUserWithRole(userId, "DOCENTE_INVESTIGADOR") &&
+            !groupRepository.existsActiveUserWithRole(userId, "ESTUDIANTE")) {
+            throw new BusinessException("grupos.error.member-invalid-role", userId);
         }
 
         if (membershipRepository.existsActiveByUser(userId)) {
-            throw new BusinessException("User with id " + userId + " already belongs to an active research group (RF-21)");
+            throw new BusinessException("grupos.error.member-already-active", userId);
         }
 
         Membership membership = Membership.builder()

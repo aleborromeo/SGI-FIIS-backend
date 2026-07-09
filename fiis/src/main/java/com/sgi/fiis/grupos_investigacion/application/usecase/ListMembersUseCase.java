@@ -22,7 +22,7 @@ public class ListMembersUseCase {
 
     public List<Membership> execute(Integer groupId) {
         if (groupRepository.findById(groupId).isEmpty()) {
-            throw new ResourceNotFoundException("ResearchGroup", "id", groupId);
+            throw new ResourceNotFoundException("grupos.error.not-found", groupId);
         }
         return membershipRepository.findActiveByGroup(groupId);
     }

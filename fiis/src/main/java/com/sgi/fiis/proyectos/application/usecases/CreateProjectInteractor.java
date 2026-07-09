@@ -2,6 +2,7 @@ package com.sgi.fiis.proyectos.application.usecases;
 
 import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
+import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.proyectos.application.dto.CreateProjectRequest;
 import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import com.sgi.fiis.proyectos.application.ports.in.CreateProjectUseCase;
@@ -26,7 +27,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     private final SaveProjectPort saveProjectPort;
     private final SaveCallPort saveCallPort;
     private final CreateProcedurePort createProcedurePort;
-    private Clock clock;
+    private Clock clock = Clock.systemDefaultZone();
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
             SaveCallPort saveCallPort,
@@ -34,7 +35,6 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
-        this.clock = Clock.systemUTC();
     }
 
     public void setClock(Clock clock) {
@@ -69,14 +69,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.line-name-not-found"));
 
         // 5. If linked to a call, fetch call and validate it (RF-33 & RF-34)
-        if (request.getCallId() != null) {
-            ResearchCall call = saveCallPort.findById(request.getCallId())
-                    .orElseThrow(() -> new BusinessRuleValidationException(
-                            "proyectos.error.call-not-found", request.getCallId()));
-
-            // Validate that call is open and current date is within range
-            call.validateCanSubmitProject(LocalDate.now(clock));
-        }
+        ResearchCall call = getAndValidateCall(request.getCallId());
+        request.setCallId(call.getId());
 
         // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
         String generatedCode = "PRJ-" + LocalDate.now(clock).getYear() + "-"
@@ -228,5 +222,33 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 project.getDocumentId(),
                 dbStatus,
                 members);
+    }
+
+    private ResearchCall getAndValidateCall(Integer callId) {
+        ResearchCall call = null;
+        if (callId != null) {
+            call = saveCallPort.findById(callId)
+                    .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.call-not-found", callId));
+        } else {
+            List<ResearchCall> openCalls = saveCallPort.findByStatus(CallStatus.OPEN);
+            if (openCalls.isEmpty()) {
+                throw new BusinessRuleValidationException("No existe ninguna convocatoria en estado ABIERTA");
+            }
+            LocalDate today = LocalDate.now(clock);
+            for (ResearchCall c : openCalls) {
+                try {
+                    c.validateCanSubmitProject(today);
+                    call = c;
+                    break;
+                } catch (BusinessRuleValidationException e) {
+                    // Check next
+                }
+            }
+            if (call == null) {
+                throw new BusinessRuleValidationException("No existe ninguna convocatoria abierta dentro del rango de fechas permitido");
+            }
+        }
+        call.validateCanSubmitProject(LocalDate.now(clock));
+        return call;
     }
 }

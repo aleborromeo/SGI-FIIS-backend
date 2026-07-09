@@ -36,8 +36,12 @@ public class ProcedureWorkflowJdbcAdapter implements ProcedureWorkflowPort {
             ps.setInt(6, idPlanTesis);
             return ps;
         }, keyHolder);
-        Number key = keyHolder.getKey();
-        Integer idTramite = key == null ? obtenerIdTramitePorPlanTesis(idPlanTesis) : key.intValue();
+        Integer idTramite = null;
+        if (keyHolder.getKeys() != null && keyHolder.getKeys().containsKey("id_tramite")) {
+            idTramite = ((Number) keyHolder.getKeys().get("id_tramite")).intValue();
+        } else {
+            idTramite = obtenerIdTramitePorPlanTesis(idPlanTesis);
+        }
         registrarMovimiento(idTramite, idSolicitante, "REGISTRAR_PLAN_TESIS", "REGISTRADO",
                 ThesisProcedureStatus.PENDIENTE_COORDINADOR.name(), "Trámite generado automáticamente para plan de tesis", null);
         return idTramite;
@@ -107,8 +111,11 @@ public class ProcedureWorkflowJdbcAdapter implements ProcedureWorkflowPort {
         registrarMovimiento(idTramite, idUsuarioAccion, "REGISTRAR_RESOLUCION",
                 estadoAnterior, ThesisProcedureStatus.APROBADO_CON_RESOLUCION.name(),
                 "Resolución " + numeroResolucion + ": " + asunto, idDocumentoAdjunto);
-        Number key = keyHolder.getKey();
-        return key != null ? key.intValue() : null;
+        Integer idResolucion = null;
+        if (keyHolder.getKeys() != null && keyHolder.getKeys().containsKey("id_resolucion")) {
+            idResolucion = ((Number) keyHolder.getKeys().get("id_resolucion")).intValue();
+        }
+        return idResolucion;
     }
 
     private void registrarMovimiento(Integer idTramite, Long idUsuarioAccion, String accion, String estadoAnterior,
