@@ -16,6 +16,6 @@ public class GetResearchLineUseCase {
 
     public ResearchLine execute(Integer id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ResearchLine", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("lineas.error.not-found", id));
     }
 }

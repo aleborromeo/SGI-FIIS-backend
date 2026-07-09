@@ -19,8 +19,7 @@ public class RetirarMiembroUseCase {
     public Membresia execute(Integer idGrupo, Integer idUsuario) {
         Membresia membresia = membresiaRepository.findActivaByUsuarioEnGrupo(idUsuario, idGrupo)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "No se encontró una membresía activa para el usuario " + idUsuario
-                        + " en el grupo " + idGrupo));
+                        "grupos.error.membership-not-found", idUsuario, idGrupo));
         membresia.retirar();
         return membresiaRepository.save(membresia);
     }

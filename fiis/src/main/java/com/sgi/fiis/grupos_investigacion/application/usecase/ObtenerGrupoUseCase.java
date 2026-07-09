@@ -16,6 +16,6 @@ public class ObtenerGrupoUseCase {
 
     public GrupoInvestigacion execute(Integer id) {
         return grupoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("GrupoInvestigacion", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("grupos.error.not-found", id));
     }
 }
