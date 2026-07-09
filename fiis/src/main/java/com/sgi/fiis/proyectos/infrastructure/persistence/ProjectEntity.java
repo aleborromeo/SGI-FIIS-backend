@@ -77,10 +77,10 @@ public class ProjectEntity {
     @JoinColumn(name = "id_convocatoria")
     private ResearchCallEntity researchCall;
 
-    @Column(name = "id_documento_actual")
+    @Column(name = "id_documento_propuesta")
     private Integer documentId;
 
-    @Column(name = "estado_proyecto", nullable = false, length = 50)
+    @Column(name = "estado", nullable = false, length = 50)
     private String status;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
@@ -93,6 +93,10 @@ public class ProjectEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now(ZoneId.of("UTC"));
         updatedAt = LocalDateTime.now(ZoneId.of("UTC"));
+        if (titleJson == null) { titleJson = "{}"; }
+        if (summaryJson == null) { summaryJson = "{}"; }
+        if (generalObjectiveJson == null) { generalObjectiveJson = "{}"; }
+        if (executionPlaceJson == null) { executionPlaceJson = "{}"; }
     }
 
     @PreUpdate

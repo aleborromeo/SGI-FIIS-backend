@@ -1,5 +1,6 @@
 package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,15 +16,16 @@ public class ResearchGroupEntity {
     @Column(name = "id_grupo")
     private Integer id;
 
-    @Column(name = "codigo_grupo", nullable = false, unique = true, length = 20)
-    private String groupCode;
+    @Column(name = "codigo_grupo", nullable = false, unique = true, length = 50)
+    private String code;
 
     @Column(name = "nombre_grupo", nullable = false, length = 150)
-    private String groupName;
-
-    @Column(name = "id_coordinador_actual")
-    private Integer currentCoordinatorId;
+    private String name;
 
     @Column(name = "es_activo", nullable = false)
     private boolean active;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_coordinador_actual")
+    private UserEntity currentCoordinator;
 }

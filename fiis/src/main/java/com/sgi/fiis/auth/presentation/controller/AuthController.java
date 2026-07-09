@@ -27,10 +27,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@lombok.RequiredArgsConstructor
 public class AuthController {
-
-    private static final String MESSAGE_KEY = "message";
 
     private final LoginUseCase loginUseCase;
     private final RegisterUseCase registerUseCase;
@@ -40,6 +37,24 @@ public class AuthController {
     private final UserRepositoryPort userRepository;
     private final UserMapper userMapper;
     private final MessageSource messageSource;
+
+    public AuthController(LoginUseCase loginUseCase,
+            RegisterUseCase registerUseCase,
+            VerifyRegistrationUseCase verifyRegistrationUseCase,
+            ResendCodeUseCase resendCodeUseCase,
+            ChangePasswordUseCase changePasswordUseCase,
+            UserRepositoryPort userRepository,
+            UserMapper userMapper,
+            MessageSource messageSource) {
+        this.loginUseCase = loginUseCase;
+        this.registerUseCase = registerUseCase;
+        this.verifyRegistrationUseCase = verifyRegistrationUseCase;
+        this.resendCodeUseCase = resendCodeUseCase;
+        this.changePasswordUseCase = changePasswordUseCase;
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.messageSource = messageSource;
+    }
 
     /** RF-01, RF-02: Iniciar sesión directo */
     @PostMapping("/login")
@@ -54,7 +69,7 @@ public class AuthController {
         registerUseCase.execute(dto);
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("auth.register.success", null, locale);
-        return ResponseEntity.ok(Map.of(MESSAGE_KEY, message));
+        return ResponseEntity.ok(Map.of("message", message));
     }
 
     /** Auto-registro: Reenviar código */
@@ -63,7 +78,7 @@ public class AuthController {
         resendCodeUseCase.execute(dto);
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("auth.resend-code.success", null, locale);
-        return ResponseEntity.ok(Map.of(MESSAGE_KEY, message));
+        return ResponseEntity.ok(Map.of("message", message));
     }
 
     /** Auto-registro: Paso 2 (verifica código y guarda usuario) */
@@ -82,7 +97,7 @@ public class AuthController {
         changePasswordUseCase.execute(email, dto.getCurrentPassword(), dto.getNewPassword());
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("auth.change-password.success", null, locale);
-        return ResponseEntity.ok(Map.of(MESSAGE_KEY, message));
+        return ResponseEntity.ok(Map.of("message", message));
     }
 
     /** RF-03: Obtener perfil del usuario autenticado */
@@ -92,17 +107,5 @@ public class AuthController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return ResponseEntity.ok(userMapper.toResponseDto(user));
-    }
-
-    /** Mock stats para WelcomePage */
-    @GetMapping("/public-stats")
-    public ResponseEntity<Map<String, Integer>> getPublicStats() {
-        return ResponseEntity.ok(Map.of(
-            "proyectosRegistrados", 350,
-            "tesis", 160,
-            "docentesInvestigadores", 28,
-            "gruposInvestigacion", 8,
-            "proyectosCulminados", 65
-        ));
     }
 }

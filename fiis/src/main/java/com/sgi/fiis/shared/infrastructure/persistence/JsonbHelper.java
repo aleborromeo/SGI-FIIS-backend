@@ -11,7 +11,9 @@ public class JsonbHelper {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private JsonbHelper() {}
+    private JsonbHelper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static String toJson(Map<String, String> map) {
         try {
@@ -30,10 +32,9 @@ public class JsonbHelper {
         try {
             return MAPPER.readValue(json, new TypeReference<Map<String, String>>() {});
         } catch (JsonProcessingException e) {
-            // Fallback for legacy plain text data
-            Map<String, String> fallback = new HashMap<>();
-            fallback.put("es", json);
-            return fallback;
+            Map<String, String> legacyMap = new HashMap<>();
+            legacyMap.put("es", json);
+            return legacyMap;
         }
     }
 

@@ -29,9 +29,8 @@ public class LoginUseCase {
     }
 
     public LoginResponseDto execute(String email, String password) {
-        String cleanEmail = email != null ? email.trim() : "";
         // Find user by email
-        User user = userRepository.findByEmail(cleanEmail)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("auth.credentials.invalid"));
 
         // RF-02: Validate that the user is active
@@ -39,8 +38,8 @@ public class LoginUseCase {
             throw new BusinessException("auth.user.inactive");
         }
 
-        // Validate password (prevent NullPointerException/IllegalArgumentException for OAuth users without password)
-        if (user.getPasswordHash() == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+        // Validate password
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new BadCredentialsException("auth.credentials.invalid");
         }
 

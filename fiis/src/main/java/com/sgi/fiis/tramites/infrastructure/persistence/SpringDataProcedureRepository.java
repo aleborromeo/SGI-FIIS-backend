@@ -1,17 +1,12 @@
 package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface SpringDataProcedureRepository extends JpaRepository<ProcedureEntity, Long> {
-
-    Optional<ProcedureEntity> findByCodigoTramite(String codigoTramite);
-
-    List<ProcedureEntity> findByIdSolicitante(Long idSolicitante);
-
-    List<ProcedureEntity> findByEstadoActual(String estadoActual);
-
-    boolean existsByCodigoTramite(String codigoTramite);
+@Repository
+public interface SpringDataProcedureRepository extends JpaRepository<ProcedureEntity, Integer> {
+    java.util.Optional<ProcedureEntity> findByCode(String code);
+    java.util.List<ProcedureEntity> findByApplicantId(Long id);
+    java.util.List<ProcedureEntity> findByStatus(String status);
+    boolean existsByCode(String code);
 }

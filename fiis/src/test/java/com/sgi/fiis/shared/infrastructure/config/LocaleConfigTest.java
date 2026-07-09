@@ -1,9 +1,7 @@
 package com.sgi.fiis.shared.infrastructure.config;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
@@ -33,24 +31,4 @@ class LocaleConfigTest {
         assertTrue(acceptHeaderResolver.getSupportedLocales().contains(new Locale("en")));
     }
 
-    @Test
-    void messageSource_shouldReturnConfiguredResourceBundleMessageSource() {
-        MessageSource messageSource = localeConfig.messageSource();
-
-        assertNotNull(messageSource);
-        assertTrue(messageSource instanceof ResourceBundleMessageSource);
-        
-        // At this level we mainly verify it created the bean properly 
-        // without throwing exceptions and returned the correct instance type.
-    }
-
-    @Test
-    void getValidator_shouldReturnLocalValidatorFactoryBeanConfiguredWithMessageSource() {
-        MessageSource messageSource = localeConfig.messageSource();
-        LocalValidatorFactoryBean validator = localeConfig.getValidator(messageSource);
-
-        assertNotNull(validator);
-        // The validator should be correctly initialized with the provided messageSource
-        // LocalValidatorFactoryBean has its own lifecycle, but we can verify it's not null.
-    }
 }

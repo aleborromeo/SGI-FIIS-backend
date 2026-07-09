@@ -6,11 +6,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface SpringDataProcedureMovementRepository extends JpaRepository<ProcedureMovementEntity, Long> {
+public interface SpringDataProcedureMovementRepository extends JpaRepository<ProcedureMovementEntity, Integer> {
 
-    @Query("SELECT m FROM ProcedureMovementEntity m WHERE m.idTramite = :id ORDER BY m.fechaMovimiento ASC")
-    List<ProcedureMovementEntity> findByProcedureIdOrderByDateAsc(@Param("id") Long id);
+    @Query("SELECT m FROM ProcedureMovementEntity m WHERE m.procedure.id = :id ORDER BY m.movementAt ASC")
+    List<ProcedureMovementEntity> findByProcedureIdOrderByDateAsc(@Param("id") int id);
 
-    @Query("SELECT COUNT(m) FROM ProcedureMovementEntity m WHERE m.idTramite = :id")
-    long countByProcedureId(@Param("id") Long id);
+    @Query("SELECT COUNT(m) FROM ProcedureMovementEntity m WHERE m.procedure.id = :id")
+    long countByProcedureId(@Param("id") int id);
 }

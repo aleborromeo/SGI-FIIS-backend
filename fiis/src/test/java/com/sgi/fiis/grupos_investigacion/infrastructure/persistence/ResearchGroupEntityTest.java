@@ -13,28 +13,30 @@ class ResearchGroupEntityTest {
     @DisplayName("Should get and set all fields correctly")
     void testGettersAndSetters() {
         ResearchGroupEntity entity = new ResearchGroupEntity();
+        com.sgi.fiis.users.infrastructure.persistence.UserEntity user = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        user.setId(10L);
 
         entity.setId(1);
-        entity.setGroupCode("GI-001");
-        entity.setGroupName("Grupo de Inteligencia Artificial");
-        entity.setCurrentCoordinatorId(10);
+        entity.setCode("GI-001");
+        entity.setName("Grupo de Inteligencia Artificial");
+        entity.setCurrentCoordinator(user);
         entity.setActive(true);
 
         assertEquals(1, entity.getId());
-        assertEquals("GI-001", entity.getGroupCode());
-        assertEquals("Grupo de Inteligencia Artificial", entity.getGroupName());
-        assertEquals(10, entity.getCurrentCoordinatorId());
+        assertEquals("GI-001", entity.getCode());
+        assertEquals("Grupo de Inteligencia Artificial", entity.getName());
+        assertEquals(10L, entity.getCurrentCoordinator().getId());
         assertTrue(entity.isActive());
     }
 
     @Test
-    @DisplayName("Should allow a null coordinator id")
+    @DisplayName("Should allow a null coordinator")
     void testNullCoordinator() {
         ResearchGroupEntity entity = new ResearchGroupEntity();
 
-        entity.setCurrentCoordinatorId(null);
+        entity.setCurrentCoordinator(null);
 
-        assertNull(entity.getCurrentCoordinatorId());
+        assertNull(entity.getCurrentCoordinator());
     }
 
     @Test
@@ -43,9 +45,9 @@ class ResearchGroupEntityTest {
         ResearchGroupEntity entity = new ResearchGroupEntity();
 
         assertNull(entity.getId());
-        assertNull(entity.getGroupCode());
-        assertNull(entity.getGroupName());
-        assertNull(entity.getCurrentCoordinatorId());
+        assertNull(entity.getCode());
+        assertNull(entity.getName());
+        assertNull(entity.getCurrentCoordinator());
         assertFalse(entity.isActive());
     }
 

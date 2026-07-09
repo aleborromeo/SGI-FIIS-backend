@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,15 +31,15 @@ class ProjectEntityTest {
         ResearchGroupEntity group = new ResearchGroupEntity();
         UserEntity responsible = new UserEntity();
         ResearchCallEntity call = new ResearchCallEntity();
-        LocalDate startDate = LocalDate.of(2025, 1, 1);
-        LocalDate endDate = LocalDate.of(2025, 12, 31);
+        LocalDate startDate = LocalDate.of(2025, Month.JANUARY, 1);
+        LocalDate endDate = LocalDate.of(2025, Month.DECEMBER, 31);
 
         ProjectEntity entity = new ProjectEntity(
                 1, "PROJ-001", "Test Project", "Summary",
-                "General Objective", null, null, null, null,
+                "General Objective", null, null, "{}", "{}",
                 line, group, BigDecimal.valueOf(10000),
                 startDate, endDate, "Lima", responsible, call,
-                42, "ACTIVO", null, null
+                42, "POSTULADO", null, null
         );
 
         assertEquals(1, entity.getId());
@@ -55,7 +56,7 @@ class ProjectEntityTest {
         assertSame(responsible, entity.getResponsible());
         assertSame(call, entity.getResearchCall());
         assertEquals(42, entity.getDocumentId());
-        assertEquals("ACTIVO", entity.getStatus());
+        assertEquals("POSTULADO", entity.getStatus());
     }
 
     @Test
@@ -64,8 +65,8 @@ class ProjectEntityTest {
         ResearchLineEntity line = new ResearchLineEntity();
         ResearchGroupEntity group = new ResearchGroupEntity();
         UserEntity responsible = new UserEntity();
-        LocalDate startDate = LocalDate.of(2025, 3, 1);
-        LocalDate endDate = LocalDate.of(2025, 8, 30);
+        LocalDate startDate = LocalDate.of(2025, Month.MARCH, 1);
+        LocalDate endDate = LocalDate.of(2025, Month.AUGUST, 30);
 
         ProjectEntity entity = ProjectEntity.builder()
                 .id(2)
@@ -117,8 +118,8 @@ class ProjectEntityTest {
         entity.setResearchLine(line);
         entity.setGroup(group);
         entity.setBudget(BigDecimal.valueOf(5000));
-        entity.setStartDate(LocalDate.of(2025, 5, 1));
-        entity.setEndDate(LocalDate.of(2025, 6, 1));
+        entity.setStartDate(LocalDate.of(2025, Month.MAY, 1));
+        entity.setEndDate(LocalDate.of(2025, Month.JUNE, 1));
         entity.setExecutionPlace("Huancayo");
         entity.setResponsible(responsible);
         entity.setDocumentId(55);
@@ -132,8 +133,8 @@ class ProjectEntityTest {
         assertSame(line, entity.getResearchLine());
         assertSame(group, entity.getGroup());
         assertEquals(BigDecimal.valueOf(5000), entity.getBudget());
-        assertEquals(LocalDate.of(2025, 5, 1), entity.getStartDate());
-        assertEquals(LocalDate.of(2025, 6, 1), entity.getEndDate());
+        assertEquals(LocalDate.of(2025, Month.MAY, 1), entity.getStartDate());
+        assertEquals(LocalDate.of(2025, Month.JUNE, 1), entity.getEndDate());
         assertEquals("Huancayo", entity.getExecutionPlace());
         assertSame(responsible, entity.getResponsible());
         assertEquals(55, entity.getDocumentId());
@@ -159,10 +160,10 @@ class ProjectEntityTest {
     @DisplayName("Should update only updatedAt on PreUpdate")
     void testOnUpdate() {
         ProjectEntity entity = new ProjectEntity();
-        entity.setCreatedAt(LocalDateTime.of(2025, 1, 1, 10, 0));
+        entity.setCreatedAt(LocalDateTime.of(2025, Month.JANUARY, 1, 10, 0));
         entity.onUpdate();
 
-        assertEquals(LocalDateTime.of(2025, 1, 1, 10, 0), entity.getCreatedAt());
+        assertEquals(LocalDateTime.of(2025, Month.JANUARY, 1, 10, 0), entity.getCreatedAt());
         assertNotNull(entity.getUpdatedAt());
     }
 }
