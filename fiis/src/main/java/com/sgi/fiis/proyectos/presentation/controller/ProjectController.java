@@ -82,7 +82,7 @@ public class ProjectController {
             // Coordinador can only see projects of the research group they coordinate
             Integer coordGroupId = jdbcTemplate.query(
                 "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
-                rs -> rs.next() ? rs.getInt("id_grupo") : null,
+                rs -> rs.next() ? rs.getObject("id_grupo", Integer.class) : null,
                 currentUser.getId()
             );
             if (coordGroupId != null) {
