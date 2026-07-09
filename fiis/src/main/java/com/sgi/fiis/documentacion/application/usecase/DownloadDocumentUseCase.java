@@ -9,7 +9,6 @@ import com.sgi.fiis.resolutions.domain.port.out.ResolutionRepositoryPort;
 import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 
 import java.io.InputStream;
-import java.util.Optional;
 
 public class DownloadDocumentUseCase {
     private final DocumentRepositoryPort documentRepositoryPort;
