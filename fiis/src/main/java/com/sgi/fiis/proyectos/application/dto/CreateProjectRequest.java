@@ -42,7 +42,7 @@ public class CreateProjectRequest {
     @NotBlank(message = "{proyectos.validation.place.required}")
     private String executionPlace;
 
-    @NotNull(message = "{proyectos.validation.responsible.required}")
+    // Set automatically from the authenticated user in the controller (RF-39)
     private Integer responsibleId;
 
     @NotNull(message = "{proyectos.validation.group.required}")
