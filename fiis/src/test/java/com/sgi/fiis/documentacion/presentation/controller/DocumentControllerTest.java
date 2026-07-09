@@ -75,7 +75,7 @@ class DocumentControllerTest {
         when(userDetails.getId()).thenReturn(userId);
         when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
         when(userDetails.getAuthorities())
-                .thenReturn((java.util.Collection) List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                .thenReturn(List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,

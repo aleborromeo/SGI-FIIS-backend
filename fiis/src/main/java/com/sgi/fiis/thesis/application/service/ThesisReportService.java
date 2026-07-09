@@ -36,13 +36,13 @@ public class ThesisReportService implements ThesisReportUseCase {
         ThesisPlan plan = planRepository.findById(command.idPlanTesis())
                 .orElseThrow(() -> new ThesisPlanNotFoundException(command.idPlanTesis()));
         if (!plan.getIdEstudiante().equals(idEstudiante)) {
-            throw new BusinessRuleViolationException("El informe final solo puede registrarlo el estudiante propietario del plan");
+            throw new BusinessRuleViolationException("thesis.error.only-student-owner-report");
         }
         if (plan.getEstadoPlan() != ThesisPlanStatus.APROBADO) {
-            throw new BusinessRuleViolationException("Solo se puede registrar informe final de un plan aprobado");
+            throw new BusinessRuleViolationException("thesis.error.only-approved-plan-report");
         }
         if (!documentoValidation.existeDocumentoActivo(command.idDocumentoTesis())) {
-            throw new BusinessRuleViolationException("El documento de tesis no existe o no está activo");
+            throw new BusinessRuleViolationException("thesis.error.document-inactive-or-null");
         }
         ThesisReport guardado = informeRepository.save(ThesisReport.nuevo(command.idPlanTesis(), command.tituloFinal(), command.idDocumentoTesis()));
         return toResponse(guardado);
@@ -82,11 +82,11 @@ public class ThesisReportService implements ThesisReportUseCase {
             boolean esEstudiante = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
             if (!esEstudiante) {
-                throw new BusinessRuleViolationException("Solo los estudiantes pueden registrar un informe de tesis");
+                throw new BusinessRuleViolationException("thesis.error.only-students-report");
             }
             return userDetails.getId();
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al estudiante autenticado");
+        throw new BusinessRuleViolationException("thesis.error.student-not-identified");
     }
 
     private void validarRolDirector() {
@@ -95,11 +95,11 @@ public class ThesisReportService implements ThesisReportUseCase {
             boolean esDirector = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_DIRECTOR_INVESTIGACION));
             if (!esDirector) {
-                throw new BusinessRuleViolationException("Solo los directores de investigación pueden revisar informes de tesis");
+                throw new BusinessRuleViolationException("thesis.error.only-directors-report-review");
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private ThesisReport obtenerInforme(Integer idInformeTesis) {

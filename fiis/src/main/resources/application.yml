@@ -11,7 +11,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   messages:
-    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages
+    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages,i18n/thesis/messages
     use-code-as-default-message: true
     fallback-to-system-locale: true
 

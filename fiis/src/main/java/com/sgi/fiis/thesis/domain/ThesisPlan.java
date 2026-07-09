@@ -39,28 +39,28 @@ public class ThesisPlan {
 
     public void marcarObservado() {
         if (estadoPlan == ThesisPlanStatus.RECHAZADO) {
-            throw new InvalidStateTransitionException("No se puede observar un plan en estado " + estadoPlan);
+            throw new InvalidStateTransitionException("thesis.error.observe-invalid-state", estadoPlan);
         }
         estadoPlan = ThesisPlanStatus.OBSERVADO;
     }
 
     public void marcarAprobado() {
         if (estadoPlan == ThesisPlanStatus.RECHAZADO) {
-            throw new InvalidStateTransitionException("No se puede aprobar un plan rechazado");
+            throw new InvalidStateTransitionException("thesis.error.approve-rejected-plan");
         }
         estadoPlan = ThesisPlanStatus.APROBADO;
     }
 
     public void marcarRechazado() {
         if (estadoPlan == ThesisPlanStatus.APROBADO) {
-            throw new InvalidStateTransitionException("No se puede rechazar un plan aprobado");
+            throw new InvalidStateTransitionException("thesis.error.reject-approved-plan");
         }
         estadoPlan = ThesisPlanStatus.RECHAZADO;
     }
 
     public void subsanar(Integer nuevoDocumentoId, String nuevoResumen) {
         if (estadoPlan != ThesisPlanStatus.OBSERVADO) {
-            throw new InvalidStateTransitionException("Solo se puede subsanar un plan observado");
+            throw new InvalidStateTransitionException("thesis.error.rectify-non-observed-plan");
         }
         if (nuevoDocumentoId != null) this.idDocumentoActual = nuevoDocumentoId;
         if (nuevoResumen != null && !nuevoResumen.isBlank()) this.resumen = nuevoResumen;

@@ -53,11 +53,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             boolean esEstudiante = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
             if (!esEstudiante) {
-                throw new BusinessRuleViolationException("Solo los estudiantes pueden registrar un plan de tesis");
+                throw new BusinessRuleViolationException("thesis.error.only-students-plan");
             }
             return userDetails.getId();
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al estudiante autenticado");
+        throw new BusinessRuleViolationException("thesis.error.student-not-identified");
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolCoordinador();
         if (plan.getEstadoPlan() != ThesisPlanStatus.POSTULADO) {
-            throw new BusinessRuleViolationException("Solo se pueden aprobar planes en estado POSTULADO");
+            throw new BusinessRuleViolationException("thesis.error.approve-only-postulated");
         }
         plan.marcarAprobado();
         ThesisPlan guardado = planRepository.save(plan);
@@ -92,7 +92,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolCoordinador();
         if (motivo == null || motivo.isBlank()) {
-            throw new BusinessRuleViolationException("El motivo de rechazo es obligatorio");
+            throw new BusinessRuleViolationException("thesis.error.rejection-reason-required");
         }
         plan.marcarRechazado();
         ThesisPlan guardado = planRepository.save(plan);
@@ -107,7 +107,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolDirector();
         if (plan.getEstadoPlan() != ThesisPlanStatus.APROBADO) {
-            throw new BusinessRuleViolationException("Solo se pueden aprobar planes previamente aprobados por el coordinador");
+            throw new BusinessRuleViolationException("thesis.error.approve-only-coordinator-approved");
         }
         plan.marcarAprobado();
         ThesisPlan guardado = planRepository.save(plan);
@@ -135,13 +135,13 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         Long idEstudiante = extraerIdEstudianteDelContexto();
         if (!plan.getIdEstudiante().equals(idEstudiante)) {
-            throw new BusinessRuleViolationException("El plan solo puede ser subsanado por el estudiante propietario");
+            throw new BusinessRuleViolationException("thesis.error.rectify-only-owner");
         }
         if (command.idDocumentoActual() != null && !documentoValidation.existeDocumentoActivo(command.idDocumentoActual())) {
-            throw new BusinessRuleViolationException("El documento de subsanación no existe o no está activo");
+            throw new BusinessRuleViolationException("thesis.error.rectification-doc-inactive");
         }
         if (command.idDocumentoActual() == null && (command.resumenSubsanado() == null || command.resumenSubsanado().isBlank())) {
-            throw new BusinessRuleViolationException("Debe adjuntar un documento o actualizar el resumen para subsanar");
+            throw new BusinessRuleViolationException("thesis.error.rectification-doc-or-summary-required");
         }
         plan.subsanar(command.idDocumentoActual(), command.resumenSubsanado());
         ThesisPlan guardado = planRepository.save(plan);
@@ -155,11 +155,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         ThesisPlan plan = obtenerPlan(idPlanTesis);
         validarRolDecano();
         if (plan.getEstadoPlan() != ThesisPlanStatus.APROBADO) {
-            throw new BusinessRuleViolationException("Solo se puede registrar resolución para planes aprobados");
+            throw new BusinessRuleViolationException("thesis.error.resolution-only-approved-plan");
         }
         String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(idPlanTesis);
         if (!"PENDIENTE_DECANATO".equals(estadoTramite)) {
-            throw new BusinessRuleViolationException("El trámite debe estar pendiente de resolución del decano");
+            throw new BusinessRuleViolationException("thesis.error.pending-resolution-required");
         }
         Long idUsuarioAccion = extraerIdUsuarioDelContexto();
         tramiteWorkflow.registrarResolucion(idPlanTesis, idUsuarioAccion,
@@ -205,7 +205,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             return userDetails.getId();
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private void validarRolCoordinador() {
@@ -214,11 +214,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             boolean esCoordinador = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
             if (!esCoordinador) {
-                throw new BusinessRuleViolationException("Solo los coordinadores de grupo pueden realizar esta acción");
+                throw new BusinessRuleViolationException("thesis.error.only-coordinators");
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private void validarRolDirector() {
@@ -227,11 +227,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             boolean esDirector = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_DIRECTOR_INVESTIGACION));
             if (!esDirector) {
-                throw new BusinessRuleViolationException("Solo los directores de investigación pueden realizar esta acción");
+                throw new BusinessRuleViolationException("thesis.error.only-directors");
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private void validarRolDecano() {
@@ -240,11 +240,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             boolean esDecano = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_DECANO));
             if (!esDecano) {
-                throw new BusinessRuleViolationException("Solo el decano puede registrar resoluciones");
+                throw new BusinessRuleViolationException("thesis.error.only-dean");
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private Long resolverIdEstudianteSegunRol(Long idEstudiante) {
@@ -257,7 +257,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             }
             return idEstudiante;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private void validarRevisorParaRol(ReviewerRole revisor) {
@@ -275,11 +275,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
                 case SIN_REVISOR -> false;
             };
             if (!autorizado) {
-                throw new BusinessRuleViolationException("No tiene permisos para consultar pendientes del rol " + revisor);
+                throw new BusinessRuleViolationException("thesis.error.no-pending-permissions", revisor.name());
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException("thesis.error.user-not-identified");
     }
 
     private ThesisPlan obtenerPlan(Integer idPlanTesis) {
@@ -287,14 +287,14 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     }
 
     private void validarGrupoLineaYDocumento(Integer idGrupo, Integer idLinea, Integer idDocumento, Long idUsuario) {
-        if (!grupoValidation.existeGrupoActivo(idGrupo)) throw new BusinessRuleViolationException("El grupo de investigación no existe o está inactivo");
-        if (!grupoValidation.existeLineaActiva(idLinea)) throw new BusinessRuleViolationException("La línea de investigación no existe o está inactiva");
-        if (!grupoValidation.lineaPerteneceAlGrupo(idGrupo, idLinea)) throw new BusinessRuleViolationException("La línea seleccionada no pertenece al grupo de investigación");
+        if (!grupoValidation.existeGrupoActivo(idGrupo)) throw new BusinessRuleViolationException("thesis.error.group-inactive");
+        if (!grupoValidation.existeLineaActiva(idLinea)) throw new BusinessRuleViolationException("thesis.error.line-inactive");
+        if (!grupoValidation.lineaPerteneceAlGrupo(idGrupo, idLinea)) throw new BusinessRuleViolationException("thesis.error.line-not-belong-to-group");
         if (idDocumento != null) {
             if (!documentoValidation.existeDocumentoActivo(idDocumento))
-                throw new BusinessRuleViolationException("El documento no existe o está inactivo");
+                throw new BusinessRuleViolationException("thesis.error.doc-inactive");
             if (!documentoValidation.documentoPerteneceAUsuario(idDocumento, idUsuario))
-                throw new BusinessRuleViolationException("El documento no pertenece al estudiante autenticado");
+                throw new BusinessRuleViolationException("thesis.error.doc-not-student-owner");
         }
     }
 

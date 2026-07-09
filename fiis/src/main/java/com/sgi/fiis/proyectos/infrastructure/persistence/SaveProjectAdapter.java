@@ -2,7 +2,6 @@ package com.sgi.fiis.proyectos.infrastructure.persistence;
 
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallJpaRepository;
-import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
@@ -85,27 +84,27 @@ public class SaveProjectAdapter implements SaveProjectPort {
     @Override
     public Optional<String> getGroupCode(Integer groupId) {
         return groupRepository.findById(groupId)
-                .map(ResearchGroupEntity::getCode);
+                .map(g -> g.getCode());
     }
 
     @Override
     public Optional<String> getLineName(Integer lineId) {
         return lineRepository.findById(lineId)
-                .map(ResearchLineEntity::getName);
+                .map(l -> l.getName());
     }
 
     @Override
     public boolean isUserMemberOfGroup(Long userId, Integer groupId) {
         // Query database to see if there is an active membership for user in research group
         return membershipRepository.findByUserIdAndGroupId(userId, groupId)
-                .map(GroupMembershipEntity::getActive)
+                .map(m -> m.getActive())
                 .orElse(false);
     }
 
     @Override
     public boolean isGroupActive(Integer groupId) {
         return groupRepository.findById(groupId)
-                .map(ResearchGroupEntity::isActive)
+                .map(g -> g.isActive())
                 .orElse(false);
     }
 
@@ -138,7 +137,7 @@ public class SaveProjectAdapter implements SaveProjectPort {
     @Override
     public boolean isLineActive(Integer lineId) {
         return lineRepository.findById(lineId)
-                .map(ResearchLineEntity::isActive)
+                .map(l -> l.isActive())
                 .orElse(false);
     }
 

@@ -32,7 +32,7 @@ public class ThesisReport {
 
     public void observar() {
         if (estadoInforme == ThesisReportStatus.APROBADO) {
-            throw new InvalidStateTransitionException("No se puede observar un informe aprobado");
+            throw new InvalidStateTransitionException("thesis.error.observe-approved-report");
         }
         estadoInforme = ThesisReportStatus.OBSERVADO;
     }

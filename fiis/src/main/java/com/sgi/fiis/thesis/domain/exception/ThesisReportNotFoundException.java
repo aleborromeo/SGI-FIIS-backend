@@ -1,5 +1,9 @@
 package com.sgi.fiis.thesis.domain.exception;
 
-public class ThesisReportNotFoundException extends RuntimeException {
-    public ThesisReportNotFoundException(Integer id) { super("No existe el informe de tesis con id: " + id); }
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+
+public class ThesisReportNotFoundException extends ResourceNotFoundException {
+    public ThesisReportNotFoundException(Integer id) {
+        super("thesis.error.report-not-found", id);
+    }
 }

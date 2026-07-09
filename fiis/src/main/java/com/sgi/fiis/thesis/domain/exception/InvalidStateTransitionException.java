@@ -1,5 +1,13 @@
 package com.sgi.fiis.thesis.domain.exception;
 
-public class InvalidStateTransitionException extends RuntimeException {
-    public InvalidStateTransitionException(String message) { super(message); }
+import com.sgi.fiis.shared.domain.exception.BusinessException;
+
+public class InvalidStateTransitionException extends BusinessException {
+    public InvalidStateTransitionException(String message) {
+        super(message);
+    }
+
+    public InvalidStateTransitionException(String errorKey, Object... args) {
+        super(errorKey, args);
+    }
 }
