@@ -14,8 +14,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.util.List;
 import java.util.Map;
+
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -23,10 +27,15 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
-    private final CreateProjectUseCase createProjectUseCase;
+    private static final String ROLE_PREFIX = "ROLE_";
+    private static final String ROLE_DOCENTE_INVESTIGADOR = "DOCENTE_INVESTIGADOR";
 
-    public ProjectController(CreateProjectUseCase createProjectUseCase) {
+    private final CreateProjectUseCase createProjectUseCase;
+    private final JdbcTemplate jdbcTemplate;
+
+    public ProjectController(CreateProjectUseCase createProjectUseCase, JdbcTemplate jdbcTemplate) {
         this.createProjectUseCase = createProjectUseCase;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @PostMapping
@@ -37,6 +46,15 @@ public class ProjectController {
             @Valid @RequestBody CreateProjectRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         
+        String role = currentUser.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
+                .orElse("");
+        
+        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
+            throw new BusinessRuleValidationException("Solo los docentes investigadores pueden registrar proyectos de investigación.");
+        }
+
         // RF-39: Associate the project with the logged-in user as the responsible investigator
         request.setResponsibleId(currentUser.getId().intValue());
         
@@ -54,15 +72,31 @@ public class ProjectController {
 
         String role = currentUser.getAuthorities().stream()
                 .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
                 .orElse("");
 
         List<ProjectResponse> response;
 
         // RF-43 / RN-05 / RNF-19: Enforce role-based filtering
-        if ("DOCENTE_INVESTIGADOR".equals(role)) {
+        if (ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
             // Docente can only see their own projects
             response = createProjectUseCase.getProjectsByResponsible(currentUser.getId());
+        } else if ("COORDINADOR_GRUPO".equals(role)) {
+            // Coordinador can only see projects of the research group they coordinate
+            java.util.List<Integer> ids = jdbcTemplate.queryForList(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                Integer.class,
+                currentUser.getId()
+            );
+            Integer coordGroupId = ids.isEmpty() ? null : ids.get(0);
+            if (coordGroupId != null) {
+                response = createProjectUseCase.getProjectsByGroup(coordGroupId);
+            } else {
+                response = List.of();
+            }
+        } else if ("ESTUDIANTE".equals(role)) {
+            // Students do not coordinate or lead research projects
+            response = List.of();
         } else if (responsibleId != null) {
             response = createProjectUseCase.getProjectsByResponsible(responsibleId);
         } else if (groupId != null) {
@@ -88,10 +122,10 @@ public class ProjectController {
         // RF-43 / RN-05: Docentes can only see their own projects
         String role = currentUser.getAuthorities().stream()
                 .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
                 .orElse("");
 
-        if ("DOCENTE_INVESTIGADOR".equals(role) && !project.getResponsibleId().equals(currentUser.getId())) {
+        if (ROLE_DOCENTE_INVESTIGADOR.equals(role) && (project.getResponsibleId() == null || !project.getResponsibleId().equals(currentUser.getId()))) {
             return ResponseEntity.status(403).build();
         }
 

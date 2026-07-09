@@ -28,7 +28,8 @@ public class AssignMemberUseCase {
             throw new ResourceNotFoundException("grupos.error.not-found", groupId);
         }
 
-        if (!groupRepository.existsActiveUserWithRole(userId, "DOCENTE_INVESTIGADOR")) {
+        if (!groupRepository.existsActiveUserWithRole(userId, "DOCENTE_INVESTIGADOR") &&
+            !groupRepository.existsActiveUserWithRole(userId, "ESTUDIANTE")) {
             throw new BusinessException("grupos.error.member-invalid-role", userId);
         }
 
