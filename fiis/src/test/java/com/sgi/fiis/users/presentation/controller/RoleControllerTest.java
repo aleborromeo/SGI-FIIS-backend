@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.presentation.controller;
 
+import com.sgi.fiis.TestcontainersConfig;
 import com.sgi.fiis.users.domain.model.Role;
 import com.sgi.fiis.users.domain.port.RoleRepositoryPort;
 import com.sgi.fiis.users.presentation.mapper.RoleMapper;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("RoleController Integration Tests")
-class RoleControllerTest {
+class RoleControllerTest extends TestcontainersConfig {
 
     @Autowired
     private MockMvc mockMvc;

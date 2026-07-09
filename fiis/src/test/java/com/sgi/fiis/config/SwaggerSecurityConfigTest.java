@@ -1,17 +1,17 @@
 package com.sgi.fiis.config;
 
+import com.sgi.fiis.TestcontainersConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = {SwaggerSecurityConfig.class})
-class SwaggerSecurityConfigTest {
+class SwaggerSecurityConfigTest extends TestcontainersConfig {
 
     @Autowired
     private ApplicationContext context;

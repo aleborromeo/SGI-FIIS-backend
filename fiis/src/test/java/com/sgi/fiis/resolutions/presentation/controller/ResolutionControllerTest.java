@@ -1,5 +1,6 @@
 package com.sgi.fiis.resolutions.presentation.controller;
 
+import com.sgi.fiis.TestcontainersConfig;
 import com.sgi.fiis.resolutions.domain.model.Resolution;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionCommand;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionUseCase;
@@ -25,8 +26,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
-class ResolutionControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+class ResolutionControllerTest extends TestcontainersConfig {
 
     private MockMvc mockMvc;
 

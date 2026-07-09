@@ -1,5 +1,6 @@
 package com.sgi.fiis.auth;
 
+import com.sgi.fiis.TestcontainersConfig;
 import com.sgi.fiis.auth.domain.port.EmailSenderPort;
 import tools.jackson.databind.ObjectMapper;
 import com.sgi.fiis.auth.application.dto.LoginRequestDto;
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Auth Integration Tests")
-class AuthIntegrationTest {
+class AuthIntegrationTest extends TestcontainersConfig {
 
     @Autowired
     private MockMvc mockMvc;
