@@ -66,12 +66,12 @@ class ProjectControllerTest {
                         String mockRole = webRequest.getHeader("X-Mock-Role");
                         if ("DOCENTE_INVESTIGADOR".equals(mockRole)) {
                             when(userDetails.getAuthorities()).thenAnswer(inv -> 
-                                java.util.Collections.singletonList(
+                                Collections.singletonList(
                                     (org.springframework.security.core.GrantedAuthority) () -> "ROLE_DOCENTE_INVESTIGADOR"
                                 )
                             );
                         } else {
-                            when(userDetails.getAuthorities()).thenAnswer(inv -> java.util.Collections.emptyList());
+                            when(userDetails.getAuthorities()).thenAnswer(inv -> Collections.emptyList());
                         }
                         return userDetails;
                     }
