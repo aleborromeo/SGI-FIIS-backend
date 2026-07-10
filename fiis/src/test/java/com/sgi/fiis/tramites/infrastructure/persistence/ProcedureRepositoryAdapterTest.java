@@ -207,4 +207,12 @@ class ProcedureRepositoryAdapterTest {
         assertNull(result.getMovements().get(0).getIdUsuarioAccion());
         verify(movimientoRepository, times(1)).save(any());
     }
+
+    @Test
+    @DisplayName("findByCode: not found → returns empty Optional")
+    void findByCode_notFound_returnsEmpty() {
+        when(tramiteRepository.findByCode("TRM-NONEXISTENT")).thenReturn(Optional.empty());
+
+        assertTrue(adapter.findByCode("TRM-NONEXISTENT").isEmpty());
+    }
 }

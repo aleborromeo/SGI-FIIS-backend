@@ -5,6 +5,8 @@ import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedExce
 import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
 import com.sgi.fiis.documentacion.domain.port.FileStoragePort;
+import com.sgi.fiis.resolutions.domain.port.out.ResolutionRepositoryPort;
+import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,19 +24,23 @@ class DocumentUseCaseTest {
 
     private DocumentRepositoryPort documentRepositoryPort;
     private FileStoragePort fileStoragePort;
+    private ResolutionRepositoryPort resolutionRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
     
     private UploadDocumentUseCase uploadDocumentUseCase;
     private DownloadDocumentUseCase downloadDocumentUseCase;
 
     @BeforeEach
     void setUp() {
-        // Simulamos los puertos (APIs externas/infraestructura) usando Mockito
         this.documentRepositoryPort = mock(DocumentRepositoryPort.class);
         this.fileStoragePort = mock(FileStoragePort.class);
+        this.resolutionRepositoryPort = mock(ResolutionRepositoryPort.class);
+        this.procedureRepositoryPort = mock(ProcedureRepositoryPort.class);
 
-        // Instanciamos tus casos de uso bajo entorno aislado
         this.uploadDocumentUseCase = new UploadDocumentUseCase(documentRepositoryPort, fileStoragePort);
-        this.downloadDocumentUseCase = new DownloadDocumentUseCase(documentRepositoryPort, fileStoragePort);
+        this.downloadDocumentUseCase = new DownloadDocumentUseCase(
+                documentRepositoryPort, fileStoragePort,
+                resolutionRepositoryPort, procedureRepositoryPort);
     }
 
     @Test

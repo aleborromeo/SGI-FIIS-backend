@@ -15,4 +15,5 @@ public class ProcedureMovement {
     private final ProcedureStatus estadoNuevo;
     private final String observacion;
     private final LocalDateTime fechaMovimiento;
+    private final Long idDocumentoAdjunto;
 }

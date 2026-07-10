@@ -2,7 +2,6 @@ package com.sgi.fiis.auth.infrastructure.security;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,12 +12,13 @@ import org.springframework.security.core.AuthenticationException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @DisplayName("CustomAuthenticationEntryPoint Unit Tests")
 class CustomAuthenticationEntryPointTest {
 
-    private final MessageSource messageSource = Mockito.mock(MessageSource.class);
+    private final MessageSource messageSource = mock(MessageSource.class);
     private final CustomAuthenticationEntryPoint entryPoint = new CustomAuthenticationEntryPoint(messageSource);
 
     @Test

@@ -7,16 +7,16 @@ import java.time.LocalDateTime;
 
 public class Evaluacion {
 
-    private Long idEvaluacion;
-    private Long idProyecto;
-    private Long idPlanTesis;
-    private Long idEvaluador;
+    private final Long idEvaluacion;
+    private final Long idProyecto;
+    private final Long idPlanTesis;
+    private final Long idEvaluador;
 
     private ResultadoEvaluacion resultado;
     private Integer puntaje;
     private String observaciones;
 
-    private LocalDateTime fechaAsignacion;
+    private final LocalDateTime fechaAsignacion;
     private LocalDateTime fechaEvaluacion;
 
     private Evaluacion(Builder builder) {
@@ -79,6 +79,7 @@ public class Evaluacion {
                 .build();
     }
 
+    @SuppressWarnings("java:S107")
     public static Evaluacion reconstruir(
             Long idEvaluacion,
             Long idProyecto,

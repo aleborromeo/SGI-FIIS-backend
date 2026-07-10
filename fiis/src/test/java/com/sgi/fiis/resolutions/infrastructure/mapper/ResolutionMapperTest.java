@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,22 +22,22 @@ class ResolutionMapperTest {
         ResolutionEntity entity = new ResolutionEntity();
         entity.setIdResolucion(1L);
         entity.setNumeroResolucion("RES-2023-001");
-        entity.setFechaEmision(LocalDate.of(2023, 10, 1));
+        entity.setFechaEmision(LocalDate.of(2023, Month.OCTOBER, 1));
         entity.setAsunto("Asunto de prueba");
         entity.setIdTramite(2L);
         entity.setIdDocumentoAdjunto(3L);
-        entity.setFechaRegistro(LocalDateTime.of(2023, 10, 1, 10, 0));
+        entity.setFechaRegistro(LocalDateTime.of(2023, Month.OCTOBER, 1, 10, 0));
 
         Resolution domain = mapper.toDomain(entity);
 
         assertNotNull(domain);
         assertEquals(1L, domain.idResolucion());
         assertEquals("RES-2023-001", domain.numeroResolucion());
-        assertEquals(LocalDate.of(2023, 10, 1), domain.fechaEmision());
+        assertEquals(LocalDate.of(2023, Month.OCTOBER, 1), domain.fechaEmision());
         assertEquals("Asunto de prueba", domain.asunto());
         assertEquals(2L, domain.idTramite());
         assertEquals(3L, domain.idDocumentoAdjunto());
-        assertEquals(LocalDateTime.of(2023, 10, 1, 10, 0), domain.fechaRegistro());
+        assertEquals(LocalDateTime.of(2023, Month.OCTOBER, 1, 10, 0), domain.fechaRegistro());
     }
 
     @Test
@@ -51,11 +52,11 @@ class ResolutionMapperTest {
         Resolution domain = new Resolution(
                 1L,
                 "RES-2023-001",
-                LocalDate.of(2023, 10, 1),
+                LocalDate.of(2023, Month.OCTOBER, 1),
                 "Asunto de prueba",
                 2L,
                 3L,
-                LocalDateTime.of(2023, 10, 1, 10, 0)
+                LocalDateTime.of(2023, Month.OCTOBER, 1, 10, 0)
         );
 
         ResolutionEntity entity = mapper.toEntity(domain);
@@ -63,11 +64,11 @@ class ResolutionMapperTest {
         assertNotNull(entity);
         assertEquals(1L, entity.getIdResolucion());
         assertEquals("RES-2023-001", entity.getNumeroResolucion());
-        assertEquals(LocalDate.of(2023, 10, 1), entity.getFechaEmision());
+        assertEquals(LocalDate.of(2023, Month.OCTOBER, 1), entity.getFechaEmision());
         assertEquals("Asunto de prueba", entity.getAsunto());
         assertEquals(2L, entity.getIdTramite());
         assertEquals(3L, entity.getIdDocumentoAdjunto());
-        assertEquals(LocalDateTime.of(2023, 10, 1, 10, 0), entity.getFechaRegistro());
+        assertEquals(LocalDateTime.of(2023, Month.OCTOBER, 1, 10, 0), entity.getFechaRegistro());
     }
 
     @Test

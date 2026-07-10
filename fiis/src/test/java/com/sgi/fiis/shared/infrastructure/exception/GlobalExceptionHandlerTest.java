@@ -1,13 +1,16 @@
 package com.sgi.fiis.shared.infrastructure.exception;
 
 import com.sgi.fiis.shared.domain.exception.BusinessException;
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.tramites.domain.model.InvalidTransitionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -91,5 +94,50 @@ class GlobalExceptionHandlerTest {
         
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Error interno del servidor", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleIllegalArgument() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid argument");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleIllegalArgument(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Invalid argument", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleIllegalState() {
+        IllegalStateException ex = new IllegalStateException("Invalid state");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleIllegalState(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Invalid state", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleBusinessRule() {
+        BusinessRuleValidationException ex = new BusinessRuleValidationException("rule.violation");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleBusinessRule(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("rule.violation", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleInvalidTransition() {
+        InvalidTransitionException ex = new InvalidTransitionException("Invalid transition");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleInvalidTransition(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Invalid transition", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleAccessDenied() {
+        AccessDeniedException ex = new AccessDeniedException("Access denied");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleAccessDenied(ex);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("Acceso denegado", response.getBody().get("message"));
     }
 }

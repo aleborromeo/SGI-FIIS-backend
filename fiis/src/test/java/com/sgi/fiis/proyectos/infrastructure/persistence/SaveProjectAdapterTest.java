@@ -4,7 +4,7 @@ import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
@@ -69,13 +69,13 @@ class SaveProjectAdapterTest {
 
     @BeforeEach
     void setup() {
-        jpaRepository = Mockito.mock(ProjectJpaRepository.class);
-        lineRepository = Mockito.mock(ResearchLineJpaRepository.class);
-        groupRepository = Mockito.mock(ResearchGroupJpaRepository.class);
-        userRepository = Mockito.mock(SpringDataUserRepository.class);
-        callRepository = Mockito.mock(ResearchCallJpaRepository.class);
-        membershipRepository = Mockito.mock(GroupMembershipJpaRepository.class);
-        projectMemberRepository = Mockito.mock(ProjectMemberJpaRepository.class);
+        jpaRepository = mock(ProjectJpaRepository.class);
+        lineRepository = mock(ResearchLineJpaRepository.class);
+        groupRepository = mock(ResearchGroupJpaRepository.class);
+        userRepository = mock(SpringDataUserRepository.class);
+        callRepository = mock(ResearchCallJpaRepository.class);
+        membershipRepository = mock(GroupMembershipJpaRepository.class);
+        projectMemberRepository = mock(ProjectMemberJpaRepository.class);
         
         adapter = new SaveProjectAdapter(jpaRepository, lineRepository, groupRepository, userRepository, callRepository, membershipRepository, projectMemberRepository);
     }

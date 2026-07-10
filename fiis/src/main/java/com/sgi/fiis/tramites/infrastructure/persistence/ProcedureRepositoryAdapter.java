@@ -86,8 +86,8 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                         ? RoleEnum.valueOf(entity.getReviewerRole()) : null)
                 .observacionActual(null)
                 .idReferenciaProyecto(entity.getProjectReference() != null ? entity.getProjectReference().getId().longValue() : null)
-                .idReferenciaTesis(null)
-                .idReferenciaInforme(null)
+                .idReferenciaTesis(entity.getThesisReferenceId())
+                .idReferenciaInforme(entity.getReportReferenceId())
                 .fechaEnvio(entity.getSentAt())
                 .fechaActualizacion(entity.getUpdatedAt())
                 .movimientos(movimientos)
@@ -121,8 +121,11 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         if (tramite.getIdReferenciaProyecto() != null) {
             com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity pe = new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity();
             pe.setId(tramite.getIdReferenciaProyecto().intValue());
-            entity.setProjectReference(pe);
+                entity.setProjectReference(pe);
         }
+
+        entity.setThesisReferenceId(tramite.getIdReferenciaTesis());
+        entity.setReportReferenceId(tramite.getIdReferenciaInforme());
 
         entity.setSentAt(tramite.getFechaEnvio());
         entity.setUpdatedAt(tramite.getFechaActualizacion());
@@ -137,6 +140,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .estadoNuevo(ProcedureStatus.valueOf(entity.getNewState()))
                 .observacion(entity.getComment())
                 .fechaMovimiento(entity.getMovementAt())
+                .idDocumentoAdjunto(entity.getDocumentAttachmentId())
                 .build();
     }
 
@@ -157,6 +161,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         entity.setNewState(domain.getEstadoNuevo().name());
         entity.setComment(domain.getObservacion());
         entity.setMovementAt(domain.getFechaMovimiento());
+        entity.setDocumentAttachmentId(domain.getIdDocumentoAdjunto());
         return entity;
     }
 }

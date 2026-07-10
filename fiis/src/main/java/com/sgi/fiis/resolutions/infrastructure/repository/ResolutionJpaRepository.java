@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ResolutionJpaRepository extends JpaRepository<ResolutionEntity, Long> {
     boolean existsByNumeroResolucion(String numeroResolucion);
+    java.util.Optional<ResolutionEntity> findByIdDocumentoAdjunto(Long idDocumentoAdjunto);
 }

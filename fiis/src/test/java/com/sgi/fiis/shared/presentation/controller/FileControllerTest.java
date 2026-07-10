@@ -6,7 +6,7 @@ import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembers
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
@@ -36,16 +36,16 @@ class FileControllerTest {
 
     @BeforeEach
     void setup() throws IOException {
-        documentRepository = Mockito.mock(DocumentJpaRepository.class);
-        projectRepository = Mockito.mock(ProjectJpaRepository.class);
-        membershipRepository = Mockito.mock(GroupMembershipJpaRepository.class);
+        documentRepository = mock(DocumentJpaRepository.class);
+        projectRepository = mock(ProjectJpaRepository.class);
+        membershipRepository = mock(GroupMembershipJpaRepository.class);
         tempUploadDir = Files.createTempDirectory("test-uploads");
         fileController = new FileController(documentRepository, projectRepository, membershipRepository,
                 tempUploadDir.toString());
     }
 
     @Test
-    void shouldUploadFileSuccessfully() throws IOException {
+    void shouldUploadFileSuccessfully() {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf",
                 "dummy content".getBytes());
         CustomUserDetails userDetails = new CustomUserDetails(1L, "test@test.com", "pass", true,
@@ -76,7 +76,7 @@ class FileControllerTest {
     @Test
     void shouldThrowExceptionWhenFileIsTooLarge() {
         // Mocking size to be too large
-        MockMultipartFile file = Mockito.mock(MockMultipartFile.class);
+        MockMultipartFile file = mock(MockMultipartFile.class);
         when(file.isEmpty()).thenReturn(false);
         when(file.getSize()).thenReturn(15L * 1024 * 1024);
 

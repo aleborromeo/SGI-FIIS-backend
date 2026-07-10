@@ -6,7 +6,7 @@ import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLine
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -26,9 +26,9 @@ class SaveCallAdapterTest {
 
     @BeforeEach
     void setUp() {
-        jpaRepository = Mockito.mock(ResearchCallJpaRepository.class);
-        documentJpaRepository = Mockito.mock(DocumentJpaRepository.class);
-        lineJpaRepository = Mockito.mock(ResearchLineJpaRepository.class);
+        jpaRepository = mock(ResearchCallJpaRepository.class);
+        documentJpaRepository = mock(DocumentJpaRepository.class);
+        lineJpaRepository = mock(ResearchLineJpaRepository.class);
         adapter = new SaveCallAdapter(jpaRepository, documentJpaRepository, lineJpaRepository);
     }
 

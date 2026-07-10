@@ -28,6 +28,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LocalDocumentStorageAdapterTest {
 
+    private static final String TEST_PDF_NAME = "test.pdf";
+    private static final String APPLICATION_PDF_TYPE = "application/pdf";
+
     @Mock
     private JdbcTemplate jdbcTemplate;
 
@@ -48,7 +51,7 @@ class LocalDocumentStorageAdapterTest {
     }
 
     @Test
-    void saveDocument_shouldReturnGeneratedId_andExecuteLambda() throws SQLException {
+    void saveDocumentShouldReturnGeneratedIdAndExecuteLambda() throws SQLException {
         // Arrange
         when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS)))
                 .thenReturn(preparedStatement);
@@ -67,18 +70,18 @@ class LocalDocumentStorageAdapterTest {
         }).when(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
 
         // Act
-        Long result = adapter.saveDocument(new byte[]{1, 2}, "test.pdf", "application/pdf");
+        Long result = adapter.saveDocument(new byte[]{1, 2}, TEST_PDF_NAME, APPLICATION_PDF_TYPE);
 
         // Assert
         assertEquals(5L, result);
-        verify(preparedStatement).setString(1, "test.pdf");
+        verify(preparedStatement).setString(1, TEST_PDF_NAME);
         verify(preparedStatement).setString(3, "pdf");
         verify(preparedStatement).setLong(4, 2L);
         verify(preparedStatement).setLong(5, 1L);
     }
     
     @Test
-    void saveDocument_nullFileBytes_shouldHandleGracefully() throws SQLException {
+    void saveDocumentNullFileBytesShouldHandleGracefully() throws SQLException {
         // Arrange
         when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS)))
                 .thenReturn(preparedStatement);
@@ -95,7 +98,7 @@ class LocalDocumentStorageAdapterTest {
         }).when(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
 
         // Act
-        Long result = adapter.saveDocument(null, "test.pdf", "application/pdf");
+        Long result = adapter.saveDocument(null, TEST_PDF_NAME, APPLICATION_PDF_TYPE);
 
         // Assert
         assertEquals(10L, result);
@@ -103,7 +106,7 @@ class LocalDocumentStorageAdapterTest {
     }
 
     @Test
-    void saveDocument_whenFails_shouldThrowException() {
+    void saveDocumentWhenFailsShouldThrowException() {
         // Arrange
         doAnswer(invocation -> {
             // No generated keys added
@@ -115,42 +118,42 @@ class LocalDocumentStorageAdapterTest {
 
         // Act & Assert
         IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
-            adapter.saveDocument(new byte[]{1, 2}, "test.pdf", "application/pdf");
+            adapter.saveDocument(new byte[]{1, 2}, TEST_PDF_NAME, APPLICATION_PDF_TYPE);
         });
         
         assertEquals("Failed to save the attached document.", ex.getMessage());
     }
 
     @Test
-    void saveDocument_withNullFileName_shouldThrowIllegalArgumentException() {
+    void saveDocumentWithNullFileNameShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
-            adapter.saveDocument(new byte[]{1, 2}, null, "application/pdf");
+            adapter.saveDocument(new byte[]{1, 2}, null, APPLICATION_PDF_TYPE);
         });
     }
 
     @Test
-    void saveDocument_withEmptyFileName_shouldThrowIllegalArgumentException() {
+    void saveDocumentWithEmptyFileNameShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
-            adapter.saveDocument(new byte[]{1, 2}, "", "application/pdf");
+            adapter.saveDocument(new byte[]{1, 2}, "", APPLICATION_PDF_TYPE);
         });
     }
 
     @Test
-    void saveDocument_withPathTraversalFileName_shouldThrowIllegalArgumentException() {
+    void saveDocumentWithPathTraversalFileNameShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
-            adapter.saveDocument(new byte[]{1, 2}, "../escaped.pdf", "application/pdf");
+            adapter.saveDocument(new byte[]{1, 2}, "../escaped.pdf", APPLICATION_PDF_TYPE);
         });
     }
 
     @Test
-    void saveDocument_withPathTraversalFileNameContainsDoubleDot_shouldThrowIllegalArgumentException() {
+    void saveDocumentWithPathTraversalFileNameContainsDoubleDotShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
-            adapter.saveDocument(new byte[]{1, 2}, "some..path.pdf", "application/pdf");
+            adapter.saveDocument(new byte[]{1, 2}, "some..path.pdf", APPLICATION_PDF_TYPE);
         });
     }
 
     @Test
-    void constructor_whenCannotCreateDirectories_shouldThrowIllegalStateException() throws java.io.IOException {
+    void constructorWhenCannotCreateDirectoriesShouldThrowIllegalStateException() throws java.io.IOException {
         java.io.File tempFile = java.io.File.createTempFile("fiis-test-file", ".tmp");
         String tempPath = tempFile.getAbsolutePath();
         try {
@@ -161,7 +164,7 @@ class LocalDocumentStorageAdapterTest {
     }
 
     @Test
-    void saveDocument_withActiveSecurityContext_shouldUseUserIdFromContext() throws SQLException {
+    void saveDocumentWithActiveSecurityContextShouldUseUserIdFromContext() throws SQLException {
         // Arrange
         org.springframework.security.core.Authentication auth = mock(org.springframework.security.core.Authentication.class);
         com.sgi.fiis.auth.infrastructure.security.CustomUserDetails userDetails = mock(com.sgi.fiis.auth.infrastructure.security.CustomUserDetails.class);
@@ -188,7 +191,7 @@ class LocalDocumentStorageAdapterTest {
             }).when(jdbcTemplate).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
 
             // Act
-            Long result = adapter.saveDocument(new byte[]{1, 2}, "test.pdf", "application/pdf");
+            Long result = adapter.saveDocument(new byte[]{1, 2}, TEST_PDF_NAME, APPLICATION_PDF_TYPE);
 
             // Assert
             assertEquals(45L, result);

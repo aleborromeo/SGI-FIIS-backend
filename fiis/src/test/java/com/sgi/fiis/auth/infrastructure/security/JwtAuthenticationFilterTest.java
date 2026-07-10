@@ -15,6 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,10 +79,12 @@ class JwtAuthenticationFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 
-    @Test
-    @DisplayName("Should not authenticate when no Authorization header is present")
-    void testFilterWithoutToken() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn(null);
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"Bearer ", "Basic valid-jwt-token"})
+    @DisplayName("Should not authenticate when header is invalid or missing")
+    void testFilterWithInvalidHeaders(String headerValue) throws Exception {
+        when(request.getHeader("Authorization")).thenReturn(headerValue);
 
         filter.doFilter(request, response, filterChain);
 
@@ -102,31 +108,5 @@ class JwtAuthenticationFilterTest {
         assertNull(authentication);
         verify(filterChain).doFilter(request, response);
         verifyNoInteractions(userDetailsService);
-    }
-
-    @Test
-    @DisplayName("Should not authenticate with an empty Bearer token")
-    void testFilterWithEmptyToken() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Bearer ");
-
-        filter.doFilter(request, response, filterChain);
-
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        assertNull(authentication);
-        verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(tokenProvider, userDetailsService);
-    }
-
-    @Test
-    @DisplayName("Should not authenticate with a malformed header")
-    void testFilterWithMalformedHeader() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Basic valid-jwt-token");
-
-        filter.doFilter(request, response, filterChain);
-
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        assertNull(authentication);
-        verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(tokenProvider, userDetailsService);
     }
 }
