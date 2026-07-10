@@ -11,7 +11,6 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,9 +20,9 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*; // Add verify, times
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,12 +41,12 @@ class ResearchCallControllerTest {
 
     @BeforeEach
     void setUp() {
-        createCallUseCase = Mockito.mock(CreateCallUseCase.class);
-        getCallUseCase = Mockito.mock(GetCallUseCase.class);
-        updateCallStatusUseCase = Mockito.mock(UpdateCallStatusUseCase.class);
+        createCallUseCase = mock(CreateCallUseCase.class);
+        getCallUseCase = mock(GetCallUseCase.class);
+        updateCallStatusUseCase = mock(UpdateCallStatusUseCase.class);
         ResearchCallController controller = new ResearchCallController(createCallUseCase, getCallUseCase, updateCallStatusUseCase);
-        MessageSource messageSource = Mockito.mock(MessageSource.class);
-        Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
+        MessageSource messageSource = mock(MessageSource.class);
+        lenient().when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .build();

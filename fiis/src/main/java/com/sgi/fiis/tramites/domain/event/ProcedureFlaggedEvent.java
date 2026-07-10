@@ -11,12 +11,28 @@ import java.time.LocalDateTime;
 @Builder
 public class ProcedureFlaggedEvent {
 
-    private final Long idTramite;
-    private final String codigoTramite;
-    private final ProcedureType tipoTramite;
-    private final Long idSolicitante;
-    private final Long idObservador;
-    private final RoleEnum rolObservador;
-    private final String textoObservacion;
-    private final LocalDateTime fechaObservacion;
+    private final Long procedureId;
+    private final String code;
+    private final ProcedureType procedureType;
+    private final Long applicantId;
+    private final Long observerId;
+    private final RoleEnum observerRole;
+    private final String observationText;
+    private final LocalDateTime observationDate;
+
+    public Long getIdTramite() {
+        return procedureId;
+    }
+
+    public Long getIdObservador() {
+        return observerId;
+    }
+
+    public String getTextoObservacion() {
+        return observationText;
+    }
+
+    public LocalDateTime getFechaObservacion() {
+        return observationDate;
+    }
 }

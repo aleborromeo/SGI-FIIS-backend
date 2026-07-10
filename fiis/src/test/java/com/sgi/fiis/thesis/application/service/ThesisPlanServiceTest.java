@@ -132,6 +132,7 @@ class ThesisPlanServiceTest {
 
         when(planRepository.findById(12)).thenReturn(Optional.of(existingPlan));
         when(planRepository.save(any(ThesisPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
 
         ThesisPlanResponse response = service.aprobarPorCoordinador(12);
 
@@ -153,6 +154,7 @@ class ThesisPlanServiceTest {
         );
         when(planRepository.findById(12)).thenReturn(Optional.of(existingPlan));
         when(planRepository.save(any(ThesisPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
 
         ObserveThesisPlanCommand cmd = new ObserveThesisPlanCommand("Falta bibliografía", 100);
         ThesisPlanResponse response = service.observarPorCoordinador(12, cmd);
@@ -175,6 +177,7 @@ class ThesisPlanServiceTest {
         );
         when(planRepository.findById(12)).thenReturn(Optional.of(existingPlan));
         when(planRepository.save(any(ThesisPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
 
         ThesisPlanResponse response = service.rechazarPorCoordinador(12, "Fuera de ámbito");
 
@@ -449,6 +452,7 @@ class ThesisPlanServiceTest {
         mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
         ThesisPlan plan = new ThesisPlan(12, "AI", "Abstract", 101L, 1, 2, 99, ThesisPlanStatus.APROBADO, null, null);
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
         assertThrows(BusinessRuleViolationException.class, () -> service.aprobarPorCoordinador(12));
     }
 

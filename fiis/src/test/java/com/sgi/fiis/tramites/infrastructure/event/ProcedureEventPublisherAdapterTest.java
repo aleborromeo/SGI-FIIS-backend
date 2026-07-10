@@ -23,14 +23,14 @@ class ProcedureEventPublisherAdapterTest {
     @DisplayName("publishProcedureApproved: logs event without throwing")
     void publishProcedureApproved_completesWithoutException() {
         ProcedureApprovedEvent event = ProcedureApprovedEvent.builder()
-                .idTramite(1L)
-                .codigoTramite("TRM-2026-001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(10L)
-                .estadoResultante(ProcedureStatus.PENDIENTE_DIRECCION)
-                .idAprobador(20L)
-                .rolAprobador(RoleEnum.COORDINADOR_GRUPO)
-                .fechaAprobacion(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0))
+                .procedureId(1L)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(10L)
+                .resultingStatus(ProcedureStatus.PENDIENTE_DIRECCION)
+                .approverId(20L)
+                .approverRole(RoleEnum.COORDINADOR_GRUPO)
+                .approvalDate(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0))
                 .build();
 
         assertDoesNotThrow(() -> adapter.publishProcedureApproved(event));
@@ -40,14 +40,14 @@ class ProcedureEventPublisherAdapterTest {
     @DisplayName("publishProcedureFlagged: logs event without throwing")
     void publishProcedureFlagged_completesWithoutException() {
         ProcedureFlaggedEvent event = ProcedureFlaggedEvent.builder()
-                .idTramite(2L)
-                .codigoTramite("TRM-2026-002")
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idSolicitante(10L)
-                .idObservador(20L)
-                .rolObservador(RoleEnum.DIRECTOR_INVESTIGACION)
-                .textoObservacion("Falta bibliografía")
-                .fechaObservacion(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0))
+                .procedureId(2L)
+                .code("TRM-2026-002")
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(10L)
+                .observerId(20L)
+                .observerRole(RoleEnum.DIRECTOR_INVESTIGACION)
+                .observationText("Falta bibliografía")
+                .observationDate(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0))
                 .build();
 
         assertDoesNotThrow(() -> adapter.publishProcedureFlagged(event));
@@ -57,11 +57,11 @@ class ProcedureEventPublisherAdapterTest {
     @DisplayName("publishProcedureFinalized: logs event without throwing")
     void publishProcedureFinalized_completesWithoutException() {
         ProcedureFinalizedEvent event = ProcedureFinalizedEvent.builder()
-                .idTramite(3L)
-                .codigoTramite("TRM-2026-003")
-                .tipoTramite(ProcedureType.INFORME_AVANCE)
-                .idSolicitante(10L)
-                .fechaFinalizacion(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0))
+                .procedureId(3L)
+                .code("TRM-2026-003")
+                .procedureType(ProcedureType.REPORT_AVANCE)
+                .applicantId(10L)
+                .finalizationDate(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0))
                 .build();
 
         assertDoesNotThrow(() -> adapter.publishProcedureFinalized(event));

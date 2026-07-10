@@ -45,7 +45,7 @@ public class ProcedureController {
     public ResponseEntity<ProcedureResponseDto> create(
             @Valid @RequestBody ProcedureRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        dto.setIdSolicitante(userDetails.getId());
+        dto.setApplicantId(userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(createProcedureUseCase.execute(dto));
     }

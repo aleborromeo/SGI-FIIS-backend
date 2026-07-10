@@ -9,7 +9,6 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,15 +20,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 
-import static org.mockito.ArgumentMatchers.anyString;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.argThat;
-
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,10 +43,10 @@ class ProjectControllerTest {
 
     @BeforeEach
     void setup() {
-        createProjectUseCase = Mockito.mock(CreateProjectUseCase.class);
+        createProjectUseCase = mock(CreateProjectUseCase.class);
         ProjectController projectController = new ProjectController(createProjectUseCase);
-        MessageSource messageSource = Mockito.mock(MessageSource.class);
-        Mockito.lenient().when(messageSource.getMessage(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenAnswer(inv -> inv.getArgument(2));
+        MessageSource messageSource = mock(MessageSource.class);
+        lenient().when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(projectController)
                 .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {

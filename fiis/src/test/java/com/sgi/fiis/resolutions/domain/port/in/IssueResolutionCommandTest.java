@@ -28,7 +28,7 @@ class IssueResolutionCommandTest {
         assertEquals(command1, command1);
         assertEquals(command1, command2);
         assertNotEquals(command1, command3);
-        assertNotEquals(command1, null);
+        assertNotEquals(null, command1);
         assertNotEquals(command1, new Object());
         
         assertEquals(command1.hashCode(), command2.hashCode());

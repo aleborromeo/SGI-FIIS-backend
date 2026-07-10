@@ -32,6 +32,7 @@ public class ResearchCall {
      * @param researchLineIds  list of research line identifiers
      * @throws BusinessRuleValidationException if endDate is before startDate
      */
+    @SuppressWarnings("java:S107")
     public ResearchCall(Integer id, String title, String description, LocalDate startDate,
                         LocalDate endDate, CallStatus status, Integer documentId,
                         List<Integer> researchLineIds) {

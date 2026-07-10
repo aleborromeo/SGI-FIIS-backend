@@ -4,4 +4,5 @@ public interface ResearchGroupValidationPort {
     boolean existeGrupoActivo(Integer idGrupo);
     boolean existeLineaActiva(Integer idLinea);
     boolean lineaPerteneceAlGrupo(Integer idGrupo, Integer idLinea);
+    boolean esCoordinadorDelGrupo(Long idUsuario, Integer idGrupo);
 }

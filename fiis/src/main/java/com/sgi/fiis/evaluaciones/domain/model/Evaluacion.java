@@ -19,6 +19,7 @@ public class Evaluacion {
     private LocalDateTime fechaAsignacion;
     private LocalDateTime fechaEvaluacion;
 
+    @SuppressWarnings("java:S107")
     private Evaluacion(
             Long idEvaluacion,
             Long idProyecto,
@@ -71,6 +72,7 @@ public class Evaluacion {
         );
     }
 
+    @SuppressWarnings("java:S107")
     public static Evaluacion reconstruir(
             Long idEvaluacion,
             Long idProyecto,

@@ -45,8 +45,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should audit with authenticated user and direct IP")
     void auditWithAuthenticatedUserAndDirectIp() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("CREATE_USER");
+        Auditable auditable = createAuditable("CREATE_USER");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -56,8 +55,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("192.168.1.10");
         when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -75,8 +73,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should use X-Forwarded-For when header is present")
     void auditWithXForwardedForHeader() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("UPDATE_USER");
+        Auditable auditable = createAuditable("UPDATE_USER");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -86,8 +83,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn("203.0.113.5, 10.0.0.1");
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -99,16 +95,14 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should default to SYSTEM when no authentication is present")
     void auditWithNoAuthentication() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("DELETE_USER");
+        Auditable auditable = createAuditable("DELETE_USER");
 
         SecurityContextHolder.getContext().setAuthentication(null);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -120,8 +114,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should default to SYSTEM when authentication is not authenticated")
     void auditWithUnauthenticatedAuthentication() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("VIEW");
+        Auditable auditable = createAuditable("VIEW");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(false);
@@ -130,8 +123,7 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
@@ -143,8 +135,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should default to 0.0.0.0 when no request attributes")
     void auditWithNoRequestAttributes() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("LOGIN");
+        Auditable auditable = createAuditable("LOGIN");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -162,8 +153,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should fall back to remoteAddr when X-Forwarded-For is empty")
     void auditWithEmptyXForwardedForHeader() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("CREATE");
+        Auditable auditable = createAuditable("CREATE");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -173,13 +163,26 @@ class AuditingAspectTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("10.0.0.1");
         when(request.getHeader("X-Forwarded-For")).thenReturn("");
-        ServletRequestAttributes attrs = mock(ServletRequestAttributes.class);
-        when(attrs.getRequest()).thenReturn(request);
+        ServletRequestAttributes attrs = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attrs);
 
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), argsCaptor.capture());
         assertEquals("10.0.0.1", argsCaptor.getValue()[3]);
+    }
+
+    private Auditable createAuditable(String action) {
+        return new Auditable() {
+            @Override
+            public String action() {
+                return action;
+            }
+
+            @Override
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return Auditable.class;
+            }
+        };
     }
 }

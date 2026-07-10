@@ -38,6 +38,9 @@ public class AuthController {
     private final UserMapper userMapper;
     private final MessageSource messageSource;
 
+    private static final String KEY_MESSAGE = "message";
+
+    @SuppressWarnings("java:S107")
     public AuthController(LoginUseCase loginUseCase,
             RegisterUseCase registerUseCase,
             VerifyRegistrationUseCase verifyRegistrationUseCase,
@@ -69,7 +72,7 @@ public class AuthController {
         registerUseCase.execute(dto);
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("auth.register.success", null, locale);
-        return ResponseEntity.ok(Map.of("message", message));
+        return ResponseEntity.ok(Map.of(KEY_MESSAGE, message));
     }
 
     /** Auto-registro: Reenviar código */
@@ -78,7 +81,7 @@ public class AuthController {
         resendCodeUseCase.execute(dto);
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("auth.resend-code.success", null, locale);
-        return ResponseEntity.ok(Map.of("message", message));
+        return ResponseEntity.ok(Map.of(KEY_MESSAGE, message));
     }
 
     /** Auto-registro: Paso 2 (verifica código y guarda usuario) */
@@ -97,7 +100,7 @@ public class AuthController {
         changePasswordUseCase.execute(email, dto.getCurrentPassword(), dto.getNewPassword());
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("auth.change-password.success", null, locale);
-        return ResponseEntity.ok(Map.of("message", message));
+        return ResponseEntity.ok(Map.of(KEY_MESSAGE, message));
     }
 
     /** RF-03: Obtener perfil del usuario autenticado */

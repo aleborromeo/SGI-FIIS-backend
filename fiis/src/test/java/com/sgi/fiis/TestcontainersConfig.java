@@ -14,6 +14,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 public abstract class TestcontainersConfig {
 
+    @SuppressWarnings("resource")
     private static final PostgreSQLContainer<?> postgres;
 
     static {
@@ -25,6 +26,8 @@ public abstract class TestcontainersConfig {
                     .withUsername("postgres")
                     .withPassword("test");
             container.start();
+            // Ensure container is closed when JVM exits
+            Runtime.getRuntime().addShutdownHook(new Thread(container::close));
         } catch (Exception e) {
             // Docker no disponible (local) - usar docker-compose PostgreSQL
             System.out.println("[Testcontainers] Docker no disponible. Usando docker-compose PostgreSQL en localhost:5433");

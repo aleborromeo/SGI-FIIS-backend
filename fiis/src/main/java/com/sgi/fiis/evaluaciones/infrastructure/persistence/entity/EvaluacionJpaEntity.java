@@ -47,6 +47,7 @@ public class EvaluacionJpaEntity {
     private LocalDateTime fechaEvaluacion;
 
     public EvaluacionJpaEntity() {
+        // Required by JPA specification
     }
 
     public Long getIdEvaluacion() {

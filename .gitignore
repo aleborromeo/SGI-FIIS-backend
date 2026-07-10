@@ -1,4 +1,7 @@
 HELP.md
+docs/
+
+
 desarrollo/
 
 target/
@@ -57,3 +60,5 @@ Thumbs.db
 
 ### Claude Code ###
 CLAUDE.md
+
+

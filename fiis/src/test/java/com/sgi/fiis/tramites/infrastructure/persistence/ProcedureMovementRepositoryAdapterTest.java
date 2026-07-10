@@ -2,6 +2,8 @@ package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,38 +23,45 @@ import static org.mockito.Mockito.*;
 class ProcedureMovementRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureMovementRepository repository;
+    @Mock private SpringDataUserRepository userRepository;
     @InjectMocks private ProcedureMovementRepositoryAdapter adapter;
 
     private ProcedureMovementEntity buildMovementEntity() {
+        UserEntity actionUser = new UserEntity();
+        actionUser.setId(20L);
+
+        ProcedureEntity procedure = new ProcedureEntity();
+        procedure.setId(1);
+
         ProcedureMovementEntity e = new ProcedureMovementEntity();
-        e.setIdTramite(1L);
-        e.setIdUsuarioAccion(20L);
-        e.setAccion("APROBADO_POR_COORDINADOR");
-        e.setEstadoAnterior("PENDIENTE_COORDINADOR");
-        e.setEstadoNuevo("PENDIENTE_DIRECCION");
-        e.setFechaMovimiento(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0));
+        e.setProcedure(procedure);
+        e.setActionUser(actionUser);
+        e.setAction("APROBADO_POR_COORDINADOR");
+        e.setPreviousState("PENDIENTE_COORDINADOR");
+        e.setNewState("PENDIENTE_DIRECCION");
+        e.setMovementAt(LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0));
         return e;
     }
 
     @Test
     @DisplayName("findByProcedureId: maps entity list to domain model")
     void findByProcedureId_returnsMappedList() {
-        when(repository.findByProcedureIdOrderByDateAsc(1L)).thenReturn(List.of(buildMovementEntity()));
+        when(repository.findByProcedure_IdOrderByMovementAtAsc(1)).thenReturn(List.of(buildMovementEntity()));
 
         List<ProcedureMovement> result = adapter.findByProcedureId(1L);
 
         assertEquals(1, result.size());
         ProcedureMovement mov = result.get(0);
-        assertEquals("APROBADO_POR_COORDINADOR", mov.getAccion());
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, mov.getEstadoAnterior());
-        assertEquals(ProcedureStatus.PENDIENTE_DIRECCION, mov.getEstadoNuevo());
-        assertEquals(20L, mov.getIdUsuarioAccion());
+        assertEquals("APROBADO_POR_COORDINADOR", mov.getAction());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, mov.getPreviousStatus());
+        assertEquals(ProcedureStatus.PENDIENTE_DIRECCION, mov.getNewStatus());
+        assertEquals(20L, mov.getActionUserId());
     }
 
     @Test
     @DisplayName("findByProcedureId: returns empty list when no movements exist")
     void findByProcedureId_emptyList() {
-        when(repository.findByProcedureIdOrderByDateAsc(99L)).thenReturn(List.of());
+        when(repository.findByProcedure_IdOrderByMovementAtAsc(99)).thenReturn(List.of());
 
         assertTrue(adapter.findByProcedureId(99L).isEmpty());
     }

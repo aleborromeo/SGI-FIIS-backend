@@ -15,8 +15,8 @@ class GroupMembershipEntityTest {
     private ResearchGroupEntity getTestGroup() {
         ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(1);
-        group.setGroupCode("GI-001");
-        group.setGroupName("Grupo de Inteligencia Artificial");
+        group.setCode("GI-001");
+        group.setName("Grupo de Inteligencia Artificial");
         return group;
     }
 

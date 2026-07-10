@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -25,8 +26,7 @@ class OpenApiConfigTest {
 
     @Test
     void printMailConfig_shouldExecuteWithoutErrors() {
-        openApiConfig.printMailConfig();
-        // Simply expecting no exception thrown
+        assertDoesNotThrow(() -> openApiConfig.printMailConfig());
     }
 
     @Test

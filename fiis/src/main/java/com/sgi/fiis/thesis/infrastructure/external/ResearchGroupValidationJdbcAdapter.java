@@ -20,4 +20,8 @@ public class ResearchGroupValidationJdbcAdapter implements ResearchGroupValidati
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM lineas_por_grupo WHERE id_grupo = ? AND id_linea = ?", Integer.class, idGrupo, idLinea);
         return count != null && count > 0;
     }
+    public boolean esCoordinadorDelGrupo(Long idUsuario, Integer idGrupo) {
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM membresias_grupo WHERE id_usuario = ? AND id_grupo = ? AND es_activo = TRUE", Integer.class, idUsuario, idGrupo);
+        return count != null && count > 0;
+    }
 }

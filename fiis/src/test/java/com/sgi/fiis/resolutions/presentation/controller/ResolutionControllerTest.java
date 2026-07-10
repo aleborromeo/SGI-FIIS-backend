@@ -1,13 +1,11 @@
 package com.sgi.fiis.resolutions.presentation.controller;
 
-import com.sgi.fiis.TestcontainersConfig;
 import com.sgi.fiis.resolutions.domain.model.Resolution;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionCommand;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
@@ -26,9 +24,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class ResolutionControllerTest extends TestcontainersConfig {
+@ExtendWith(MockitoExtension.class)
+class ResolutionControllerTest {
 
     private MockMvc mockMvc;
 
@@ -38,13 +35,13 @@ class ResolutionControllerTest extends TestcontainersConfig {
     @Mock
     private MessageSource messageSource;
 
-    @InjectMocks
     private ResolutionController resolutionController;
 
     private Resolution sampleResolution;
 
     @BeforeEach
     void setUp() {
+        resolutionController = new ResolutionController(issueResolutionUseCase, messageSource);
         mockMvc = MockMvcBuilders.standaloneSetup(resolutionController).build();
 
         sampleResolution = new Resolution(

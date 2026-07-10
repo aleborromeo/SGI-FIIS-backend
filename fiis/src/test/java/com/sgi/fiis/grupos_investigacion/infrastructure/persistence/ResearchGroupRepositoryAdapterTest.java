@@ -1,6 +1,8 @@
 package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,21 +24,29 @@ import static org.mockito.Mockito.*;
 @DisplayName("ResearchGroupRepositoryAdapter Unit Tests")
 class ResearchGroupRepositoryAdapterTest {
 
-    @Mock
-    private SpringDataResearchGroupRepository jpaRepository;
-
-    @Mock
-    private JdbcTemplate jdbcTemplate;
-
-    @InjectMocks
-    private ResearchGroupRepositoryAdapter adapter;
+    @Mock private SpringDataResearchGroupRepository jpaRepository;
+    @Mock private JdbcTemplate jdbcTemplate;
+    @Mock private SpringDataUserRepository userRepository;
+    @InjectMocks private ResearchGroupRepositoryAdapter adapter;
 
     private ResearchGroupEntity getTestGroupEntity() {
+        UserEntity coordinator = new UserEntity();
+        coordinator.setId(10L);
+
         ResearchGroupEntity entity = new ResearchGroupEntity();
         entity.setId(1);
-        entity.setGroupCode("GI-001");
-        entity.setGroupName("Grupo de Inteligencia Artificial");
-        entity.setCurrentCoordinatorId(10);
+        entity.setCode("GI-001");
+        entity.setName("Grupo de Inteligencia Artificial");
+        entity.setCurrentCoordinator(coordinator);
+        entity.setActive(true);
+        return entity;
+    }
+
+    private ResearchGroupEntity getTestGroupEntityWithoutCoordinator() {
+        ResearchGroupEntity entity = new ResearchGroupEntity();
+        entity.setId(1);
+        entity.setCode("GI-001");
+        entity.setName("Grupo de Inteligencia Artificial");
         entity.setActive(true);
         return entity;
     }
@@ -58,9 +68,9 @@ class ResearchGroupRepositoryAdapterTest {
         ResearchGroup domain = getTestGroup();
         ResearchGroupEntity entity = getTestGroupEntity();
 
+        when(userRepository.getReferenceById(10L)).thenReturn(entity.getCurrentCoordinator());
         when(jpaRepository.save(any(ResearchGroupEntity.class))).thenReturn(entity);
         
-        // Mock enrichWithCoordinator behavior
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
             RowMapper<ResearchGroup> mapper = invocation.getArgument(1);
             ResultSet rs = mock(ResultSet.class);
@@ -90,8 +100,7 @@ class ResearchGroupRepositoryAdapterTest {
                 .active(true)
                 .build();
 
-        ResearchGroupEntity entity = getTestGroupEntity();
-        entity.setCurrentCoordinatorId(null);
+        ResearchGroupEntity entity = getTestGroupEntityWithoutCoordinator();
 
         when(jpaRepository.save(any(ResearchGroupEntity.class))).thenReturn(entity);
 
@@ -171,7 +180,7 @@ class ResearchGroupRepositoryAdapterTest {
     @Test
     @DisplayName("Should check if group exists by code")
     void testExistsByCode() {
-        when(jpaRepository.existsByGroupCode("GI-001")).thenReturn(true);
+        when(jpaRepository.existsByCode("GI-001")).thenReturn(true);
 
         assertTrue(adapter.existsByCode("GI-001"));
     }

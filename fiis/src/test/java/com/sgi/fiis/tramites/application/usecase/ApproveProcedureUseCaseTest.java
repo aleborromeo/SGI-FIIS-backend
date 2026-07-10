@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 class ApproveProcedureUseCaseTest {
 
     @Mock
-    private ProcedureRepositoryPort tramiteRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
 
     @Mock
     private ProcedureEventPublisherPort eventPublisherPort;
@@ -37,55 +37,55 @@ class ApproveProcedureUseCaseTest {
     private Procedure buildProcedure(ProcedureStatus status, RoleEnum rolRevisor) {
         return Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-000001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(2L)
-                .idGrupo(10L)
-                .estadoActual(status)
-                .rolRevisorActual(rolRevisor)
-                .idReferenciaProyecto(100L)
-                .fechaEnvio(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .code("TRM-2026-000001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(2L)
+                .groupId(10L)
+                .currentStatus(status)
+                .currentReviewerRole(rolRevisor)
+                .projectReferenceId(100L)
+                .sentAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
     @Test
     void execute_coordinadorAprueba_retornaPendienteDireccion() {
         Procedure tramite = buildProcedure(ProcedureStatus.PENDIENTE_COORDINADOR, RoleEnum.COORDINADOR_GRUPO);
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
-        when(tramiteRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        when(procedureRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ProcedureResponseDto result = approveProcedureUseCase.execute(1L, RoleEnum.COORDINADOR_GRUPO, 10L);
 
-        assertEquals(ProcedureStatus.PENDIENTE_DIRECCION, result.getEstadoActual());
+        assertEquals(ProcedureStatus.PENDIENTE_DIRECCION, result.getCurrentStatus());
         verify(eventPublisherPort).publishProcedureApproved(any());
     }
 
     @Test
     void execute_directorAprueba_retornaPendienteDecanato() {
         Procedure tramite = buildProcedure(ProcedureStatus.PENDIENTE_DIRECCION, RoleEnum.DIRECTOR_INVESTIGACION);
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
-        when(tramiteRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        when(procedureRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ProcedureResponseDto result = approveProcedureUseCase.execute(1L, RoleEnum.DIRECTOR_INVESTIGACION, 20L);
 
-        assertEquals(ProcedureStatus.PENDIENTE_DECANATO, result.getEstadoActual());
+        assertEquals(ProcedureStatus.PENDIENTE_DECANATO, result.getCurrentStatus());
         verify(eventPublisherPort).publishProcedureApproved(any());
     }
 
     @Test
     void execute_rolInvalido_lanzaBusinessException() {
         Procedure tramite = buildProcedure(ProcedureStatus.PENDIENTE_COORDINADOR, RoleEnum.COORDINADOR_GRUPO);
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
 
         assertThrows(BusinessException.class,
                 () -> approveProcedureUseCase.execute(1L, RoleEnum.EVALUADOR, 99L));
-        verify(tramiteRepositoryPort, never()).save(any());
+        verify(procedureRepositoryPort, never()).save(any());
     }
 
     @Test
     void execute_tramiteNoEncontrado_lanzaResourceNotFoundException() {
-        when(tramiteRepositoryPort.findById(999L)).thenReturn(Optional.empty());
+        when(procedureRepositoryPort.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> approveProcedureUseCase.execute(999L, RoleEnum.COORDINADOR_GRUPO, 10L));

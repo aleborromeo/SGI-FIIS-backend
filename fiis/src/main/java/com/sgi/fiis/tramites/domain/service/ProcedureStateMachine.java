@@ -57,11 +57,11 @@ public class ProcedureStateMachine {
     }
 
     public void remediateByApplicant(Procedure tramite, Long idSolicitante, String detalleSubsanacion) {
-        if (!tramite.getIdSolicitante().equals(idSolicitante)) {
+        if (!tramite.getApplicantId().equals(idSolicitante)) {
             throw new InvalidTransitionException(String.format(
                     "Solo el solicitante original [id=%d] puede subsanar el trámite. " +
                     "Usuario que intenta subsanar: [id=%d]",
-                    tramite.getIdSolicitante(), idSolicitante
+                    tramite.getApplicantId(), idSolicitante
             ));
         }
         // OBSERVADO → SUBSANADO (acción del solicitante)
@@ -157,10 +157,10 @@ public class ProcedureStateMachine {
     }
 
     private void validateReviewerRole(Procedure tramite, RoleEnum rolEsperado) {
-        if (rolEsperado != tramite.getRolRevisorActual()) {
+        if (rolEsperado != tramite.getCurrentReviewerRole()) {
             throw new InvalidTransitionException(String.format(
                     "Acción no autorizada: se requiere rol [%s] pero el revisor actual del trámite es [%s]",
-                    rolEsperado, tramite.getRolRevisorActual()
+                    rolEsperado, tramite.getCurrentReviewerRole()
             ));
         }
     }

@@ -23,6 +23,8 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
     /** Nombre de columna reutilizado en múltiples RowMappers. */
     private static final String COL_NOMBRE_GRUPO = "nombre_grupo";
 
+    private static final String SQL_LIMIT_OFFSET = " LIMIT ? OFFSET ?";
+
     public ReporteRepositoryImpl(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
@@ -59,7 +61,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = buildProyectosWhere(f);
         String sql = SQL_PROYECTOS_BASE + qb.where +
                      " ORDER BY p.fecha_creacion DESC" +
-                     " LIMIT ? OFFSET ?";
+                     SQL_LIMIT_OFFSET;
         qb.params.add(f.getSize());
         qb.params.add(f.getOffset());
         return jdbc.query(sql, MAPPER_PROYECTO, qb.params.toArray());
@@ -134,7 +136,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = buildTramitesWhere(f);
         String sql = SQL_TRAMITES_BASE + qb.where +
                      " ORDER BY t.fecha_envio DESC" +
-                     " LIMIT ? OFFSET ?";
+                     SQL_LIMIT_OFFSET;
         qb.params.add(f.getSize());
         qb.params.add(f.getOffset());
         return jdbc.query(sql, MAPPER_TRAMITE, qb.params.toArray());
@@ -203,7 +205,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = buildResolucionesWhere(f);
         String sql = SQL_RESOLUCIONES_BASE + qb.where +
                      " ORDER BY r.fecha_emision DESC" +
-                     " LIMIT ? OFFSET ?";
+                     SQL_LIMIT_OFFSET;
         qb.params.add(f.getSize());
         qb.params.add(f.getOffset());
         return jdbc.query(sql, MAPPER_RESOLUCION, qb.params.toArray());
@@ -270,7 +272,7 @@ public class ReporteRepositoryImpl implements ReporteRepositoryPort {
         QueryBuilder qb = buildInformesWhere(f);
         String sql = SQL_INFORMES_BASE + qb.where +
                      " ORDER BY ia.fecha_registro DESC" +
-                     " LIMIT ? OFFSET ?";
+                     SQL_LIMIT_OFFSET;
         qb.params.add(f.getSize());
         qb.params.add(f.getOffset());
         return jdbc.query(sql, MAPPER_INFORME, qb.params.toArray());

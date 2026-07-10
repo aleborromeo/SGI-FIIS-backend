@@ -36,6 +36,7 @@ public class ResearchLineController {
     private final ResearchLineMapper mapper;
     private final ResearchGroupMapper groupMapper;
 
+    @SuppressWarnings("java:S107")
     public ResearchLineController(RegisterResearchLineUseCase registerResearchLineUseCase,
                                   ListResearchLinesUseCase listResearchLinesUseCase,
                                   GetResearchLineUseCase getResearchLineUseCase,

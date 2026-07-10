@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class RegisterResolutionUseCaseTest {
 
     @Mock
-    private ProcedureRepositoryPort tramiteRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
 
     @Mock
     private ProcedureEventPublisherPort eventPublisherPort;
@@ -36,33 +36,33 @@ class RegisterResolutionUseCaseTest {
     private Procedure buildPendienteDecanatoProcedure() {
         return Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-000001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(2L)
-                .idGrupo(10L)
-                .estadoActual(ProcedureStatus.PENDIENTE_DECANATO)
-                .rolRevisorActual(RoleEnum.DECANO)
-                .idReferenciaProyecto(100L)
-                .fechaEnvio(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .code("TRM-2026-000001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(2L)
+                .groupId(10L)
+                .currentStatus(ProcedureStatus.PENDIENTE_DECANATO)
+                .currentReviewerRole(RoleEnum.DECANO)
+                .projectReferenceId(100L)
+                .sentAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
     @Test
     void execute_decanoRegistraResolucion_retornaFinalizado() {
         Procedure tramite = buildPendienteDecanatoProcedure();
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
-        when(tramiteRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        when(procedureRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ProcedureResponseDto result = registerResolutionUseCase.execute(1L, 30L);
 
-        assertEquals(ProcedureStatus.FINALIZADO, result.getEstadoActual());
+        assertEquals(ProcedureStatus.FINALIZADO, result.getCurrentStatus());
         verify(eventPublisherPort).publishProcedureFinalized(any());
     }
 
     @Test
     void execute_tramiteNoEncontrado_lanzaResourceNotFoundException() {
-        when(tramiteRepositoryPort.findById(999L)).thenReturn(Optional.empty());
+        when(procedureRepositoryPort.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> registerResolutionUseCase.execute(999L, 30L));

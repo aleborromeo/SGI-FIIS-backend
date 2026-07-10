@@ -6,7 +6,6 @@ import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,7 +29,8 @@ class GlobalExceptionHandlerTest {
     @BeforeEach
     void setup() {
         messageSource = mock(MessageSource.class);
-        when(messageSource.getMessage(any(String.class), any(), any(String.class), any())).thenAnswer(invocation -> invocation.getArgument(2));
+        when(messageSource.getMessage(any(String.class), any(), any(String.class), any()))
+                .thenAnswer(invocation -> invocation.getArgument(2));
         exceptionHandler = new GlobalExceptionHandler(messageSource);
     }
 
@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
     void handleNotFound() {
         ResourceNotFoundException ex = new ResourceNotFoundException("Not found");
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleNotFound(ex);
-        
+
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Not found", response.getBody().get("message"));
     }
@@ -47,7 +47,7 @@ class GlobalExceptionHandlerTest {
     void handleDuplicate() {
         DuplicateResourceException ex = new DuplicateResourceException("Duplicate");
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleDuplicate(ex);
-        
+
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertEquals("Duplicate", response.getBody().get("message"));
     }
@@ -56,7 +56,7 @@ class GlobalExceptionHandlerTest {
     void handleBusiness() {
         BusinessException ex = new BusinessException("Business");
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleBusiness(ex);
-        
+
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Business", response.getBody().get("message"));
     }
@@ -65,22 +65,22 @@ class GlobalExceptionHandlerTest {
     void handleBadCredentials() {
         BadCredentialsException ex = new BadCredentialsException("Bad");
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleBadCredentials(ex);
-        
+
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("Credenciales inválidas", response.getBody().get("message"));
     }
 
     @Test
     void handleValidation() {
-        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         BindingResult bindingResult = mock(BindingResult.class);
         FieldError fieldError = new FieldError("object", "field", "Error message");
-        
-        when(ex.getBindingResult()).thenReturn(bindingResult);
+
         when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(
+                (org.springframework.core.MethodParameter) null, bindingResult);
 
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleValidation(ex);
-        
+
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Errores de validación", response.getBody().get("error"));
     }
@@ -89,7 +89,7 @@ class GlobalExceptionHandlerTest {
     void handleGeneral() {
         Exception ex = new Exception("General");
         ResponseEntity<Map<String, Object>> response = exceptionHandler.handleGeneral(ex);
-        
+
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Error interno del servidor", response.getBody().get("message"));
     }
