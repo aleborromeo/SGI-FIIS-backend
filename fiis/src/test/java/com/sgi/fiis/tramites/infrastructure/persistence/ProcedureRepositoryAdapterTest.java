@@ -215,4 +215,109 @@ class ProcedureRepositoryAdapterTest {
 
         assertTrue(adapter.findByCode("TRM-NONEXISTENT").isEmpty());
     }
+
+    @Test
+    @DisplayName("save: handles entity with projectReference and thesisReferenceId")
+    void save_handlesProjectReferenceAndThesis() {
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .codigoTramite("TRM-2026-001")
+                .tipoTramite(ProcedureType.PROYECTO)
+                .idSolicitante(10L)
+                .idGrupo(1L)
+                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .rolRevisorActual(RoleEnum.COORDINADOR_GRUPO)
+                .idReferenciaProyecto(99L)
+                .idReferenciaTesis(42L)
+                .idReferenciaInforme(7L)
+                .fechaEnvio(FECHA)
+                .fechaActualizacion(FECHA)
+                .movimientos(new ArrayList<>())
+                .build();
+
+        ProcedureEntity entityWithRefs = buildEntity(1);
+        entityWithRefs.setProjectReference(new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity());
+        entityWithRefs.getProjectReference().setId(99);
+        entityWithRefs.setThesisReferenceId(42L);
+        entityWithRefs.setReportReferenceId(7L);
+
+        when(tramiteRepository.save(any())).thenReturn(entityWithRefs);
+        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
+
+        Procedure result = adapter.save(domain);
+
+        verify(tramiteRepository).save(any());
+        assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("findById: maps entity with projectReference and thesisReferenceId")
+    void findById_mapsProjectReferenceAndThesis() {
+        ProcedureEntity entity = buildEntity(1);
+        com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity pe =
+                new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity();
+        pe.setId(99);
+        entity.setProjectReference(pe);
+        entity.setThesisReferenceId(42L);
+        entity.setReportReferenceId(7L);
+
+        when(tramiteRepository.findById(1)).thenReturn(Optional.of(entity));
+        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of());
+
+        Optional<Procedure> result = adapter.findById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(99L, result.get().getIdReferenciaProyecto());
+        assertEquals(42L, result.get().getIdReferenciaTesis());
+        assertEquals(7L, result.get().getIdReferenciaInforme());
+    }
+
+    @Test
+    @DisplayName("toMovimientoDomain: handles null previousState and newState")
+    void findById_handlesMovementsWithNullStates() {
+        ProcedureMovementEntity movEntity = new ProcedureMovementEntity();
+        movEntity.setAction("SISTEMA_AUTO");
+        movEntity.setPreviousState(null);
+        movEntity.setNewState(null);
+        movEntity.setComment("test");
+
+        when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
+        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of(movEntity));
+
+        Optional<Procedure> result = adapter.findById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get().getMovements().size());
+        assertNull(result.get().getMovements().get(0).getEstadoAnterior());
+        assertNull(result.get().getMovements().get(0).getEstadoNuevo());
+    }
+
+    @Test
+    @DisplayName("save: handles movement with null estadoAnterior and estadoNuevo")
+    void save_handlesMovementWithNullEnumStates() {
+        List<com.sgi.fiis.tramites.domain.model.ProcedureMovement> movs = new ArrayList<>();
+        movs.add(com.sgi.fiis.tramites.domain.model.ProcedureMovement.builder()
+                .accion("SISTEMA_AUTO")
+                .estadoAnterior(null)
+                .estadoNuevo(null)
+                .fechaMovimiento(FECHA)
+                .build());
+
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .codigoTramite("TRM-2026-001")
+                .tipoTramite(ProcedureType.PROYECTO)
+                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movimientos(movs)
+                .build();
+
+        when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
+        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
+        when(movimientoRepository.save(any())).thenReturn(null);
+
+        Procedure result = adapter.save(domain);
+
+        assertEquals(1, result.getMovements().size());
+        verify(movimientoRepository).save(any());
+    }
 }

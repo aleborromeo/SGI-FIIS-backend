@@ -369,4 +369,117 @@ class DocumentControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(header().exists("X-Error-Cause"));
     }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP POST: upload acepta archivo DOC con magic bytes correctos")
+    void uploadDocument_HttpSuccess_DocFile() throws Exception {
+        byte[] docContent = new byte[]{(byte)0xD0, (byte)0xCF, 0x11, 0x00, 0x00};
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file", "doc.doc", "application/msword", docContent);
+        DocumentResponseDto dto = new DocumentResponseDto(
+                1L, "doc.doc", "DOC", 100L, 42L,
+                LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0));
+        when(uploadDocumentUseCase.execute(any(), eq("doc.doc"), anyLong(), eq(42L))).thenReturn(dto);
+        mockMvc.perform(multipart("/api/documents/upload").file(mockFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.originalName").value("doc.doc"));
+    }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP POST: upload acepta archivo DOCX con magic bytes correctos")
+    void uploadDocument_HttpSuccess_DocxFile() throws Exception {
+        byte[] docxContent = new byte[]{(byte)'P', (byte)'K', 0x03, 0x04, 0x00};
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file", "doc.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                docxContent);
+        DocumentResponseDto dto = new DocumentResponseDto(
+                1L, "doc.docx", "DOCX", 100L, 42L,
+                LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0));
+        when(uploadDocumentUseCase.execute(any(), eq("doc.docx"), anyLong(), eq(42L))).thenReturn(dto);
+        mockMvc.perform(multipart("/api/documents/upload").file(mockFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.originalName").value("doc.docx"));
+    }
+
+    @Test
+    @DisplayName("HTTP POST: upload rechaza archivo con magic bytes inválidos")
+    void uploadDocument_HttpBadRequest_InvalidMagicBytes() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file", "fake.pdf", MediaType.APPLICATION_PDF_VALUE,
+                "not-a-real-pdf".getBytes());
+        mockMvc.perform(multipart("/api/documents/upload").file(mockFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("X-Error-Cause",
+                        "El contenido del archivo no coincide con el tipo declarado."));
+    }
+
+    @Test
+    @DisplayName("HTTP POST: upload rechaza archivo con contenido muy corto")
+    void uploadDocument_HttpBadRequest_ShortContent() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file", "tiny.pdf", MediaType.APPLICATION_PDF_VALUE,
+                new byte[]{0x01, 0x02});
+        mockMvc.perform(multipart("/api/documents/upload").file(mockFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().exists("X-Error-Cause"));
+    }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP GET download sanitiza filename con CRLF")
+    void downloadDocument_HttpSuccess_SanitizesCrlf() throws Exception {
+        ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
+        when(downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"))
+                .thenReturn(new DocumentDownloadResult(stream, "file\r\nInjected.pdf"));
+        mockMvc.perform(get("/api/documents/download/{id}", 1L)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"file__Injected.pdf\""));
+    }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP GET download sanitiza filename con caracteres especiales")
+    void downloadDocument_HttpSuccess_SanitizesSpecialChars() throws Exception {
+        ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
+        when(downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"))
+                .thenReturn(new DocumentDownloadResult(stream, "archivo (copia).pdf"));
+        mockMvc.perform(get("/api/documents/download/{id}", 1L)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"archivo__copia_.pdf\""));
+    }
+
+    @Test
+    @DisplayName("HTTP POST: upload retorna 401 cuando no hay usuario autenticado")
+    void uploadDocument_HttpUnauthorized_WhenNoUserId() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file", "test.pdf", MediaType.APPLICATION_PDF_VALUE,
+                "%PDF-1.4 content".getBytes());
+        mockMvc.perform(multipart("/api/documents/upload").file(mockFile))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("HTTP GET download retorna 401 cuando no hay usuario autenticado")
+    void downloadDocument_HttpUnauthorized_WhenNoUserId() throws Exception {
+        mockMvc.perform(get("/api/documents/download/{id}", 1L))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("HTTP DELETE deactivate retorna 401 cuando no hay usuario autenticado")
+    void deactivateDocument_HttpUnauthorized_WhenNoUserId() throws Exception {
+        mockMvc.perform(delete("/api/documents/deactivate/{id}", 1L))
+                .andExpect(status().isUnauthorized());
+    }
 }
