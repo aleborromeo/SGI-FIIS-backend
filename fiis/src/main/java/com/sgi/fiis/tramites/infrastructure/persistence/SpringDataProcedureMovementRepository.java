@@ -7,7 +7,7 @@ import java.util.List;
 @SuppressWarnings("java:S100")
 public interface SpringDataProcedureMovementRepository extends JpaRepository<ProcedureMovementEntity, Integer> {
 
-    List<ProcedureMovementEntity> findByProcedure_IdOrderByMovementAtAsc(Integer procedureId);
+    List<ProcedureMovementEntity> findByProcedure_IdOrderByMovementAtAsc(Long procedureId);
 
-    long countByProcedure_Id(Integer procedureId);
+    long countByProcedure_Id(Long procedureId);
 }

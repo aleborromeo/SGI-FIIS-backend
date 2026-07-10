@@ -86,7 +86,7 @@ class ProcedureRepositoryAdapterTest {
         when(userRepository.getReferenceById(10L)).thenReturn(buildApplicant());
         when(groupRepository.getReferenceById(1)).thenReturn(buildGroup());
         when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
-        when(movimientoRepository.countByProcedure_Id(1)).thenReturn(0L);
+        when(movimientoRepository.countByProcedure_Id(1L)).thenReturn(0L);
 
         Procedure result = adapter.save(buildDomain());
 
@@ -100,7 +100,7 @@ class ProcedureRepositoryAdapterTest {
     @DisplayName("findById: found → returns mapped domain")
     void findById_found_returnsDomain() {
         when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
-        when(movimientoRepository.findByProcedure_IdOrderByMovementAtAsc(1)).thenReturn(List.of());
+        when(movimientoRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findById(1L);
 
@@ -122,7 +122,7 @@ class ProcedureRepositoryAdapterTest {
     void findByCode_found_returnsDomain() {
         when(tramiteRepository.findByCode("TRM-2026-001"))
                 .thenReturn(Optional.of(buildEntity(1)));
-        when(movimientoRepository.findByProcedure_IdOrderByMovementAtAsc(1)).thenReturn(List.of());
+        when(movimientoRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findByCode("TRM-2026-001");
 

@@ -46,7 +46,7 @@ class ProcedureMovementRepositoryAdapterTest {
     @Test
     @DisplayName("findByProcedureId: maps entity list to domain model")
     void findByProcedureId_returnsMappedList() {
-        when(repository.findByProcedure_IdOrderByMovementAtAsc(1)).thenReturn(List.of(buildMovementEntity()));
+        when(repository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of(buildMovementEntity()));
 
         List<ProcedureMovement> result = adapter.findByProcedureId(1L);
 
@@ -61,7 +61,7 @@ class ProcedureMovementRepositoryAdapterTest {
     @Test
     @DisplayName("findByProcedureId: returns empty list when no movements exist")
     void findByProcedureId_emptyList() {
-        when(repository.findByProcedure_IdOrderByMovementAtAsc(99)).thenReturn(List.of());
+        when(repository.findByProcedure_IdOrderByMovementAtAsc(99L)).thenReturn(List.of());
 
         assertTrue(adapter.findByProcedureId(99L).isEmpty());
     }

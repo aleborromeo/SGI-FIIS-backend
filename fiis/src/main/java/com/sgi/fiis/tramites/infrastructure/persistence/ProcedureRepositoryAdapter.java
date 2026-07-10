@@ -31,7 +31,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     public Procedure save(Procedure tramite) {
         ProcedureEntity saved = procedureRepository.save(toEntity(tramite));
 
-        long existentes = movementRepository.countByProcedure_Id(saved.getId());
+        long existentes = movementRepository.countByProcedure_Id(Long.valueOf(saved.getId()));
         tramite.getMovements().stream()
                 .skip(existentes)
                 .forEach(mov -> movementRepository.save(toMovimientoEntity(mov, saved.getId())));
@@ -42,16 +42,16 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     @Override
     public Optional<Procedure> findById(Long id) {
         return procedureRepository.findById(id.intValue())
-                .map(entity -> toDomain(entity, loadMovements(entity.getId())));
+                .map(entity -> toDomain(entity, loadMovements(Long.valueOf(entity.getId()))));
     }
 
     @Override
     public Optional<Procedure> findByCode(String codigoTramite) {
         return procedureRepository.findByCode(codigoTramite)
-                .map(entity -> toDomain(entity, loadMovements(entity.getId())));
+                .map(entity -> toDomain(entity, loadMovements(Long.valueOf(entity.getId()))));
     }
 
-    private List<ProcedureMovement> loadMovements(Integer procedureId) {
+    private List<ProcedureMovement> loadMovements(Long procedureId) {
         return movementRepository.findByProcedure_IdOrderByMovementAtAsc(procedureId)
                 .stream()
                 .map(this::toMovimientoDomain)

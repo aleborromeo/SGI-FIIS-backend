@@ -16,7 +16,7 @@ public class ProcedureMovementRepositoryAdapter implements ProcedureMovementRepo
 
     @Override
     public List<ProcedureMovement> findByProcedureId(Long procedureId) {
-        return repository.findByProcedure_IdOrderByMovementAtAsc(procedureId.intValue())
+        return repository.findByProcedure_IdOrderByMovementAtAsc(procedureId)
                 .stream()
                 .map(this::toDomain)
                 .toList();
