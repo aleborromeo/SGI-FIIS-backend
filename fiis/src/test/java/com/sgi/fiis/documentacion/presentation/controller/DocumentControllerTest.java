@@ -482,4 +482,14 @@ class DocumentControllerTest {
         mockMvc.perform(delete("/api/documents/deactivate/{id}", 1L))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    @DisplayName("HTTP POST: upload con content-type application/zip (no permitido)")
+    void uploadDocument_HttpBadRequest_ZipMimeType() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file", "file.zip", "application/zip", "content".getBytes());
+        mockMvc.perform(multipart("/api/documents/upload").file(mockFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isBadRequest());
+    }
 }

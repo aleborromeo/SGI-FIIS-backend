@@ -320,4 +320,155 @@ class ProcedureRepositoryAdapterTest {
         assertEquals(1, result.getMovements().size());
         verify(movimientoRepository).save(any());
     }
+
+    @Test
+    @DisplayName("findById: entity con procedureType, status, applicant, group, reviewerRole null")
+    void findById_entityWithAllNullOptionalFields() {
+        ProcedureEntity entity = new ProcedureEntity();
+        entity.setId(1);
+        entity.setCode("TRM-NULL");
+        entity.setProcedureType(null);
+        entity.setApplicant(null);
+        entity.setGroup(null);
+        entity.setStatus(null);
+        entity.setReviewerRole(null);
+        entity.setProjectReference(null);
+        entity.setThesisReferenceId(null);
+        entity.setReportReferenceId(null);
+        entity.setSentAt(null);
+        entity.setUpdatedAt(null);
+
+        when(tramiteRepository.findById(99)).thenReturn(Optional.of(entity));
+        when(movimientoRepository.findByProcedureIdOrderByDateAsc(nullable(Integer.class))).thenReturn(List.of());
+
+        Optional<Procedure> result = adapter.findById(99L);
+
+        assertTrue(result.isPresent());
+        assertNull(result.get().getTipoTramite());
+        assertNull(result.get().getIdSolicitante());
+        assertNull(result.get().getIdGrupo());
+        assertNull(result.get().getEstadoActual());
+        assertNull(result.get().getRolRevisorActual());
+        assertNull(result.get().getIdReferenciaProyecto());
+        assertNull(result.get().getIdReferenciaTesis());
+        assertNull(result.get().getIdReferenciaInforme());
+        assertNull(result.get().getFechaEnvio());
+        assertNull(result.get().getFechaActualizacion());
+    }
+
+    @Test
+    @DisplayName("save: domain sin estadoActual y sin rolRevisorActual")
+    void save_domainWithNullEstadoAndRol() {
+        Procedure domain = Procedure.builder()
+                .codigoTramite("TRM-X")
+                .tipoTramite(ProcedureType.PROYECTO)
+                .idSolicitante(10L)
+                .idGrupo(1L)
+                .estadoActual(null)
+                .rolRevisorActual(null)
+                .idReferenciaProyecto(null)
+                .fechaEnvio(null)
+                .fechaActualizacion(null)
+                .movimientos(new ArrayList<>())
+                .build();
+
+        ProcedureEntity saved = new ProcedureEntity();
+        saved.setId(1);
+        saved.setCode("TRM-X");
+        saved.setProcedureType("PROYECTO");
+        saved.setStatus(null);
+        saved.setReviewerRole(null);
+        saved.setSentAt(null);
+        saved.setUpdatedAt(null);
+        com.sgi.fiis.users.infrastructure.persistence.UserEntity applicant = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        applicant.setId(10L);
+        saved.setApplicant(applicant);
+        com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity group =
+                new com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity();
+        group.setId(1);
+        saved.setGroup(group);
+
+        when(tramiteRepository.save(any())).thenReturn(saved);
+        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
+
+        Procedure result = adapter.save(domain);
+
+        assertNull(result.getEstadoActual());
+        assertNull(result.getRolRevisorActual());
+        assertNull(result.getFechaEnvio());
+        assertNull(result.getFechaActualizacion());
+    }
+
+    @Test
+    @DisplayName("findByApplicantId: entity sin optional fields")
+    void findByApplicantId_entityWithNullOptionalFields() {
+        ProcedureEntity entity = new ProcedureEntity();
+        entity.setId(5);
+        entity.setCode("TRM-5");
+        entity.setProcedureType(null);
+        entity.setApplicant(null);
+        entity.setGroup(null);
+        entity.setStatus(null);
+        entity.setReviewerRole(null);
+
+        when(tramiteRepository.findByApplicantId(10L)).thenReturn(List.of(entity));
+
+        List<Procedure> result = adapter.findByApplicantId(10L);
+
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getTipoTramite());
+        assertNull(result.get(0).getIdSolicitante());
+        assertNull(result.get(0).getIdGrupo());
+    }
+
+    @Test
+    @DisplayName("findByStatus: entity sin optional fields")
+    void findByStatus_entityWithNullOptionalFields() {
+        ProcedureEntity entity = new ProcedureEntity();
+        entity.setId(5);
+        entity.setCode("TRM-5");
+        entity.setProcedureType(null);
+        entity.setApplicant(null);
+        entity.setGroup(null);
+        entity.setStatus(null);
+        entity.setReviewerRole(null);
+
+        when(tramiteRepository.findByStatus("PENDIENTE_COORDINADOR")).thenReturn(List.of(entity));
+
+        List<Procedure> result = adapter.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
+
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getEstadoActual());
+    }
+
+    @Test
+    @DisplayName("toMovimientoDomain: actionUser con id válido, movement completo")
+    void toMovimientoDomain_completeMovement() {
+        ProcedureMovementEntity movEntity = new ProcedureMovementEntity();
+        movEntity.setAction("TEST");
+        com.sgi.fiis.users.infrastructure.persistence.UserEntity actionUser =
+                new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        actionUser.setId(77L);
+        movEntity.setActionUser(actionUser);
+        movEntity.setPreviousState("REGISTRADO");
+        movEntity.setNewState("PENDIENTE_COORDINADOR");
+        movEntity.setComment("comment");
+        movEntity.setMovementAt(FECHA);
+        movEntity.setDocumentAttachmentId(99L);
+
+        when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
+        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of(movEntity));
+
+        Optional<Procedure> result = adapter.findById(1L);
+
+        assertTrue(result.isPresent());
+        com.sgi.fiis.tramites.domain.model.ProcedureMovement mov = result.get().getMovements().get(0);
+        assertEquals(77L, mov.getIdUsuarioAccion());
+        assertEquals("TEST", mov.getAccion());
+        assertEquals(ProcedureStatus.REGISTRADO, mov.getEstadoAnterior());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, mov.getEstadoNuevo());
+        assertEquals("comment", mov.getObservacion());
+        assertEquals(FECHA, mov.getFechaMovimiento());
+        assertEquals(99L, mov.getIdDocumentoAdjunto());
+    }
 }
