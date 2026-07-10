@@ -6,7 +6,9 @@ import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
 import com.sgi.fiis.documentacion.infrastructure.persistence.entity.DocumentEntity;
 import com.sgi.fiis.documentacion.infrastructure.persistence.repository.JpaDocumentRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
@@ -27,6 +29,13 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
     @Override
     public Optional<Document> findById(Long id) {
         return repository.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public List<Document> findAll() {
+        return repository.findAll().stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
     }
 
     private DocumentEntity toEntity(Document domain) {

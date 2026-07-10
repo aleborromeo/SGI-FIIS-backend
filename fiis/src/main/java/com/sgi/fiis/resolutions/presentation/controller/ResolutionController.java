@@ -1,9 +1,11 @@
 package com.sgi.fiis.resolutions.presentation.controller;
 
 import com.sgi.fiis.resolutions.application.dto.ResolutionResponseDTO;
+import com.sgi.fiis.resolutions.application.usecase.GetResolutionUseCase;
 import com.sgi.fiis.resolutions.domain.model.Resolution;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionCommand;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionUseCase;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,11 +27,14 @@ public class ResolutionController {
     private static final String MESSAGE_KEY = "message";
 
     private final IssueResolutionUseCase issueResolutionUseCase;
+    private final GetResolutionUseCase getResolutionUseCase;
     private final MessageSource messageSource;
 
     public ResolutionController(IssueResolutionUseCase issueResolutionUseCase,
+                                GetResolutionUseCase getResolutionUseCase,
                                 MessageSource messageSource) {
         this.issueResolutionUseCase = issueResolutionUseCase;
+        this.getResolutionUseCase = getResolutionUseCase;
         this.messageSource = messageSource;
     }
 
@@ -70,5 +75,13 @@ public class ResolutionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 Map.of(MESSAGE_KEY, message, "data", responseDTO)
         );
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResolutionResponseDTO> getResolution(@PathVariable Long id) {
+        return getResolutionUseCase.execute(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("resolution.not.found", id));
     }
 }

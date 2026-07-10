@@ -12,7 +12,7 @@ class JsonbHelperTest {
 
     @Test
     @DisplayName("Should serialize map to json")
-    void toJson_shouldSerialize() {
+    void toJsonShouldSerialize() {
         Map<String, String> map = Map.of("es", "Hola", "en", "Hello");
         String json = JsonbHelper.toJson(map);
         assertTrue(json.contains("\"es\":\"Hola\""));
@@ -21,7 +21,7 @@ class JsonbHelperTest {
 
     @Test
     @DisplayName("Should deserialize json to map")
-    void fromJson_shouldDeserialize() {
+    void fromJsonShouldDeserialize() {
         String json = "{\"es\":\"Hola\",\"en\":\"Hello\"}";
         Map<String, String> map = JsonbHelper.fromJson(json);
         assertEquals(2, map.size());
@@ -31,7 +31,7 @@ class JsonbHelperTest {
 
     @Test
     @DisplayName("Should handle empty json")
-    void fromJson_emptyJson_shouldReturnDefaultMap() {
+    void fromJsonEmptyJsonShouldReturnDefaultMap() {
         Map<String, String> map1 = JsonbHelper.fromJson(null);
         Map<String, String> map2 = JsonbHelper.fromJson("");
 
@@ -44,7 +44,7 @@ class JsonbHelperTest {
 
     @Test
     @DisplayName("Should handle legacy plain text")
-    void fromJson_legacyText_shouldReturnFallbackMap() {
+    void fromJsonLegacyTextShouldReturnFallbackMap() {
         String legacyText = "Este es un texto plano";
         Map<String, String> map = JsonbHelper.fromJson(legacyText);
         assertEquals(1, map.size());
@@ -53,7 +53,7 @@ class JsonbHelperTest {
 
     @Test
     @DisplayName("Should get text by locale")
-    void getText_shouldReturnCorrectText() {
+    void getTextShouldReturnCorrectText() {
         String json = "{\"es\":\"Hola\",\"en\":\"Hello\"}";
         assertEquals("Hola", JsonbHelper.getText(json, "es"));
         assertEquals("Hello", JsonbHelper.getText(json, "en"));
@@ -63,7 +63,7 @@ class JsonbHelperTest {
 
     @Test
     @DisplayName("Should set text by locale")
-    void setText_shouldAddOrUpdateText() {
+    void setTextShouldAddOrUpdateText() {
         String json = "{\"es\":\"Hola\"}";
         String newJson = JsonbHelper.setText(json, "en", "Hello");
         

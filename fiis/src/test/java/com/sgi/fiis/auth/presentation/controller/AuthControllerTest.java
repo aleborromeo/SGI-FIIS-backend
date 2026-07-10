@@ -23,6 +23,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import java.util.Locale;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -217,13 +218,13 @@ class AuthControllerTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getName()).thenReturn("test@test.com");
 
-        try {
-            mockMvc.perform(get("/api/v1/auth/profile").principal(auth));
-            org.junit.jupiter.api.Assertions.fail("Expected exception");
-        } catch (Exception e) {
-            org.junit.jupiter.api.Assertions.assertTrue(e.getCause() instanceof RuntimeException);
-            org.junit.jupiter.api.Assertions.assertEquals("Usuario no encontrado", e.getCause().getMessage());
-        }
+        Exception exception = assertThrows(Exception.class, () -> 
+            mockMvc.perform(get("/api/v1/auth/profile").principal(auth))
+        );
+
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertEquals("Usuario no encontrado", exception.getCause().getMessage());
     }
 
     @Test

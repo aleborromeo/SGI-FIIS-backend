@@ -44,7 +44,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldSucceed_WhenProjectExists() {
+    void createPostulationProcedureShouldSucceedWhenProjectExists() {
         Project project = Project.builder().id(1).build();
         UserEntity responsible = new UserEntity();
         responsible.setId(10L);
@@ -69,7 +69,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldThrow_WhenProjectNotFound() {
+    void createPostulationProcedureShouldThrowWhenProjectNotFound() {
         Project project = Project.builder().id(99).build();
 
         when(projectRepository.findById(99)).thenReturn(Optional.empty());
@@ -84,7 +84,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldSetCorrectProcedureFields() {
+    void createPostulationProcedureShouldSetCorrectProcedureFields() {
         Project project = Project.builder().id(1).build();
         UserEntity responsible = new UserEntity();
         responsible.setId(10L);
@@ -133,7 +133,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldThrow_WhenProjectResponsibleIsNull() {
+    void createPostulationProcedureShouldThrowWhenProjectResponsibleIsNull() {
         Project project = Project.builder().id(1).build();
         ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(20);
@@ -150,7 +150,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldSaveWithNullGroup() {
+    void createPostulationProcedureShouldSaveWithNullGroup() {
         Project project = Project.builder().id(1).build();
         UserEntity responsible = new UserEntity();
         responsible.setId(10L);

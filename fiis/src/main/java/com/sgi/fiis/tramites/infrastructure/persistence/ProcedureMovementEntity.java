@@ -41,4 +41,7 @@ public class ProcedureMovementEntity {
 
     @Column(name = "fecha_movimiento", nullable = false)
     private LocalDateTime movementAt;
+
+    @Column(name = "id_documento_adjunto")
+    private Long documentAttachmentId;
 }

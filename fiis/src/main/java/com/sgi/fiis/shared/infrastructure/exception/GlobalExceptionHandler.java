@@ -19,6 +19,7 @@ import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.tramites.domain.model.InvalidTransitionException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -86,7 +87,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            String translatedMsg = messageSource.getMessage(error.getDefaultMessage(), null, error.getDefaultMessage(), resolveLocale());
+            String defaultMsg = error.getDefaultMessage();
+            String translatedMsg = defaultMsg != null
+                    ? messageSource.getMessage(defaultMsg, null, defaultMsg, resolveLocale())
+                    : error.getField() + " is invalid";
             errors.put(error.getField(), translatedMsg);
         }
         Map<String, Object> body = new HashMap<>();
@@ -95,6 +99,11 @@ public class GlobalExceptionHandler {
         body.put("error", messageSource.getMessage("shared.validation.error", null, "Errores de validación", resolveLocale()));
         body.put("details", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InvalidTransitionException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTransition(InvalidTransitionException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)

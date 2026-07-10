@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,8 +22,8 @@ class ResearchCallEntityTest {
     @Test
     @DisplayName("Should create entity using all-args constructor")
     void testAllArgsConstructor() {
-        LocalDate startDate = LocalDate.of(2025, 1, 1);
-        LocalDate endDate = LocalDate.of(2025, 3, 31);
+        LocalDate startDate = LocalDate.of(2025, Month.JANUARY, 1);
+        LocalDate endDate = LocalDate.of(2025, Month.MARCH, 31);
 
         ResearchCallEntity entity = new ResearchCallEntity(
                 1, "Convocatoria 2025-I", "Description",
@@ -41,8 +42,8 @@ class ResearchCallEntityTest {
     @Test
     @DisplayName("Should create entity using builder")
     void testBuilder() {
-        LocalDate startDate = LocalDate.of(2025, 4, 1);
-        LocalDate endDate = LocalDate.of(2025, 6, 30);
+        LocalDate startDate = LocalDate.of(2025, Month.APRIL, 1);
+        LocalDate endDate = LocalDate.of(2025, Month.JUNE, 30);
 
         ResearchCallEntity entity = ResearchCallEntity.builder()
                 .id(2)
@@ -65,8 +66,8 @@ class ResearchCallEntityTest {
     @DisplayName("Should set and get all fields via setters")
     void testSettersAndGetters() {
         ResearchCallEntity entity = new ResearchCallEntity();
-        LocalDate startDate = LocalDate.of(2025, 7, 1);
-        LocalDate endDate = LocalDate.of(2025, 9, 30);
+        LocalDate startDate = LocalDate.of(2025, Month.JULY, 1);
+        LocalDate endDate = LocalDate.of(2025, Month.SEPTEMBER, 30);
 
         entity.setId(3);
         entity.setTitle("Convocatoria 2025-III");
@@ -109,8 +110,8 @@ class ResearchCallEntityTest {
     @Test
     @DisplayName("Should handle toString, equals, and hashCode from @Data")
     void testDataAnnotationMethods() {
-        LocalDate startDate = LocalDate.of(2025, 1, 1);
-        LocalDate endDate = LocalDate.of(2025, 3, 31);
+        LocalDate startDate = LocalDate.of(2025, Month.JANUARY, 1);
+        LocalDate endDate = LocalDate.of(2025, Month.MARCH, 31);
 
         ResearchCallEntity entity1 = new ResearchCallEntity(
                 1, "Test", "Description",

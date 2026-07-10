@@ -32,6 +32,22 @@ public class ResearchCall {
      * @param researchLineIds  list of research line identifiers
      * @throws BusinessRuleValidationException if endDate is before startDate
      */
+    private ResearchCall(Builder builder) {
+        if (builder.endDate.isBefore(builder.startDate)) {
+            throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
+        }
+        this.id = builder.id;
+        this.title = builder.title;
+        this.description = builder.description;
+        this.startDate = builder.startDate;
+        this.endDate = builder.endDate;
+        this.status = builder.status;
+        this.documentId = builder.documentId;
+        // Almacenamos una lista completamente inmutable en el dominio
+        this.researchLineIds = List.copyOf(builder.researchLineIds);
+    }
+
+    /** Convenience constructor kept for backward compatibility with existing callers. */
     @SuppressWarnings("java:S107")
     public ResearchCall(Integer id, String title, String description, LocalDate startDate,
                         LocalDate endDate, CallStatus status, Integer documentId,

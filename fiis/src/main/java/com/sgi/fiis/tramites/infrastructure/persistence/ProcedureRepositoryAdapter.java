@@ -11,6 +11,7 @@ import com.sgi.fiis.users.domain.model.RoleEnum;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     private final ProjectJpaRepository projectRepository;
 
     @Override
+    @Transactional
     public Procedure save(Procedure tramite) {
         ProcedureEntity saved = procedureRepository.save(toEntity(tramite));
 
@@ -99,6 +101,21 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .sentAt(entity.getSentAt())
                 .updatedAt(entity.getUpdatedAt())
                 .movements(movimientos)
+                .id(entity.getId() != null ? entity.getId().longValue() : null)
+                .codigoTramite(entity.getCode())
+                .tipoTramite(entity.getProcedureType() != null ? ProcedureType.valueOf(entity.getProcedureType()) : null)
+                .idSolicitante(entity.getApplicant() != null ? entity.getApplicant().getId().longValue() : null)
+                .idGrupo(entity.getGroup() != null ? entity.getGroup().getId().longValue() : null)
+                .estadoActual(entity.getStatus() != null ? ProcedureStatus.valueOf(entity.getStatus()) : null)
+                .rolRevisorActual(entity.getReviewerRole() != null
+                        ? RoleEnum.valueOf(entity.getReviewerRole()) : null)
+                .observacionActual(null)
+                .idReferenciaProyecto(entity.getProjectReference() != null ? entity.getProjectReference().getId().longValue() : null)
+                .idReferenciaTesis(entity.getThesisReferenceId())
+                .idReferenciaInforme(entity.getReportReferenceId())
+                .fechaEnvio(entity.getSentAt())
+                .fechaActualizacion(entity.getUpdatedAt())
+                .movimientos(movimientos)
                 .build();
     }
 
@@ -118,6 +135,36 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         if (tramite.getProjectReferenceId() != null) {
             entity.setProjectReference(projectRepository.getReferenceById(tramite.getProjectReferenceId().intValue()));
         }
+        entity.setCode(tramite.getCodigoTramite());
+        entity.setProcedureType(tramite.getTipoTramite().name());
+        
+        if (tramite.getIdSolicitante() != null) {
+            com.sgi.fiis.users.infrastructure.persistence.UserEntity user = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+            user.setId(tramite.getIdSolicitante());
+            entity.setApplicant(user);
+        }
+        
+        if (tramite.getIdGrupo() != null) {
+            com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity rg = new com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity();
+            rg.setId(tramite.getIdGrupo().intValue());
+            entity.setGroup(rg);
+        }
+        
+        entity.setStatus(tramite.getEstadoActual() != null ? tramite.getEstadoActual().name() : null);
+        entity.setReviewerRole(tramite.getRolRevisorActual() != null
+                ? tramite.getRolRevisorActual().name() : null);
+                
+        if (tramite.getIdReferenciaProyecto() != null) {
+            com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity pe = new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity();
+            pe.setId(tramite.getIdReferenciaProyecto().intValue());
+                entity.setProjectReference(pe);
+        }
+
+        entity.setThesisReferenceId(tramite.getIdReferenciaTesis());
+        entity.setReportReferenceId(tramite.getIdReferenciaInforme());
+
+        entity.setSentAt(tramite.getFechaEnvio());
+        entity.setUpdatedAt(tramite.getFechaActualizacion());
         return entity;
     }
 
@@ -129,6 +176,13 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .newStatus(ProcedureStatus.valueOf(entity.getNewState()))
                 .comment(entity.getComment())
                 .movementAt(entity.getMovementAt())
+                .idUsuarioAccion(entity.getActionUser() != null ? entity.getActionUser().getId().longValue() : null)
+                .accion(entity.getAction())
+                .estadoAnterior(entity.getPreviousState() != null ? ProcedureStatus.valueOf(entity.getPreviousState()) : null)
+                .estadoNuevo(entity.getNewState() != null ? ProcedureStatus.valueOf(entity.getNewState()) : null)
+                .observacion(entity.getComment())
+                .fechaMovimiento(entity.getMovementAt())
+                .idDocumentoAdjunto(entity.getDocumentAttachmentId())
                 .build();
     }
 
@@ -141,6 +195,22 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         entity.setNewState(domain.getNewStatus().name());
         entity.setComment(domain.getComment());
         entity.setMovementAt(domain.getMovementAt());
+        ProcedureEntity proc = new ProcedureEntity();
+        proc.setId(idTramite);
+        entity.setProcedure(proc);
+        
+        if (domain.getIdUsuarioAccion() != null) {
+            com.sgi.fiis.users.infrastructure.persistence.UserEntity actionUser = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+            actionUser.setId(domain.getIdUsuarioAccion());
+            entity.setActionUser(actionUser);
+        }
+        
+        entity.setAction(domain.getAccion());
+        entity.setPreviousState(domain.getEstadoAnterior() != null ? domain.getEstadoAnterior().name() : null);
+        entity.setNewState(domain.getEstadoNuevo() != null ? domain.getEstadoNuevo().name() : null);
+        entity.setComment(domain.getObservacion());
+        entity.setMovementAt(domain.getFechaMovimiento());
+        entity.setDocumentAttachmentId(domain.getIdDocumentoAdjunto());
         return entity;
     }
 }
