@@ -109,13 +109,13 @@ class ProjectControllerTest {
 
     @Test
     void testGetProjectsNoFilters() throws Exception {
-        when(createProjectUseCase.getAllProjects()).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
 
         mockMvc.perform(get("/api/v1/projects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1));
         
-        verify(createProjectUseCase, times(1)).getAllProjects();
+        verify(createProjectUseCase, times(1)).getProjectsByResponsible(3L);
     }
 
     @Test
@@ -131,18 +131,18 @@ class ProjectControllerTest {
 
     @Test
     void testGetProjectsByGroup() throws Exception {
-        when(createProjectUseCase.getProjectsByGroup(2)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
 
         mockMvc.perform(get("/api/v1/projects?groupId=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1));
 
-        verify(createProjectUseCase, times(1)).getProjectsByGroup(2);
+        verify(createProjectUseCase, times(1)).getProjectsByResponsible(3L);
     }
 
     @Test
     void testGetProjectById() throws Exception {
-        when(createProjectUseCase.getProjectById(1)).thenReturn(ProjectResponse.builder().id(1).code("PRJ-1").build());
+        when(createProjectUseCase.getProjectById(1)).thenReturn(ProjectResponse.builder().id(1).code("PRJ-1").responsibleId(3L).build());
 
         mockMvc.perform(get("/api/v1/projects/1"))
                 .andExpect(status().isOk())
