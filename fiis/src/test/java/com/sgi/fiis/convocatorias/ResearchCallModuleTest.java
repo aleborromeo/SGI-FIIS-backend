@@ -165,4 +165,27 @@ class ResearchCallModuleTest {
         when(saveCallPort.findById(99)).thenReturn(java.util.Optional.empty());
         assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(99, "CERRADA"));
     }
+
+    @Test
+    void shouldGetVigentCallsSuccessfully() {
+        ResearchCall call1 = new ResearchCall(1, "Call 1", "Description", FIXED_TODAY, FIXED_FUTURE_10D,
+                CallStatus.OPEN, null, null);
+        ResearchCall call2 = new ResearchCall(2, "Call 2", "Description", FIXED_TODAY, FIXED_FUTURE_10D,
+                CallStatus.OPEN, null, null);
+
+        when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(Arrays.asList(call1, call2));
+
+        List<CallResponse> vigentCalls = callInteractor.getVigentCalls();
+        assertEquals(2, vigentCalls.size());
+        assertEquals("Call 1", vigentCalls.get(0).getTitle());
+        assertEquals("Call 2", vigentCalls.get(1).getTitle());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoVigentCalls() {
+        when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(Collections.emptyList());
+
+        List<CallResponse> vigentCalls = callInteractor.getVigentCalls();
+        assertTrue(vigentCalls.isEmpty());
+    }
 }

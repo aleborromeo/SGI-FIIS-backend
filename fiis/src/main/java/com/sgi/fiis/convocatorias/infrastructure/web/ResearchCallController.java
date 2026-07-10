@@ -1,10 +1,13 @@
 package com.sgi.fiis.convocatorias.infrastructure.web;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.convocatorias.application.dto.CallResponse;
 import com.sgi.fiis.convocatorias.application.dto.CreateCallRequest;
+import com.sgi.fiis.convocatorias.application.dto.PrerequisitosResponse;
 import com.sgi.fiis.convocatorias.application.ports.in.CreateCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.GetCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.UpdateCallStatusUseCase;
+import com.sgi.fiis.grupos_investigacion.domain.port.MembershipRepositoryPort;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,6 +17,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,13 +32,16 @@ public class ResearchCallController {
     private final CreateCallUseCase createCallUseCase;
     private final GetCallUseCase getCallUseCase;
     private final UpdateCallStatusUseCase updateCallStatusUseCase;
+    private final MembershipRepositoryPort membershipRepositoryPort;
 
     public ResearchCallController(CreateCallUseCase createCallUseCase,
                                   GetCallUseCase getCallUseCase,
-                                  UpdateCallStatusUseCase updateCallStatusUseCase) {
+                                  UpdateCallStatusUseCase updateCallStatusUseCase,
+                                  MembershipRepositoryPort membershipRepositoryPort) {
         this.createCallUseCase = createCallUseCase;
         this.getCallUseCase = getCallUseCase;
         this.updateCallStatusUseCase = updateCallStatusUseCase;
+        this.membershipRepositoryPort = membershipRepositoryPort;
     }
 
     @PostMapping
@@ -55,6 +62,32 @@ public class ResearchCallController {
             @RequestParam(value = "status", required = false) String status) {
         List<CallResponse> calls = getCallUseCase.getCalls(status);
         return ResponseEntity.ok(calls);
+    }
+
+    @GetMapping("/vigent")
+    @Operation(summary = "Get open/vigent research calls", description = "Retrieves all research calls with OPEN status.")
+    @ApiResponse(responseCode = "200", description = "List of vigent calls retrieved successfully")
+    public ResponseEntity<List<CallResponse>> getVigentCalls() {
+        List<CallResponse> calls = getCallUseCase.getVigentCalls();
+        return ResponseEntity.ok(calls);
+    }
+
+    @GetMapping("/prerequisitos")
+    @Operation(summary = "Check user prerequisites", description = "Checks if the authenticated user meets prerequisites for project submission.")
+    @ApiResponse(responseCode = "200", description = "Prerequisites check result")
+    public ResponseEntity<PrerequisitosResponse> checkPrerequisitos(
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        boolean hasActiveGroup = membershipRepositoryPort.existsActiveByUser(currentUser.getId().intValue());
+        boolean hasVigentCalls = !getCallUseCase.getVigentCalls().isEmpty();
+        boolean isDocente = currentUser.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_DOCENTE_INVESTIGADOR".equals(a.getAuthority()));
+        boolean valid = hasActiveGroup && hasVigentCalls && isDocente;
+        return ResponseEntity.ok(PrerequisitosResponse.builder()
+                .hasActiveGroup(hasActiveGroup)
+                .hasVigentCalls(hasVigentCalls)
+                .docente(isDocente)
+                .valid(valid)
+                .build());
     }
 
     @GetMapping("/{id}")
