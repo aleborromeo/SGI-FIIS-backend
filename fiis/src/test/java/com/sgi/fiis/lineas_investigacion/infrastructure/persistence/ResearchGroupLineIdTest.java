@@ -64,6 +64,6 @@ class ResearchGroupLineIdTest {
     void shouldBeEqualToItself() {
         ResearchGroupLineId id = new ResearchGroupLineId(1, 2);
 
-        assertEquals(id, id);
+        assertSame(id, id);
     }
 }

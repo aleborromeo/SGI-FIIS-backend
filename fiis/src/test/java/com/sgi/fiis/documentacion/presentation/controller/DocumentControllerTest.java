@@ -299,4 +299,74 @@ class DocumentControllerTest {
                 )
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP GET /api/documents retorna 200 con lista de documentos")
+    void listDocuments_HttpSuccess() throws Exception {
+        DocumentResponseDto doc1 = new DocumentResponseDto(
+                1L, "informe.pdf", "PDF", 1024L, 10L,
+                LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0));
+        DocumentResponseDto doc2 = new DocumentResponseDto(
+                2L, "tesis.docx", "DOCX", 2048L, 20L,
+                LocalDateTime.of(2026, java.time.Month.JUNE, 18, 10, 0));
+
+        when(listDocumentsUseCase.execute()).thenReturn(List.of(doc1, doc2));
+
+        mockMvc.perform(get("/api/documents"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].originalName").value("informe.pdf"))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].originalName").value("tesis.docx"));
+    }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP GET /api/documents retorna 200 con lista vacía")
+    void listDocuments_HttpEmpty() throws Exception {
+        when(listDocumentsUseCase.execute()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/documents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    @DisplayName("HTTP POST: /api/documents/upload debe retornar 400 ante tipo MIME no permitido")
+    void uploadDocument_HttpBadRequest_InvalidMimeType() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "imagen.png",
+                "image/png",
+                "contenido-de-imagen".getBytes()
+        );
+
+        mockMvc.perform(
+                        multipart("/api/documents/upload")
+                                .file(mockFile)
+                                .principal(createAuth(42L, "ESTUDIANTE"))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(header().exists("X-Error-Cause"));
+    }
+
+    @Test
+    @DisplayName("HTTP POST: /api/documents/upload debe retornar 400 ante content type null")
+    void uploadDocument_HttpBadRequest_NullContentType() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "sin_tipo.bin",
+                null,
+                "contenido".getBytes()
+        );
+
+        mockMvc.perform(
+                        multipart("/api/documents/upload")
+                                .file(mockFile)
+                                .principal(createAuth(42L, "ESTUDIANTE"))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(header().exists("X-Error-Cause"));
+    }
 }

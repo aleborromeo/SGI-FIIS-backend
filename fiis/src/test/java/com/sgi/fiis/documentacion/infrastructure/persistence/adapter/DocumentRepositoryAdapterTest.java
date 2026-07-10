@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -96,5 +97,62 @@ class DocumentRepositoryAdapterTest {
         assertEquals("convocatoria_anexo.pdf", domain.getOriginalName());
         assertEquals("PDF", domain.getExtension());
         assertTrue(domain.isActive());
+    }
+
+    @Test
+    @DisplayName("Infrastructure Mappings: findById retorna vacío cuando no existe")
+    void findById_ReturnsEmptyWhenNotFound() {
+        when(jpaDocumentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Optional<Document> result = documentRepositoryAdapter.findById(999L);
+
+        assertTrue(result.isEmpty());
+        verify(jpaDocumentRepository).findById(999L);
+    }
+
+    @Test
+    @DisplayName("Infrastructure Mappings: findAll mapea correctamente la lista de entidades a dominio")
+    void findAll_MapsCorrectlyToDomainList() {
+        DocumentEntity entity1 = new DocumentEntity();
+        entity1.setId(1L);
+        entity1.setOriginalName("doc1.pdf");
+        entity1.setStoragePath("/path/doc1.pdf");
+        entity1.setExtension("PDF");
+        entity1.setSizeBytes(1000L);
+        entity1.setUploadedById(1L);
+        entity1.setUploadDate(LocalDateTime.of(2026, java.time.Month.JUNE, 17, 10, 0));
+        entity1.setActive(true);
+
+        DocumentEntity entity2 = new DocumentEntity();
+        entity2.setId(2L);
+        entity2.setOriginalName("doc2.docx");
+        entity2.setStoragePath("/path/doc2.docx");
+        entity2.setExtension("DOCX");
+        entity2.setSizeBytes(2000L);
+        entity2.setUploadedById(2L);
+        entity2.setUploadDate(LocalDateTime.of(2026, java.time.Month.JUNE, 18, 10, 0));
+        entity2.setActive(false);
+
+        when(jpaDocumentRepository.findAll()).thenReturn(List.of(entity1, entity2));
+
+        List<Document> result = documentRepositoryAdapter.findAll();
+
+        assertEquals(2, result.size());
+        assertEquals("doc1.pdf", result.get(0).getOriginalName());
+        assertEquals("doc2.docx", result.get(1).getOriginalName());
+        assertTrue(result.get(0).isActive());
+        assertFalse(result.get(1).isActive());
+        verify(jpaDocumentRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Infrastructure Mappings: findAll retorna lista vacía cuando no hay documentos")
+    void findAll_ReturnsEmptyList() {
+        when(jpaDocumentRepository.findAll()).thenReturn(List.of());
+
+        List<Document> result = documentRepositoryAdapter.findAll();
+
+        assertTrue(result.isEmpty());
+        verify(jpaDocumentRepository).findAll();
     }
 }

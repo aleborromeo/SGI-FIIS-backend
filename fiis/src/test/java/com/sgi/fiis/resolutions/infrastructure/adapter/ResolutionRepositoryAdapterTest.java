@@ -118,4 +118,31 @@ class ResolutionRepositoryAdapterTest {
         assertFalse(result);
         verify(repository).existsByNumeroResolucion("RES-2023-001");
     }
+
+    @Test
+    @DisplayName("Should find resolution by document adjunto id successfully")
+    void findByDocumentAdjuntoId_Success() {
+        when(repository.findByIdDocumentoAdjunto(100L)).thenReturn(Optional.of(resolutionEntity));
+        when(mapper.toDomain(resolutionEntity)).thenReturn(resolution);
+
+        Optional<Resolution> result = adapter.findByDocumentAdjuntoId(100L);
+
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().idResolucion());
+
+        verify(repository).findByIdDocumentoAdjunto(100L);
+        verify(mapper).toDomain(resolutionEntity);
+    }
+
+    @Test
+    @DisplayName("Should return empty when resolution not found by document adjunto id")
+    void findByDocumentAdjuntoId_NotFound() {
+        when(repository.findByIdDocumentoAdjunto(999L)).thenReturn(Optional.empty());
+
+        Optional<Resolution> result = adapter.findByDocumentAdjuntoId(999L);
+
+        assertTrue(result.isEmpty());
+        verify(repository).findByIdDocumentoAdjunto(999L);
+        verify(mapper, never()).toDomain(any());
+    }
 }
