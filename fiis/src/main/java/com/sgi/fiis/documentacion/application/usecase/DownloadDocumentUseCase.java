@@ -34,17 +34,23 @@ public class DownloadDocumentUseCase {
             throw new DocumentAccessDeniedException("El documento solicitado no está disponible.");
         }
 
-        boolean isOwner = document.getUploadedById().equals(currentUserId);
-        boolean isAuthority = currentUserRol.equals("DIRECTOR_INVESTIGACION") || 
+        boolean isOwner = document.getUploadedById() != null && document.getUploadedById().equals(currentUserId);
+        boolean isAuthority = currentUserRol != null && (
+                              currentUserRol.equals("DIRECTOR_INVESTIGACION") || 
                               currentUserRol.equals("DECANO") || 
                               currentUserRol.equals("ADMIN") ||
-                              currentUserRol.equals("COORDINADOR_GRUPO");
+                              currentUserRol.equals("COORDINADOR_GRUPO"));
 
         if (!isOwner && !isAuthority && !isProcedureApplicant(documentId, currentUserId)) {
             throw new DocumentAccessDeniedException("Acceso denegado: No posee permisos sobre este archivo.");
         }
 
-        InputStream stream = fileStoragePort.load(document.getStoragePath());
+        InputStream stream;
+        try {
+            stream = fileStoragePort.load(document.getStoragePath());
+        } catch (Exception e) {
+            throw new DocumentNotFoundException("No se pudo acceder al archivo del documento.");
+        }
         return new DocumentDownloadResult(stream, document.getOriginalName());
     }
 
@@ -54,7 +60,7 @@ public class DownloadDocumentUseCase {
         }
         return resolutionRepositoryPort.findByDocumentAdjuntoId(documentId)
                 .flatMap(resolution -> procedureRepositoryPort.findById(resolution.idTramite()))
-                .map(procedure -> procedure.getIdSolicitante().equals(currentUserId))
+                .map(procedure -> procedure.getIdSolicitante() != null && procedure.getIdSolicitante().equals(currentUserId))
                 .orElse(false);
     }
 }

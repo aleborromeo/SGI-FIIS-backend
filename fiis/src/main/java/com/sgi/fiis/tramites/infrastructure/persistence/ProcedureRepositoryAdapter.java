@@ -8,6 +8,7 @@ import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     private final SpringDataProcedureMovementRepository movimientoRepository;
 
     @Override
+    @Transactional
     public Procedure save(Procedure tramite) {
         ProcedureEntity saved = tramiteRepository.save(toEntity(tramite));
 
@@ -78,10 +80,10 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         return Procedure.builder()
                 .id(entity.getId() != null ? entity.getId().longValue() : null)
                 .codigoTramite(entity.getCode())
-                .tipoTramite(ProcedureType.valueOf(entity.getProcedureType()))
+                .tipoTramite(entity.getProcedureType() != null ? ProcedureType.valueOf(entity.getProcedureType()) : null)
                 .idSolicitante(entity.getApplicant() != null ? entity.getApplicant().getId().longValue() : null)
                 .idGrupo(entity.getGroup() != null ? entity.getGroup().getId().longValue() : null)
-                .estadoActual(ProcedureStatus.valueOf(entity.getStatus()))
+                .estadoActual(entity.getStatus() != null ? ProcedureStatus.valueOf(entity.getStatus()) : null)
                 .rolRevisorActual(entity.getReviewerRole() != null
                         ? RoleEnum.valueOf(entity.getReviewerRole()) : null)
                 .observacionActual(null)
@@ -114,7 +116,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
             entity.setGroup(rg);
         }
         
-        entity.setStatus(tramite.getEstadoActual().name());
+        entity.setStatus(tramite.getEstadoActual() != null ? tramite.getEstadoActual().name() : null);
         entity.setReviewerRole(tramite.getRolRevisorActual() != null
                 ? tramite.getRolRevisorActual().name() : null);
                 
@@ -136,8 +138,8 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         return ProcedureMovement.builder()
                 .idUsuarioAccion(entity.getActionUser() != null ? entity.getActionUser().getId().longValue() : null)
                 .accion(entity.getAction())
-                .estadoAnterior(ProcedureStatus.valueOf(entity.getPreviousState()))
-                .estadoNuevo(ProcedureStatus.valueOf(entity.getNewState()))
+                .estadoAnterior(entity.getPreviousState() != null ? ProcedureStatus.valueOf(entity.getPreviousState()) : null)
+                .estadoNuevo(entity.getNewState() != null ? ProcedureStatus.valueOf(entity.getNewState()) : null)
                 .observacion(entity.getComment())
                 .fechaMovimiento(entity.getMovementAt())
                 .idDocumentoAdjunto(entity.getDocumentAttachmentId())
@@ -157,8 +159,8 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         }
         
         entity.setAction(domain.getAccion());
-        entity.setPreviousState(domain.getEstadoAnterior().name());
-        entity.setNewState(domain.getEstadoNuevo().name());
+        entity.setPreviousState(domain.getEstadoAnterior() != null ? domain.getEstadoAnterior().name() : null);
+        entity.setNewState(domain.getEstadoNuevo() != null ? domain.getEstadoNuevo().name() : null);
         entity.setComment(domain.getObservacion());
         entity.setMovementAt(domain.getFechaMovimiento());
         entity.setDocumentAttachmentId(domain.getIdDocumentoAdjunto());

@@ -320,4 +320,83 @@ class DownloadDocumentUseCaseTest {
         assertNotNull(result);
         assertEquals("doc_coord.pdf", result.getOriginalName());
     }
+
+    @Test
+    @DisplayName("Debe lanzar excepción cuando fileStoragePort.load falla")
+    void execute_ThrowsException_WhenFileStorageFails() {
+        Document mockDoc = Document.builder()
+                .id(1L).originalName("test.pdf").extension("PDF")
+                .sizeBytes(1024L).storagePath("/ruta/test.pdf")
+                .uploadedById(42L).active(true).build();
+
+        when(documentRepositoryPort.findById(1L)).thenReturn(Optional.of(mockDoc));
+        when(fileStoragePort.load("/ruta/test.pdf"))
+                .thenThrow(new RuntimeException("File not found"));
+
+        DocumentNotFoundException ex = assertThrows(
+                DocumentNotFoundException.class,
+                () -> downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"));
+
+        assertEquals("No se pudo acceder al archivo del documento.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Debe permitir descarga cuando uploadedById es null")
+    void execute_Success_WhenUploadedByIdIsNull() {
+        Document mockDoc = Document.builder()
+                .id(1L).originalName("anon.pdf").extension("PDF")
+                .sizeBytes(1024L).storagePath("/ruta/anon.pdf")
+                .uploadedById(null).active(true).build();
+
+        InputStream fakeStream = new ByteArrayInputStream("datos".getBytes());
+
+        when(documentRepositoryPort.findById(1L)).thenReturn(Optional.of(mockDoc));
+        when(fileStoragePort.load("/ruta/anon.pdf")).thenReturn(fakeStream);
+
+        DocumentDownloadResult result = downloadDocumentUseCase.execute(1L, 42L, "ADMIN");
+
+        assertNotNull(result);
+        assertEquals("anon.pdf", result.getOriginalName());
+    }
+
+    @Test
+    @DisplayName("Debe permitir descarga cuando currentUserRol es null y usuario es propietario")
+    void execute_Success_WhenRoleIsNullAndUserIsOwner() {
+        Document mockDoc = Document.builder()
+                .id(1L).originalName("owner.pdf").extension("PDF")
+                .sizeBytes(1024L).storagePath("/ruta/owner.pdf")
+                .uploadedById(42L).active(true).build();
+
+        InputStream fakeStream = new ByteArrayInputStream("datos".getBytes());
+
+        when(documentRepositoryPort.findById(1L)).thenReturn(Optional.of(mockDoc));
+        when(fileStoragePort.load("/ruta/owner.pdf")).thenReturn(fakeStream);
+
+        DocumentDownloadResult result = downloadDocumentUseCase.execute(1L, 42L, null);
+
+        assertNotNull(result);
+        assertEquals("owner.pdf", result.getOriginalName());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción cuando procedure tiene idSolicitante null")
+    void execute_ThrowsException_WhenProcedureApplicantIsNull() {
+        Document mockDoc = Document.builder()
+                .id(1L).originalName("res.pdf").extension("PDF")
+                .sizeBytes(1024L).storagePath("/ruta/res.pdf")
+                .uploadedById(10L).active(true).build();
+
+        Resolution resolution = new Resolution(1L, "RES-001", null, null, 5L, 1L, null);
+        Procedure procedure = Procedure.builder().id(5L).idSolicitante(null).build();
+
+        when(documentRepositoryPort.findById(1L)).thenReturn(Optional.of(mockDoc));
+        when(resolutionRepositoryPort.findByDocumentAdjuntoId(1L)).thenReturn(Optional.of(resolution));
+        when(procedureRepositoryPort.findById(5L)).thenReturn(Optional.of(procedure));
+
+        DocumentAccessDeniedException ex = assertThrows(
+                DocumentAccessDeniedException.class,
+                () -> downloadDocumentUseCase.execute(1L, 99L, "ESTUDIANTE"));
+
+        assertTrue(ex.getMessage().contains("Acceso denegado"));
+    }
 }

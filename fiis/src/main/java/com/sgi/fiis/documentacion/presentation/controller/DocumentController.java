@@ -21,6 +21,7 @@ import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedExce
 import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundException;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -69,6 +70,10 @@ public class DocumentController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
+            if (!isValidFileContent(file)) {
+                return ResponseEntity.badRequest().header("X-Error-Cause", "El contenido del archivo no coincide con el tipo declarado.").build();
+            }
+
             DocumentResponseDto response = uploadDocumentUseCase.execute(
                 file.getInputStream(),
                 file.getOriginalFilename(),
@@ -99,9 +104,13 @@ public class DocumentController {
             DocumentDownloadResult downloadResult = downloadDocumentUseCase.execute(documentId, userId, role);
             InputStreamResource resource = new InputStreamResource(downloadResult.getInputStream());
 
+            String safeFilename = downloadResult.getOriginalName()
+                    .replaceAll("[\\r\\n]", "_")
+                    .replaceAll("[^a-zA-Z0-9._-]", "_");
+
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadResult.getOriginalName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"")
                     .body(resource);
         } catch (DocumentNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -166,13 +175,46 @@ public class DocumentController {
      * Extrae el rol principal del usuario autenticado.
      * Stripea el prefijo "ROLE_" si existe, ya que los use cases comparan
      * contra nombres sin prefijo (ej: "ADMIN", "DECANO").
+     * Retorna null si no hay authorities configuradas.
      */
     private String extractRole(Authentication authentication) {
+        if (authentication == null || authentication.getAuthorities().isEmpty()) {
+            return null;
+        }
         GrantedAuthority authority = authentication.getAuthorities().iterator().next();
         String role = authority.getAuthority();
         if (role.startsWith("ROLE_")) {
             return role.substring(5);
         }
         return role;
+    }
+
+    /**
+     * Valida los magic bytes del archivo para confirmar que el contenido real
+     * coincide con el Content-Type declarado. Previene spoofing de MIME type.
+     */
+    private boolean isValidFileContent(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        try (InputStream is = file.getInputStream()) {
+            byte[] header = new byte[8];
+            int bytesRead = is.read(header);
+            if (bytesRead < 4) {
+                return false;
+            }
+            if (contentType.equalsIgnoreCase("application/pdf")) {
+                return header[0] == (byte) '%' && header[1] == (byte) 'P' && header[2] == (byte) 'D' && header[3] == (byte) 'F';
+            }
+            if (contentType.equalsIgnoreCase("application/msword"))
+                return header[0] == (byte) 0xD0 && header[1] == (byte) 0xCF;
+            if (contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                return header[0] == (byte) 'P' && header[1] == (byte) 'K';
+            return false;
+        } catch (IOException e) {
+            log.warn("No se pudieron leer los magic bytes del archivo: {}", e.getMessage());
+            return false;
+        }
     }
 }
