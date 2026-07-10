@@ -36,8 +36,9 @@ public class CreateUserUseCase {
     @Transactional
     public User execute(User user) {
         // Validate that the role exists
-        roleRepository.findByCode(user.getRoleCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Rol", "codigo", user.getRoleCode()));
+        if (roleRepository.findByCode(user.getRoleCode()).isEmpty()) {
+            throw new ResourceNotFoundException("Rol", "codigo", user.getRoleCode());
+        }
 
         // Validate DNI uniqueness (RNF-38)
         if (userRepository.existsByDni(user.getDni())) {

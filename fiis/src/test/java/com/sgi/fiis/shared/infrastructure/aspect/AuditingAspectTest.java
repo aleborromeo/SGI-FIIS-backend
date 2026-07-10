@@ -54,8 +54,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should audit with authenticated user and direct IP")
     void auditWithAuthenticatedUserAndDirectIp() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("CREATE_USER");
+        Auditable auditable = createAuditable("CREATE_USER");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -87,8 +86,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should use X-Forwarded-For when header is present")
     void auditWithXForwardedForHeader() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("UPDATE_USER");
+        Auditable auditable = createAuditable("UPDATE_USER");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -112,8 +110,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should default to SYSTEM ID when no authentication is present")
     void auditWithNoAuthentication() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("DELETE_USER");
+        Auditable auditable = createAuditable("DELETE_USER");
 
         SecurityContextHolder.getContext().setAuthentication(null);
 
@@ -132,8 +129,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should default to SYSTEM ID when authentication is not authenticated")
     void auditWithUnauthenticatedAuthentication() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("VIEW");
+        Auditable auditable = createAuditable("VIEW");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(false);
@@ -154,8 +150,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should default to 0.0.0.0 when no request attributes")
     void auditWithNoRequestAttributes() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("LOGIN");
+        Auditable auditable = createAuditable("LOGIN");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -175,8 +170,7 @@ class AuditingAspectTest {
     @Test
     @DisplayName("Should fall back to remoteAddr when X-Forwarded-For is empty")
     void auditWithEmptyXForwardedForHeader() {
-        Auditable auditable = mock(Auditable.class);
-        when(auditable.action()).thenReturn("CREATE");
+        Auditable auditable = createAuditable("CREATE");
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -256,5 +250,19 @@ class AuditingAspectTest {
         auditingAspect.audit(mockJoinPoint, auditable, null);
         verify(jdbcTemplate, atLeastOnce()).update(anyString(), argsCaptor.capture());
         assertEquals("general", argsCaptor.getValue()[0]);
+    }
+
+    private Auditable createAuditable(String action) {
+        return new Auditable() {
+            @Override
+            public String action() {
+                return action;
+            }
+
+            @Override
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return Auditable.class;
+            }
+        };
     }
 }

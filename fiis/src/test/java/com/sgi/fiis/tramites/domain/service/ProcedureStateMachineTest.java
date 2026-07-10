@@ -34,37 +34,37 @@ class ProcedureStateMachineTest {
 
     private Procedure tramiteEnPendienteCoordinador() {
         return Procedure.builder()
-                .codigoTramite("TRM-001").tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE).idGrupo(1L)
-                .estadoActual(PENDIENTE_COORDINADOR).rolRevisorActual(COORDINADOR_GRUPO)
-                .idReferenciaProyecto(100L).fechaEnvio(FECHA).fechaActualizacion(FECHA)
+                .code("TRM-001").procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_COORDINADOR).currentReviewerRole(COORDINADOR_GRUPO)
+                .projectReferenceId(100L).sentAt(FECHA).updatedAt(FECHA)
                 .build();
     }
 
     private Procedure tramiteEnObservado() {
         return Procedure.builder()
-                .codigoTramite("TRM-001").tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE).idGrupo(1L)
-                .estadoActual(OBSERVADO).rolRevisorActual(null)
-                .idReferenciaProyecto(100L).fechaEnvio(FECHA).fechaActualizacion(FECHA)
+                .code("TRM-001").procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(OBSERVADO).currentReviewerRole(null)
+                .projectReferenceId(100L).sentAt(FECHA).updatedAt(FECHA)
                 .build();
     }
 
     private Procedure tramiteEnPendienteDireccion() {
         return Procedure.builder()
-                .codigoTramite("TRM-001").tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE).idGrupo(1L)
-                .estadoActual(PENDIENTE_DIRECCION).rolRevisorActual(DIRECTOR_INVESTIGACION)
-                .idReferenciaProyecto(100L).fechaEnvio(FECHA).fechaActualizacion(FECHA)
+                .code("TRM-001").procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_DIRECCION).currentReviewerRole(DIRECTOR_INVESTIGACION)
+                .projectReferenceId(100L).sentAt(FECHA).updatedAt(FECHA)
                 .build();
     }
 
     private Procedure tramiteEnPendienteDecanato() {
         return Procedure.builder()
-                .codigoTramite("TRM-001").tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE).idGrupo(1L)
-                .estadoActual(PENDIENTE_DECANATO).rolRevisorActual(DECANO)
-                .idReferenciaProyecto(100L).fechaEnvio(FECHA).fechaActualizacion(FECHA)
+                .code("TRM-001").procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_DECANATO).currentReviewerRole(DECANO)
+                .projectReferenceId(100L).sentAt(FECHA).updatedAt(FECHA)
                 .build();
     }
 
@@ -79,8 +79,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.aprobarPorCoordinador(tramite, ID_COORDINADOR);
 
-        assertEquals(PENDIENTE_DIRECCION, tramite.getEstadoActual());
-        assertEquals(DIRECTOR_INVESTIGACION, tramite.getRolRevisorActual());
+        assertEquals(PENDIENTE_DIRECCION, tramite.getCurrentStatus());
+        assertEquals(DIRECTOR_INVESTIGACION, tramite.getCurrentReviewerRole());
         assertEquals(1, tramite.getMovements().size());
     }
 
@@ -95,9 +95,9 @@ class ProcedureStateMachineTest {
 
         stateMachine.observarPorCoordinador(tramite, ID_COORDINADOR, "Falta la firma del asesor");
 
-        assertEquals(OBSERVADO, tramite.getEstadoActual());
-        assertNull(tramite.getRolRevisorActual());
-        assertEquals("Falta la firma del asesor", tramite.getObservacionActual());
+        assertEquals(OBSERVADO, tramite.getCurrentStatus());
+        assertNull(tramite.getCurrentReviewerRole());
+        assertEquals("Falta la firma del asesor", tramite.getCurrentObservation());
     }
 
     // -------------------------------------------------------------------------
@@ -111,8 +111,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.rechazarPorCoordinador(tramite, ID_COORDINADOR);
 
-        assertEquals(RECHAZADO, tramite.getEstadoActual());
-        assertTrue(tramite.getEstadoActual().isTerminalStatus());
+        assertEquals(RECHAZADO, tramite.getCurrentStatus());
+        assertTrue(tramite.getCurrentStatus().isTerminalStatus());
     }
 
     // -------------------------------------------------------------------------
@@ -126,8 +126,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.remediateByApplicant(tramite, ID_SOLICITANTE, "Se adjuntó la firma");
 
-        assertEquals(PENDIENTE_COORDINADOR, tramite.getEstadoActual());
-        assertEquals(COORDINADOR_GRUPO, tramite.getRolRevisorActual());
+        assertEquals(PENDIENTE_COORDINADOR, tramite.getCurrentStatus());
+        assertEquals(COORDINADOR_GRUPO, tramite.getCurrentReviewerRole());
     }
 
     @Test
@@ -138,10 +138,10 @@ class ProcedureStateMachineTest {
         stateMachine.remediateByApplicant(tramite, ID_SOLICITANTE, "Se adjuntó la firma");
 
         assertEquals(2, tramite.getMovements().size());
-        assertEquals(OBSERVADO,              tramite.getMovements().get(0).getEstadoAnterior());
-        assertEquals(SUBSANADO,              tramite.getMovements().get(0).getEstadoNuevo());
-        assertEquals(SUBSANADO,              tramite.getMovements().get(1).getEstadoAnterior());
-        assertEquals(PENDIENTE_COORDINADOR,  tramite.getMovements().get(1).getEstadoNuevo());
+        assertEquals(OBSERVADO,              tramite.getMovements().get(0).getPreviousStatus());
+        assertEquals(SUBSANADO,              tramite.getMovements().get(0).getNewStatus());
+        assertEquals(SUBSANADO,              tramite.getMovements().get(1).getPreviousStatus());
+        assertEquals(PENDIENTE_COORDINADOR,  tramite.getMovements().get(1).getNewStatus());
     }
 
     @Test
@@ -165,8 +165,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.aprobarPorDirector(tramite, ID_DIRECTOR);
 
-        assertEquals(PENDIENTE_DECANATO, tramite.getEstadoActual());
-        assertEquals(DECANO, tramite.getRolRevisorActual());
+        assertEquals(PENDIENTE_DECANATO, tramite.getCurrentStatus());
+        assertEquals(DECANO, tramite.getCurrentReviewerRole());
     }
 
     // -------------------------------------------------------------------------
@@ -180,8 +180,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.observarPorDirector(tramite, ID_DIRECTOR, "El presupuesto no está justificado");
 
-        assertEquals(OBSERVADO, tramite.getEstadoActual());
-        assertEquals(COORDINADOR_GRUPO, tramite.getRolRevisorActual());
+        assertEquals(OBSERVADO, tramite.getCurrentStatus());
+        assertEquals(COORDINADOR_GRUPO, tramite.getCurrentReviewerRole());
     }
 
     // -------------------------------------------------------------------------
@@ -195,8 +195,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.rechazarPorDirector(tramite, ID_DIRECTOR);
 
-        assertEquals(RECHAZADO, tramite.getEstadoActual());
-        assertTrue(tramite.getEstadoActual().isTerminalStatus());
+        assertEquals(RECHAZADO, tramite.getCurrentStatus());
+        assertTrue(tramite.getCurrentStatus().isTerminalStatus());
     }
 
     // -------------------------------------------------------------------------
@@ -210,11 +210,11 @@ class ProcedureStateMachineTest {
 
         stateMachine.registrarResolucionPorDecano(tramite, ID_DECANO);
 
-        assertEquals(FINALIZADO, tramite.getEstadoActual());
-        assertTrue(tramite.getEstadoActual().isTerminalStatus());
+        assertEquals(FINALIZADO, tramite.getCurrentStatus());
+        assertTrue(tramite.getCurrentStatus().isTerminalStatus());
         assertEquals(2, tramite.getMovements().size());
-        assertEquals(APROBADO_CON_RESOLUCION, tramite.getMovements().get(0).getEstadoNuevo());
-        assertEquals(FINALIZADO,              tramite.getMovements().get(1).getEstadoNuevo());
+        assertEquals(APROBADO_CON_RESOLUCION, tramite.getMovements().get(0).getNewStatus());
+        assertEquals(FINALIZADO,              tramite.getMovements().get(1).getNewStatus());
     }
 
     // -------------------------------------------------------------------------
@@ -228,8 +228,8 @@ class ProcedureStateMachineTest {
 
         stateMachine.observarPorDecano(tramite, ID_DECANO, "Revisar el plan financiero");
 
-        assertEquals(OBSERVADO, tramite.getEstadoActual());
-        assertEquals(DIRECTOR_INVESTIGACION, tramite.getRolRevisorActual());
+        assertEquals(OBSERVADO, tramite.getCurrentStatus());
+        assertEquals(DIRECTOR_INVESTIGACION, tramite.getCurrentReviewerRole());
     }
 
     // -------------------------------------------------------------------------
@@ -240,10 +240,10 @@ class ProcedureStateMachineTest {
     @DisplayName("Llamar a aprobarPorCoordinador con rol incorrecto lanza InvalidTransitionException")
     void aprobarPorCoordinador_conRolIncorrecto_lanzaExcepcion() {
         Procedure tramite = Procedure.builder()
-                .codigoTramite("TRM-001").tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE).idGrupo(1L)
-                .estadoActual(PENDIENTE_COORDINADOR).rolRevisorActual(DIRECTOR_INVESTIGACION)
-                .idReferenciaProyecto(100L).fechaEnvio(FECHA).fechaActualizacion(FECHA)
+                .code("TRM-001").procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_COORDINADOR).currentReviewerRole(DIRECTOR_INVESTIGACION)
+                .projectReferenceId(100L).sentAt(FECHA).updatedAt(FECHA)
                 .build();
 
         assertThrows(InvalidTransitionException.class, () ->

@@ -8,8 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +20,8 @@ import static org.mockito.Mockito.*;
 @DisplayName("ResearchLineRepositoryAdapter Unit Tests")
 class ResearchLineRepositoryAdapterTest {
 
-    @Mock
-    private SpringDataResearchLineRepository springDataRepository;
-
-    @InjectMocks
-    private ResearchLineRepositoryAdapter adapter;
+    @Mock private SpringDataResearchLineRepository springDataRepository;
+    @InjectMocks private ResearchLineRepositoryAdapter adapter;
 
     private ResearchLineEntity getTestLineEntity() {
         ResearchLineEntity entity = new ResearchLineEntity();
@@ -41,8 +36,6 @@ class ResearchLineRepositoryAdapterTest {
                 .id(1)
                 .lineName("Tecnologia y Comunicaciones")
                 .active(true)
-                .createdAt(LocalDateTime.of(2026, Month.JANUARY, 1, 12, 0))
-                .updatedAt(LocalDateTime.of(2026, Month.JANUARY, 2, 12, 0))
                 .build();
     }
 

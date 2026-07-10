@@ -15,11 +15,11 @@ public class LocaleConfig {
     public AcceptHeaderLocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
         List<Locale> supportedLocales = Arrays.asList(
-                new Locale("es"),
-                new Locale("en")
+                Locale.forLanguageTag("es"),
+                Locale.forLanguageTag("en")
         );
         resolver.setSupportedLocales(supportedLocales);
-        resolver.setDefaultLocale(new Locale("es"));
+        resolver.setDefaultLocale(Locale.forLanguageTag("es"));
         return resolver;
     }
 }

@@ -1,6 +1,5 @@
 package com.sgi.fiis;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +13,12 @@ import java.sql.DatabaseMetaData;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Pruebas de integración para verificar la conexión a la base de datos PostgreSQL.
- *
- * PREREQUISITO: La base de datos PostgreSQL debe estar corriendo.
- *   - Opción 1: docker-compose up db_fiis
- *   - Opción 2: PostgreSQL local en localhost:5432 con la BD 'db_fiis_investigacion'
+ * Pruebas de integracion para verificar la conexion a PostgreSQL.
+ * Usa Testcontainers para levantar PostgreSQL automaticamente.
  */
 @SpringBootTest
-@Disabled("Requiere PostgreSQL corriendo en localhost:5432")
-@DisplayName("Pruebas de Conexión a Base de Datos")
-class DatabaseConnectionTest {
+@DisplayName("Pruebas de Conexion a Base de Datos")
+class DatabaseConnectionTest extends TestcontainersConfig {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

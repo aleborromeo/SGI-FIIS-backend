@@ -19,15 +19,15 @@ class ProcedureTest {
 
     private Procedure tramiteEnPendienteCoordinador() {
         return Procedure.builder()
-                .codigoTramite("TRM-001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE)
-                .idGrupo(1L)
-                .estadoActual(PENDIENTE_COORDINADOR)
-                .rolRevisorActual(COORDINADOR_GRUPO)
-                .idReferenciaProyecto(100L)
-                .fechaEnvio(FECHA_INICIAL)
-                .fechaActualizacion(FECHA_INICIAL)
+                .code("TRM-001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE)
+                .groupId(1L)
+                .currentStatus(PENDIENTE_COORDINADOR)
+                .currentReviewerRole(COORDINADOR_GRUPO)
+                .projectReferenceId(100L)
+                .sentAt(FECHA_INICIAL)
+                .updatedAt(FECHA_INICIAL)
                 .build();
     }
 
@@ -43,7 +43,7 @@ class ProcedureTest {
         tramite.transitionTo(PENDIENTE_DIRECCION, COORDINADOR_GRUPO, ID_COORDINADOR,
                 "APROBADO_POR_COORDINADOR", null, DIRECTOR_INVESTIGACION);
 
-        assertEquals(PENDIENTE_DIRECCION, tramite.getEstadoActual());
+        assertEquals(PENDIENTE_DIRECCION, tramite.getCurrentStatus());
     }
 
     @Test
@@ -67,22 +67,22 @@ class ProcedureTest {
                 "APROBADO_POR_COORDINADOR", null, DIRECTOR_INVESTIGACION);
 
         ProcedureMovement movimiento = tramite.getMovements().get(0);
-        assertEquals(PENDIENTE_COORDINADOR, movimiento.getEstadoAnterior());
-        assertEquals(PENDIENTE_DIRECCION, movimiento.getEstadoNuevo());
-        assertEquals(ID_COORDINADOR, movimiento.getIdUsuarioAccion());
-        assertEquals("APROBADO_POR_COORDINADOR", movimiento.getAccion());
+        assertEquals(PENDIENTE_COORDINADOR, movimiento.getPreviousStatus());
+        assertEquals(PENDIENTE_DIRECCION, movimiento.getNewStatus());
+        assertEquals(ID_COORDINADOR, movimiento.getActionUserId());
+        assertEquals("APROBADO_POR_COORDINADOR", movimiento.getAction());
     }
 
     @Test
     @DisplayName("transitionTo actualiza fechaActualizacion en cada transición")
     void transitionTo_actualizaFechaActualizacion() {
         Procedure tramite = tramiteEnPendienteCoordinador();
-        LocalDateTime tiempoAntes = tramite.getFechaActualizacion();
+        LocalDateTime tiempoAntes = tramite.getUpdatedAt();
 
         tramite.transitionTo(PENDIENTE_DIRECCION, COORDINADOR_GRUPO, ID_COORDINADOR,
                 "APROBADO_POR_COORDINADOR", null, DIRECTOR_INVESTIGACION);
 
-        assertNotEquals(tiempoAntes, tramite.getFechaActualizacion());
+        assertNotEquals(tiempoAntes, tramite.getUpdatedAt());
     }
 
     @Test
@@ -96,7 +96,7 @@ class ProcedureTest {
                 "APROBADO_POR_DIRECTOR", null, DECANO);
 
         assertEquals(2, tramite.getMovements().size());
-        assertEquals(PENDIENTE_DECANATO, tramite.getEstadoActual());
+        assertEquals(PENDIENTE_DECANATO, tramite.getCurrentStatus());
     }
 
     @Test
@@ -108,8 +108,8 @@ class ProcedureTest {
         tramite.transitionTo(OBSERVADO, COORDINADOR_GRUPO, ID_COORDINADOR,
                 "OBSERVADO_POR_COORDINADOR", textoObservacion, null);
 
-        assertEquals(textoObservacion, tramite.getMovements().get(0).getObservacion());
-        assertEquals(textoObservacion, tramite.getObservacionActual());
+        assertEquals(textoObservacion, tramite.getMovements().get(0).getComment());
+        assertEquals(textoObservacion, tramite.getCurrentObservation());
     }
 
     // -------------------------------------------------------------------------
@@ -137,7 +137,7 @@ class ProcedureTest {
                         "ACCION_INVALIDA", null, null)
         );
 
-        assertEquals(PENDIENTE_COORDINADOR, tramite.getEstadoActual());
+        assertEquals(PENDIENTE_COORDINADOR, tramite.getCurrentStatus());
         assertEquals(0, tramite.getMovements().size());
     }
 
@@ -164,15 +164,15 @@ class ProcedureTest {
     @DisplayName("validateExclusiveReference con exactamente una referencia no lanza excepción")
     void validateExclusiveReference_conUnaReferencia_esValido() {
         Procedure tramite = Procedure.builder()
-                .codigoTramite("TRM-002")
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idSolicitante(ID_SOLICITANTE)
-                .idGrupo(1L)
-                .estadoActual(REGISTRADO)
-                .rolRevisorActual(COORDINADOR_GRUPO)
-                .idReferenciaTesis(50L)
-                .fechaEnvio(FECHA_INICIAL)
-                .fechaActualizacion(FECHA_INICIAL)
+                .code("TRM-002")
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(ID_SOLICITANTE)
+                .groupId(1L)
+                .currentStatus(REGISTRADO)
+                .currentReviewerRole(COORDINADOR_GRUPO)
+                .thesisReferenceId(50L)
+                .sentAt(FECHA_INICIAL)
+                .updatedAt(FECHA_INICIAL)
                 .build();
 
         assertDoesNotThrow(tramite::validateExclusiveReference);
@@ -182,14 +182,14 @@ class ProcedureTest {
     @DisplayName("validateExclusiveReference sin ninguna referencia lanza IllegalArgumentException")
     void validateExclusiveReference_sinReferencias_lanzaExcepcion() {
         Procedure tramite = Procedure.builder()
-                .codigoTramite("TRM-003")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE)
-                .idGrupo(1L)
-                .estadoActual(REGISTRADO)
-                .rolRevisorActual(COORDINADOR_GRUPO)
-                .fechaEnvio(FECHA_INICIAL)
-                .fechaActualizacion(FECHA_INICIAL)
+                .code("TRM-003")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE)
+                .groupId(1L)
+                .currentStatus(REGISTRADO)
+                .currentReviewerRole(COORDINADOR_GRUPO)
+                .sentAt(FECHA_INICIAL)
+                .updatedAt(FECHA_INICIAL)
                 .build();
 
         assertThrows(IllegalArgumentException.class, tramite::validateExclusiveReference);
@@ -199,16 +199,16 @@ class ProcedureTest {
     @DisplayName("validateExclusiveReference con múltiples referencias lanza IllegalArgumentException")
     void validateExclusiveReference_conMultiplesReferencias_lanzaExcepcion() {
         Procedure tramite = Procedure.builder()
-                .codigoTramite("TRM-004")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(ID_SOLICITANTE)
-                .idGrupo(1L)
-                .estadoActual(REGISTRADO)
-                .rolRevisorActual(COORDINADOR_GRUPO)
-                .idReferenciaProyecto(100L)
-                .idReferenciaTesis(50L)
-                .fechaEnvio(FECHA_INICIAL)
-                .fechaActualizacion(FECHA_INICIAL)
+                .code("TRM-004")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(ID_SOLICITANTE)
+                .groupId(1L)
+                .currentStatus(REGISTRADO)
+                .currentReviewerRole(COORDINADOR_GRUPO)
+                .projectReferenceId(100L)
+                .thesisReferenceId(50L)
+                .sentAt(FECHA_INICIAL)
+                .updatedAt(FECHA_INICIAL)
                 .build();
 
         assertThrows(IllegalArgumentException.class, tramite::validateExclusiveReference);

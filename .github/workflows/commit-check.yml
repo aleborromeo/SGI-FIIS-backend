@@ -16,5 +16,3 @@ jobs:
 
       - name: Validate Commit Messages
         uses: wagoid/commitlint-github-action@v6
-        with:
-          commitDepth: 1

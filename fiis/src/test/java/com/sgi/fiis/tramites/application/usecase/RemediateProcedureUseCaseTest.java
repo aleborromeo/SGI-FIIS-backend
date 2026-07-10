@@ -24,50 +24,50 @@ import static org.mockito.Mockito.*;
 class RemediateProcedureUseCaseTest {
 
     @Mock
-    private ProcedureRepositoryPort tramiteRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
 
     @InjectMocks
     private RemediateProcedureUseCase remediateProcedureUseCase;
 
-    private Procedure buildObservedProcedure(Long idSolicitante) {
+    private Procedure buildOBSERVADOProcedure(Long idSolicitante) {
         return Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-000001")
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idSolicitante(idSolicitante)
-                .idGrupo(10L)
-                .estadoActual(ProcedureStatus.OBSERVADO)
-                .rolRevisorActual(null)
-                .idReferenciaTesis(200L)
-                .fechaEnvio(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .code("TRM-2026-000001")
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(idSolicitante)
+                .groupId(10L)
+                .currentStatus(ProcedureStatus.OBSERVADO)
+                .currentReviewerRole(null)
+                .thesisReferenceId(200L)
+                .sentAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
     @Test
     void execute_solicitanteOriginalSubsana_retornaPendienteCoordinador() {
-        Procedure tramite = buildObservedProcedure(5L);
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
-        when(tramiteRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        Procedure tramite = buildOBSERVADOProcedure(5L);
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        when(procedureRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ProcedureResponseDto result = remediateProcedureUseCase.execute(1L, 5L, "Adjunto firma escaneada");
 
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, result.getEstadoActual());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, result.getCurrentStatus());
     }
 
     @Test
     void execute_solicitanteIncorrecto_lanzaInvalidTransitionException() {
-        Procedure tramite = buildObservedProcedure(5L);
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        Procedure tramite = buildOBSERVADOProcedure(5L);
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
 
         assertThrows(InvalidTransitionException.class,
                 () -> remediateProcedureUseCase.execute(1L, 99L, "intento no autorizado"));
-        verify(tramiteRepositoryPort, never()).save(any());
+        verify(procedureRepositoryPort, never()).save(any());
     }
 
     @Test
     void execute_tramiteNoEncontrado_lanzaResourceNotFoundException() {
-        when(tramiteRepositoryPort.findById(999L)).thenReturn(Optional.empty());
+        when(procedureRepositoryPort.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> remediateProcedureUseCase.execute(999L, 5L, "texto"));

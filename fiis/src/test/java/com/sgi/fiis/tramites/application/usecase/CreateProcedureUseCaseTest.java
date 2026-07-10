@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class CreateProcedureUseCaseTest {
 
     @Mock
-    private ProcedureRepositoryPort tramiteRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
 
     @InjectMocks
     private CreateProcedureUseCase crearTramiteUseCase;
@@ -32,68 +32,68 @@ class CreateProcedureUseCaseTest {
     @Test
     void execute_creaYPresentaTramite_estadoResultanteEsPendienteCoordinador() {
         ProcedureRequestDto dto = ProcedureRequestDto.builder()
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(1L)
-                .idGrupo(10L)
-                .idReferenciaProyecto(100L)
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(1L)
+                .groupId(10L)
+                .projectReferenceId(100L)
                 .build();
 
         Procedure tramiteGuardado = Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-000001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(1L)
-                .idGrupo(10L)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .rolRevisorActual(RoleEnum.COORDINADOR_GRUPO)
-                .idReferenciaProyecto(100L)
-                .fechaEnvio(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .code("TRM-2026-000001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(1L)
+                .groupId(10L)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .currentReviewerRole(RoleEnum.COORDINADOR_GRUPO)
+                .projectReferenceId(100L)
+                .sentAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
-        when(tramiteRepositoryPort.save(any(Procedure.class))).thenReturn(tramiteGuardado);
+        when(procedureRepositoryPort.save(any(Procedure.class))).thenReturn(tramiteGuardado);
 
         ProcedureResponseDto resultado = crearTramiteUseCase.execute(dto);
 
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, resultado.getEstadoActual());
-        assertEquals(RoleEnum.COORDINADOR_GRUPO, resultado.getRolRevisorActual());
-        assertEquals(ProcedureType.PROYECTO, resultado.getTipoTramite());
-        verify(tramiteRepositoryPort).save(any(Procedure.class));
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, resultado.getCurrentStatus());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, resultado.getCurrentReviewerRole());
+        assertEquals(ProcedureType.PROJECT, resultado.getProcedureType());
+        verify(procedureRepositoryPort).save(any(Procedure.class));
     }
 
     @Test
     void execute_tramiteGuardado_tieneTransicionRegistradoAPendienteCoordinador() {
         ProcedureRequestDto dto = ProcedureRequestDto.builder()
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idSolicitante(2L)
-                .idReferenciaTesis(200L)
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(2L)
+                .thesisReferenceId(200L)
                 .build();
 
-        when(tramiteRepositoryPort.save(any(Procedure.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(procedureRepositoryPort.save(any(Procedure.class))).thenAnswer(inv -> inv.getArgument(0));
 
         crearTramiteUseCase.execute(dto);
 
         // El tramite fue guardado ya en PENDIENTE_COORDINADOR con un movimiento registrado
         ArgumentCaptor<Procedure> captor = ArgumentCaptor.forClass(Procedure.class);
-        verify(tramiteRepositoryPort).save(captor.capture());
+        verify(procedureRepositoryPort).save(captor.capture());
 
         Procedure tramiteCapturado = captor.getValue();
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, tramiteCapturado.getEstadoActual());
-        assertEquals(RoleEnum.COORDINADOR_GRUPO, tramiteCapturado.getRolRevisorActual());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, tramiteCapturado.getCurrentStatus());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, tramiteCapturado.getCurrentReviewerRole());
         assertEquals(1, tramiteCapturado.getMovements().size());
-        assertEquals("PRESENTADO_POR_SOLICITANTE", tramiteCapturado.getMovements().get(0).getAccion());
+        assertEquals("PRESENTADO_POR_SOLICITANTE", tramiteCapturado.getMovements().get(0).getAction());
     }
 
     @Test
     void execute_arcoExcluyenteInvalido_lanzaExcepcionSinGuardar() {
         ProcedureRequestDto dto = ProcedureRequestDto.builder()
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(1L)
-                .idReferenciaProyecto(100L)
-                .idReferenciaTesis(200L) // dos referencias — inválido
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(1L)
+                .projectReferenceId(100L)
+                .thesisReferenceId(200L) // dos referencias — inválido
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> crearTramiteUseCase.execute(dto));
-        verify(tramiteRepositoryPort, never()).save(any());
+        verify(procedureRepositoryPort, never()).save(any());
     }
 }

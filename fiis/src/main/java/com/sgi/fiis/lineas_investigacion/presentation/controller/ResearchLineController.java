@@ -14,7 +14,6 @@ import com.sgi.fiis.grupos_investigacion.presentation.mapper.ResearchGroupMapper
 import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
 import com.sgi.fiis.lineas_investigacion.presentation.mapper.ResearchLineMapper;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/research-lines")
-@RequiredArgsConstructor
 public class ResearchLineController {
 
     private final RegisterResearchLineUseCase registerResearchLineUseCase;
@@ -37,6 +35,27 @@ public class ResearchLineController {
     private final ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase;
     private final ResearchLineMapper mapper;
     private final ResearchGroupMapper groupMapper;
+
+    @SuppressWarnings("java:S107")
+    public ResearchLineController(RegisterResearchLineUseCase registerResearchLineUseCase,
+                                  ListResearchLinesUseCase listResearchLinesUseCase,
+                                  GetResearchLineUseCase getResearchLineUseCase,
+                                  ChangeResearchLineStatusUseCase changeResearchLineStatusUseCase,
+                                  AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase,
+                                  RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase,
+                                  ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase,
+                                  ResearchLineMapper mapper,
+                                  ResearchGroupMapper groupMapper) {
+        this.registerResearchLineUseCase = registerResearchLineUseCase;
+        this.listResearchLinesUseCase = listResearchLinesUseCase;
+        this.getResearchLineUseCase = getResearchLineUseCase;
+        this.changeResearchLineStatusUseCase = changeResearchLineStatusUseCase;
+        this.assignGroupToResearchLineUseCase = assignGroupToResearchLineUseCase;
+        this.removeGroupFromResearchLineUseCase = removeGroupFromResearchLineUseCase;
+        this.listResearchGroupsByLineUseCase = listResearchGroupsByLineUseCase;
+        this.mapper = mapper;
+        this.groupMapper = groupMapper;
+    }
 
     /** RF-24: Register research line */
     @PostMapping

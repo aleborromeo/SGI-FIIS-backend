@@ -17,16 +17,16 @@ import java.time.LocalDateTime;
 public class ProcedureResponseDto {
 
     private Long id;
-    private String codigoTramite;
-    private ProcedureType tipoTramite;
-    private ProcedureStatus estadoActual;
-    private Long idSolicitante;
-    private Long idGrupo;
-    private RoleEnum rolRevisorActual;
-    private String observacionActual;
-    private Long idReferenciaProyecto;
-    private Long idReferenciaTesis;
-    private Long idReferenciaInforme;
-    private LocalDateTime fechaEnvio;
-    private LocalDateTime fechaActualizacion;
+    private String code;
+    private ProcedureType procedureType;
+    private ProcedureStatus currentStatus;
+    private Long applicantId;
+    private Long groupId;
+    private RoleEnum currentReviewerRole;
+    private String currentObservation;
+    private Long projectReferenceId;
+    private Long thesisReferenceId;
+    private Long reportReferenceId;
+    private LocalDateTime sentAt;
+    private LocalDateTime updatedAt;
 }

@@ -22,35 +22,35 @@ class ProcedureMapperTest {
 
         Procedure tramite = Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-000001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .idSolicitante(42L)
-                .idGrupo(5L)
-                .rolRevisorActual(RoleEnum.COORDINADOR_GRUPO)
-                .observacionActual(null)
-                .idReferenciaProyecto(100L)
-                .idReferenciaTesis(null)
-                .idReferenciaInforme(null)
-                .fechaEnvio(ahora)
-                .fechaActualizacion(ahora)
+                .code("TRM-2026-000001")
+                .procedureType(ProcedureType.PROJECT)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .applicantId(42L)
+                .groupId(5L)
+                .currentReviewerRole(RoleEnum.COORDINADOR_GRUPO)
+                .currentObservation(null)
+                .projectReferenceId(100L)
+                .thesisReferenceId(null)
+                .reportReferenceId(null)
+                .sentAt(ahora)
+                .updatedAt(ahora)
                 .build();
 
         ProcedureResponseDto dto = ProcedureMapper.toResponse(tramite);
 
         assertEquals(1L, dto.getId());
-        assertEquals("TRM-2026-000001", dto.getCodigoTramite());
-        assertEquals(ProcedureType.PROYECTO, dto.getTipoTramite());
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, dto.getEstadoActual());
-        assertEquals(42L, dto.getIdSolicitante());
-        assertEquals(5L, dto.getIdGrupo());
-        assertEquals(RoleEnum.COORDINADOR_GRUPO, dto.getRolRevisorActual());
-        assertNull(dto.getObservacionActual());
-        assertEquals(100L, dto.getIdReferenciaProyecto());
-        assertNull(dto.getIdReferenciaTesis());
-        assertNull(dto.getIdReferenciaInforme());
-        assertEquals(ahora, dto.getFechaEnvio());
-        assertEquals(ahora, dto.getFechaActualizacion());
+        assertEquals("TRM-2026-000001", dto.getCode());
+        assertEquals(ProcedureType.PROJECT, dto.getProcedureType());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, dto.getCurrentStatus());
+        assertEquals(42L, dto.getApplicantId());
+        assertEquals(5L, dto.getGroupId());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, dto.getCurrentReviewerRole());
+        assertNull(dto.getCurrentObservation());
+        assertEquals(100L, dto.getProjectReferenceId());
+        assertNull(dto.getThesisReferenceId());
+        assertNull(dto.getReportReferenceId());
+        assertEquals(ahora, dto.getSentAt());
+        assertEquals(ahora, dto.getUpdatedAt());
     }
 
     @Test
@@ -58,22 +58,22 @@ class ProcedureMapperTest {
         LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 11, 0);
 
         ProcedureMovement movimiento = ProcedureMovement.builder()
-                .idUsuarioAccion(10L)
-                .accion("APROBADO_POR_COORDINADOR")
-                .estadoAnterior(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .estadoNuevo(ProcedureStatus.PENDIENTE_DIRECCION)
-                .observacion(null)
-                .fechaMovimiento(fecha)
+                .actionUserId(10L)
+                .action("APROBADO_POR_COORDINADOR")
+                .previousStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .newStatus(ProcedureStatus.PENDIENTE_DIRECCION)
+                .comment(null)
+                .movementAt(fecha)
                 .build();
 
-        ProcedureMovementResponseDto dto = ProcedureMapper.toMovimientoResponse(movimiento);
+        ProcedureMovementResponseDto dto = ProcedureMapper.toMovementResponse(movimiento);
 
-        assertEquals(10L, dto.getIdUsuarioAccion());
-        assertEquals("APROBADO_POR_COORDINADOR", dto.getAccion());
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, dto.getEstadoAnterior());
-        assertEquals(ProcedureStatus.PENDIENTE_DIRECCION, dto.getEstadoNuevo());
-        assertNull(dto.getObservacion());
-        assertEquals(fecha, dto.getFechaMovimiento());
+        assertEquals(10L, dto.getActionUserId());
+        assertEquals("APROBADO_POR_COORDINADOR", dto.getAction());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, dto.getPreviousStatus());
+        assertEquals(ProcedureStatus.PENDIENTE_DIRECCION, dto.getNewStatus());
+        assertNull(dto.getComment());
+        assertEquals(fecha, dto.getMovementAt());
     }
 
     @Test

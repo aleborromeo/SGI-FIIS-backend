@@ -2,6 +2,7 @@ package com.sgi.fiis.shared.presentation.controller;
 
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
+import com.sgi.fiis.shared.domain.exception.FileStorageException;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
@@ -32,7 +33,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Deprecated
+/**
+ * @deprecated Use DocumentController (/api/documents) instead
+ */
+@Deprecated(since = "2.0.0", forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/files")
 @Tag(name = "Files", description = "DEPRECATED: Use DocumentController (/api/documents) instead")
@@ -106,7 +110,7 @@ public class FileController {
         try {
             file.transferTo(targetPath.toFile());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save physical file", e);
+            throw new FileStorageException("Failed to save physical file", e);
         }
 
         // 4. Save metadata to DB
@@ -156,7 +160,7 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getOriginalName() + "\"")
                     .body(resource);
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Error reading physical file", e);
+            throw new FileStorageException("Error reading physical file", e);
         }
     }
 

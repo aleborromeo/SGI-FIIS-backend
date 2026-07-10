@@ -12,12 +12,24 @@ import java.time.LocalDateTime;
 @Builder
 public class ProcedureApprovedEvent {
 
-    private final Long idTramite;
-    private final String codigoTramite;
-    private final ProcedureType tipoTramite;
-    private final Long idSolicitante;
-    private final ProcedureStatus estadoResultante;
-    private final Long idAprobador;
-    private final RoleEnum rolAprobador;
-    private final LocalDateTime fechaAprobacion;
+    private final Long procedureId;
+    private final String code;
+    private final ProcedureType procedureType;
+    private final Long applicantId;
+    private final ProcedureStatus resultingStatus;
+    private final Long approverId;
+    private final RoleEnum approverRole;
+    private final LocalDateTime approvalDate;
+
+    public Long getIdTramite() {
+        return procedureId;
+    }
+
+    public Long getIdAprobador() {
+        return approverId;
+    }
+
+    public LocalDateTime getFechaAprobacion() {
+        return approvalDate;
+    }
 }

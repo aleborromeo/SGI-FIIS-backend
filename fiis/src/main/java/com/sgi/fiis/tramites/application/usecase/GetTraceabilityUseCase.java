@@ -13,21 +13,21 @@ import java.util.List;
 @Service
 public class GetTraceabilityUseCase {
 
-    private final ProcedureRepositoryPort tramiteRepositoryPort;
-    private final ProcedureMovementRepositoryPort movimientoRepositoryPort;
+    private final ProcedureRepositoryPort procedureRepositoryPort;
+    private final ProcedureMovementRepositoryPort movementRepositoryPort;
 
-    public GetTraceabilityUseCase(ProcedureRepositoryPort tramiteRepositoryPort,
-                                         ProcedureMovementRepositoryPort movimientoRepositoryPort) {
-        this.tramiteRepositoryPort    = tramiteRepositoryPort;
-        this.movimientoRepositoryPort = movimientoRepositoryPort;
+    public GetTraceabilityUseCase(ProcedureRepositoryPort procedureRepositoryPort,
+                                         ProcedureMovementRepositoryPort movementRepositoryPort) {
+        this.procedureRepositoryPort    = procedureRepositoryPort;
+        this.movementRepositoryPort = movementRepositoryPort;
     }
 
     @Transactional(readOnly = true)
     public List<ProcedureMovementResponseDto> execute(Long idTramite) {
-        tramiteRepositoryPort.findById(idTramite)
+        var tramite = procedureRepositoryPort.findById(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));
 
-        return ProcedureMapper.toMovimientoResponseList(
-                movimientoRepositoryPort.findByProcedureId(idTramite));
+        return ProcedureMapper.toMovementResponseList(
+                movementRepositoryPort.findByProcedureId(tramite.getId()));
     }
 }

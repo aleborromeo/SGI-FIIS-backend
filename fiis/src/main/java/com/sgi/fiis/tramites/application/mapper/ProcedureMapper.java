@@ -16,35 +16,35 @@ public class ProcedureMapper {
     public static ProcedureResponseDto toResponse(Procedure tramite) {
         return ProcedureResponseDto.builder()
                 .id(tramite.getId())
-                .codigoTramite(tramite.getCodigoTramite())
-                .tipoTramite(tramite.getTipoTramite())
-                .estadoActual(tramite.getEstadoActual())
-                .idSolicitante(tramite.getIdSolicitante())
-                .idGrupo(tramite.getIdGrupo())
-                .rolRevisorActual(tramite.getRolRevisorActual())
-                .observacionActual(tramite.getObservacionActual())
-                .idReferenciaProyecto(tramite.getIdReferenciaProyecto())
-                .idReferenciaTesis(tramite.getIdReferenciaTesis())
-                .idReferenciaInforme(tramite.getIdReferenciaInforme())
-                .fechaEnvio(tramite.getFechaEnvio())
-                .fechaActualizacion(tramite.getFechaActualizacion())
+                .code(tramite.getCode())
+                .procedureType(tramite.getProcedureType())
+                .currentStatus(tramite.getCurrentStatus())
+                .applicantId(tramite.getApplicantId())
+                .groupId(tramite.getGroupId())
+                .currentReviewerRole(tramite.getCurrentReviewerRole())
+                .currentObservation(tramite.getCurrentObservation())
+                .projectReferenceId(tramite.getProjectReferenceId())
+                .thesisReferenceId(tramite.getThesisReferenceId())
+                .reportReferenceId(tramite.getReportReferenceId())
+                .sentAt(tramite.getSentAt())
+                .updatedAt(tramite.getUpdatedAt())
                 .build();
     }
 
-    public static ProcedureMovementResponseDto toMovimientoResponse(ProcedureMovement movimiento) {
+    public static ProcedureMovementResponseDto toMovementResponse(ProcedureMovement movimiento) {
         return ProcedureMovementResponseDto.builder()
-                .idUsuarioAccion(movimiento.getIdUsuarioAccion())
-                .accion(movimiento.getAccion())
-                .estadoAnterior(movimiento.getEstadoAnterior())
-                .estadoNuevo(movimiento.getEstadoNuevo())
-                .observacion(movimiento.getObservacion())
-                .fechaMovimiento(movimiento.getFechaMovimiento())
+                .actionUserId(movimiento.getActionUserId())
+                .action(movimiento.getAction())
+                .previousStatus(movimiento.getPreviousStatus())
+                .newStatus(movimiento.getNewStatus())
+                .comment(movimiento.getComment())
+                .movementAt(movimiento.getMovementAt())
                 .build();
     }
 
-    public static List<ProcedureMovementResponseDto> toMovimientoResponseList(List<ProcedureMovement> movimientos) {
+    public static List<ProcedureMovementResponseDto> toMovementResponseList(List<ProcedureMovement> movimientos) {
         return movimientos.stream()
-                .map(ProcedureMapper::toMovimientoResponse)
+                .map(ProcedureMapper::toMovementResponse)
                 .toList();
     }
 }
