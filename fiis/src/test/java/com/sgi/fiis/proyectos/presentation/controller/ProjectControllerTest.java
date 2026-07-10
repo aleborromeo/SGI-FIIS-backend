@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,7 +45,7 @@ class ProjectControllerTest {
     @BeforeEach
     void setup() {
         createProjectUseCase = mock(CreateProjectUseCase.class);
-        ProjectController projectController = new ProjectController(createProjectUseCase);
+        ProjectController projectController = new ProjectController(createProjectUseCase, mock(org.springframework.jdbc.core.JdbcTemplate.class));
         MessageSource messageSource = mock(MessageSource.class);
         lenient().when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(projectController)
@@ -59,6 +60,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getUsername()).thenReturn("testuser");
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DOCENTE_INVESTIGADOR"));
                         return userDetails;
                     }
                 })
