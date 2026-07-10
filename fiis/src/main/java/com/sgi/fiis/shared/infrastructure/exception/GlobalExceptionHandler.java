@@ -1,9 +1,10 @@
 package com.sgi.fiis.shared.infrastructure.exception;
 
-import com.sgi.fiis.shared.domain.exception.BusinessException;
-import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
-import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
-import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import com.sgi.fiis.shared.domain.exception.BusinessException;
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
+import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
+import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -65,6 +66,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, message);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
         String message = messageSource.getMessage("auth.error.bad-credentials", null, "Credenciales inválidas", resolveLocale());
@@ -86,8 +97,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        String message = messageSource.getMessage("shared.error.forbidden", null, "Acceso denegado", resolveLocale());
+        return buildResponse(HttpStatus.FORBIDDEN, message);
+    }
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
+        log.error("Unhandled exception caught: ", ex);
         String message = messageSource.getMessage("shared.error.internal", null, "Error interno del servidor", resolveLocale());
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }

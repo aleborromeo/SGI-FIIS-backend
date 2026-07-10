@@ -1,12 +1,16 @@
 package com.sgi.fiis.auth.presentation.controller;
 
 import com.sgi.fiis.auth.application.dto.ChangePasswordDto;
+import com.sgi.fiis.auth.application.dto.ForgotPasswordRequestDto;
+import com.sgi.fiis.auth.application.dto.ResetPasswordRequestDto;
 import com.sgi.fiis.auth.application.dto.LoginRequestDto;
 import com.sgi.fiis.auth.application.dto.LoginResponseDto;
 import com.sgi.fiis.auth.application.dto.RegisterRequestDto;
 import com.sgi.fiis.auth.application.dto.ResendCodeRequestDto;
 import com.sgi.fiis.auth.application.dto.VerifyRegistrationRequestDto;
 import com.sgi.fiis.auth.application.usecase.ChangePasswordUseCase;
+import com.sgi.fiis.auth.application.usecase.ForgotPasswordUseCase;
+import com.sgi.fiis.auth.application.usecase.SelfResetPasswordUseCase;
 import com.sgi.fiis.auth.application.usecase.LoginUseCase;
 import com.sgi.fiis.auth.application.usecase.RegisterUseCase;
 import com.sgi.fiis.auth.application.usecase.ResendCodeUseCase;
@@ -29,11 +33,15 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
+    private static final String MESSAGE_KEY = "message";
+
     private final LoginUseCase loginUseCase;
     private final RegisterUseCase registerUseCase;
     private final VerifyRegistrationUseCase verifyRegistrationUseCase;
     private final ResendCodeUseCase resendCodeUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
+    private final ForgotPasswordUseCase forgotPasswordUseCase;
+    private final SelfResetPasswordUseCase selfResetPasswordUseCase;
     private final UserRepositoryPort userRepository;
     private final UserMapper userMapper;
     private final MessageSource messageSource;
@@ -46,6 +54,8 @@ public class AuthController {
             VerifyRegistrationUseCase verifyRegistrationUseCase,
             ResendCodeUseCase resendCodeUseCase,
             ChangePasswordUseCase changePasswordUseCase,
+            ForgotPasswordUseCase forgotPasswordUseCase,
+            SelfResetPasswordUseCase selfResetPasswordUseCase,
             UserRepositoryPort userRepository,
             UserMapper userMapper,
             MessageSource messageSource) {
@@ -54,6 +64,8 @@ public class AuthController {
         this.verifyRegistrationUseCase = verifyRegistrationUseCase;
         this.resendCodeUseCase = resendCodeUseCase;
         this.changePasswordUseCase = changePasswordUseCase;
+        this.forgotPasswordUseCase = forgotPasswordUseCase;
+        this.selfResetPasswordUseCase = selfResetPasswordUseCase;
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.messageSource = messageSource;
@@ -89,6 +101,24 @@ public class AuthController {
     public ResponseEntity<LoginResponseDto> verifyRegistration(@Valid @RequestBody VerifyRegistrationRequestDto dto) {
         LoginResponseDto response = verifyRegistrationUseCase.execute(dto.getEmail(), dto.getCode());
         return ResponseEntity.ok(response);
+    }
+
+    /** Solicitar recuperación de contraseña (envía código) */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto dto) {
+        forgotPasswordUseCase.execute(dto.getEmail());
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("auth.forgot-password.success", null, "Código de recuperación enviado con éxito.", locale);
+        return ResponseEntity.ok(Map.of(MESSAGE_KEY, message));
+    }
+
+    /** Restablecer contraseña usando código */
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDto dto) {
+        selfResetPasswordUseCase.execute(dto.getEmail(), dto.getCode(), dto.getNewPassword(), dto.getConfirmPassword());
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("auth.reset-password.success", null, "Contraseña restablecida con éxito.", locale);
+        return ResponseEntity.ok(Map.of(MESSAGE_KEY, message));
     }
 
     /** RF-06: Cambiar contraseña */

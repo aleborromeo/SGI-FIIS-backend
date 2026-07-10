@@ -155,4 +155,45 @@ class SaveCallAdapterTest {
         List<ResearchCall> result = adapter.findAll();
         assertEquals(2, result.size());
     }
+
+    @Test
+    void shouldReturnFalseWhenLineIdsIsNullOrEmpty() {
+        assertFalse(adapter.areLinesActive(null));
+        assertFalse(adapter.areLinesActive(List.of()));
+    }
+
+    @Test
+    void shouldReturnTrueWhenAllLinesAreActive() {
+        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity activeLine1 = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
+        activeLine1.setId(10);
+        activeLine1.setActive(true);
+
+        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity activeLine2 = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
+        activeLine2.setId(20);
+        activeLine2.setActive(true);
+
+        when(lineJpaRepository.findById(10)).thenReturn(Optional.of(activeLine1));
+        when(lineJpaRepository.findById(20)).thenReturn(Optional.of(activeLine2));
+
+        assertTrue(adapter.areLinesActive(List.of(10, 20)));
+    }
+
+    @Test
+    void shouldReturnFalseWhenSomeLinesAreInactiveOrNotFound() {
+        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity activeLine = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
+        activeLine.setId(10);
+        activeLine.setActive(true);
+
+        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity inactiveLine = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
+        inactiveLine.setId(20);
+        inactiveLine.setActive(false);
+
+        when(lineJpaRepository.findById(10)).thenReturn(Optional.of(activeLine));
+        when(lineJpaRepository.findById(20)).thenReturn(Optional.of(inactiveLine));
+        when(lineJpaRepository.findById(30)).thenReturn(Optional.empty());
+
+        assertFalse(adapter.areLinesActive(List.of(10, 20)));
+        assertFalse(adapter.areLinesActive(List.of(10, 30)));
+    }
 }
+

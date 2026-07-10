@@ -31,7 +31,11 @@ class AssignCoordinatorUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(99, 1))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("99");
+                .satisfies(ex -> {
+                    ResourceNotFoundException notFound = (ResourceNotFoundException) ex;
+                    assertThat(notFound.getErrorKey()).isEqualTo("grupos.error.not-found");
+                    assertThat(notFound.getArgs()).containsExactly(99);
+                });
     }
 
     @Test
@@ -42,7 +46,11 @@ class AssignCoordinatorUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute(1, 5))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("5");
+                .satisfies(ex -> {
+                    BusinessException business = (BusinessException) ex;
+                    assertThat(business.getErrorKey()).isEqualTo("grupos.error.coordinator-invalid-role");
+                    assertThat(business.getArgs()).containsExactly(5);
+                });
     }
 
     @Test

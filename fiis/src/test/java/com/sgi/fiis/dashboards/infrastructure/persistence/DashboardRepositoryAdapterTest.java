@@ -1,6 +1,7 @@
 package com.sgi.fiis.dashboards.infrastructure.persistence;
 
 import com.sgi.fiis.dashboards.domain.model.*;
+import com.sgi.fiis.dashboards.infrastructure.i18n.DashboardMessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -26,17 +28,104 @@ class DashboardRepositoryAdapterTest {
     @Mock
     private JdbcTemplate jdbcTemplate;
 
+    @Mock
+    private DashboardMessageService messages;
+
     private DashboardRepositoryAdapter repository;
 
     @BeforeEach
     void setUp() {
-        repository = new DashboardRepositoryAdapter(jdbcTemplate);
+        repository = new DashboardRepositoryAdapter(jdbcTemplate, messages);
+        mockMessages();
     }
 
     private void mockAllCounts(int value) {
         lenient()
                 .when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
                 .thenReturn(value);
+    }
+
+    private void mockMessages() {
+        lenient().when(messages.get(anyString()))
+                .thenAnswer(invocation -> {
+                    String code = invocation.getArgument(0);
+
+                    return switch (code) {
+                        case "dashboard.default.no-group-assigned",
+                             "dashboard.alert.no-group-assigned.title" -> "No group assigned";
+
+                        case "dashboard.alert.no-group-assigned.description" ->
+                                "No active group found coordinated by this user.";
+
+                        case "dashboard.default.no-group" -> "No group";
+
+                        case "dashboard.alert.observed-projects.title" -> "Observed projects";
+                        case "dashboard.alert.pending-procedures.title" -> "Pending procedures";
+                        case "dashboard.alert.active-call.title" -> "Active call for applications";
+                        case "dashboard.alert.pending-review-procedures.title" -> "Procedures pending review";
+                        case "dashboard.alert.pending-progress-reports.title" -> "Pending progress reports";
+                        case "dashboard.alert.active-call.director.description" -> "FIIS competitive fund available.";
+                        case "dashboard.alert.pending-group-procedures.title" -> "Pending procedures in your group";
+                        case "dashboard.alert.observed-procedures.title" -> "Observed procedures";
+                        case "dashboard.alert.procedures-in-progress.title" -> "Procedures in progress";
+                        case "dashboard.alert.pending-evaluations.title" -> "Pending evaluations";
+                        case "dashboard.alert.pending-signature-procedures.title" -> "Procedures pending signature";
+                        case "dashboard.alert.thesis-plan-observed.title" -> "Thesis plan observed";
+                        case "dashboard.alert.thesis-plan-observed.description" ->
+                                "Your thesis plan has observations that you must address.";
+
+                        default -> code;
+                    };
+                });
+
+        lenient().when(messages.get(anyString(), any()))
+                .thenAnswer(invocation -> {
+                    String code = invocation.getArgument(0);
+                    Object value = invocation.getArgument(1);
+
+                    return switch (code) {
+                        case "dashboard.alert.observed-projects.description" ->
+                                value + " project(s) require correction.";
+
+                        case "dashboard.alert.pending-procedures.description" ->
+                                value + " procedure(s) unresolved.";
+
+                        case "dashboard.alert.active-call.admin.description" ->
+                                value + " open call(s) for applications.";
+
+                        case "dashboard.alert.pending-review-procedures.description" ->
+                                value + " procedure(s) awaiting your review.";
+
+                        case "dashboard.alert.pending-progress-reports.description" ->
+                                value + " progress report(s) not yet approved.";
+
+                        case "dashboard.alert.pending-group-procedures.description" ->
+                                value + " procedure(s) from your group unresolved.";
+
+                        case "dashboard.alert.observed-procedures.description" ->
+                                value + " procedure(s) require corrections.";
+
+                        case "dashboard.alert.procedures-in-progress.teacher.description" ->
+                                value + " procedure(s) still under review.";
+
+                        case "dashboard.alert.procedures-in-progress.student.description" ->
+                                value + " procedure(s) under review.";
+
+                        case "dashboard.alert.active-call.general.description" ->
+                                "There are " + value + " open call(s) for applications.";
+
+                        case "dashboard.alert.pending-evaluations.description" ->
+                                value + " assigned evaluation(s) not yet completed.";
+
+                        case "dashboard.alert.pending-signature-procedures.description" ->
+                                value + " procedure(s) awaiting Dean's approval.";
+
+                        case "dashboard.alert.active-call.faculty.description" ->
+                                "There are " + value + " open call(s) for applications in the faculty.";
+
+                        default -> code;
+                    };
+                });
     }
 
     @Test
@@ -137,6 +226,7 @@ class DashboardRepositoryAdapterTest {
         assertNotNull(result.getAlerts());
         assertEquals(1, result.getAlerts().size());
         assertEquals("No group assigned", result.getAlerts().get(0).getTitle());
+        assertEquals("No active group found coordinated by this user.", result.getAlerts().get(0).getDescription());
     }
 
     @Test

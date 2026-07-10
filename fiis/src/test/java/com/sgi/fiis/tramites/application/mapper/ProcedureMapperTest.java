@@ -75,4 +75,13 @@ class ProcedureMapperTest {
         assertNull(dto.getComment());
         assertEquals(fecha, dto.getMovementAt());
     }
+
+    @Test
+    void testConstructorIsPrivate() throws NoSuchMethodException {
+        java.lang.reflect.Constructor<ProcedureMapper> constructor = ProcedureMapper.class.getDeclaredConstructor();
+        assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);
+    }
 }
+

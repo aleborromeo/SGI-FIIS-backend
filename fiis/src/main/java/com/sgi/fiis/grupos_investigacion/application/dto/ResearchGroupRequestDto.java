@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResearchGroupRequestDto {
 
-    @NotBlank(message = "Group code is required")
-    @Size(max = 20, message = "Group code must not exceed 20 characters")
+    @NotBlank(message = "{grupos.validation.codigo.required}")
+    @Size(max = 20, message = "{grupos.validation.codigo.max-size}")
     private String groupCode;
 
-    @NotBlank(message = "Group name is required")
-    @Size(max = 150, message = "Group name must not exceed 150 characters")
+    @NotBlank(message = "{grupos.validation.nombre.required}")
+    @Size(max = 150, message = "{grupos.validation.nombre.max-size}")
     private String groupName;
 }

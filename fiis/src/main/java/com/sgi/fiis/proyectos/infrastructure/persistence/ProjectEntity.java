@@ -77,10 +77,10 @@ public class ProjectEntity {
     @JoinColumn(name = "id_convocatoria")
     private ResearchCallEntity researchCall;
 
-    @Column(name = "id_documento_propuesta")
+    @Column(name = "id_documento_actual")
     private Integer documentId;
 
-    @Column(name = "estado", nullable = false, length = 50)
+    @Column(name = "estado_proyecto", nullable = false, length = 50)
     private String status;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)

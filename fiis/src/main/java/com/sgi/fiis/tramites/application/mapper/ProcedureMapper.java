@@ -9,7 +9,9 @@ import java.util.List;
 
 public class ProcedureMapper {
 
-    private ProcedureMapper() {}
+    private ProcedureMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static ProcedureResponseDto toResponse(Procedure tramite) {
         return ProcedureResponseDto.builder()

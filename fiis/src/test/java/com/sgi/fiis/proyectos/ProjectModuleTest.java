@@ -13,7 +13,7 @@ import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -33,10 +33,10 @@ class ProjectModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
     private static final LocalDate FIXED_TODAY     = LocalDate.of(2026, Month.JUNE, 1);
-    private static final LocalDate FIXED_PAST_1D   = LocalDate.of(2026, Month.MAY, 31);
     private static final LocalDate FIXED_FUTURE_6M = LocalDate.of(2026, Month.DECEMBER, 1);
-    private static final LocalDate FIXED_FUTURE_1M = LocalDate.of(2026, Month.JULY, 1);
     private static final LocalDate FIXED_FUTURE_10 = LocalDate.of(2026, Month.JUNE, 11);
+    private static final LocalDate CALL_OPEN_START = LocalDate.of(2000, Month.JANUARY, 1);
+    private static final LocalDate CALL_OPEN_END   = LocalDate.of(2100, Month.DECEMBER, 31);
 
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
@@ -46,9 +46,9 @@ class ProjectModuleTest {
 
     @BeforeEach
     void setup() {
-        saveProjectPort = Mockito.mock(SaveProjectPort.class);
-        saveCallPort = Mockito.mock(SaveCallPort.class);
-        createProcedurePort = Mockito.mock(CreateProcedurePort.class);
+        saveProjectPort = mock(SaveProjectPort.class);
+        saveCallPort = mock(SaveCallPort.class);
+        createProcedurePort = mock(CreateProcedurePort.class);
         fixedClock = Clock.fixed(Instant.parse("2026-06-01T00:00:00Z"), ZoneId.of("UTC"));
         createProjectInteractor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort);
         createProjectInteractor.setClock(fixedClock);
@@ -75,7 +75,8 @@ class ProjectModuleTest {
         when(saveProjectPort.getGroupCode(2)).thenReturn(Optional.of("GINSOFT"));
         when(saveProjectPort.getLineName(1)).thenReturn(Optional.of("Computacion"));
 
-        ResearchCall call = new ResearchCall(4, "Call 2026", "Description", FIXED_PAST_1D, FIXED_FUTURE_1M, CallStatus.OPEN, null, null);
+        ResearchCall call = new ResearchCall(4, "Call 2026", "Description", CALL_OPEN_START, CALL_OPEN_END, CallStatus.OPEN,
+                null, null);
         when(saveCallPort.findById(4)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(
