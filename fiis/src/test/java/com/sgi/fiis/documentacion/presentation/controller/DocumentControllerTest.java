@@ -96,7 +96,7 @@ class DocumentControllerTest {
                 "file",
                 "manual_investigacion.pdf",
                 MediaType.APPLICATION_PDF_VALUE,
-                "contenido-binario-de-prueba".getBytes()
+                "%PDF-1.4 contenido-binario-de-prueba".getBytes()
         );
 
         DocumentResponseDto simulatedDto =
@@ -156,7 +156,7 @@ class DocumentControllerTest {
                 "file",
                 "error.pdf",
                 MediaType.APPLICATION_PDF_VALUE,
-                "datos-de-prueba".getBytes()
+                "%PDF-1.4 datos-de-prueba".getBytes()
         );
 
         // Cambiamos a IllegalArgumentException para que sea un error no verificado compatible con el Servlet de MockMvc
