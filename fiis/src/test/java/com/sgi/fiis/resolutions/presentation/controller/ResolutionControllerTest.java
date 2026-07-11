@@ -39,6 +39,9 @@ class ResolutionControllerTest {
     private IssueResolutionUseCase issueResolutionUseCase;
 
     @Mock
+    private GetResolutionUseCase getResolutionUseCase;
+
+    @Mock
     private MessageSource messageSource;
 
     private ResolutionController resolutionController;
@@ -47,7 +50,7 @@ class ResolutionControllerTest {
 
     @BeforeEach
     void setUp() {
-        resolutionController = new ResolutionController(issueResolutionUseCase, messageSource);
+        resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
         mockMvc = MockMvcBuilders.standaloneSetup(resolutionController).build();
 
         sampleResolution = new Resolution(
