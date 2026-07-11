@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ProcedureMovementResponseDto {
 
-    private Long idUsuarioAccion;
-    private String accion;
-    private ProcedureStatus estadoAnterior;
-    private ProcedureStatus estadoNuevo;
-    private String observacion;
-    private LocalDateTime fechaMovimiento;
+    private Long actionUserId;
+    private String action;
+    private ProcedureStatus previousStatus;
+    private ProcedureStatus newStatus;
+    private String comment;
+    private LocalDateTime movementAt;
 }

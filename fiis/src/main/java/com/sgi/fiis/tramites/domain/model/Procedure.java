@@ -15,68 +15,64 @@ import java.util.List;
 public class Procedure {
 
     private Long id;
-    private String codigoTramite;
-    private ProcedureType tipoTramite;
-    private Long idSolicitante;
-    private Long idGrupo;
-    private ProcedureStatus estadoActual;
-    private RoleEnum rolRevisorActual;
-    private String observacionActual;
+    private String code;
+    private ProcedureType procedureType;
+    private Long applicantId;
+    private Long groupId;
+    private ProcedureStatus currentStatus;
+    private RoleEnum currentReviewerRole;
+    private String currentObservation;
 
-    // Arco excluyente: exactamente uno debe ser no-nulo según tipoTramite
-    private Long idReferenciaProyecto;
-    private Long idReferenciaTesis;
-    private Long idReferenciaInforme;
+    private Long projectReferenceId;
+    private Long thesisReferenceId;
+    private Long reportReferenceId;
 
-    private LocalDateTime fechaEnvio;
-    private LocalDateTime fechaActualizacion;
+    private LocalDateTime sentAt;
+    private LocalDateTime updatedAt;
 
     @Builder.Default
-    private List<ProcedureMovement> movimientos = new ArrayList<>();
+    private List<ProcedureMovement> movements = new ArrayList<>();
 
-    // Expuesto como vista inmutable: solo transitionTo puede agregar movimientos
     public List<ProcedureMovement> getMovements() {
-        return Collections.unmodifiableList(movimientos);
+        return Collections.unmodifiableList(movements);
     }
 
     public void transitionTo(
-            ProcedureStatus nuevoEstado,
-            RoleEnum rolQueEjecuta,
-            Long idUsuarioAccion,
-            String accion,
-            String observacion,
-            RoleEnum nuevoRolRevisor) {
+            ProcedureStatus newStatus,
+            RoleEnum executingRole,
+            Long actionUserId,
+            String action,
+            String comment,
+            RoleEnum newReviewerRole) {
 
-        if (!estadoActual.canTransitionTo(nuevoEstado)) {
-            throw new InvalidTransitionException(estadoActual, nuevoEstado, rolQueEjecuta);
+        if (!currentStatus.canTransitionTo(newStatus)) {
+            throw new InvalidTransitionException(currentStatus, newStatus, executingRole);
         }
 
-        ProcedureStatus estadoAnterior = this.estadoActual;
-        this.estadoActual     = nuevoEstado;
-        this.rolRevisorActual = nuevoRolRevisor;
-        this.observacionActual = observacion;
-        this.fechaActualizacion = LocalDateTime.now(ZoneId.systemDefault());
+        ProcedureStatus previousStatus = this.currentStatus;
+        this.currentStatus     = newStatus;
+        this.currentReviewerRole = newReviewerRole;
+        this.currentObservation = comment;
+        this.updatedAt = LocalDateTime.now(ZoneId.systemDefault());
 
-        movimientos.add(ProcedureMovement.builder()
-                .idUsuarioAccion(idUsuarioAccion)
-                .accion(accion)
-                .estadoAnterior(estadoAnterior)
-                .estadoNuevo(nuevoEstado)
-                .observacion(observacion)
-                .fechaMovimiento(this.fechaActualizacion)
+        movements.add(ProcedureMovement.builder()
+                .actionUserId(actionUserId)
+                .action(action)
+                .previousStatus(previousStatus)
+                .newStatus(newStatus)
+                .comment(comment)
+                .movementAt(this.updatedAt)
                 .build());
     }
 
-    // No se valida en el builder porque la capa de infraestructura reconstruye tramites
-    // desde BD sin pasar por esta regla. Es responsabilidad del use case llamarla al crear.
     public void validateExclusiveReference() {
-        int conteo = (idReferenciaProyecto != null ? 1 : 0)
-                   + (idReferenciaTesis    != null ? 1 : 0)
-                   + (idReferenciaInforme  != null ? 1 : 0);
-        if (conteo != 1) {
+        int count = (projectReferenceId != null ? 1 : 0)
+                  + (thesisReferenceId    != null ? 1 : 0)
+                  + (reportReferenceId    != null ? 1 : 0);
+        if (count != 1) {
             throw new IllegalArgumentException(
                     "El trámite debe referenciar exactamente una entidad origen " +
-                    "(proyecto, tesis o informe). Referencias encontradas: " + conteo
+                    "(proyecto, tesis o informe). Referencias encontradas: " + count
             );
         }
     }

@@ -1,7 +1,6 @@
 package com.sgi.fiis.shared.infrastructure.config;
 
 import org.junit.jupiter.api.Test;
-
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
@@ -24,12 +23,10 @@ class LocaleConfigTest {
         assertTrue(resolver instanceof AcceptHeaderLocaleResolver);
 
         AcceptHeaderLocaleResolver acceptHeaderResolver = (AcceptHeaderLocaleResolver) resolver;
-        
-        // Assert supported locales
+
         assertNotNull(acceptHeaderResolver.getSupportedLocales());
         assertEquals(2, acceptHeaderResolver.getSupportedLocales().size());
         assertTrue(acceptHeaderResolver.getSupportedLocales().contains(new Locale("es")));
         assertTrue(acceptHeaderResolver.getSupportedLocales().contains(new Locale("en")));
     }
-
 }

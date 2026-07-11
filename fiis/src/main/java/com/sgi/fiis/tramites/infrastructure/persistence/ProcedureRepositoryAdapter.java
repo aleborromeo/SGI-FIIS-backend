@@ -1,11 +1,15 @@
 package com.sgi.fiis.tramites.infrastructure.persistence;
 
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
+import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
 import com.sgi.fiis.tramites.domain.model.ProcedureType;
 import com.sgi.fiis.tramites.domain.model.Procedure;
 import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import com.sgi.fiis.users.domain.model.RoleEnum;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +21,11 @@ import java.util.stream.Collectors;
 @Component
 public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
-    private final SpringDataProcedureRepository tramiteRepository;
-    private final SpringDataProcedureMovementRepository movimientoRepository;
+    private final SpringDataProcedureRepository procedureRepository;
+    private final SpringDataProcedureMovementRepository movementRepository;
+    private final SpringDataUserRepository userRepository;
+    private final ResearchGroupJpaRepository groupRepository;
+    private final ProjectJpaRepository projectRepository;
 
     public ProcedureRepositoryAdapter(
             SpringDataProcedureRepository tramiteRepository,
@@ -30,31 +37,30 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     @Override
     @Transactional
     public Procedure save(Procedure tramite) {
-        ProcedureEntity saved = tramiteRepository.save(toEntity(tramite));
+        ProcedureEntity saved = procedureRepository.save(toEntity(tramite));
 
-        // Movimientos son append-only: persiste solo los que aún no están en DB
-        long existentes = movimientoRepository.countByProcedureId(saved.getId());
+        long existentes = movementRepository.countByProcedure_Id(Long.valueOf(saved.getId()));
         tramite.getMovements().stream()
                 .skip(existentes)
-                .forEach(mov -> movimientoRepository.save(toMovimientoEntity(mov, saved.getId())));
+                .forEach(mov -> movementRepository.save(toMovimientoEntity(mov, saved.getId())));
 
         return toDomain(saved, new ArrayList<>(tramite.getMovements()));
     }
 
     @Override
     public Optional<Procedure> findById(Long id) {
-        return tramiteRepository.findById(id.intValue())
-                .map(entity -> toDomain(entity, cargarMovimientos(entity.getId())));
+        return procedureRepository.findById(id.intValue())
+                .map(entity -> toDomain(entity, loadMovements(Long.valueOf(entity.getId()))));
     }
 
     @Override
     public Optional<Procedure> findByCode(String codigoTramite) {
-        return tramiteRepository.findByCode(codigoTramite)
-                .map(entity -> toDomain(entity, cargarMovimientos(entity.getId())));
+        return procedureRepository.findByCode(codigoTramite)
+                .map(entity -> toDomain(entity, loadMovements(Long.valueOf(entity.getId()))));
     }
 
-    private List<ProcedureMovement> cargarMovimientos(Integer idTramite) {
-        return movimientoRepository.findByProcedureIdOrderByDateAsc(idTramite)
+    private List<ProcedureMovement> loadMovements(Long procedureId) {
+        return movementRepository.findByProcedure_IdOrderByMovementAtAsc(procedureId)
                 .stream()
                 .map(this::toMovimientoDomain)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -62,7 +68,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     public List<Procedure> findByApplicantId(Long idSolicitante) {
-        return tramiteRepository.findByApplicantId(idSolicitante)
+        return procedureRepository.findByApplicant_Id(idSolicitante)
                 .stream()
                 .map(entity -> toDomain(entity, new ArrayList<>()))
                 .toList();
@@ -70,7 +76,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     public List<Procedure> findByStatus(ProcedureStatus estado) {
-        return tramiteRepository.findByStatus(estado.name())
+        return procedureRepository.findByStatus(estado.name())
                 .stream()
                 .map(entity -> toDomain(entity, new ArrayList<>()))
                 .toList();
@@ -78,11 +84,29 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     public boolean existsByCode(String codigoTramite) {
-        return tramiteRepository.existsByCode(codigoTramite);
+        return procedureRepository.existsByCode(codigoTramite);
     }
 
     private Procedure toDomain(ProcedureEntity entity, List<ProcedureMovement> movimientos) {
         return Procedure.builder()
+                .id(entity.getId().longValue())
+                .code(entity.getCode())
+                .procedureType(ProcedureType.fromDbValue(entity.getProcedureType()))
+                .applicantId(entity.getApplicant().getId())
+                .groupId(entity.getGroup().getId().longValue())
+                .currentStatus(ProcedureStatus.valueOf(entity.getStatus()))
+                .currentReviewerRole(entity.getReviewerRole() != null
+                        ? RoleEnum.valueOf(entity.getReviewerRole())
+                        : null)
+                .currentObservation(null)
+                .projectReferenceId(entity.getProjectReference() != null
+                        ? entity.getProjectReference().getId().longValue()
+                        : null)
+                .thesisReferenceId(null)
+                .reportReferenceId(null)
+                .sentAt(entity.getSentAt())
+                .updatedAt(entity.getUpdatedAt())
+                .movements(movimientos)
                 .id(entity.getId() != null ? entity.getId().longValue() : null)
                 .codigoTramite(entity.getCode())
                 .tipoTramite(entity.getProcedureType() != null ? ProcedureType.valueOf(entity.getProcedureType()) : null)
@@ -103,8 +127,19 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     private ProcedureEntity toEntity(Procedure tramite) {
         ProcedureEntity entity = new ProcedureEntity();
-        if (tramite.getId() != null) {
-            entity.setId(tramite.getId().intValue());
+        entity.setId(tramite.getId() != null ? tramite.getId().intValue() : null);
+        entity.setCode(tramite.getCode());
+        entity.setProcedureType(tramite.getProcedureType().getDbValue());
+        entity.setApplicant(userRepository.getReferenceById(tramite.getApplicantId()));
+        entity.setGroup(groupRepository.getReferenceById(tramite.getGroupId().intValue()));
+        entity.setStatus(tramite.getCurrentStatus().name());
+        entity.setReviewerRole(tramite.getCurrentReviewerRole() != null
+                ? tramite.getCurrentReviewerRole().name()
+                : null);
+        entity.setSentAt(tramite.getSentAt());
+        entity.setUpdatedAt(tramite.getUpdatedAt());
+        if (tramite.getProjectReferenceId() != null) {
+            entity.setProjectReference(projectRepository.getReferenceById(tramite.getProjectReferenceId().intValue()));
         }
         entity.setCode(tramite.getCodigoTramite());
         entity.setProcedureType(tramite.getTipoTramite().name());
@@ -141,6 +176,12 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     private ProcedureMovement toMovimientoDomain(ProcedureMovementEntity entity) {
         return ProcedureMovement.builder()
+                .actionUserId(entity.getActionUser().getId())
+                .action(entity.getAction())
+                .previousStatus(ProcedureStatus.valueOf(entity.getPreviousState()))
+                .newStatus(ProcedureStatus.valueOf(entity.getNewState()))
+                .comment(entity.getComment())
+                .movementAt(entity.getMovementAt())
                 .idUsuarioAccion(entity.getActionUser() != null ? entity.getActionUser().getId().longValue() : null)
                 .accion(entity.getAction())
                 .estadoAnterior(entity.getPreviousState() != null ? ProcedureStatus.valueOf(entity.getPreviousState()) : null)
@@ -151,8 +192,15 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .build();
     }
 
-    private ProcedureMovementEntity toMovimientoEntity(ProcedureMovement domain, Integer idTramite) {
+    private ProcedureMovementEntity toMovimientoEntity(ProcedureMovement domain, Integer procedureId) {
         ProcedureMovementEntity entity = new ProcedureMovementEntity();
+        entity.setProcedure(procedureRepository.getReferenceById(procedureId));
+        entity.setActionUser(userRepository.getReferenceById(domain.getActionUserId()));
+        entity.setAction(domain.getAction());
+        entity.setPreviousState(domain.getPreviousStatus().name());
+        entity.setNewState(domain.getNewStatus().name());
+        entity.setComment(domain.getComment());
+        entity.setMovementAt(domain.getMovementAt());
         ProcedureEntity proc = new ProcedureEntity();
         proc.setId(idTramite);
         entity.setProcedure(proc);

@@ -1,5 +1,6 @@
 package com.sgi.fiis.observations.presentation.controller;
 
+import com.sgi.fiis.TestcontainersConfig;
 import tools.jackson.databind.ObjectMapper;
 import com.sgi.fiis.observations.application.dto.ObservationRequestDTO;
 import com.sgi.fiis.observations.application.dto.ObservationResponseDTO;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("ObservationController Integration Tests")
-class ObservationControllerTest {
+class ObservationControllerTest extends TestcontainersConfig {
 
     @Autowired
     private MockMvc mockMvc;

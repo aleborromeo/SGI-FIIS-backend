@@ -25,10 +25,10 @@ import static org.mockito.Mockito.*;
 class GetTraceabilityUseCaseTest {
 
     @Mock
-    private ProcedureRepositoryPort tramiteRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
 
     @Mock
-    private ProcedureMovementRepositoryPort movimientoRepositoryPort;
+    private ProcedureMovementRepositoryPort movementRepositoryPort;
 
     @InjectMocks
     private GetTraceabilityUseCase getTraceabilityUseCase;
@@ -37,48 +37,48 @@ class GetTraceabilityUseCaseTest {
     void execute_tramiteExiste_retornaListaMovimientos() {
         Procedure tramite = Procedure.builder()
                 .id(1L)
-                .tipoTramite(ProcedureType.PROYECTO)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .idSolicitante(2L)
+                .procedureType(ProcedureType.PROJECT)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .applicantId(2L)
                 .build();
         ProcedureMovement mov = ProcedureMovement.builder()
-                .idUsuarioAccion(2L)
-                .accion("PRESENTADO_POR_SOLICITANTE")
-                .estadoAnterior(ProcedureStatus.REGISTRADO)
-                .estadoNuevo(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .fechaMovimiento(LocalDateTime.now())
+                .actionUserId(2L)
+                .action("PRESENTADO_POR_SOLICITANTE")
+                .previousStatus(ProcedureStatus.REGISTRADO)
+                .newStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movementAt(LocalDateTime.now())
                 .build();
 
-        when(tramiteRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
-        when(movimientoRepositoryPort.findByProcedureId(1L)).thenReturn(List.of(mov));
+        when(procedureRepositoryPort.findById(1L)).thenReturn(Optional.of(tramite));
+        when(movementRepositoryPort.findByProcedureId(1L)).thenReturn(List.of(mov));
 
         List<ProcedureMovementResponseDto> result = getTraceabilityUseCase.execute(1L);
 
         assertEquals(1, result.size());
-        assertEquals("PRESENTADO_POR_SOLICITANTE", result.get(0).getAccion());
+        assertEquals("PRESENTADO_POR_SOLICITANTE", result.get(0).getAction());
     }
 
     @Test
     void execute_tramiteConMultiplesMovimientos_retornaListaCompleta() {
         Procedure tramite = Procedure.builder()
                 .id(2L)
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .estadoActual(ProcedureStatus.PENDIENTE_DIRECCION)
-                .idSolicitante(3L)
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .currentStatus(ProcedureStatus.PENDIENTE_DIRECCION)
+                .applicantId(3L)
                 .build();
         List<ProcedureMovement> movimientos = List.of(
-                ProcedureMovement.builder().accion("PRESENTADO_POR_SOLICITANTE")
-                        .estadoAnterior(ProcedureStatus.REGISTRADO)
-                        .estadoNuevo(ProcedureStatus.PENDIENTE_COORDINADOR)
-                        .fechaMovimiento(LocalDateTime.now()).build(),
-                ProcedureMovement.builder().accion("APROBADO_POR_COORDINADOR")
-                        .estadoAnterior(ProcedureStatus.PENDIENTE_COORDINADOR)
-                        .estadoNuevo(ProcedureStatus.PENDIENTE_DIRECCION)
-                        .fechaMovimiento(LocalDateTime.now()).build()
+                ProcedureMovement.builder().action("PRESENTADO_POR_SOLICITANTE")
+                        .previousStatus(ProcedureStatus.REGISTRADO)
+                        .newStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                        .movementAt(LocalDateTime.now()).build(),
+                ProcedureMovement.builder().action("APROBADO_POR_COORDINADOR")
+                        .previousStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                        .newStatus(ProcedureStatus.PENDIENTE_DIRECCION)
+                        .movementAt(LocalDateTime.now()).build()
         );
 
-        when(tramiteRepositoryPort.findById(2L)).thenReturn(Optional.of(tramite));
-        when(movimientoRepositoryPort.findByProcedureId(2L)).thenReturn(movimientos);
+        when(procedureRepositoryPort.findById(2L)).thenReturn(Optional.of(tramite));
+        when(movementRepositoryPort.findByProcedureId(2L)).thenReturn(movimientos);
 
         List<ProcedureMovementResponseDto> result = getTraceabilityUseCase.execute(2L);
 
@@ -87,7 +87,7 @@ class GetTraceabilityUseCaseTest {
 
     @Test
     void execute_tramiteNoEncontrado_lanzaResourceNotFoundException() {
-        when(tramiteRepositoryPort.findById(999L)).thenReturn(Optional.empty());
+        when(procedureRepositoryPort.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> getTraceabilityUseCase.execute(999L));

@@ -20,6 +20,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     private static final String ROLE_COORDINADOR_GRUPO = "ROLE_COORDINADOR_GRUPO";
     private static final String ROLE_DIRECTOR_INVESTIGACION = "ROLE_DIRECTOR_INVESTIGACION";
     private static final String ROLE_DECANO = "ROLE_DECANO";
+    private static final String MSG_USUARIO_NO_AUTENTICADO = "No se pudo identificar al usuario autenticado";
 
     private final ThesisPlanRepositoryPort planRepository;
     private final ProcedureWorkflowPort tramiteWorkflow;
@@ -199,7 +200,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
                     .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
             boolean esEstudiante = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
-            
+
             if (esEstudiante) {
                 throw new BusinessRuleViolationException("Los estudiantes no tienen permisos para listar planes de tesis de un grupo");
             }
@@ -228,7 +229,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             return userDetails.getId();
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private void validarRolCoordinador() {
@@ -241,7 +242,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private void validarRolDirector() {
@@ -254,7 +255,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private void validarRolDecano() {
@@ -267,7 +268,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private Long resolverIdEstudianteSegunRol(Long idEstudiante) {
@@ -280,7 +281,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             }
             return idEstudiante;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private void validarRevisorParaRol(ReviewerRole revisor) {
@@ -302,7 +303,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             }
             return;
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al usuario autenticado");
+        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private ThesisPlan obtenerPlan(Integer idPlanTesis) {

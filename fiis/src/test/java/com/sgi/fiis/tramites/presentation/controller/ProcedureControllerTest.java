@@ -54,19 +54,19 @@ class ProcedureControllerTest {
     @DisplayName("create: sets applicant id from JWT, not from request body")
     void create_setsApplicantIdFromJwt_returns201() {
         ProcedureRequestDto dto = ProcedureRequestDto.builder()
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idReferenciaTesis(1L)
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .thesisReferenceId(1L)
                 .build();
         ProcedureResponseDto expected = ProcedureResponseDto.builder()
                 .id(1L)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
                 .build();
         when(createProcedureUseCase.execute(any())).thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.create(dto, student);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(5L, dto.getIdSolicitante()); // security: set from JWT, not HTTP body
+        assertEquals(5L, dto.getApplicantId()); // security: set from JWT, not HTTP body
         assertSame(expected, response.getBody());
         verify(createProcedureUseCase).execute(dto);
     }
@@ -147,8 +147,8 @@ class ProcedureControllerTest {
     @DisplayName("getTraceability: returns movement list without role requirement")
     void getTraceability_returnsMovements_noRoleRequired() {
         List<ProcedureMovementResponseDto> movements = List.of(
-                ProcedureMovementResponseDto.builder().accion("PRESENTADO_POR_SOLICITANTE").build(),
-                ProcedureMovementResponseDto.builder().accion("APROBADO_COORDINADOR").build()
+                ProcedureMovementResponseDto.builder().action("PRESENTADO_POR_SOLICITANTE").build(),
+                ProcedureMovementResponseDto.builder().action("APROBADO_COORDINADOR").build()
         );
         when(getTraceabilityUseCase.execute(6L)).thenReturn(movements);
 

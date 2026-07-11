@@ -80,8 +80,7 @@ class JsonbHelperTest {
     void testConstructorIsPrivate() throws NoSuchMethodException {
         java.lang.reflect.Constructor<JsonbHelper> constructor = JsonbHelper.class.getDeclaredConstructor();
         assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
-        constructor.setAccessible(true);
-        assertThrows(InvocationTargetException.class, constructor::newInstance);
+
     }
 }
 

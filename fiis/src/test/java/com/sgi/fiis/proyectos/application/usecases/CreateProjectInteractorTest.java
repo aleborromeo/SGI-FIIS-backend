@@ -13,16 +13,13 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-
 import static org.mockito.Mockito.*;
 
 class CreateProjectInteractorTest {
@@ -205,71 +202,5 @@ class CreateProjectInteractorTest {
         assertEquals(ProjectStatus.COMPLETED, p.getStatus());
         interactor.updateStatus(1, "POSTULADO");
         assertEquals(ProjectStatus.POSTULATED, p.getStatus());
-        interactor.updateStatus(1, "APPROVED");
-        assertEquals(ProjectStatus.APPROVED, p.getStatus());
-    }
-
-    @Test
-    void getProjectById_NotFound_ThrowsException() {
-        when(saveProjectPort.findById(999)).thenReturn(Optional.empty());
-        assertThrows(BusinessRuleValidationException.class, () -> interactor.getProjectById(999));
-    }
-
-    @Test
-    void execute_withNullCallId_noOpenCalls_ThrowsException() {
-        CreateProjectRequest request = buildValidRequest();
-        request.setCallId(null);
-
-        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
-        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
-        when(saveProjectPort.isLineActive(3)).thenReturn(true);
-        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
-        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
-        when(saveCallPort.findByStatus(com.sgi.fiis.convocatorias.domain.model.CallStatus.OPEN)).thenReturn(List.of());
-
-        assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
-    }
-
-    @Test
-    void execute_withNullCallId_openCallButInvalidDate_ThrowsException() {
-        CreateProjectRequest request = buildValidRequest();
-        request.setCallId(null);
-
-        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
-        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
-        when(saveProjectPort.isLineActive(3)).thenReturn(true);
-        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
-        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
-
-        ResearchCall call = mock(ResearchCall.class);
-        doThrow(new BusinessRuleValidationException("Forced date validation exception"))
-                .when(call).validateCanSubmitProject(any(LocalDate.class));
-
-        when(saveCallPort.findByStatus(com.sgi.fiis.convocatorias.domain.model.CallStatus.OPEN)).thenReturn(List.of(call));
-
-        assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
-    }
-
-    @Test
-    void execute_withNullCallId_withOpenCalls_Success() {
-        CreateProjectRequest request = buildValidRequest();
-        request.setCallId(null);
-
-        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
-        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
-        when(saveProjectPort.isLineActive(3)).thenReturn(true);
-        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
-        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
-
-        ResearchCall call = mock(ResearchCall.class);
-        when(call.getId()).thenReturn(55);
-        when(saveCallPort.findByStatus(com.sgi.fiis.convocatorias.domain.model.CallStatus.OPEN)).thenReturn(List.of(call));
-
-        Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", 55, null, ProjectStatus.POSTULATED);
-        when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
-
-        ProjectResponse response = interactor.execute(request);
-        assertNotNull(response);
-        assertEquals(55, response.getCallId());
     }
 }

@@ -1,10 +1,9 @@
 package com.sgi.fiis.convocatorias.domain.model;
 
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 /**
  * Domain model representing a research call (convocatoria).
@@ -21,6 +20,19 @@ public class ResearchCall {
     private Integer creatorId;
     private final List<Integer> researchLineIds;
 
+    /**
+     * Constructs a ResearchCall with the given parameters.
+     *
+     * @param id               unique identifier
+     * @param title            call title
+     * @param description      call description
+     * @param startDate        start date of submission period
+     * @param endDate          end date of submission period
+     * @param status           current status of the call
+     * @param documentId       associated document identifier
+     * @param researchLineIds  list of research line identifiers
+     * @throws BusinessRuleValidationException if endDate is before startDate
+     */
     private ResearchCall(Builder builder) {
         if (builder.endDate.isBefore(builder.startDate)) {
             throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
@@ -72,7 +84,6 @@ public class ResearchCall {
         private CallStatus status;
         private Integer documentId;
         private Integer creatorId;
-        // Inicializamos la lista vacía por defecto para evitar nulos molestos
         private List<Integer> researchLineIds = new ArrayList<>();
 
         private Builder() {}
@@ -85,8 +96,6 @@ public class ResearchCall {
         public Builder status(CallStatus status)                { this.status = status; return this; }
         public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
         public Builder creatorId(Integer creatorId)             { this.creatorId = creatorId; return this; }
-        
-        // SOLUCIÓN DEFINITIVA PARA DEEPSOURCE
         public Builder researchLineIds(List<Integer> lineIds) { 
             if (lineIds == null) {
                 this.researchLineIds = new ArrayList<>();
@@ -95,8 +104,6 @@ public class ResearchCall {
             }
             return this; 
         }
-
-        public ResearchCall build() { return new ResearchCall(this); }
     }
 
     /**
@@ -104,7 +111,7 @@ public class ResearchCall {
      *
      * @param submissionDate the date the project is being submitted
      * @throws BusinessRuleValidationException if the call is not open or the
-     * date is outside the submission period
+     *                                         date is outside the submission period
      */
     public void validateCanSubmitProject(LocalDate submissionDate) {
         if (status != CallStatus.OPEN) {

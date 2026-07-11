@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -77,11 +76,11 @@ class DocumentControllerTest {
      * Crea un Authentication simulado con CustomUserDetails como principal mockeado.
      */
     private UsernamePasswordAuthenticationToken createAuth(Long userId, String role) {
-        CustomUserDetails userDetails = mock(CustomUserDetails.class);
-        when(userDetails.getId()).thenReturn(userId);
-        when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
-        when(userDetails.getAuthorities())
-                .thenReturn((java.util.Collection) List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+        CustomUserDetails userDetails = org.mockito.Mockito.mock(CustomUserDetails.class);
+        org.mockito.Mockito.when(userDetails.getId()).thenReturn(userId);
+        org.mockito.Mockito.when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
+        org.mockito.Mockito.when(userDetails.getAuthorities())
+                .thenReturn(List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,

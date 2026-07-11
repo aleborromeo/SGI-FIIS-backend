@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.presentation.controller;
 
+import com.sgi.fiis.TestcontainersConfig;
 import tools.jackson.databind.ObjectMapper;
 import com.sgi.fiis.users.application.dto.UserRequestDto;
 import com.sgi.fiis.users.application.usecase.*;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("UserController Integration Tests")
-class UserControllerTest {
+class UserControllerTest extends TestcontainersConfig {
 
         @Autowired
         private MockMvc mockMvc;

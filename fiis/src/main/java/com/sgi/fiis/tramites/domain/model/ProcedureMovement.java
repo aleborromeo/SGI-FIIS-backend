@@ -9,11 +9,10 @@ import java.time.LocalDateTime;
 @Builder
 public class ProcedureMovement {
 
-    private final Long idUsuarioAccion;
-    private final String accion;
-    private final ProcedureStatus estadoAnterior;
-    private final ProcedureStatus estadoNuevo;
-    private final String observacion;
-    private final LocalDateTime fechaMovimiento;
-    private final Long idDocumentoAdjunto;
+    private final Long actionUserId;
+    private final String action;
+    private final ProcedureStatus previousStatus;
+    private final ProcedureStatus newStatus;
+    private final String comment;
+    private final LocalDateTime movementAt;
 }

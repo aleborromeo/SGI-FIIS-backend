@@ -1,5 +1,6 @@
 package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,14 +13,15 @@ class ResearchGroupEntityTest {
     @Test
     @DisplayName("Should get and set all fields correctly")
     void testGettersAndSetters() {
+        UserEntity coordinator = new UserEntity();
+        coordinator.setId(10L);
+
         ResearchGroupEntity entity = new ResearchGroupEntity();
-        com.sgi.fiis.users.infrastructure.persistence.UserEntity user = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
-        user.setId(10L);
 
         entity.setId(1);
         entity.setCode("GI-001");
         entity.setName("Grupo de Inteligencia Artificial");
-        entity.setCurrentCoordinator(user);
+        entity.setCurrentCoordinator(coordinator);
         entity.setActive(true);
 
         assertEquals(1, entity.getId());

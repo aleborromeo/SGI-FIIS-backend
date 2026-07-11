@@ -1,40 +1,69 @@
 -- ============================================================================
--- V7: Creación de tablas restantes del Sistema de Gestión de Investigación FIIS
--- Basado en la normalización hasta 3NF e Integridad Referencial
+-- SGI-FIIS — Migración V1: Esquema completo consolidado
+-- Fusiona: V1, V6, V7, V8, V10, V12, V13 del esquema anterior
+-- Base de referencia: DB_FIIS_Investigacion_pgadmin.sql + correcciones JPA
+-- Compatible: PostgreSQL 15+ / Flyway
 -- ============================================================================
 
 -- ============================================================================
--- MÓDULO 1: SEGURIDAD Y USUARIOS (Ampliación Multi-rol)
+-- MÓDULO 1: SEGURIDAD Y USUARIOS (RF-01 a RF-14, RN-01)
 -- ============================================================================
 
--- Tabla intermedia para múltiples roles por usuario
+CREATE TABLE roles (
+    id_rol          SERIAL PRIMARY KEY,
+    codigo_rol      VARCHAR(50) NOT NULL,
+    descripcion     VARCHAR(255),
+    CONSTRAINT uq_codigo_rol UNIQUE (codigo_rol)
+);
+
+CREATE TABLE usuarios (
+    id_usuario              SERIAL PRIMARY KEY,
+    dni                     VARCHAR(8) NOT NULL,
+    nombres                 VARCHAR(100) NOT NULL,
+    apellidos               VARCHAR(100) NOT NULL,
+    correo_institucional    VARCHAR(150) NOT NULL,
+    telefono                VARCHAR(20),
+    password_hash           VARCHAR(255) NOT NULL,
+    must_change_password    BOOLEAN DEFAULT TRUE NOT NULL,
+    es_activo               BOOLEAN DEFAULT TRUE NOT NULL,
+    id_rol_principal        INT NOT NULL,
+    oauth_provider          VARCHAR(50),
+    codigo_verificacion     VARCHAR(6),
+    fecha_expiracion_codigo TIMESTAMP,
+    fecha_creacion          TIMESTAMP DEFAULT NOW() NOT NULL,
+    fecha_actualizacion     TIMESTAMP DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_dni_usuario UNIQUE (dni),
+    CONSTRAINT uq_correo_usuario UNIQUE (correo_institucional),
+    CONSTRAINT fk_usuarios_rol FOREIGN KEY (id_rol_principal) REFERENCES roles(id_rol)
+);
+
+-- Multi-rol por usuario (RF-09 ampliación)
 CREATE TABLE usuarios_roles (
-    id_usuario      BIGINT NOT NULL,
-    id_rol          BIGINT NOT NULL,
+    id_usuario  INT NOT NULL,
+    id_rol      INT NOT NULL,
     PRIMARY KEY (id_usuario, id_rol),
     CONSTRAINT fk_ur_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
     CONSTRAINT fk_ur_rol FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
 );
 
 -- ============================================================================
--- MÓDULO 2: GRUPOS Y LÍNEAS DE INVESTIGACIÓN
+-- MÓDULO 2: GRUPOS Y LÍNEAS DE INVESTIGACIÓN (RF-15 a RF-28, RN-02, RN-03)
 -- ============================================================================
 
--- Tabla de Grupos de Investigación
 CREATE TABLE grupos_investigacion (
-    id_grupo                BIGSERIAL PRIMARY KEY,
-    codigo_grupo            VARCHAR(20) NOT NULL UNIQUE,
+    id_grupo                SERIAL PRIMARY KEY,
+    codigo_grupo            VARCHAR(50) NOT NULL,
     nombre_grupo            VARCHAR(150) NOT NULL,
-    id_coordinador_actual   BIGINT,
+    id_coordinador_actual   INT,
     es_activo               BOOLEAN DEFAULT TRUE NOT NULL,
+    CONSTRAINT uq_codigo_grupo UNIQUE (codigo_grupo),
     CONSTRAINT fk_grupos_coordinador FOREIGN KEY (id_coordinador_actual) REFERENCES usuarios(id_usuario)
 );
 
--- Historial de Membresías en Grupos
 CREATE TABLE membresias_grupo (
-    id_membresia    BIGSERIAL PRIMARY KEY,
-    id_grupo        BIGINT NOT NULL,
-    id_usuario      BIGINT NOT NULL,
+    id_membresia    SERIAL PRIMARY KEY,
+    id_grupo        INT NOT NULL,
+    id_usuario      INT NOT NULL,
     es_activo       BOOLEAN DEFAULT TRUE NOT NULL,
     fecha_inicio    TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_fin       TIMESTAMP,
@@ -42,98 +71,127 @@ CREATE TABLE membresias_grupo (
     CONSTRAINT fk_membresias_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
--- Restricción: máximo una membresía activa por usuario (RF-21)
+-- RF-21: máximo una membresía activa por usuario
 CREATE UNIQUE INDEX uq_membresias_activas ON membresias_grupo(id_usuario) WHERE es_activo = TRUE;
 
--- Tabla de Líneas de Investigación
 CREATE TABLE lineas_investigacion (
-    id_linea            BIGSERIAL PRIMARY KEY,
-    nombre_linea        VARCHAR(150) NOT NULL UNIQUE,
+    id_linea            SERIAL PRIMARY KEY,
+    nombre_linea        VARCHAR(150) NOT NULL,
     es_activa           BOOLEAN DEFAULT TRUE NOT NULL,
     fecha_creacion      TIMESTAMP DEFAULT NOW() NOT NULL,
-    fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL
+    fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_nombre_linea UNIQUE (nombre_linea)
 );
 
--- Intersección de Líneas permitidas por Grupo
+-- Intersección líneas permitidas por grupo (RF-26, RN-12)
 CREATE TABLE lineas_por_grupo (
-    id_grupo    BIGINT NOT NULL,
-    id_linea    BIGINT NOT NULL,
+    id_grupo    INT NOT NULL,
+    id_linea    INT NOT NULL,
     PRIMARY KEY (id_grupo, id_linea),
     CONSTRAINT fk_lpg_grupo FOREIGN KEY (id_grupo) REFERENCES grupos_investigacion(id_grupo),
     CONSTRAINT fk_lpg_linea FOREIGN KEY (id_linea) REFERENCES lineas_investigacion(id_linea)
 );
 
 -- ============================================================================
--- MÓDULO 4: CONVOCATORIAS Y PROYECTOS
+-- MÓDULO 3: DOCUMENTOS (RF-65 a RF-69, RNF-07, RNF-08, RN-10)
 -- ============================================================================
 
--- Tabla de Convocatorias
+CREATE TABLE documentos (
+    id_documento        SERIAL PRIMARY KEY,
+    nombre_original     VARCHAR(255) NOT NULL,
+    ruta_almacenamiento VARCHAR(500) NOT NULL,
+    tipo_extension      VARCHAR(10) NOT NULL,
+    tamano_bytes        BIGINT NOT NULL,
+    id_usuario_subio    INT NOT NULL,
+    fecha_carga         TIMESTAMP DEFAULT NOW() NOT NULL,
+    es_activo           BOOLEAN DEFAULT TRUE NOT NULL,
+    CONSTRAINT chk_extension_documento CHECK (tipo_extension IN ('PDF', 'DOC', 'DOCX')),
+    CONSTRAINT fk_documentos_usuario FOREIGN KEY (id_usuario_subio) REFERENCES usuarios(id_usuario)
+);
+
+-- ============================================================================
+-- MÓDULO 4: CONVOCATORIAS Y PROYECTOS (RF-29 a RF-44, RNF-37)
+-- ============================================================================
+
 CREATE TABLE convocatorias (
-    id_convocatoria     BIGSERIAL PRIMARY KEY,
+    id_convocatoria     SERIAL PRIMARY KEY,
     titulo_convocatoria VARCHAR(150) NOT NULL,
-    descripcion         TEXT,
+    descripcion         TEXT NOT NULL DEFAULT '',
     fecha_inicio        DATE NOT NULL,
     fecha_fin           DATE NOT NULL,
     estado              VARCHAR(20) DEFAULT 'ABIERTA' NOT NULL,
-    id_creador          BIGINT NOT NULL,
+    id_documento_bases  INT,
+    id_creador          INT NOT NULL,
     fecha_creacion      TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL,
     CONSTRAINT chk_estado_convocatoria CHECK (estado IN ('ABIERTA', 'CERRADA', 'FINALIZADA')),
     CONSTRAINT chk_fechas_convocatoria CHECK (fecha_fin >= fecha_inicio),
+    CONSTRAINT fk_convocatorias_documento FOREIGN KEY (id_documento_bases) REFERENCES documentos(id_documento),
     CONSTRAINT fk_convocatorias_creador FOREIGN KEY (id_creador) REFERENCES usuarios(id_usuario)
 );
 
--- Tabla de Proyectos de Investigación
+-- Join table convocatorias <-> líneas (ManyToMany)
+CREATE TABLE convocatorias_lineas (
+    id_convocatoria INT NOT NULL,
+    id_linea        INT NOT NULL,
+    PRIMARY KEY (id_convocatoria, id_linea),
+    CONSTRAINT fk_conv_lineas_conv FOREIGN KEY (id_convocatoria) REFERENCES convocatorias(id_convocatoria) ON DELETE CASCADE,
+    CONSTRAINT fk_conv_lineas_linea FOREIGN KEY (id_linea) REFERENCES lineas_investigacion(id_linea) ON DELETE CASCADE
+);
+
 CREATE TABLE proyectos (
-    id_proyecto         BIGSERIAL PRIMARY KEY,
-    codigo_proyecto     VARCHAR(30) NOT NULL UNIQUE,
-    titulo_proyecto     VARCHAR(500) NOT NULL,
-    resumen             TEXT NOT NULL,
-    objetivo_general    TEXT NOT NULL,
-    id_linea            BIGINT NOT NULL,
-    id_grupo            BIGINT NOT NULL,
-    presupuesto         DECIMAL(18,2) NOT NULL,
-    fecha_inicio        DATE NOT NULL,
-    fecha_fin           DATE NOT NULL,
-    lugar_ejecucion     VARCHAR(255) NOT NULL,
-    id_responsable      BIGINT NOT NULL,
-    id_convocatoria     BIGINT,
-    id_documento_actual BIGINT,
-    estado_proyecto     VARCHAR(30) DEFAULT 'POSTULADO' NOT NULL,
-    fecha_creacion      TIMESTAMP DEFAULT NOW() NOT NULL,
-    fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL,
-    CONSTRAINT chk_estado_proyecto CHECK (estado_proyecto IN ('POSTULADO', 'OBSERVADO', 'APROBADO', 'RECHAZADO', 'EN_EJECUCION', 'FINALIZADO')),
+    id_proyecto             SERIAL PRIMARY KEY,
+    codigo_proyecto         VARCHAR(30) NOT NULL,
+    titulo_proyecto         VARCHAR(500) NOT NULL,
+    resumen                 TEXT NOT NULL,
+    objetivo_general        TEXT NOT NULL,
+    titulo_jsonb            JSONB NOT NULL DEFAULT '{"es": ""}',
+    resumen_jsonb           JSONB NOT NULL DEFAULT '{"es": ""}',
+    objetivo_general_jsonb  JSONB NOT NULL DEFAULT '{"es": ""}',
+    lugar_ejecucion_jsonb   JSONB NOT NULL DEFAULT '{"es": ""}',
+    id_linea                INT NOT NULL,
+    id_grupo                INT NOT NULL,
+    presupuesto             DECIMAL(18,2) NOT NULL,
+    fecha_inicio            DATE NOT NULL,
+    fecha_fin               DATE NOT NULL,
+    lugar_ejecucion         VARCHAR(255) NOT NULL,
+    id_responsable          INT NOT NULL,
+    id_convocatoria         INT,
+    id_documento_propuesta  INT,
+    estado                  VARCHAR(50) DEFAULT 'POSTULADO' NOT NULL,
+    fecha_creacion          TIMESTAMP DEFAULT NOW() NOT NULL,
+    fecha_actualizacion     TIMESTAMP DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_codigo_proyecto UNIQUE (codigo_proyecto),
+    CONSTRAINT chk_estado_proyecto CHECK (estado IN ('POSTULADO', 'OBSERVADO', 'APROBADO', 'RECHAZADO', 'EN_EJECUCION', 'FINALIZADO')),
     CONSTRAINT fk_proyectos_linea FOREIGN KEY (id_linea) REFERENCES lineas_investigacion(id_linea),
     CONSTRAINT fk_proyectos_grupo FOREIGN KEY (id_grupo) REFERENCES grupos_investigacion(id_grupo),
     CONSTRAINT fk_proyectos_responsable FOREIGN KEY (id_responsable) REFERENCES usuarios(id_usuario),
     CONSTRAINT fk_proyectos_convocatoria FOREIGN KEY (id_convocatoria) REFERENCES convocatorias(id_convocatoria),
-    CONSTRAINT fk_proyectos_documento FOREIGN KEY (id_documento_actual) REFERENCES documentos(id_documento)
+    CONSTRAINT fk_proyectos_documento FOREIGN KEY (id_documento_propuesta) REFERENCES documentos(id_documento)
 );
 
--- Equipo de Trabajo del Proyecto
-CREATE TABLE integrantes_proyecto (
-    id_proyecto         BIGINT NOT NULL,
-    id_usuario          BIGINT NOT NULL,
-    rol_en_proyecto     VARCHAR(50) NOT NULL,
-    fecha_integracion   TIMESTAMP DEFAULT NOW() NOT NULL,
-    PRIMARY KEY (id_proyecto, id_usuario),
-    CONSTRAINT fk_integrantes_proyecto FOREIGN KEY (id_proyecto) REFERENCES proyectos(id_proyecto),
-    CONSTRAINT fk_integrantes_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+CREATE TABLE miembros_proyecto (
+    id_miembro      SERIAL PRIMARY KEY,
+    id_proyecto     INT NOT NULL,
+    id_usuario      INT NOT NULL,
+    rol             VARCHAR(30) DEFAULT 'INVESTIGADOR' NOT NULL,
+    CONSTRAINT uq_miembro_proyecto UNIQUE (id_proyecto, id_usuario),
+    CONSTRAINT fk_miembros_proyecto FOREIGN KEY (id_proyecto) REFERENCES proyectos(id_proyecto) ON DELETE CASCADE,
+    CONSTRAINT fk_miembros_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
 -- ============================================================================
--- MÓDULO 5: PLANES DE TESIS
+-- MÓDULO 5: PLANES DE TESIS (RF-45 a RF-53, RN-06)
 -- ============================================================================
 
--- Tabla de Planes de Tesis
 CREATE TABLE planes_tesis (
-    id_plan_tesis       BIGSERIAL PRIMARY KEY,
+    id_plan_tesis       SERIAL PRIMARY KEY,
     titulo_tesis        VARCHAR(500) NOT NULL,
     resumen             TEXT,
-    id_estudiante       BIGINT NOT NULL,
-    id_linea            BIGINT NOT NULL,
-    id_grupo            BIGINT NOT NULL,
-    id_documento_actual BIGINT,
+    id_estudiante       INT NOT NULL,
+    id_linea            INT NOT NULL,
+    id_grupo            INT NOT NULL,
+    id_documento_actual INT,
     estado_plan         VARCHAR(30) DEFAULT 'POSTULADO' NOT NULL,
     fecha_creacion      TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL,
@@ -144,12 +202,11 @@ CREATE TABLE planes_tesis (
     CONSTRAINT fk_planes_documento FOREIGN KEY (id_documento_actual) REFERENCES documentos(id_documento)
 );
 
--- Tabla de Informes Finales de Tesis
 CREATE TABLE informes_tesis (
-    id_informe_tesis    BIGSERIAL PRIMARY KEY,
-    id_plan_tesis       BIGINT NOT NULL,
+    id_informe_tesis    SERIAL PRIMARY KEY,
+    id_plan_tesis       INT NOT NULL,
     titulo_final        VARCHAR(500) NOT NULL,
-    id_documento_tesis  BIGINT NOT NULL,
+    id_documento_tesis  INT NOT NULL,
     fecha_presentacion  TIMESTAMP DEFAULT NOW() NOT NULL,
     estado_informe      VARCHAR(30) DEFAULT 'EN_REVISION' NOT NULL,
     CONSTRAINT chk_estado_informe_tesis CHECK (estado_informe IN ('EN_REVISION', 'APROBADO', 'OBSERVADO')),
@@ -158,19 +215,19 @@ CREATE TABLE informes_tesis (
 );
 
 -- ============================================================================
--- MÓDULO 6: INFORMES DE AVANCE DE PROYECTOS
+-- MÓDULO 6: INFORMES DE AVANCE DE PROYECTOS (RF-70 a RF-77)
 -- ============================================================================
 
 CREATE TABLE informes_avance (
-    id_informe          BIGSERIAL PRIMARY KEY,
-    id_proyecto         BIGINT NOT NULL,
+    id_informe          SERIAL PRIMARY KEY,
+    id_proyecto         INT NOT NULL,
     tipo_informe        VARCHAR(50) NOT NULL,
     periodo             VARCHAR(50) NOT NULL,
     porcentaje_avance   DECIMAL(5,2) NOT NULL,
     logros              TEXT NOT NULL,
     dificultades        TEXT NOT NULL,
     recomendaciones     TEXT NOT NULL,
-    id_documento_adjunto BIGINT,
+    id_documento_adjunto INT,
     estado_informe      VARCHAR(30) DEFAULT 'PENDIENTE' NOT NULL,
     fecha_registro      TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL,
@@ -182,30 +239,30 @@ CREATE TABLE informes_avance (
 );
 
 -- ============================================================================
--- MÓDULO 7: WORKFLOW, TRÁMITES Y AUDITORÍA
+-- MÓDULO 7: WORKFLOW, TRÁMITES Y AUDITORÍA (RF-54 a RF-64, RF-96 a RF-100)
 -- ============================================================================
 
--- Tabla General de Trámites
 CREATE TABLE tramites (
-    id_tramite              BIGSERIAL PRIMARY KEY,
-    codigo_tramite          VARCHAR(30) NOT NULL UNIQUE,
+    id_tramite              SERIAL PRIMARY KEY,
+    codigo_tramite          VARCHAR(30) NOT NULL,
     tipo_tramite            VARCHAR(50) NOT NULL,
-    id_solicitante          BIGINT NOT NULL,
-    id_grupo                BIGINT NOT NULL,
+    id_solicitante          INT NOT NULL,
+    id_grupo                INT,
     estado_actual           VARCHAR(50) NOT NULL,
-    rol_revisor_actual      VARCHAR(50) NOT NULL,
+    rol_revisor_actual      VARCHAR(50),
     fecha_envio             TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_actualizacion     TIMESTAMP DEFAULT NOW() NOT NULL,
-    id_referencia_proyecto  BIGINT,
-    id_referencia_tesis     BIGINT,
-    id_referencia_informe   BIGINT,
+    id_referencia_proyecto  INT,
+    id_referencia_tesis     INT,
+    id_referencia_informe   INT,
+    CONSTRAINT uq_codigo_tramite UNIQUE (codigo_tramite),
     CONSTRAINT chk_tipo_tramite CHECK (tipo_tramite IN ('PROYECTO', 'PLAN_TESIS', 'INFORME_AVANCE')),
     CONSTRAINT fk_tramites_solicitante FOREIGN KEY (id_solicitante) REFERENCES usuarios(id_usuario),
     CONSTRAINT fk_tramites_grupo FOREIGN KEY (id_grupo) REFERENCES grupos_investigacion(id_grupo),
     CONSTRAINT fk_tramites_proyecto FOREIGN KEY (id_referencia_proyecto) REFERENCES proyectos(id_proyecto),
     CONSTRAINT fk_tramites_tesis FOREIGN KEY (id_referencia_tesis) REFERENCES planes_tesis(id_plan_tesis),
     CONSTRAINT fk_tramites_informe FOREIGN KEY (id_referencia_informe) REFERENCES informes_avance(id_informe),
-    -- Arco Excluyente
+    -- Arco excluyente 3NF
     CONSTRAINT chk_tramites_exclusividad CHECK (
         (id_referencia_proyecto IS NOT NULL AND id_referencia_tesis IS NULL AND id_referencia_informe IS NULL) OR
         (id_referencia_proyecto IS NULL AND id_referencia_tesis IS NOT NULL AND id_referencia_informe IS NULL) OR
@@ -213,16 +270,15 @@ CREATE TABLE tramites (
     )
 );
 
--- Trazabilidad de Movimientos
 CREATE TABLE movimientos_tramite (
-    id_movimiento       BIGSERIAL PRIMARY KEY,
-    id_tramite          BIGINT NOT NULL,
-    id_usuario_accion   BIGINT NOT NULL,
+    id_movimiento       SERIAL PRIMARY KEY,
+    id_tramite          INT NOT NULL,
+    id_usuario_accion   INT NOT NULL,
     accion              VARCHAR(50) NOT NULL,
     estado_anterior     VARCHAR(50) NOT NULL,
     estado_nuevo        VARCHAR(50) NOT NULL,
     observacion         TEXT,
-    id_documento_adjunto BIGINT,
+    id_documento_adjunto INT,
     fecha_movimiento    TIMESTAMP DEFAULT NOW() NOT NULL,
     CONSTRAINT fk_movimientos_tramite FOREIGN KEY (id_tramite) REFERENCES tramites(id_tramite),
     CONSTRAINT fk_movimientos_usuario FOREIGN KEY (id_usuario_accion) REFERENCES usuarios(id_usuario),
@@ -230,28 +286,60 @@ CREATE TABLE movimientos_tramite (
 );
 
 -- ============================================================================
--- MÓDULO 8: RESOLUCIONES Y EVALUACIONES
+-- MÓDULO 8: OBSERVACIONES Y SUBSANACIONES (RF-60 a RF-64, RF-69, RF-76)
 -- ============================================================================
 
--- Resoluciones Emitidas
+CREATE TABLE observaciones (
+    id_observacion      SERIAL PRIMARY KEY,
+    id_tramite          INT NOT NULL,
+    id_revisor          INT NOT NULL,
+    tipo_observacion    VARCHAR(30) NOT NULL,
+    descripcion         TEXT NOT NULL,
+    estado_observacion  VARCHAR(20) DEFAULT 'PENDIENTE' NOT NULL,
+    rol_revisor         VARCHAR(50) NOT NULL,
+    fecha_registro      TIMESTAMP DEFAULT NOW() NOT NULL,
+    fecha_actualizacion TIMESTAMP DEFAULT NOW() NOT NULL,
+    CONSTRAINT fk_observaciones_tramite FOREIGN KEY (id_tramite) REFERENCES tramites(id_tramite) ON DELETE RESTRICT,
+    CONSTRAINT fk_observaciones_revisor FOREIGN KEY (id_revisor) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT,
+    CONSTRAINT chk_tipo_observacion CHECK (tipo_observacion IN ('TECNICA', 'DOCUMENTAL', 'PRESUPUESTAL', 'FORMATO')),
+    CONSTRAINT chk_estado_observacion CHECK (estado_observacion IN ('PENDIENTE', 'SUBSANADA', 'VIGENTE'))
+);
+
+CREATE TABLE subsanaciones (
+    id_subsanacion       SERIAL PRIMARY KEY,
+    id_observacion       INT NOT NULL,
+    id_solicitante       INT NOT NULL,
+    descripcion          TEXT NOT NULL,
+    id_documento_adjunto INT,
+    fecha_registro       TIMESTAMP DEFAULT NOW() NOT NULL,
+    fecha_actualizacion  TIMESTAMP DEFAULT NOW() NOT NULL,
+    CONSTRAINT fk_subsanaciones_observacion FOREIGN KEY (id_observacion) REFERENCES observaciones(id_observacion) ON DELETE RESTRICT,
+    CONSTRAINT fk_subsanaciones_solicitante FOREIGN KEY (id_solicitante) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT,
+    CONSTRAINT fk_subsanaciones_documento FOREIGN KEY (id_documento_adjunto) REFERENCES documentos(id_documento) ON DELETE RESTRICT
+);
+
+-- ============================================================================
+-- MÓDULO 9: RESOLUCIONES Y EVALUACIONES (RF-78 a RF-87)
+-- ============================================================================
+
 CREATE TABLE resoluciones (
-    id_resolucion       BIGSERIAL PRIMARY KEY,
-    numero_resolucion   VARCHAR(100) NOT NULL UNIQUE,
+    id_resolucion       SERIAL PRIMARY KEY,
+    numero_resolucion   VARCHAR(100) NOT NULL,
     fecha_emision       DATE NOT NULL,
     asunto              VARCHAR(500) NOT NULL,
-    id_tramite          BIGINT NOT NULL,
-    id_documento_adjunto BIGINT NOT NULL,
+    id_tramite          INT NOT NULL,
+    id_documento_adjunto INT NOT NULL,
     fecha_registro      TIMESTAMP DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_numero_resolucion UNIQUE (numero_resolucion),
     CONSTRAINT fk_resoluciones_tramite FOREIGN KEY (id_tramite) REFERENCES tramites(id_tramite),
     CONSTRAINT fk_resoluciones_documento FOREIGN KEY (id_documento_adjunto) REFERENCES documentos(id_documento)
 );
 
--- Evaluaciones por Pares
 CREATE TABLE evaluaciones (
-    id_evaluacion       BIGSERIAL PRIMARY KEY,
-    id_proyecto         BIGINT,
-    id_plan_tesis       BIGINT,
-    id_evaluador        BIGINT NOT NULL,
+    id_evaluacion       SERIAL PRIMARY KEY,
+    id_proyecto         INT,
+    id_plan_tesis       INT,
+    id_evaluador        INT NOT NULL,
     resultado           VARCHAR(30),
     puntaje             INT,
     observaciones       TEXT,
@@ -261,7 +349,6 @@ CREATE TABLE evaluaciones (
     CONSTRAINT fk_evaluaciones_proyecto FOREIGN KEY (id_proyecto) REFERENCES proyectos(id_proyecto),
     CONSTRAINT fk_evaluaciones_tesis FOREIGN KEY (id_plan_tesis) REFERENCES planes_tesis(id_plan_tesis),
     CONSTRAINT fk_evaluaciones_evaluador FOREIGN KEY (id_evaluador) REFERENCES usuarios(id_usuario),
-    -- Arco Excluyente
     CONSTRAINT chk_evaluaciones_exclusividad CHECK (
         (id_proyecto IS NOT NULL AND id_plan_tesis IS NULL) OR
         (id_proyecto IS NULL AND id_plan_tesis IS NOT NULL)
@@ -269,15 +356,15 @@ CREATE TABLE evaluaciones (
 );
 
 -- ============================================================================
--- MÓDULO 9: AUDITORÍA GENERAL
+-- MÓDULO 10: AUDITORÍA GENERAL (RF-100, RNF-09)
 -- ============================================================================
 
 CREATE TABLE auditoria_general (
-    id_auditoria        BIGSERIAL PRIMARY KEY,
+    id_auditoria        SERIAL PRIMARY KEY,
     tabla_afectada      VARCHAR(100) NOT NULL,
-    id_registro         BIGINT NOT NULL,
+    id_registro         INT NOT NULL,
     accion              VARCHAR(30) NOT NULL,
-    id_usuario          BIGINT NOT NULL,
+    id_usuario          INT NOT NULL,
     datos_anteriores    TEXT,
     datos_nuevos        TEXT,
     ip_origen           VARCHAR(45),
@@ -287,51 +374,50 @@ CREATE TABLE auditoria_general (
 );
 
 -- ============================================================================
--- ÍNDICES ESTRATÉGICOS PARA RENDIMIENTO
+-- ÍNDICES ESTRATÉGICOS PARA RENDIMIENTO (RNF-17, RNF-19)
 -- ============================================================================
 
+-- Usuarios
+CREATE INDEX ix_usuarios_rol ON usuarios(id_rol_principal);
+CREATE INDEX ix_usuarios_activo ON usuarios(es_activo);
 CREATE INDEX ix_usuarios_roles_rol ON usuarios_roles(id_rol);
+
+-- Proyectos
 CREATE INDEX ix_proyectos_responsable ON proyectos(id_responsable);
 CREATE INDEX ix_proyectos_grupo ON proyectos(id_grupo);
-CREATE INDEX ix_proyectos_estado ON proyectos(estado_proyecto);
+CREATE INDEX ix_proyectos_estado ON proyectos(estado);
+
+-- Planes de tesis
 CREATE INDEX ix_planes_estudiante ON planes_tesis(id_estudiante);
 CREATE INDEX ix_planes_grupo ON planes_tesis(id_grupo);
+CREATE INDEX ix_planes_estado ON planes_tesis(estado_plan);
+
+-- Informes de tesis
+CREATE INDEX ix_informes_tesis_plan ON informes_tesis(id_plan_tesis);
+CREATE INDEX ix_informes_tesis_estado ON informes_tesis(estado_informe);
+
+-- Trámites
 CREATE INDEX ix_tramites_estado ON tramites(estado_actual, rol_revisor_actual);
 CREATE INDEX ix_tramites_grupo ON tramites(id_grupo);
 CREATE INDEX ix_tramites_solicitante ON tramites(id_solicitante);
+
+-- Movimientos
 CREATE INDEX ix_movimientos_tramite ON movimientos_tramite(id_tramite);
 CREATE INDEX ix_movimientos_fecha ON movimientos_tramite(fecha_movimiento);
+
+-- Informes de avance
 CREATE INDEX ix_informes_proyecto ON informes_avance(id_proyecto);
+
+-- Evaluaciones
 CREATE INDEX ix_evaluaciones_evaluador ON evaluaciones(id_evaluador);
+
+-- Observaciones (RNF-17: rendimiento en bandejas)
+CREATE INDEX ix_observaciones_tramite ON observaciones(id_tramite);
+CREATE INDEX ix_observaciones_estado ON observaciones(estado_observacion);
+CREATE INDEX ix_observaciones_tramite_estado ON observaciones(id_tramite, estado_observacion);
+CREATE INDEX ix_subsanaciones_observacion ON subsanaciones(id_observacion);
+
+-- Auditoría
 CREATE INDEX ix_auditoria_tabla ON auditoria_general(tabla_afectada, id_registro);
 CREATE INDEX ix_auditoria_usuario ON auditoria_general(id_usuario);
 CREATE INDEX ix_auditoria_fecha ON auditoria_general(fecha_accion);
-
--- ============================================================================
--- INSERCIÓN DE DATOS SEMILLA RESTANTES
--- ============================================================================
-
--- Grupos de Investigación
-INSERT INTO grupos_investigacion (codigo_grupo, nombre_grupo, es_activo) VALUES
-('GINSOFT', 'Grupo de Investigación en Ingeniería de Software', TRUE),
-('RESEGTI', 'Red de Seguridad y Gestión de TI', TRUE),
-('GISI', 'Grupo de Investigación en Sistemas de Información', TRUE),
-('CICO', 'Círculo de Computación', TRUE),
-('EAP', 'Estadística Aplicada', TRUE),
-('MAP', 'Matemática Aplicada', TRUE),
-('EU', 'Emprendimiento Universitario', TRUE);
-
--- Líneas de Investigación
-INSERT INTO lineas_investigacion (nombre_linea, es_activa) VALUES
-('Computacion', TRUE),
-('Ingenieria de software', TRUE),
-('Ciberseguridad y Auditoria de TI', TRUE),
-('Ciencia de Datos e Inteligencia Artificial', TRUE),
-('Redes y Telecomunicaciones', TRUE),
-('Gestion de Tecnologias de Informacion', TRUE);
-
--- Asociación de Líneas por Grupo - GINSOFT
-INSERT INTO lineas_por_grupo (id_grupo, id_linea)
-SELECT g.id_grupo, l.id_linea
-FROM grupos_investigacion g, lineas_investigacion l
-WHERE g.codigo_grupo = 'GINSOFT' AND l.nombre_linea IN ('Computacion', 'Ingenieria de software');

@@ -159,10 +159,23 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- H2 in-memory DB para tests (sin necesitar PostgreSQL local) -->
+        <!-- Testcontainers para tests de integracion con PostgreSQL real -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.21.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.21.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.21.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -235,7 +248,7 @@
 		<plugin>
 			<groupId>org.sonarsource.scanner.maven</groupId>
 			<artifactId>sonar-maven-plugin</artifactId>
-			<version>4.0.0.4121</version>
+			<version>5.7.0.6970</version>
 		</plugin>
 
 		<plugin>

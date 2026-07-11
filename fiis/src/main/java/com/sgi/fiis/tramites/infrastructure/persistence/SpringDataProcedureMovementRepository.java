@@ -1,16 +1,13 @@
 package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+@SuppressWarnings("java:S100")
 public interface SpringDataProcedureMovementRepository extends JpaRepository<ProcedureMovementEntity, Integer> {
 
-    @Query("SELECT m FROM ProcedureMovementEntity m WHERE m.procedure.id = :id ORDER BY m.movementAt ASC")
-    List<ProcedureMovementEntity> findByProcedureIdOrderByDateAsc(@Param("id") int id);
+    List<ProcedureMovementEntity> findByProcedure_IdOrderByMovementAtAsc(Long procedureId);
 
-    @Query("SELECT COUNT(m) FROM ProcedureMovementEntity m WHERE m.procedure.id = :id")
-    long countByProcedureId(@Param("id") int id);
+    long countByProcedure_Id(Long procedureId);
 }

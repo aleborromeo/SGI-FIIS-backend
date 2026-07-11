@@ -12,6 +12,8 @@ import java.util.UUID;
 @Component
 public class LocalFileStorageAdapter implements FileStoragePort {
 
+    private static final String ERR_PATH_TRAVERSAL = "Nombre de archivo no válido o intento de Path Traversal.";
+
     private final Path rootLocation;
 
     // Lee la ruta desde tu application.yml, si no existe usa 'uploads-fiis' por defecto
@@ -29,22 +31,22 @@ public class LocalFileStorageAdapter implements FileStoragePort {
     public String store(InputStream fileStream, String fileName) {
         try {
             if (fileName == null) {
-                throw new IllegalArgumentException("Nombre de archivo no válido o intento de Path Traversal.");
+                throw new IllegalArgumentException(ERR_PATH_TRAVERSAL);
             }
-            
+
             // Extraer únicamente el nombre base del archivo para evitar inyección de directorios/rutas absolutas
             String cleanedFileName = Paths.get(fileName).getFileName().toString();
             if (cleanedFileName.contains("..") || cleanedFileName.isEmpty() || fileName.contains("..")) {
-                throw new IllegalArgumentException("Nombre de archivo no válido o intento de Path Traversal.");
+                throw new IllegalArgumentException(ERR_PATH_TRAVERSAL);
             }
-            
+
             // Renombrar con UUID para evitar que un alumno sobreescriba el archivo de otro si se llaman igual
             String uniqueName = UUID.randomUUID().toString() + "_" + cleanedFileName;
             Path destinationFile = this.rootLocation.resolve(Paths.get(uniqueName)).normalize().toAbsolutePath();
-            
+
             // Verificación defensiva adicional de que el archivo final sigue estando dentro de la raíz de almacenamiento
             if (!destinationFile.startsWith(this.rootLocation.toAbsolutePath())) {
-                throw new IllegalArgumentException("Nombre de archivo no válido o intento de Path Traversal.");
+                throw new IllegalArgumentException(ERR_PATH_TRAVERSAL);
             }
             
             Files.copy(fileStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);

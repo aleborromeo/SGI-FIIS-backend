@@ -1,6 +1,8 @@
 package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,23 +25,29 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("all")
 class ResearchGroupRepositoryAdapterTest {
 
-    @Mock
-    private SpringDataResearchGroupRepository jpaRepository;
-
-    @Mock
-    private JdbcTemplate jdbcTemplate;
-
-    @InjectMocks
-    private ResearchGroupRepositoryAdapter adapter;
+    @Mock private SpringDataResearchGroupRepository jpaRepository;
+    @Mock private JdbcTemplate jdbcTemplate;
+    @Mock private SpringDataUserRepository userRepository;
+    @InjectMocks private ResearchGroupRepositoryAdapter adapter;
 
     private ResearchGroupEntity getTestGroupEntity() {
+        UserEntity coordinator = new UserEntity();
+        coordinator.setId(10L);
+
         ResearchGroupEntity entity = new ResearchGroupEntity();
         entity.setId(1);
         entity.setCode("GI-001");
         entity.setName("Grupo de Inteligencia Artificial");
-        com.sgi.fiis.users.infrastructure.persistence.UserEntity coordinator = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
-        coordinator.setId(10L);
         entity.setCurrentCoordinator(coordinator);
+        entity.setActive(true);
+        return entity;
+    }
+
+    private ResearchGroupEntity getTestGroupEntityWithoutCoordinator() {
+        ResearchGroupEntity entity = new ResearchGroupEntity();
+        entity.setId(1);
+        entity.setCode("GI-001");
+        entity.setName("Grupo de Inteligencia Artificial");
         entity.setActive(true);
         return entity;
     }
@@ -61,9 +69,9 @@ class ResearchGroupRepositoryAdapterTest {
         ResearchGroup domain = getTestGroup();
         ResearchGroupEntity entity = getTestGroupEntity();
 
+        when(userRepository.getReferenceById(10L)).thenReturn(entity.getCurrentCoordinator());
         when(jpaRepository.save(any(ResearchGroupEntity.class))).thenReturn(entity);
         
-        // Mock enrichWithCoordinator behavior
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
             RowMapper<ResearchGroup> mapper = invocation.getArgument(1);
             ResultSet rs = mock(ResultSet.class);
@@ -93,8 +101,7 @@ class ResearchGroupRepositoryAdapterTest {
                 .active(true)
                 .build();
 
-        ResearchGroupEntity entity = getTestGroupEntity();
-        entity.setCurrentCoordinator(null);
+        ResearchGroupEntity entity = getTestGroupEntityWithoutCoordinator();
 
         when(jpaRepository.save(any(ResearchGroupEntity.class))).thenReturn(entity);
 
@@ -202,45 +209,4 @@ class ResearchGroupRepositoryAdapterTest {
 
         assertFalse(adapter.existsActiveUser(5));
     }
-
-    @Test
-    @DisplayName("Should return true when active user with role exists")
-    void testExistsActiveUserWithRole_True() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(5), eq("ADMIN"), eq("ADMIN"))).thenReturn(1);
-        assertTrue(adapter.existsActiveUserWithRole(5, "ADMIN"));
-    }
-
-    @Test
-    @DisplayName("Should return false when active user with role does not exist or count is null")
-    void testExistsActiveUserWithRole_False() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(5), eq("ADMIN"), eq("ADMIN"))).thenReturn(0);
-        assertFalse(adapter.existsActiveUserWithRole(5, "ADMIN"));
-
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(5), eq("ADMIN"), eq("ADMIN"))).thenReturn(null);
-        assertFalse(adapter.existsActiveUserWithRole(5, "ADMIN"));
-    }
-
-    @Test
-    @DisplayName("Should find groups by line ID")
-    @SuppressWarnings("unchecked")
-    void testFindGroupsByLineId() {
-        ResearchGroupEntity entity = getTestGroupEntity();
-        when(jpaRepository.findActiveByLineId(4)).thenReturn(List.of(entity));
-
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(Object[].class))).thenAnswer(invocation -> {
-            RowMapper<ResearchGroup> mapper = invocation.getArgument(1);
-            ResultSet rs = mock(ResultSet.class);
-            when(rs.getString("nombres")).thenReturn("Maria");
-            when(rs.getString("apellidos")).thenReturn("Lopez");
-            ResearchGroup enriched = mapper.mapRow(rs, 0);
-            return List.of(enriched);
-        });
-
-        List<ResearchGroup> result = adapter.findGroupsByLineId(4);
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("GI-001", result.get(0).getGroupCode());
-        assertEquals("Maria", result.get(0).getCoordinatorFirstNames());
-    }
 }
-

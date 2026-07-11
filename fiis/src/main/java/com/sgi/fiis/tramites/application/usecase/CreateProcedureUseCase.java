@@ -16,26 +16,26 @@ import java.time.ZoneId;
 @Service
 public class CreateProcedureUseCase {
 
-    private final ProcedureRepositoryPort tramiteRepositoryPort;
+    private final ProcedureRepositoryPort procedureRepositoryPort;
 
-    public CreateProcedureUseCase(ProcedureRepositoryPort tramiteRepositoryPort) {
-        this.tramiteRepositoryPort = tramiteRepositoryPort;
+    public CreateProcedureUseCase(ProcedureRepositoryPort procedureRepositoryPort) {
+        this.procedureRepositoryPort = procedureRepositoryPort;
     }
 
     @Transactional
     public ProcedureResponseDto execute(ProcedureRequestDto dto) {
         Procedure tramite = Procedure.builder()
-                .codigoTramite(generarCodigo())
-                .tipoTramite(dto.getTipoTramite())
-                .idSolicitante(dto.getIdSolicitante())
-                .idGrupo(dto.getIdGrupo())
-                .estadoActual(ProcedureStatus.REGISTRADO)
-                .rolRevisorActual(null)
-                .idReferenciaProyecto(dto.getIdReferenciaProyecto())
-                .idReferenciaTesis(dto.getIdReferenciaTesis())
-                .idReferenciaInforme(dto.getIdReferenciaInforme())
-                .fechaEnvio(LocalDateTime.now(ZoneId.systemDefault()))
-                .fechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()))
+                .code(generarCodigo())
+                .procedureType(dto.getProcedureType())
+                .applicantId(dto.getApplicantId())
+                .groupId(dto.getGroupId())
+                .currentStatus(ProcedureStatus.REGISTRADO)
+                .currentReviewerRole(null)
+                .projectReferenceId(dto.getProjectReferenceId())
+                .thesisReferenceId(dto.getThesisReferenceId())
+                .reportReferenceId(dto.getReportReferenceId())
+                .sentAt(LocalDateTime.now(ZoneId.systemDefault()))
+                .updatedAt(LocalDateTime.now(ZoneId.systemDefault()))
                 .build();
 
         tramite.validateExclusiveReference();
@@ -44,13 +44,13 @@ public class CreateProcedureUseCase {
         tramite.transitionTo(
                 ProcedureStatus.PENDIENTE_COORDINADOR,
                 null,
-                dto.getIdSolicitante(),
+                dto.getApplicantId(),
                 "PRESENTADO_POR_SOLICITANTE",
                 null,
                 RoleEnum.COORDINADOR_GRUPO
         );
 
-        return ProcedureMapper.toResponse(tramiteRepositoryPort.save(tramite));
+        return ProcedureMapper.toResponse(procedureRepositoryPort.save(tramite));
     }
 
     private String generarCodigo() {

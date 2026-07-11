@@ -21,8 +21,8 @@ public class LoginUseCase {
     private final TokenProviderPort tokenProvider;
 
     public LoginUseCase(UserRepositoryPort userRepository,
-                        PasswordEncoderPort passwordEncoder,
-                        TokenProviderPort tokenProvider) {
+            PasswordEncoderPort passwordEncoder,
+            TokenProviderPort tokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
@@ -39,7 +39,7 @@ public class LoginUseCase {
         }
 
         // Validate password
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+        if (user.getPasswordHash() == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new BadCredentialsException("auth.credentials.invalid");
         }
 
