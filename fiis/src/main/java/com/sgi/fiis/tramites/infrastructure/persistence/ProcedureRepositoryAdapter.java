@@ -28,10 +28,16 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     private final ProjectJpaRepository projectRepository;
 
     public ProcedureRepositoryAdapter(
-            SpringDataProcedureRepository tramiteRepository,
-            SpringDataProcedureMovementRepository movimientoRepository) {
-        this.tramiteRepository = tramiteRepository;
-        this.movimientoRepository = movimientoRepository;
+            SpringDataProcedureRepository procedureRepository,
+            SpringDataProcedureMovementRepository movementRepository,
+            SpringDataUserRepository userRepository,
+            ResearchGroupJpaRepository groupRepository,
+            ProjectJpaRepository projectRepository) {
+        this.procedureRepository = procedureRepository;
+        this.movementRepository = movementRepository;
+        this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
+        this.projectRepository = projectRepository;
     }
 
     @Override
