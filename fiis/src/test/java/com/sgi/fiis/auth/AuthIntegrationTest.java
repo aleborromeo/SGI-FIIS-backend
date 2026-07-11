@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Auth Integration Tests")
+@SuppressWarnings("all")
 class AuthIntegrationTest {
 
     private static final String ADMIN_EMAIL = "admin@unas.edu.pe";

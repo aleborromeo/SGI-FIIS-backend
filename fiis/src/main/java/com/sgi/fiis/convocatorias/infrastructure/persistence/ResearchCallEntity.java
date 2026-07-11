@@ -2,12 +2,16 @@ package com.sgi.fiis.convocatorias.infrastructure.persistence;
 
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,9 +37,11 @@ public class ResearchCallEntity {
     @Column(name = "descripcion", nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "titulo_jsonb", columnDefinition = "jsonb", nullable = false)
     private String titleJson;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "descripcion_jsonb", columnDefinition = "jsonb", nullable = false)
     private String descriptionJson;
 
@@ -51,6 +57,10 @@ public class ResearchCallEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_documento_bases")
     private DocumentEntity document;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_creador", nullable = false)
+    private UserEntity creator;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)

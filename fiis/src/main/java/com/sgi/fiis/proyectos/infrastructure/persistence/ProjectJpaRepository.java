@@ -10,5 +10,8 @@ import java.util.Optional;
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Integer> {
     List<ProjectEntity> findByResponsibleId(Long responsibleId);
     Optional<ProjectEntity> findByDocumentId(Integer documentId);
-    List<ProjectEntity> findByGroupId(Integer groupId);
-}
+    List<ProjectEntity> findByGroupId(Integer groupId);
+
+    List<ProjectEntity> findByResponsibleIdAndStatus(Long responsibleId, String status);
+
+}

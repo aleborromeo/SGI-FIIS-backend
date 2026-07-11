@@ -6,7 +6,6 @@ import com.sgi.fiis.tramites.domain.model.ProcedureType;
 import com.sgi.fiis.tramites.domain.model.Procedure;
 import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import com.sgi.fiis.users.domain.model.RoleEnum;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +15,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     private final SpringDataProcedureRepository tramiteRepository;
     private final SpringDataProcedureMovementRepository movimientoRepository;
+
+    public ProcedureRepositoryAdapter(
+            SpringDataProcedureRepository tramiteRepository,
+            SpringDataProcedureMovementRepository movimientoRepository) {
+        this.tramiteRepository = tramiteRepository;
+        this.movimientoRepository = movimientoRepository;
+    }
 
     @Override
     @Transactional

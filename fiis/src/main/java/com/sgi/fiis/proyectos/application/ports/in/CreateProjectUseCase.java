@@ -11,4 +11,6 @@ public interface CreateProjectUseCase {
     List<ProjectResponse> getAllProjects();
     ProjectResponse getProjectById(Integer id);
     ProjectResponse updateStatus(Integer id, String status);
+    List<ProjectResponse> getDraftsByResponsible(Long responsibleId);
+    void deleteDraft(Integer projectId, Long userId);
 }

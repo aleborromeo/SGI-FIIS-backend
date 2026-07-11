@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ResearchLineRepositoryAdapter Unit Tests")
+@SuppressWarnings("all")
 class ResearchLineRepositoryAdapterTest {
 
     @Mock

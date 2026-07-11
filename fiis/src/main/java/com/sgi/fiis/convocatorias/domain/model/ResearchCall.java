@@ -18,6 +18,7 @@ public class ResearchCall {
     private LocalDate endDate;
     private CallStatus status;
     private Integer documentId;
+    private Integer creatorId;
     private final List<Integer> researchLineIds;
 
     private ResearchCall(Builder builder) {
@@ -31,6 +32,7 @@ public class ResearchCall {
         this.endDate = builder.endDate;
         this.status = builder.status;
         this.documentId = builder.documentId;
+        this.creatorId = builder.creatorId;
         // Almacenamos una lista completamente inmutable en el dominio
         this.researchLineIds = List.copyOf(builder.researchLineIds);
     }
@@ -46,6 +48,17 @@ public class ResearchCall {
                 .documentId(documentId).researchLineIds(researchLineIds));
     }
 
+    /** Full constructor including creatorId. */
+    @SuppressWarnings("java:S107")
+    public ResearchCall(Integer id, String title, String description, LocalDate startDate,
+                        LocalDate endDate, CallStatus status, Integer documentId,
+                        Integer creatorId, List<Integer> researchLineIds) {
+        this(new Builder()
+                .id(id).title(title).description(description)
+                .startDate(startDate).endDate(endDate).status(status)
+                .documentId(documentId).creatorId(creatorId).researchLineIds(researchLineIds));
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -58,6 +71,7 @@ public class ResearchCall {
         private LocalDate endDate;
         private CallStatus status;
         private Integer documentId;
+        private Integer creatorId;
         // Inicializamos la lista vacía por defecto para evitar nulos molestos
         private List<Integer> researchLineIds = new ArrayList<>();
 
@@ -70,6 +84,7 @@ public class ResearchCall {
         public Builder endDate(LocalDate endDate)               { this.endDate = endDate; return this; }
         public Builder status(CallStatus status)                { this.status = status; return this; }
         public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
+        public Builder creatorId(Integer creatorId)             { this.creatorId = creatorId; return this; }
         
         // SOLUCIÓN DEFINITIVA PARA DEEPSOURCE
         public Builder researchLineIds(List<Integer> lineIds) { 
@@ -121,6 +136,11 @@ public class ResearchCall {
     /** Returns the associated document identifier. */
     public Integer getDocumentId() {
         return documentId;
+    }
+
+    /** Returns the creator user identifier. */
+    public Integer getCreatorId() {
+        return creatorId;
     }
 
     /**

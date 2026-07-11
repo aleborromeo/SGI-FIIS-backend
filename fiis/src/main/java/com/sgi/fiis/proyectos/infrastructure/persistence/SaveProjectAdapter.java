@@ -2,7 +2,6 @@ package com.sgi.fiis.proyectos.infrastructure.persistence;
 
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallEntity;
 import com.sgi.fiis.convocatorias.infrastructure.persistence.ResearchCallJpaRepository;
-import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.GroupMembershipJpaRepository;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
@@ -85,27 +84,27 @@ public class SaveProjectAdapter implements SaveProjectPort {
     @Override
     public Optional<String> getGroupCode(Integer groupId) {
         return groupRepository.findById(groupId)
-                .map(ResearchGroupEntity::getCode);
+                .map(g -> g.getCode());
     }
 
     @Override
     public Optional<String> getLineName(Integer lineId) {
         return lineRepository.findById(lineId)
-                .map(ResearchLineEntity::getName);
+                .map(l -> l.getName());
     }
 
     @Override
     public boolean isUserMemberOfGroup(Long userId, Integer groupId) {
         // Query database to see if there is an active membership for user in research group
         return membershipRepository.findByUserIdAndGroupId(userId, groupId)
-                .map(GroupMembershipEntity::getActive)
+                .map(m -> m.getActive())
                 .orElse(false);
     }
 
     @Override
     public boolean isGroupActive(Integer groupId) {
         return groupRepository.findById(groupId)
-                .map(ResearchGroupEntity::isActive)
+                .map(g -> g.isActive())
                 .orElse(false);
     }
 
@@ -138,8 +137,30 @@ public class SaveProjectAdapter implements SaveProjectPort {
     @Override
     public boolean isLineActive(Integer lineId) {
         return lineRepository.findById(lineId)
-                .map(ResearchLineEntity::isActive)
+                .map(l -> l.isActive())
                 .orElse(false);
+    }
+
+    @Override
+    public List<Project> findByResponsibleIdAndStatus(Long responsibleId, ProjectStatus status) {
+        String dbStatus = switch (status) {
+            case DRAFT -> "BORRADOR";
+            case POSTULATED -> "POSTULADO";
+            case OBSERVED -> "OBSERVADO";
+            case APPROVED -> "APROBADO";
+            case REJECTED -> "RECHAZADO";
+            case IN_PROGRESS -> "EN_EJECUCION";
+            case COMPLETED -> "FINALIZADO";
+        };
+        return projectRepository.findByResponsibleIdAndStatus(responsibleId, dbStatus).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void deleteById(Integer projectId) {
+        projectMemberRepository.deleteByProjectId(projectId);
+        projectRepository.deleteById(projectId);
     }
 
     private ProjectEntity toEntity(Project domain) {
@@ -158,18 +179,15 @@ public class SaveProjectAdapter implements SaveProjectPort {
                     .orElseThrow(() -> new IllegalArgumentException("Research call not found with ID: " + domain.getCallId()));
         }
 
-        String dbStatus = "POSTULADO";
-        if (domain.getStatus() == ProjectStatus.OBSERVED) {
-            dbStatus = "OBSERVADO";
-        } else if (domain.getStatus() == ProjectStatus.APPROVED) {
-            dbStatus = "APROBADO";
-        } else if (domain.getStatus() == ProjectStatus.REJECTED) {
-            dbStatus = "RECHAZADO";
-        } else if (domain.getStatus() == ProjectStatus.IN_PROGRESS) {
-            dbStatus = "EN_EJECUCION";
-        } else if (domain.getStatus() == ProjectStatus.COMPLETED) {
-            dbStatus = "FINALIZADO";
-        }
+        String dbStatus = switch (domain.getStatus()) {
+            case DRAFT -> "BORRADOR";
+            case OBSERVED -> "OBSERVADO";
+            case APPROVED -> "APROBADO";
+            case REJECTED -> "RECHAZADO";
+            case IN_PROGRESS -> "EN_EJECUCION";
+            case COMPLETED -> "FINALIZADO";
+            default -> "POSTULADO";
+        };
 
         return ProjectEntity.builder()
                 .id(domain.getId())
@@ -196,7 +214,9 @@ public class SaveProjectAdapter implements SaveProjectPort {
 
     private Project toDomain(ProjectEntity entity) {
         ProjectStatus domainStatus = ProjectStatus.POSTULATED;
-        if ("OBSERVADO".equalsIgnoreCase(entity.getStatus())) {
+        if ("BORRADOR".equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.DRAFT;
+        } else if ("OBSERVADO".equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.OBSERVED;
         } else if ("APROBADO".equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.APPROVED;
@@ -208,7 +228,7 @@ public class SaveProjectAdapter implements SaveProjectPort {
             domainStatus = ProjectStatus.COMPLETED;
         }
 
-        return new Project(
+        Project project = new Project(
                 entity.getId(),
                 entity.getCode(),
                 JsonbHelper.getText(entity.getTitleJson(), "es"),
@@ -227,5 +247,6 @@ public class SaveProjectAdapter implements SaveProjectPort {
                 entity.getDocumentId(),
                 domainStatus
         );
+        return project;
     }
 }

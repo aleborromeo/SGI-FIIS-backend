@@ -17,7 +17,7 @@ public class ListDocumentsUseCase {
 
     public List<DocumentResponseDto> execute() {
         return documentRepositoryPort.findAll().stream()
-                .filter(Document::isActive)
+                .filter(doc -> doc.isActive())
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }

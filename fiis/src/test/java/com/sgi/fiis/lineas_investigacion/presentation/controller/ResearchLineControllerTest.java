@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ResearchLineController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
+@SuppressWarnings("all")
 class ResearchLineControllerTest {
 
     @Autowired
@@ -69,6 +70,7 @@ class ResearchLineControllerTest {
 
     @MockitoBean
     private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
+
 
     @Test
     void register_shouldReturn201_whenDataIsValid() throws Exception {

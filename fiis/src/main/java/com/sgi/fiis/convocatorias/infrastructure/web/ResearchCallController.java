@@ -45,13 +45,15 @@ public class ResearchCallController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'ADMIN')")
     @Operation(summary = "Create a new research call", description = "Allows the research director to register a new research call with submission date ranges.")
     @ApiResponse(responseCode = "200", description = "Research call successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")
     @ApiResponse(responseCode = "403", description = "Forbidden - Requires DIRECTOR_INVESTIGACION role")
-    public ResponseEntity<CallResponse> createCall(@Valid @RequestBody CreateCallRequest request) {
-        CallResponse response = createCallUseCase.execute(request);
+    public ResponseEntity<CallResponse> createCall(
+            @Valid @RequestBody CreateCallRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        CallResponse response = createCallUseCase.execute(request, currentUser.getId().intValue());
         return ResponseEntity.ok(response);
     }
 
@@ -100,7 +102,7 @@ public class ResearchCallController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'ADMIN')")
     @Operation(summary = "Update research call status", description = "Allows the research director to change the status of a research call (ABIERTA, CERRADA, FINALIZADA).")
     @ApiResponse(responseCode = "200", description = "Status updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid status value")

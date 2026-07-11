@@ -50,8 +50,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
             throw new BusinessRuleValidationException("proyectos.error.group-not-active");
         }
 
-        // 2. Validate responsible teacher is an active member of the research group
-        // (RN-02)
+        // 2. Validate responsible teacher is an active member of the research group (RN-02)
         if (!saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
                 request.getResearchGroupId())) {
             throw new BusinessRuleValidationException("proyectos.error.responsible-not-member");
@@ -68,45 +67,63 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         String lineName = saveProjectPort.getLineName(request.getResearchLineId())
                 .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.line-name-not-found"));
 
-        // 5. If linked to a call, fetch call and validate it (RF-33 & RF-34)
+        // 5. DRAFT mode: save partial data without triggering workflow
+        if (request.isDraft()) {
+            String tempCode = "BOR-" + LocalDate.now(clock).getYear() + "-"
+                    + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            ResearchCall call = null;
+            if (request.getCallId() != null) {
+                call = saveCallPort.findById(request.getCallId()).orElse(null);
+            }
+
+            Project project = new Project(
+                    null, tempCode, request.getTitle(), request.getSummary(),
+                    request.getGeneralObjective(), request.getResearchLineId(), lineName,
+                    request.getBudget(), request.getStartDate(), request.getEndDate(),
+                    request.getExecutionPlace(), request.getResponsibleId().longValue(),
+                    request.getResearchGroupId(), groupCode,
+                    call != null ? call.getId() : null,
+                    request.getDocumentId(), ProjectStatus.DRAFT);
+
+            Project savedProject = saveProjectPort.save(project);
+
+            if (request.getMembers() != null && !request.getMembers().isEmpty()) {
+                List<ProjectMember> members = request.getMembers().stream()
+                        .map(m -> new ProjectMember(null, savedProject.getId(), m.getUserId(),
+                                m.getRole() != null ? m.getRole() : "INVESTIGADOR"))
+                        .toList();
+                saveProjectPort.saveMembers(savedProject.getId(), members);
+            }
+            return mapToResponse(savedProject);
+        }
+
+        // 6. SUBMIT mode: full validation + workflow
         ResearchCall call = getAndValidateCall(request.getCallId());
         request.setCallId(call.getId());
 
-        // 6. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
+        // 7. Generate unique formatted project code: PRJ-YYYY-[UUID-8]
         String generatedCode = "PRJ-" + LocalDate.now(clock).getYear() + "-"
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
-        // 7. Create domain model
+        // 8. Create domain model
         Project project = new Project(
-                null,
-                generatedCode,
-                request.getTitle(),
-                request.getSummary(),
-                request.getGeneralObjective(),
-                request.getResearchLineId(),
-                lineName,
-                request.getBudget(),
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getExecutionPlace(),
-                request.getResponsibleId().longValue(),
-                request.getResearchGroupId(),
-                groupCode,
-                request.getCallId(),
-                request.getDocumentId(),
-                ProjectStatus.POSTULATED);
+                null, generatedCode, request.getTitle(), request.getSummary(),
+                request.getGeneralObjective(), request.getResearchLineId(), lineName,
+                request.getBudget(), request.getStartDate(), request.getEndDate(),
+                request.getExecutionPlace(), request.getResponsibleId().longValue(),
+                request.getResearchGroupId(), groupCode,
+                request.getCallId(), request.getDocumentId(), ProjectStatus.POSTULATED);
 
-        // 8. Validate domain invariants (budget > 0, dates order, and GINSOFT line
-        // consistency RN-12)
+        // 9. Validate domain invariants (budget > 0, dates order, and GINSOFT line consistency RN-12)
         project.validateInvariants();
 
-        // 9. Save project
+        // 10. Save project
         Project savedProject = saveProjectPort.save(project);
 
-        // 10. Trigger procedure workflow (RF-40 & RF-41)
+        // 11. Trigger procedure workflow (RF-40 & RF-41)
         createProcedurePort.createPostulationProcedure(savedProject);
 
-        // 11. Save project team members if provided (RF-36)
+        // 12. Save project team members if provided (RF-36)
         if (request.getMembers() != null && !request.getMembers().isEmpty()) {
             List<ProjectMember> members = request.getMembers().stream()
                     .map(m -> new ProjectMember(null, savedProject.getId(), m.getUserId(),
@@ -159,6 +176,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private ProjectStatus mapStatusFromString(String status) {
+        if ("BORRADOR".equalsIgnoreCase(status))
+            return ProjectStatus.DRAFT;
         if ("POSTULADO".equalsIgnoreCase(status))
             return ProjectStatus.POSTULATED;
         if ("OBSERVADO".equalsIgnoreCase(status))
@@ -181,9 +200,33 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
                 .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.project-not-found", id));
     }
 
+    @Override
+    public List<ProjectResponse> getDraftsByResponsible(Long responsibleId) {
+        return saveProjectPort.findByResponsibleIdAndStatus(responsibleId, ProjectStatus.DRAFT).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    @Auditable(action = "DELETE_DRAFT")
+    public void deleteDraft(Integer projectId, Long userId) {
+        Project project = saveProjectPort.findById(projectId)
+                .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.project-not-found", projectId));
+        if (project.getStatus() != ProjectStatus.DRAFT) {
+            throw new BusinessRuleValidationException("Solo se pueden eliminar proyectos en estado BORRADOR");
+        }
+        if (!project.getResponsibleId().equals(userId)) {
+            throw new BusinessRuleValidationException("No tiene permisos para eliminar este borrador");
+        }
+        saveProjectPort.deleteById(projectId);
+    }
+
     private ProjectResponse mapToResponse(Project project) {
         String dbStatus = "POSTULADO";
-        if (project.getStatus() == ProjectStatus.OBSERVED) {
+        if (project.getStatus() == ProjectStatus.DRAFT) {
+            dbStatus = "BORRADOR";
+        } else if (project.getStatus() == ProjectStatus.OBSERVED) {
             dbStatus = "OBSERVADO";
         } else if (project.getStatus() == ProjectStatus.APPROVED) {
             dbStatus = "APROBADO";

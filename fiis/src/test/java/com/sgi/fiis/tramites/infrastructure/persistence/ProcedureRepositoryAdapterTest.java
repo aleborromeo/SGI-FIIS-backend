@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProcedureRepositoryAdapter Unit Tests")
+@SuppressWarnings("all")
 class ProcedureRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureRepository tramiteRepository;

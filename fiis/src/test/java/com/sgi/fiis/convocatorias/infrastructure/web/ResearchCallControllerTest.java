@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("all")
 class ResearchCallControllerTest {
 
     private static final LocalDate FIXED_START = LocalDate.of(2026, Month.JUNE, 1);
@@ -49,7 +50,7 @@ class ResearchCallControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         createCallUseCase = mock(CreateCallUseCase.class);
         getCallUseCase = mock(GetCallUseCase.class);
         updateCallStatusUseCase = mock(UpdateCallStatusUseCase.class);
@@ -68,7 +69,7 @@ class ResearchCallControllerTest {
     }
 
     @AfterEach
-    void tearDown() {
+    public void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
@@ -83,6 +84,7 @@ class ResearchCallControllerTest {
 
     @Test
     void shouldCreateCall() throws Exception {
+        authenticateAs(1L, "admin@unas.edu.pe", "ADMIN");
         CreateCallRequest request = new CreateCallRequest();
         request.setTitle("Call Test");
         request.setDescription("Description");
@@ -92,7 +94,7 @@ class ResearchCallControllerTest {
 
         CallResponse response = new CallResponse(1, "Call Test", "Description", FIXED_START, FIXED_END, "ABIERTA", null, null);
 
-        when(createCallUseCase.execute(any(CreateCallRequest.class))).thenReturn(response);
+        when(createCallUseCase.execute(any(CreateCallRequest.class), anyInt())).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/calls")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +104,7 @@ class ResearchCallControllerTest {
                 .andExpect(jsonPath("$.title").value("Call Test"))
                 .andExpect(jsonPath("$.status").value("ABIERTA"));
 
-        verify(createCallUseCase, times(1)).execute(any(CreateCallRequest.class));
+        verify(createCallUseCase, times(1)).execute(any(CreateCallRequest.class), anyInt());
     }
 
     @Test

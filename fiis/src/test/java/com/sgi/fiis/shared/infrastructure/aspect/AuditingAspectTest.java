@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AuditingAspect Unit Tests")
+@SuppressWarnings("all")
 class AuditingAspectTest {
 
     @Mock
