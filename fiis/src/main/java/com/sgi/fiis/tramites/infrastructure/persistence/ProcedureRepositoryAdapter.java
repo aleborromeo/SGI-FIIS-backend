@@ -9,7 +9,6 @@ import com.sgi.fiis.tramites.domain.model.Procedure;
 import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,15 +41,15 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     @Transactional
-    public Procedure save(Procedure tramite) {
-        ProcedureEntity saved = procedureRepository.save(toEntity(tramite));
+    public Procedure save(Procedure procedure) {
+        ProcedureEntity saved = procedureRepository.save(toEntity(procedure));
 
-        long existentes = movementRepository.countByProcedure_Id(Long.valueOf(saved.getId()));
-        tramite.getMovements().stream()
-                .skip(existentes)
-                .forEach(mov -> movementRepository.save(toMovimientoEntity(mov, saved.getId())));
+        long existingCount = movementRepository.countByProcedure_Id(Long.valueOf(saved.getId()));
+        procedure.getMovements().stream()
+                .skip(existingCount)
+                .forEach(mov -> movementRepository.save(toMovementEntity(mov, saved.getId())));
 
-        return toDomain(saved, new ArrayList<>(tramite.getMovements()));
+        return toDomain(saved, new ArrayList<>(procedure.getMovements()));
     }
 
     @Override
@@ -60,40 +59,40 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     }
 
     @Override
-    public Optional<Procedure> findByCode(String codigoTramite) {
-        return procedureRepository.findByCode(codigoTramite)
+    public Optional<Procedure> findByCode(String code) {
+        return procedureRepository.findByCode(code)
                 .map(entity -> toDomain(entity, loadMovements(Long.valueOf(entity.getId()))));
     }
 
     private List<ProcedureMovement> loadMovements(Long procedureId) {
         return movementRepository.findByProcedure_IdOrderByMovementAtAsc(procedureId)
                 .stream()
-                .map(this::toMovimientoDomain)
+                .map(this::toMovementDomain)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
-    public List<Procedure> findByApplicantId(Long idSolicitante) {
-        return procedureRepository.findByApplicant_Id(idSolicitante)
+    public List<Procedure> findByApplicantId(Long applicantId) {
+        return procedureRepository.findByApplicant_Id(applicantId)
                 .stream()
                 .map(entity -> toDomain(entity, new ArrayList<>()))
                 .toList();
     }
 
     @Override
-    public List<Procedure> findByStatus(ProcedureStatus estado) {
-        return procedureRepository.findByStatus(estado.name())
+    public List<Procedure> findByStatus(ProcedureStatus status) {
+        return procedureRepository.findByStatus(status.name())
                 .stream()
                 .map(entity -> toDomain(entity, new ArrayList<>()))
                 .toList();
     }
 
     @Override
-    public boolean existsByCode(String codigoTramite) {
-        return procedureRepository.existsByCode(codigoTramite);
+    public boolean existsByCode(String code) {
+        return procedureRepository.existsByCode(code);
     }
 
-    private Procedure toDomain(ProcedureEntity entity, List<ProcedureMovement> movimientos) {
+    private Procedure toDomain(ProcedureEntity entity, List<ProcedureMovement> movements) {
         return Procedure.builder()
                 .id(entity.getId().longValue())
                 .code(entity.getCode())
@@ -108,79 +107,36 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .projectReferenceId(entity.getProjectReference() != null
                         ? entity.getProjectReference().getId().longValue()
                         : null)
-                .thesisReferenceId(null)
-                .reportReferenceId(null)
+                .thesisReferenceId(entity.getThesisReferenceId())
+                .reportReferenceId(entity.getReportReferenceId())
                 .sentAt(entity.getSentAt())
                 .updatedAt(entity.getUpdatedAt())
-                .movements(movimientos)
-                .id(entity.getId() != null ? entity.getId().longValue() : null)
-                .codigoTramite(entity.getCode())
-                .tipoTramite(entity.getProcedureType() != null ? ProcedureType.valueOf(entity.getProcedureType()) : null)
-                .idSolicitante(entity.getApplicant() != null ? entity.getApplicant().getId().longValue() : null)
-                .idGrupo(entity.getGroup() != null ? entity.getGroup().getId().longValue() : null)
-                .estadoActual(entity.getStatus() != null ? ProcedureStatus.valueOf(entity.getStatus()) : null)
-                .rolRevisorActual(entity.getReviewerRole() != null
-                        ? RoleEnum.valueOf(entity.getReviewerRole()) : null)
-                .observacionActual(null)
-                .idReferenciaProyecto(entity.getProjectReference() != null ? entity.getProjectReference().getId().longValue() : null)
-                .idReferenciaTesis(entity.getThesisReferenceId())
-                .idReferenciaInforme(entity.getReportReferenceId())
-                .fechaEnvio(entity.getSentAt())
-                .fechaActualizacion(entity.getUpdatedAt())
-                .movimientos(movimientos)
+                .movements(movements)
                 .build();
     }
 
-    private ProcedureEntity toEntity(Procedure tramite) {
+    private ProcedureEntity toEntity(Procedure procedure) {
         ProcedureEntity entity = new ProcedureEntity();
-        entity.setId(tramite.getId() != null ? tramite.getId().intValue() : null);
-        entity.setCode(tramite.getCode());
-        entity.setProcedureType(tramite.getProcedureType().getDbValue());
-        entity.setApplicant(userRepository.getReferenceById(tramite.getApplicantId()));
-        entity.setGroup(groupRepository.getReferenceById(tramite.getGroupId().intValue()));
-        entity.setStatus(tramite.getCurrentStatus().name());
-        entity.setReviewerRole(tramite.getCurrentReviewerRole() != null
-                ? tramite.getCurrentReviewerRole().name()
+        entity.setId(procedure.getId() != null ? procedure.getId().intValue() : null);
+        entity.setCode(procedure.getCode());
+        entity.setProcedureType(procedure.getProcedureType().getDbValue());
+        entity.setApplicant(userRepository.getReferenceById(procedure.getApplicantId()));
+        entity.setGroup(groupRepository.getReferenceById(procedure.getGroupId().intValue()));
+        entity.setStatus(procedure.getCurrentStatus().name());
+        entity.setReviewerRole(procedure.getCurrentReviewerRole() != null
+                ? procedure.getCurrentReviewerRole().name()
                 : null);
-        entity.setSentAt(tramite.getSentAt());
-        entity.setUpdatedAt(tramite.getUpdatedAt());
-        if (tramite.getProjectReferenceId() != null) {
-            entity.setProjectReference(projectRepository.getReferenceById(tramite.getProjectReferenceId().intValue()));
+        entity.setSentAt(procedure.getSentAt());
+        entity.setUpdatedAt(procedure.getUpdatedAt());
+        if (procedure.getProjectReferenceId() != null) {
+            entity.setProjectReference(projectRepository.getReferenceById(procedure.getProjectReferenceId().intValue()));
         }
-        entity.setCode(tramite.getCodigoTramite());
-        entity.setProcedureType(tramite.getTipoTramite().name());
-        
-        if (tramite.getIdSolicitante() != null) {
-            com.sgi.fiis.users.infrastructure.persistence.UserEntity user = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
-            user.setId(tramite.getIdSolicitante());
-            entity.setApplicant(user);
-        }
-        
-        if (tramite.getIdGrupo() != null) {
-            com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity rg = new com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity();
-            rg.setId(tramite.getIdGrupo().intValue());
-            entity.setGroup(rg);
-        }
-        
-        entity.setStatus(tramite.getEstadoActual() != null ? tramite.getEstadoActual().name() : null);
-        entity.setReviewerRole(tramite.getRolRevisorActual() != null
-                ? tramite.getRolRevisorActual().name() : null);
-                
-        if (tramite.getIdReferenciaProyecto() != null) {
-            com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity pe = new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity();
-            pe.setId(tramite.getIdReferenciaProyecto().intValue());
-                entity.setProjectReference(pe);
-        }
-
-        entity.setThesisReferenceId(tramite.getIdReferenciaTesis());
-        entity.setReportReferenceId(tramite.getIdReferenciaInforme());
-
-        entity.setSentAt(tramite.getFechaEnvio());
-        entity.setUpdatedAt(tramite.getFechaActualizacion());
+        entity.setThesisReferenceId(procedure.getThesisReferenceId());
+        entity.setReportReferenceId(procedure.getReportReferenceId());
         return entity;
     }
 
-    private ProcedureMovement toMovimientoDomain(ProcedureMovementEntity entity) {
+    private ProcedureMovement toMovementDomain(ProcedureMovementEntity entity) {
         return ProcedureMovement.builder()
                 .actionUserId(entity.getActionUser().getId())
                 .action(entity.getAction())
@@ -188,17 +144,10 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .newStatus(ProcedureStatus.valueOf(entity.getNewState()))
                 .comment(entity.getComment())
                 .movementAt(entity.getMovementAt())
-                .idUsuarioAccion(entity.getActionUser() != null ? entity.getActionUser().getId().longValue() : null)
-                .accion(entity.getAction())
-                .estadoAnterior(entity.getPreviousState() != null ? ProcedureStatus.valueOf(entity.getPreviousState()) : null)
-                .estadoNuevo(entity.getNewState() != null ? ProcedureStatus.valueOf(entity.getNewState()) : null)
-                .observacion(entity.getComment())
-                .fechaMovimiento(entity.getMovementAt())
-                .idDocumentoAdjunto(entity.getDocumentAttachmentId())
                 .build();
     }
 
-    private ProcedureMovementEntity toMovimientoEntity(ProcedureMovement domain, Integer procedureId) {
+    private ProcedureMovementEntity toMovementEntity(ProcedureMovement domain, Integer procedureId) {
         ProcedureMovementEntity entity = new ProcedureMovementEntity();
         entity.setProcedure(procedureRepository.getReferenceById(procedureId));
         entity.setActionUser(userRepository.getReferenceById(domain.getActionUserId()));
@@ -207,22 +156,6 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         entity.setNewState(domain.getNewStatus().name());
         entity.setComment(domain.getComment());
         entity.setMovementAt(domain.getMovementAt());
-        ProcedureEntity proc = new ProcedureEntity();
-        proc.setId(idTramite);
-        entity.setProcedure(proc);
-        
-        if (domain.getIdUsuarioAccion() != null) {
-            com.sgi.fiis.users.infrastructure.persistence.UserEntity actionUser = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
-            actionUser.setId(domain.getIdUsuarioAccion());
-            entity.setActionUser(actionUser);
-        }
-        
-        entity.setAction(domain.getAccion());
-        entity.setPreviousState(domain.getEstadoAnterior() != null ? domain.getEstadoAnterior().name() : null);
-        entity.setNewState(domain.getEstadoNuevo() != null ? domain.getEstadoNuevo().name() : null);
-        entity.setComment(domain.getObservacion());
-        entity.setMovementAt(domain.getFechaMovimiento());
-        entity.setDocumentAttachmentId(domain.getIdDocumentoAdjunto());
         return entity;
     }
 }

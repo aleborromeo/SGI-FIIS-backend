@@ -60,7 +60,7 @@ public class DownloadDocumentUseCase {
         }
         return resolutionRepositoryPort.findByDocumentAdjuntoId(documentId)
                 .flatMap(resolution -> procedureRepositoryPort.findById(resolution.idTramite()))
-                .map(procedure -> procedure.getIdSolicitante() != null && procedure.getIdSolicitante().equals(currentUserId))
+                .map(procedure -> procedure.getApplicantId() != null && procedure.getApplicantId().equals(currentUserId))
                 .orElse(false);
     }
 }
