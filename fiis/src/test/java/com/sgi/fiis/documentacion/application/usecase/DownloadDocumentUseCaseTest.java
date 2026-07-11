@@ -232,7 +232,7 @@ class DownloadDocumentUseCaseTest {
 
         Procedure procedure = Procedure.builder()
                 .id(5L)
-                .applicantId(77L)
+                .idSolicitante(77L)
                 .build();
 
         InputStream fakeStream = new ByteArrayInputStream("contenido".getBytes());
@@ -387,7 +387,7 @@ class DownloadDocumentUseCaseTest {
                 .uploadedById(10L).active(true).build();
 
         Resolution resolution = new Resolution(1L, "RES-001", null, null, 5L, 1L, null);
-        Procedure procedure = Procedure.builder().id(5L).applicantId(null).build();
+        Procedure procedure = Procedure.builder().id(5L).idSolicitante(null).build();
 
         when(documentRepositoryPort.findById(1L)).thenReturn(Optional.of(mockDoc));
         when(resolutionRepositoryPort.findByDocumentAdjuntoId(1L)).thenReturn(Optional.of(resolution));
