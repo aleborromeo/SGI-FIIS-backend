@@ -12,6 +12,7 @@ import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     private final SpringDataProcedureRepository procedureRepository;
@@ -28,19 +30,6 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     private final SpringDataUserRepository userRepository;
     private final ResearchGroupJpaRepository groupRepository;
     private final ProjectJpaRepository projectRepository;
-
-    public ProcedureRepositoryAdapter(
-            SpringDataProcedureRepository procedureRepository,
-            SpringDataProcedureMovementRepository movementRepository,
-            SpringDataUserRepository userRepository,
-            ResearchGroupJpaRepository groupRepository,
-            ProjectJpaRepository projectRepository) {
-        this.procedureRepository = procedureRepository;
-        this.movementRepository = movementRepository;
-        this.userRepository = userRepository;
-        this.groupRepository = groupRepository;
-        this.projectRepository = projectRepository;
-    }
 
     @Override
     @Transactional
