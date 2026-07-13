@@ -16,7 +16,7 @@ class ProgressReportEventAdapterTest {
     private ProgressReportEventAdapter progressReportEventAdapter;
 
     @Test
-    @DisplayName("Should publish report procedure without throwing exceptions")
+    @DisplayName("Should publish report procedure without throwing exceptionss")
     void shouldPublishReportProcedureWithoutExceptions() {
         assertDoesNotThrow(() -> progressReportEventAdapter.publishReportProcedure(1L, 2L, 3L, 4L));
     }
