@@ -18,6 +18,8 @@ import java.util.List;
 public class ProcedureController {
 
     private final CreateProcedureUseCase createProcedureUseCase;
+    private final ListProceduresUseCase listProceduresUseCase;
+    private final GetProcedureUseCase getProcedureUseCase;
     private final ApproveProcedureUseCase approveProcedureUseCase;
     private final FlagProcedureUseCase flagProcedureUseCase;
     private final RemediateProcedureUseCase remediateProcedureUseCase;
@@ -26,6 +28,8 @@ public class ProcedureController {
     private final GetTraceabilityUseCase getTraceabilityUseCase;
 
     public ProcedureController(CreateProcedureUseCase createProcedureUseCase,
+                               ListProceduresUseCase listProceduresUseCase,
+                               GetProcedureUseCase getProcedureUseCase,
                                ApproveProcedureUseCase approveProcedureUseCase,
                                FlagProcedureUseCase flagProcedureUseCase,
                                RemediateProcedureUseCase remediateProcedureUseCase,
@@ -33,12 +37,24 @@ public class ProcedureController {
                                RegisterResolutionUseCase registerResolutionUseCase,
                                GetTraceabilityUseCase getTraceabilityUseCase) {
         this.createProcedureUseCase    = createProcedureUseCase;
+        this.listProceduresUseCase     = listProceduresUseCase;
+        this.getProcedureUseCase       = getProcedureUseCase;
         this.approveProcedureUseCase   = approveProcedureUseCase;
         this.flagProcedureUseCase      = flagProcedureUseCase;
         this.remediateProcedureUseCase = remediateProcedureUseCase;
         this.rejectProcedureUseCase    = rejectProcedureUseCase;
         this.registerResolutionUseCase = registerResolutionUseCase;
         this.getTraceabilityUseCase    = getTraceabilityUseCase;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProcedureResponseDto>> list() {
+        return ResponseEntity.ok(listProceduresUseCase.execute());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProcedureResponseDto> get(@PathVariable Long id) {
+        return ResponseEntity.ok(getProcedureUseCase.execute(id));
     }
 
     @PostMapping

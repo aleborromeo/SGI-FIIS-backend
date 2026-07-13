@@ -16,6 +16,7 @@ public class MembershipResponseDto {
     private String userFirstNames;
     private String userLastNames;
     private String userEmail;
+    private String userRoleCode;
     private boolean active;
     private String startDate;
     private String endDate;

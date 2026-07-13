@@ -12,6 +12,8 @@ public interface ProcedureRepositoryPort {
 
     Optional<Procedure> findById(Long id);
 
+    List<Procedure> findAll();
+
     Optional<Procedure> findByCode(String codigoTramite);
 
     List<Procedure> findByApplicantId(Long idSolicitante);

@@ -56,6 +56,14 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
                 .map(entity -> toDomain(entity, loadMovements(Long.valueOf(entity.getId()))));
     }
 
+    @Override
+    public List<Procedure> findAll() {
+        return procedureRepository.findAll()
+                .stream()
+                .map(entity -> toDomain(entity, new ArrayList<>()))
+                .toList();
+    }
+
     private List<ProcedureMovement> loadMovements(Long procedureId) {
         return movementRepository.findByProcedure_IdOrderByMovementAtAsc(procedureId)
                 .stream()

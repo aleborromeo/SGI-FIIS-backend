@@ -35,40 +35,41 @@ public class UpdateCallInteractor implements UpdateCallUseCase {
             throw new BusinessRuleValidationException("convocatorias.error.cannot-edit-closed", call.getStatus());
         }
 
-        if (request.getTitle() != null && !request.getTitle().isBlank()) {
-            call = ResearchCall.builder()
-                    .id(call.getId())
-                    .title(request.getTitle())
-                    .description(request.getDescription() != null ? request.getDescription() : call.getDescription())
-                    .startDate(request.getStartDate() != null ? request.getStartDate() : call.getStartDate())
-                    .endDate(request.getEndDate() != null ? request.getEndDate() : call.getEndDate())
-                    .status(call.getStatus())
-                    .documentId(request.getDocumentId() != null ? request.getDocumentId() : call.getDocumentId())
-                    .creatorId(call.getCreatorId())
-                    .researchLineIds(request.getResearchLineIds() != null ? request.getResearchLineIds() : call.getResearchLineIds())
-                    .build();
-        } else {
-            call = ResearchCall.builder()
-                    .id(call.getId())
-                    .title(call.getTitle())
-                    .description(request.getDescription() != null ? request.getDescription() : call.getDescription())
-                    .startDate(request.getStartDate() != null ? request.getStartDate() : call.getStartDate())
-                    .endDate(request.getEndDate() != null ? request.getEndDate() : call.getEndDate())
-                    .status(call.getStatus())
-                    .documentId(request.getDocumentId() != null ? request.getDocumentId() : call.getDocumentId())
-                    .creatorId(call.getCreatorId())
-                    .researchLineIds(request.getResearchLineIds() != null ? request.getResearchLineIds() : call.getResearchLineIds())
-                    .build();
-        }
-
-        if (request.getResearchLineIds() != null && !request.getResearchLineIds().isEmpty()) {
-            if (!saveCallPort.areLinesActive(request.getResearchLineIds())) {
-                throw new BusinessRuleValidationException("convocatorias.error.lines-not-active");
-            }
-        }
+        call = applyUpdates(call, request);
+        validateActiveLines(request);
 
         ResearchCall saved = saveCallPort.save(call);
         return mapToResponse(saved);
+    }
+
+    private ResearchCall applyUpdates(ResearchCall call, UpdateCallRequest request) {
+        return ResearchCall.builder()
+                .id(call.getId())
+                .title(resolveString(request.getTitle(), call.getTitle()))
+                .description(resolveString(request.getDescription(), call.getDescription()))
+                .startDate(resolveIfNotNull(request.getStartDate(), call.getStartDate()))
+                .endDate(resolveIfNotNull(request.getEndDate(), call.getEndDate()))
+                .status(call.getStatus())
+                .documentId(resolveIfNotNull(request.getDocumentId(), call.getDocumentId()))
+                .creatorId(call.getCreatorId())
+                .researchLineIds(request.getResearchLineIds() != null
+                        ? request.getResearchLineIds() : call.getResearchLineIds())
+                .build();
+    }
+
+    private void validateActiveLines(UpdateCallRequest request) {
+        if (request.getResearchLineIds() != null && !request.getResearchLineIds().isEmpty()
+                && !saveCallPort.areLinesActive(request.getResearchLineIds())) {
+            throw new BusinessRuleValidationException("convocatorias.error.lines-not-active");
+        }
+    }
+
+    private String resolveString(String candidate, String fallback) {
+        return (candidate != null && !candidate.isBlank()) ? candidate : fallback;
+    }
+
+    private <T> T resolveIfNotNull(T candidate, T fallback) {
+        return candidate != null ? candidate : fallback;
     }
 
     private CallResponse mapToResponse(ResearchCall call) {
