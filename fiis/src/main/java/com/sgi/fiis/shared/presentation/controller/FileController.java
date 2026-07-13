@@ -36,7 +36,6 @@ import java.util.UUID;
 /**
  * @deprecated Use DocumentController (/api/documents) instead
  */
-@Deprecated(since = "2.0.0", forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/files")
 @Tag(name = "Files", description = "DEPRECATED: Use DocumentController (/api/documents) instead")
@@ -48,7 +47,6 @@ public class FileController {
     private final GroupMembershipJpaRepository membershipRepository;
     private final String uploadDir;
 
-    @Deprecated(since = "2.0.0", forRemoval = true)
     public FileController(DocumentJpaRepository documentRepository,
                           ProjectJpaRepository projectRepository,
                           GroupMembershipJpaRepository membershipRepository,
@@ -65,7 +63,6 @@ public class FileController {
         }
     }
 
-    @Deprecated(since = "2.0.0", forRemoval = true)
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload proposal document", description = "Only allows PDF, DOC, and DOCX files up to 10 MB.")
     @ApiResponse(responseCode = "200", description = "File successfully uploaded")
@@ -133,10 +130,9 @@ public class FileController {
         ));
     }
 
-    @Deprecated(since = "2.0.0", forRemoval = true)
     @GetMapping("/download/{id}")
     @Operation(summary = "Download file by ID", description = "Validates access rights before download.")
-    @ApiResponse(responseCode = "200", description = "File successfully downloaded")
+    @ApiResponse(responseCode = "200", description = "File downloaded successfully")
     @ApiResponse(responseCode = "403", description = "Forbidden - Unauthorized to download this file")
     @ApiResponse(responseCode = "404", description = "File not found")
     public ResponseEntity<Resource> downloadFile(

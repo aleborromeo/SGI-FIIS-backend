@@ -22,6 +22,10 @@ spring:
     baseline-on-migrate: true
     baseline-version: 0
     validate-on-migrate: false
+  messages:
+    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages
+    use-code-as-default-message: true
+    fallback-to-system-locale: true
   servlet:
     multipart:
       max-file-size: 5MB       # Tamaño máximo permitido por cada archivo individual

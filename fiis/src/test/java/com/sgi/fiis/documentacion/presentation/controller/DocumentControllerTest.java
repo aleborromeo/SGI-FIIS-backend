@@ -7,7 +7,6 @@ import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundExceptio
 import com.sgi.fiis.documentacion.application.usecase.DeactivateDocumentUseCase;
 import com.sgi.fiis.documentacion.application.usecase.DownloadDocumentUseCase;
 import com.sgi.fiis.documentacion.application.usecase.UploadDocumentUseCase;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import com.sgi.fiis.documentacion.application.usecase.DocumentDownloadResult;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +44,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(value = DocumentController.class, excludeAutoConfiguration = {DataSourceAutoConfiguration.class})
+@WebMvcTest(DocumentController.class)
 @DisplayName("Pruebas Expandidas de Cobertura - DocumentController")
 class DocumentControllerTest {
 
