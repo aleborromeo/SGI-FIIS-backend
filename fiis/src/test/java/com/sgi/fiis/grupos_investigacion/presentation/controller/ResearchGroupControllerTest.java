@@ -51,6 +51,7 @@ class ResearchGroupControllerTest {
     @MockitoBean private ListResearchLinesByGroupUseCase listResearchLinesByGroupUseCase;
     @MockitoBean private ResearchGroupMapper mapper;
     @MockitoBean private ResearchLineMapper lineMapper;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
     @MockitoBean private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
     @MockitoBean private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
 

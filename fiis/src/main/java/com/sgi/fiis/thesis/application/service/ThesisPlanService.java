@@ -1,7 +1,6 @@
 package com.sgi.fiis.thesis.application.service;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -213,13 +212,14 @@ public class ThesisPlanService implements ThesisPlanUseCase {
 
     @Override
     @Transactional(readOnly = true)
+    @SuppressWarnings("all")
     public List<ThesisPlanResponse> listarPendientesPorRevisor(ReviewerRole revisor) {
         validarRevisorParaRol(revisor);
         List<Integer> ids = tramiteWorkflow.findPlanTesisIdsByRevisor(revisor);
         return ids.stream()
                 .map(planRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .filter(opt -> opt.isPresent())
+                .map(opt -> opt.get())
                 .map(this::toResponse)
                 .toList();
     }

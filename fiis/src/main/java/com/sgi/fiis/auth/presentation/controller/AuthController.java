@@ -23,10 +23,12 @@ import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -47,6 +49,7 @@ public class AuthController {
     private final UserRepositoryPort userRepository;
     private final UserMapper userMapper;
     private final MessageSource messageSource;
+    private final JdbcTemplate jdbcTemplate;
 
     private static final String KEY_MESSAGE = "message";
 
@@ -119,5 +122,47 @@ public class AuthController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return ResponseEntity.ok(userMapper.toResponseDto(user));
+    }
+
+    /** Public stats for WelcomePage (no auth required) */
+    @GetMapping("/public-stats")
+    public ResponseEntity<Map<String, Object>> getPublicStats() {
+        int proyectosRegistrados = count("SELECT COUNT(*) FROM proyectos");
+        int tesis = count("SELECT COUNT(*) FROM planes_tesis");
+        int docentesInvestigadores = count("SELECT COUNT(*) FROM usuarios WHERE es_activo = TRUE");
+        int gruposInvestigacion = count("SELECT COUNT(*) FROM grupos_investigacion WHERE es_activo = TRUE");
+        int proyectosCulminados = count("SELECT COUNT(*) FROM proyectos WHERE estado_proyecto = 'FINALIZADO'");
+
+        return ResponseEntity.ok(Map.of(
+                "proyectosRegistrados", proyectosRegistrados,
+                "tesis", tesis,
+                "docentesInvestigadores", docentesInvestigadores,
+                "gruposInvestigacion", gruposInvestigacion,
+                "proyectosCulminados", proyectosCulminados
+        ));
+    }
+
+    /** Public groups for WelcomePage (no auth required) */
+    @GetMapping("/public-groups")
+    public ResponseEntity<List<Map<String, Object>>> getPublicGroups() {
+        String sql = """
+                SELECT g.codigo_grupo AS codigo,
+                       g.nombre_grupo AS nombre,
+                       COUNT(DISTINCT m.id_usuario) AS miembros,
+                       COUNT(DISTINCT p.id_proyecto) AS publicaciones
+                FROM grupos_investigacion g
+                LEFT JOIN membresias_grupo m ON m.id_grupo = g.id_grupo AND m.es_activo = TRUE
+                LEFT JOIN proyectos p ON p.id_grupo = g.id_grupo
+                WHERE g.es_activo = TRUE
+                GROUP BY g.codigo_grupo, g.nombre_grupo
+                ORDER BY publicaciones DESC
+                """;
+        List<Map<String, Object>> groups = jdbcTemplate.queryForList(sql);
+        return ResponseEntity.ok(groups);
+    }
+
+    private int count(String sql) {
+        Integer result = jdbcTemplate.queryForObject(sql, Integer.class);
+        return result != null ? result : 0;
     }
 }

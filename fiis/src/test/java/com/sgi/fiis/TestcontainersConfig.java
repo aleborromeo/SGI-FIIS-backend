@@ -12,6 +12,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *
  * Uso: hacer que la clase de test extienda esta clase.
  */
+@SuppressWarnings({"resource", "unused"})
 public abstract class TestcontainersConfig {
 
     @SuppressWarnings("resource")

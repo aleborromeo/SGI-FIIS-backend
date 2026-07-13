@@ -24,7 +24,6 @@ import static org.mockito.Mockito.*;
 class ProcedureMovementRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureMovementRepository repository;
-    @Mock private SpringDataUserRepository userRepository;
     @InjectMocks private ProcedureMovementRepositoryAdapter adapter;
 
     private ProcedureMovementEntity buildMovementEntity() {

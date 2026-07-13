@@ -9,10 +9,12 @@ import com.sgi.fiis.lineas_investigacion.presentation.mapper.ResearchLineMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/research-groups")
@@ -29,6 +31,7 @@ public class ResearchGroupController {
     private final ListResearchLinesByGroupUseCase listResearchLinesByGroupUseCase;
     private final ResearchGroupMapper mapper;
     private final ResearchLineMapper lineMapper;
+    private final JdbcTemplate jdbcTemplate;
 
     /** RF-22: Create research group */
     @PostMapping
@@ -103,5 +106,26 @@ public class ResearchGroupController {
         return ResponseEntity.ok(listResearchLinesByGroupUseCase.execute(id).stream()
                 .map(lineMapper::toResponseDto)
                 .toList());
+    }
+
+    /** Users without active group membership (for assigning to groups) */
+    @GetMapping("/available-users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Map<String, Object>>> getAvailableUsers() {
+        String sql = """
+                SELECT u.id_usuario AS id,
+                       u.nombres AS "firstNames",
+                       u.apellidos AS "lastNames",
+                       u.correo_institucional AS "institutionalEmail"
+                FROM usuarios u
+                WHERE u.es_activo = TRUE
+                  AND NOT EXISTS (
+                    SELECT 1 FROM membresias_grupo m
+                    WHERE m.id_usuario = u.id_usuario AND m.es_activo = TRUE
+                  )
+                ORDER BY u.nombres, u.apellidos
+                """;
+        List<Map<String, Object>> users = jdbcTemplate.queryForList(sql);
+        return ResponseEntity.ok(users);
     }
 }

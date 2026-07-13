@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -48,6 +49,7 @@ class AuthControllerTest {
     private UserRepositoryPort userRepository;
     private UserMapper userMapper;
     private MessageSource messageSource;
+    private JdbcTemplate jdbcTemplate;
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -62,11 +64,12 @@ class AuthControllerTest {
         userRepository = mock(UserRepositoryPort.class);
         userMapper = mock(UserMapper.class);
         messageSource = mock(MessageSource.class);
+        jdbcTemplate = mock(JdbcTemplate.class);
 
         AuthController controller = new AuthController(
                 loginUseCase, registerUseCase, verifyRegistrationUseCase, resendCodeUseCase,
                 changePasswordUseCase, forgotPasswordUseCase, selfResetPasswordUseCase,
-                userRepository, userMapper, messageSource
+                userRepository, userMapper, messageSource, jdbcTemplate
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)

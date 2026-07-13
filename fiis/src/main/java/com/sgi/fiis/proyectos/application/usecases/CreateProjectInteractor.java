@@ -25,6 +25,7 @@ import java.util.UUID;
 @Service
 public class CreateProjectInteractor implements CreateProjectUseCase {
 
+    // Trigger rebuild to resolve compilation in JDT LS
     private static final String PROJECT_NOT_FOUND = "proyectos.error.project-not-found";
 
     private final SaveProjectPort saveProjectPort;
@@ -217,20 +218,15 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private ProjectResponse mapToResponse(Project project) {
-        String dbStatus = "POSTULADO";
-        if (project.getStatus() == ProjectStatus.DRAFT) {
-            dbStatus = "BORRADOR";
-        } else if (project.getStatus() == ProjectStatus.OBSERVED) {
-            dbStatus = "OBSERVADO";
-        } else if (project.getStatus() == ProjectStatus.APPROVED) {
-            dbStatus = "APROBADO";
-        } else if (project.getStatus() == ProjectStatus.REJECTED) {
-            dbStatus = "RECHAZADO";
-        } else if (project.getStatus() == ProjectStatus.IN_PROGRESS) {
-            dbStatus = "EN_EJECUCION";
-        } else if (project.getStatus() == ProjectStatus.COMPLETED) {
-            dbStatus = "FINALIZADO";
-        }
+        String dbStatus = switch (project.getStatus()) {
+            case DRAFT -> "BORRADOR";
+            case OBSERVED -> "OBSERVADO";
+            case APPROVED -> "APROBADO";
+            case REJECTED -> "RECHAZADO";
+            case IN_PROGRESS -> "EN_EJECUCION";
+            case COMPLETED -> "FINALIZADO";
+            default -> "POSTULADO";
+        };
 
         List<com.sgi.fiis.proyectos.application.dto.MemberResponse> members = null;
         if (project.getId() != null) {

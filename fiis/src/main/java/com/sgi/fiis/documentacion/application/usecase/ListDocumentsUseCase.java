@@ -5,7 +5,6 @@ import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ListDocumentsUseCase {
 
@@ -15,11 +14,12 @@ public class ListDocumentsUseCase {
         this.documentRepositoryPort = documentRepositoryPort;
     }
 
+    @SuppressWarnings("all")
     public List<DocumentResponseDto> execute() {
         return documentRepositoryPort.findAll().stream()
-                .filter(Document::isActive)
+                .filter(doc -> doc.isActive())
                 .map(this::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private DocumentResponseDto toDto(Document doc) {

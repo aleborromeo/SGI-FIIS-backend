@@ -1,8 +1,6 @@
 package com.sgi.fiis.tramites.infrastructure.persistence;
 
-import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
-import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
