@@ -86,4 +86,30 @@ class DocumentEntityTest {
         assertNotNull(entity.getCreatedAt());
         assertTrue(entity.getCreatedAt() instanceof LocalDateTime);
     }
+
+    @Test
+    @DisplayName("Should set and get createdAt via setter")
+    void testSetCreatedAt() {
+        DocumentEntity entity = new DocumentEntity();
+        LocalDateTime now = LocalDateTime.now();
+        entity.setCreatedAt(now);
+        assertEquals(now, entity.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Should set and get active via setter")
+    void testSetActive() {
+        DocumentEntity entity = DocumentEntity.builder().active(true).build();
+        assertTrue(entity.isActive());
+
+        entity.setActive(false);
+        assertFalse(entity.isActive());
+    }
+
+    @Test
+    @DisplayName("Should default active to true via builder")
+    void testDefaultActive() {
+        DocumentEntity entity = DocumentEntity.builder().build();
+        assertTrue(entity.isActive());
+    }
 }

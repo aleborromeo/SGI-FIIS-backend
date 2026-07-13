@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.convocatorias.application.dto.CallResponse;
 import com.sgi.fiis.convocatorias.application.dto.CreateCallRequest;
+import com.sgi.fiis.convocatorias.application.dto.UpdateCallRequest;
 import com.sgi.fiis.convocatorias.application.ports.in.CreateCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.GetCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.UpdateCallStatusUseCase;
@@ -32,6 +33,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*; // Add verify, times
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -229,5 +231,38 @@ class ResearchCallControllerTest {
                 .andExpect(jsonPath("$.hasVigentCalls").value(false))
                 .andExpect(jsonPath("$.docente").value(true))
                 .andExpect(jsonPath("$.valid").value(false));
+    }
+
+    @Test
+    void shouldUpdateCall() throws Exception {
+        authenticateAs(1L, "admin@unas.edu.pe", "DIRECTOR_INVESTIGACION");
+
+        CallResponse updated = new CallResponse(1, "Updated Title", "Updated Desc",
+                FIXED_START, FIXED_END, "ABIERTA", null, List.of(1));
+        UpdateCallRequest request = new UpdateCallRequest();
+        request.setTitle("Updated Title");
+        request.setDescription("Updated Desc");
+
+        when(updateCallUseCase.execute(eq(1), any(UpdateCallRequest.class))).thenReturn(updated);
+
+        mockMvc.perform(put("/api/v1/calls/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Title"));
+
+        verify(updateCallUseCase).execute(eq(1), any(UpdateCallRequest.class));
+    }
+
+    @Test
+    void shouldGetCallsWithStatusFilter() throws Exception {
+        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "CERRADA", null, null);
+        when(getCallUseCase.getCalls("CERRADA")).thenReturn(List.of(call));
+
+        mockMvc.perform(get("/api/v1/calls?status=CERRADA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].status").value("CERRADA"));
+
+        verify(getCallUseCase).getCalls("CERRADA");
     }
 }

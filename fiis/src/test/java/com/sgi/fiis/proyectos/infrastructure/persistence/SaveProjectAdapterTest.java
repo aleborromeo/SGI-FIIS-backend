@@ -481,4 +481,42 @@ class SaveProjectAdapterTest {
         verify(jpaRepository).findById(1);
         verify(projectMemberRepository, never()).save(any());
     }
+
+    @Test
+    void testSave_NullOptionalFields() {
+        Project project = Project.builder()
+                .title("Test")
+                .budget(new BigDecimal("100"))
+                .status(ProjectStatus.POSTULATED)
+                .researchLineId(1)
+                .responsibleId(3L)
+                .researchGroupId(2)
+                .callId(4)
+                .summary(null)
+                .generalObjective(null)
+                .executionPlace(null)
+                .build();
+
+        ProjectEntity entity = createValidEntity(1, "POSTULADO");
+
+        when(lineRepository.findById(1)).thenReturn(Optional.of(new ResearchLineEntity()));
+        when(userRepository.findById(3L)).thenReturn(Optional.of(new UserEntity()));
+        when(groupRepository.findById(2)).thenReturn(Optional.of(new ResearchGroupEntity()));
+        when(callRepository.findById(4)).thenReturn(Optional.of(new ResearchCallEntity()));
+        when(jpaRepository.save(any(ProjectEntity.class))).thenReturn(entity);
+
+        Project saved = adapter.save(project);
+        assertNotNull(saved);
+        verify(jpaRepository).save(argThat(e ->
+                e.getSummaryJson() != null && e.getGeneralObjectiveJson() != null && e.getExecutionPlaceJson() != null));
+    }
+
+    @Test
+    void testToDomain_WithNullResearchLine() {
+        ProjectEntity entity = createValidEntity(1, "POSTULADO");
+        entity.setResearchLine(null);
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
+
+        assertThrows(NullPointerException.class, () -> adapter.findById(1));
+    }
 }

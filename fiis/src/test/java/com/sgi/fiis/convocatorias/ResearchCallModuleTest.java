@@ -201,4 +201,10 @@ class ResearchCallModuleTest {
         List<CallResponse> vigentCalls = callInteractor.getVigentCalls();
         assertTrue(vigentCalls.isEmpty());
     }
+
+    @Test
+    void shouldThrowWhenEndDateBeforeStartDate() {
+        assertThrows(BusinessRuleValidationException.class, () ->
+                new ResearchCall(1, "Bad", "Desc", FIXED_FUTURE_2M, FIXED_PAST_5, CallStatus.OPEN, null, null));
+    }
 }

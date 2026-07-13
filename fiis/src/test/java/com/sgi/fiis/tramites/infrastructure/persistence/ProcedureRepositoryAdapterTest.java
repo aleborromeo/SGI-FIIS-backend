@@ -490,4 +490,60 @@ class ProcedureRepositoryAdapterTest {
         assertEquals("comment", mov.getComment());
         assertEquals(DATE, mov.getMovementAt());
     }
+
+    @Test
+    @DisplayName("findAll: returns all procedures mapped to domain")
+    void findAll_returnsAllProcedures() {
+        when(procedureRepository.findAll()).thenReturn(List.of(buildEntity(1), buildEntity(2)));
+
+        List<Procedure> result = adapter.findAll();
+
+        assertEquals(2, result.size());
+        verify(procedureRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("save: handles projectReferenceId null and applicant null")
+    void save_handlesProjectReferenceAndApplicantNull() {
+        Procedure domain = Procedure.builder()
+                .code("TRM-NO-REF")
+                .currentStatus(ProcedureStatus.REGISTRADO)
+                .movements(new ArrayList<>())
+                .build();
+
+        ProcedureEntity saved = new ProcedureEntity();
+        saved.setId(1);
+        saved.setCode("TRM-NO-REF");
+        when(procedureRepository.save(any())).thenReturn(saved);
+
+        Procedure result = adapter.save(domain);
+
+        assertNotNull(result);
+        verify(procedureRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("save: skips projectReference when projectReferenceId is null")
+    void save_skipsProjectReferenceWhenNull() {
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(10L)
+                .groupId(1L)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .projectReferenceId(null)
+                .movements(new ArrayList<>())
+                .build();
+
+        when(userRepository.getReferenceById(10L)).thenReturn(buildApplicant());
+        when(groupRepository.getReferenceById(1)).thenReturn(buildGroup());
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+
+        Procedure result = adapter.save(domain);
+
+        verify(projectRepository, never()).getReferenceById(anyInt());
+        assertNotNull(result);
+    }
 }

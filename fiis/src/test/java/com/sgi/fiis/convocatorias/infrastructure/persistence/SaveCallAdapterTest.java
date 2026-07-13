@@ -369,4 +369,43 @@ class SaveCallAdapterTest {
 
         verify(jpaRepository).save(argThat(e -> e.getResearchLines() != null && e.getResearchLines().isEmpty()));
     }
+
+    @Test
+    @DisplayName("findByStatus: OPEN returns ABIERTA (default branch)")
+    void findByStatus_openDefault() {
+        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(List.of(createEntity(1, "ABIERTA")));
+
+        List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
+
+        assertEquals(1, result.size());
+        assertEquals(CallStatus.OPEN, result.get(0).getStatus());
+    }
+
+    @Test
+    @DisplayName("save: maps OPEN status to ABIERTA")
+    void save_openStatus() {
+        ResearchCall domain = new ResearchCall(null, "Open Call", "Desc", START, END,
+                CallStatus.OPEN, null, null);
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> "ABIERTA".equals(e.getStatus())));
+    }
+
+    @Test
+    @DisplayName("save: with null title and description")
+    void save_nullTitleAndDescription() {
+        ResearchCall domain = new ResearchCall(null, null, null, START, END,
+                CallStatus.OPEN, null, null);
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> e.getTitle() == null && e.getDescription() == null));
+    }
 }
