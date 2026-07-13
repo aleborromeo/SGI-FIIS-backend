@@ -17,33 +17,38 @@ public abstract class TestcontainersConfig {
     @SuppressWarnings("resource")
     private static final PostgreSQLContainer<?> postgres;
 
+    private static final boolean useTestcontainers;
+
     static {
         PostgreSQLContainer<?> container = null;
+        boolean success = false;
         try {
-            // Intentar usar Testcontainers (funciona en CI con Docker)
             container = new PostgreSQLContainer<>("postgres:15-alpine")
                     .withDatabaseName("db_fiis_investigacion")
                     .withUsername("postgres")
                     .withPassword("test");
             container.start();
-            // Ensure container is closed when JVM exits
             Runtime.getRuntime().addShutdownHook(new Thread(container::close));
+            success = true;
         } catch (Exception e) {
-            // Docker no disponible (local) - usar docker-compose PostgreSQL
             System.out.println("[Testcontainers] Docker no disponible. Usando docker-compose PostgreSQL en localhost:5433");
         }
         postgres = container;
+        useTestcontainers = success;
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        if (postgres != null && postgres.isRunning()) {
-            // Testcontainers esta activo - sobreescribir properties
+        if (useTestcontainers && postgres != null && postgres.isRunning()) {
             registry.add("spring.datasource.url", postgres::getJdbcUrl);
             registry.add("spring.datasource.username", postgres::getUsername);
             registry.add("spring.datasource.password", postgres::getPassword);
             registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+        } else {
+            registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:5433/db_fiis_investigacion");
+            registry.add("spring.datasource.username", () -> "postgres");
+            registry.add("spring.datasource.password", () -> "1tesla");
+            registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
         }
-        // Si Testcontainers no esta activo, se usan las properties del application.yml
     }
 }

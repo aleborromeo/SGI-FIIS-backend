@@ -6,7 +6,6 @@ import com.sgi.fiis.thesis.application.dto.*;
 import com.sgi.fiis.thesis.domain.*;
 import com.sgi.fiis.thesis.domain.exception.BusinessRuleViolationException;
 import com.sgi.fiis.thesis.domain.exception.ThesisPlanNotFoundException;
-import com.sgi.fiis.thesis.domain.exception.InvalidStateTransitionException;
 import com.sgi.fiis.thesis.domain.port.in.ThesisPlanUseCase;
 import com.sgi.fiis.thesis.presentation.handler.ThesisExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
