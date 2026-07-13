@@ -36,7 +36,7 @@ public class ProcedureMovementEntity {
     @Column(name = "estado_nuevo", nullable = false, length = 30)
     private String newState;
 
-    @Column(name = "comentario", columnDefinition = "TEXT")
+    @Column(name = "observacion", columnDefinition = "TEXT")
     private String comment;
 
     @Column(name = "fecha_movimiento", nullable = false)
