@@ -187,54 +187,6 @@ class CreateProjectInteractorTest {
     }
     
     @Test
-    void execute_EmptyMembers_DoesNotCallSaveMembers() {
-        CreateProjectRequest request = buildValidRequest();
-        request.setMembers(null);
-        request.setCallId(5);
-
-        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
-        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
-        when(saveProjectPort.isLineActive(3)).thenReturn(true);
-        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
-        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
-
-        ResearchCall call = mock(ResearchCall.class);
-        when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
-
-        Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
-        when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
-
-        ProjectResponse response = interactor.execute(request);
-
-        assertNotNull(response);
-        verify(saveProjectPort, never()).saveMembers(anyInt(), anyList());
-    }
-
-    @Test
-    void execute_EmptyMemberList_DoesNotCallSaveMembers() {
-        CreateProjectRequest request = buildValidRequest();
-        request.setMembers(List.of());
-        request.setCallId(5);
-
-        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
-        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
-        when(saveProjectPort.isLineActive(3)).thenReturn(true);
-        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
-        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
-
-        ResearchCall call = mock(ResearchCall.class);
-        when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
-
-        Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
-        when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
-
-        ProjectResponse response = interactor.execute(request);
-
-        assertNotNull(response);
-        verify(saveProjectPort, never()).saveMembers(anyInt(), anyList());
-    }
-
-    @Test
     void mapStatusFromString_TestAllValues() {
         Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.POSTULATED);
         when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));

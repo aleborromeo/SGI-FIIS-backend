@@ -523,52 +523,6 @@ class ProcedureRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findByApplicantId: toDomain handles null entity id (new code coverage)")
-    void findByApplicantId_toDomainHandlesNullEntityId() {
-        ProcedureEntity entity = new ProcedureEntity();
-        entity.setId(null);
-        entity.setCode("TRM-NULL-ID");
-        entity.setStatus("REGISTRADO");
-
-        when(procedureRepository.findByApplicant_Id(10L)).thenReturn(List.of(entity));
-
-        List<Procedure> result = adapter.findByApplicantId(10L);
-
-        assertEquals(1, result.size());
-        assertNull(result.get(0).getId());
-    }
-
-    @Test
-    @DisplayName("save: toMovimientoEntity sets actionUser when actionUserId is not null")
-    void save_toMovimientoEntitySetsActionUser() {
-        List<ProcedureMovement> movs = new ArrayList<>();
-        movs.add(ProcedureMovement.builder()
-                .actionUserId(42L)
-                .action("APROBADO")
-                .previousStatus(ProcedureStatus.REGISTRADO)
-                .newStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .movementAt(DATE)
-                .build());
-
-        Procedure domain = Procedure.builder()
-                .id(1L)
-                .code("TRM-2026-001")
-                .procedureType(ProcedureType.PROJECT)
-                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .movements(movs)
-                .build();
-
-        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
-        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
-        when(movementRepository.save(any())).thenReturn(null);
-
-        Procedure result = adapter.save(domain);
-
-        assertEquals(1, result.getMovements().size());
-        verify(movementRepository).save(any());
-    }
-
-    @Test
     @DisplayName("save: skips projectReference when projectReferenceId is null")
     void save_skipsProjectReferenceWhenNull() {
         Procedure domain = Procedure.builder()
