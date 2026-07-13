@@ -53,27 +53,30 @@ class UpdateCallInteractorTest {
     @DisplayName("execute: throws when call not found")
     void execute_notFound() {
         when(saveCallPort.findById(99)).thenReturn(Optional.empty());
+        UpdateCallRequest request = new UpdateCallRequest();
 
         assertThrows(BusinessRuleValidationException.class,
-                () -> interactor.execute(99, new UpdateCallRequest()));
+                () -> interactor.execute(99, request));
     }
 
     @Test
     @DisplayName("execute: throws when call is not OPEN")
     void execute_notOpen() {
         when(saveCallPort.findById(1)).thenReturn(Optional.of(closedCall()));
+        UpdateCallRequest request = new UpdateCallRequest();
 
         assertThrows(BusinessRuleValidationException.class,
-                () -> interactor.execute(1, new UpdateCallRequest()));
+                () -> interactor.execute(1, request));
     }
 
     @Test
     @DisplayName("execute: throws when call is FINISHED")
     void execute_finished() {
         when(saveCallPort.findById(1)).thenReturn(Optional.of(finishedCall()));
+        UpdateCallRequest request = new UpdateCallRequest();
 
         assertThrows(BusinessRuleValidationException.class,
-                () -> interactor.execute(1, new UpdateCallRequest()));
+                () -> interactor.execute(1, request));
     }
 
     @Test

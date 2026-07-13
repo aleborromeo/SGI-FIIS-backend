@@ -6,6 +6,7 @@ import com.sgi.fiis.tramites.application.dto.*;
 import com.sgi.fiis.tramites.application.usecase.*;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/procedures")
+@RequiredArgsConstructor
 public class ProcedureController {
 
     private final CreateProcedureUseCase createProcedureUseCase;
@@ -26,26 +28,6 @@ public class ProcedureController {
     private final RejectProcedureUseCase rejectProcedureUseCase;
     private final RegisterResolutionUseCase registerResolutionUseCase;
     private final GetTraceabilityUseCase getTraceabilityUseCase;
-
-    public ProcedureController(CreateProcedureUseCase createProcedureUseCase,
-                               ListProceduresUseCase listProceduresUseCase,
-                               GetProcedureUseCase getProcedureUseCase,
-                               ApproveProcedureUseCase approveProcedureUseCase,
-                               FlagProcedureUseCase flagProcedureUseCase,
-                               RemediateProcedureUseCase remediateProcedureUseCase,
-                               RejectProcedureUseCase rejectProcedureUseCase,
-                               RegisterResolutionUseCase registerResolutionUseCase,
-                               GetTraceabilityUseCase getTraceabilityUseCase) {
-        this.createProcedureUseCase    = createProcedureUseCase;
-        this.listProceduresUseCase     = listProceduresUseCase;
-        this.getProcedureUseCase       = getProcedureUseCase;
-        this.approveProcedureUseCase   = approveProcedureUseCase;
-        this.flagProcedureUseCase      = flagProcedureUseCase;
-        this.remediateProcedureUseCase = remediateProcedureUseCase;
-        this.rejectProcedureUseCase    = rejectProcedureUseCase;
-        this.registerResolutionUseCase = registerResolutionUseCase;
-        this.getTraceabilityUseCase    = getTraceabilityUseCase;
-    }
 
     @GetMapping
     public ResponseEntity<List<ProcedureResponseDto>> list() {

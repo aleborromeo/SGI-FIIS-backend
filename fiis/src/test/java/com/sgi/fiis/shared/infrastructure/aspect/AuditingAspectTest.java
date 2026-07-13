@@ -4,7 +4,6 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import org.aspectj.lang.JoinPoint;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -169,8 +168,8 @@ class AuditingAspectTest {
     }
 
     @Test
-    @DisplayName("mapAction: maps all action keywords")
-    void mapAction_allMappings() {
+    @DisplayName("mapAction: maps creation action keywords")
+    void mapAction_createMappings() {
         assertEquals("CREAR", callMapAction("CREATE_PROJECT"));
         assertEquals("CREAR", callMapAction("REGISTRAR_USUARIO"));
         assertEquals("CREAR", callMapAction("POSTULAR_PROYECTO"));
@@ -183,6 +182,11 @@ class AuditingAspectTest {
         assertEquals("ACTIVAR", callMapAction("ACTIVAR_GRUPO"));
         assertEquals("LOGIN", callMapAction("USER_LOGIN"));
         assertEquals("LOGOUT", callMapAction("USER_LOGOUT"));
+    }
+
+    @Test
+    @DisplayName("mapAction: maps unknown action to EDITAR")
+    void mapAction_unknownAction() {
         assertEquals("EDITAR", callMapAction("UNKNOWN_ACTION"));
     }
 

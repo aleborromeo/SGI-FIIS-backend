@@ -520,9 +520,10 @@ class ProjectModuleTest {
         when(saveProjectPort.isGroupActive(2)).thenReturn(true);
         when(saveProjectPort.isUserMemberOfGroup(3L, 2)).thenReturn(true);
         when(saveProjectPort.isLineActive(1)).thenReturn(false);
+        CreateProjectRequest request = buildSubmitRequest();
 
         assertThrows(BusinessRuleValidationException.class,
-                () -> createProjectInteractor.execute(buildSubmitRequest()));
+                () -> createProjectInteractor.execute(request));
     }
 
     @Test
@@ -531,9 +532,10 @@ class ProjectModuleTest {
         when(saveProjectPort.isUserMemberOfGroup(3L, 2)).thenReturn(true);
         when(saveProjectPort.isLineActive(1)).thenReturn(true);
         when(saveProjectPort.getGroupCode(2)).thenReturn(Optional.empty());
+        CreateProjectRequest request = buildSubmitRequest();
 
         assertThrows(BusinessRuleValidationException.class,
-                () -> createProjectInteractor.execute(buildSubmitRequest()));
+                () -> createProjectInteractor.execute(request));
     }
 
     @Test
@@ -543,9 +545,10 @@ class ProjectModuleTest {
         when(saveProjectPort.isLineActive(1)).thenReturn(true);
         when(saveProjectPort.getGroupCode(2)).thenReturn(Optional.of("GINSOFT"));
         when(saveProjectPort.getLineName(1)).thenReturn(Optional.empty());
+        CreateProjectRequest request = buildSubmitRequest();
 
         assertThrows(BusinessRuleValidationException.class,
-                () -> createProjectInteractor.execute(buildSubmitRequest()));
+                () -> createProjectInteractor.execute(request));
     }
 
     @Test
@@ -609,8 +612,6 @@ class ProjectModuleTest {
     @Test
     void shouldMapAllStatusesInUpdateStatus() {
         String[] statuses = {"BORRADOR", "POSTULADO", "OBSERVADO", "APROBADO", "RECHAZADO", "EN_EJECUCION", "FINALIZADO"};
-        ProjectStatus[] expected = {ProjectStatus.DRAFT, ProjectStatus.POSTULATED, ProjectStatus.OBSERVED,
-                ProjectStatus.APPROVED, ProjectStatus.REJECTED, ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED};
         String[] expectedDb = {"BORRADOR", "POSTULADO", "OBSERVADO", "APROBADO", "RECHAZADO", "EN_EJECUCION", "FINALIZADO"};
 
         for (int i = 0; i < statuses.length; i++) {

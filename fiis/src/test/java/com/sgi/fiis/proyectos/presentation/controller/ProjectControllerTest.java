@@ -9,6 +9,9 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -111,33 +114,21 @@ class ProjectControllerTest {
         ));
     }
 
-    @Test
-    void testGetProjectsNoFilters() throws Exception {
-        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
-
-        mockMvc.perform(get("/api/v1/projects"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
-        
-        verify(createProjectUseCase, times(1)).getProjectsByResponsible(3L);
+    static java.util.stream.Stream<Arguments> projectListEndpoints() {
+        return java.util.stream.Stream.of(
+                Arguments.of("/api/v1/projects", "Docente defaults to own projects"),
+                Arguments.of("/api/v1/projects?responsibleId=3", "Filter by responsibleId"),
+                Arguments.of("/api/v1/projects?groupId=2", "Filter by groupId")
+        );
     }
 
-    @Test
-    void testGetProjectsByResponsible() throws Exception {
-        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("projectListEndpoints")
+    void testGetProjectsListEndpoints(String url, String testName) throws Exception {
+        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(
+                Collections.singletonList(ProjectResponse.builder().id(1).build()));
 
-        mockMvc.perform(get("/api/v1/projects?responsibleId=3"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
-
-        verify(createProjectUseCase, times(1)).getProjectsByResponsible(3L);
-    }
-
-    @Test
-    void testGetProjectsByGroup() throws Exception {
-        when(createProjectUseCase.getProjectsByResponsible(3L)).thenReturn(Collections.singletonList(ProjectResponse.builder().id(1).build()));
-
-        mockMvc.perform(get("/api/v1/projects?groupId=2"))
+        mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1));
 

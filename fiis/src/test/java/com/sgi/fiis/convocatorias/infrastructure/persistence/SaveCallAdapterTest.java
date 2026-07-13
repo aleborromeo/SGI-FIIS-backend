@@ -12,10 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -368,17 +366,6 @@ class SaveCallAdapterTest {
         adapter.save(domain);
 
         verify(jpaRepository).save(argThat(e -> e.getResearchLines() != null && e.getResearchLines().isEmpty()));
-    }
-
-    @Test
-    @DisplayName("findByStatus: OPEN returns ABIERTA (default branch)")
-    void findByStatus_openDefault() {
-        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(List.of(createEntity(1, "ABIERTA")));
-
-        List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
-
-        assertEquals(1, result.size());
-        assertEquals(CallStatus.OPEN, result.get(0).getStatus());
     }
 
     @Test

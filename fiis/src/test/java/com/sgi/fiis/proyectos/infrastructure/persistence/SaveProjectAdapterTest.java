@@ -305,9 +305,10 @@ class SaveProjectAdapterTest {
 
         com.sgi.fiis.proyectos.domain.model.ProjectMember member =
                 new com.sgi.fiis.proyectos.domain.model.ProjectMember(null, 99, 5, "INVESTIGADOR");
+        List<com.sgi.fiis.proyectos.domain.model.ProjectMember> members = List.of(member);
 
         assertThrows(IllegalArgumentException.class,
-                () -> adapter.saveMembers(99, List.of(member)));
+                () -> adapter.saveMembers(99, members));
     }
 
     @Test
@@ -319,9 +320,10 @@ class SaveProjectAdapterTest {
 
         com.sgi.fiis.proyectos.domain.model.ProjectMember member =
                 new com.sgi.fiis.proyectos.domain.model.ProjectMember(null, 1, 99, "INVESTIGADOR");
+        List<com.sgi.fiis.proyectos.domain.model.ProjectMember> members = List.of(member);
 
         assertThrows(IllegalArgumentException.class,
-                () -> adapter.saveMembers(1, List.of(member)));
+                () -> adapter.saveMembers(1, members));
     }
 
     @Test
