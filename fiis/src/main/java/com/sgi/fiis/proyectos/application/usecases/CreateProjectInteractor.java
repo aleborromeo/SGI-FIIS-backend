@@ -49,6 +49,9 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     @Transactional
     @Auditable(action = "CREATE_PROJECT")
     public ProjectResponse execute(CreateProjectRequest request) {
+        if (!request.isDraft()) {
+            validateRequiredFields(request);
+        }
         validateGroupAndLine(request);
 
         String groupCode = saveProjectPort.getGroupCode(request.getResearchGroupId())
@@ -63,15 +66,49 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private void validateGroupAndLine(CreateProjectRequest request) {
-        if (!saveProjectPort.isGroupActive(request.getResearchGroupId())) {
+        if (request.getResearchGroupId() != null && !saveProjectPort.isGroupActive(request.getResearchGroupId())) {
             throw new BusinessRuleValidationException("proyectos.error.group-not-active");
         }
-        if (!saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
+        if (request.getResponsibleId() != null && request.getResearchGroupId() != null
+                && !saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
                 request.getResearchGroupId())) {
             throw new BusinessRuleValidationException("proyectos.error.responsible-not-member");
         }
-        if (!saveProjectPort.isLineActive(request.getResearchLineId())) {
+        if (request.getResearchLineId() != null && !saveProjectPort.isLineActive(request.getResearchLineId())) {
             throw new BusinessRuleValidationException("proyectos.error.line-not-active");
+        }
+    }
+
+    private void validateRequiredFields(CreateProjectRequest request) {
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw new BusinessRuleValidationException("El título es obligatorio.");
+        }
+        if (request.getSummary() == null || request.getSummary().isBlank()) {
+            throw new BusinessRuleValidationException("El resumen es obligatorio.");
+        }
+        if (request.getGeneralObjective() == null || request.getGeneralObjective().isBlank()) {
+            throw new BusinessRuleValidationException("El objetivo general es obligatorio.");
+        }
+        if (request.getResearchLineId() == null) {
+            throw new BusinessRuleValidationException("La línea de investigación es obligatoria.");
+        }
+        if (request.getBudget() == null) {
+            throw new BusinessRuleValidationException("El presupuesto es obligatorio.");
+        }
+        if (request.getStartDate() == null) {
+            throw new BusinessRuleValidationException("La fecha de inicio es obligatoria.");
+        }
+        if (request.getEndDate() == null) {
+            throw new BusinessRuleValidationException("La fecha de fin es obligatoria.");
+        }
+        if (request.getExecutionPlace() == null || request.getExecutionPlace().isBlank()) {
+            throw new BusinessRuleValidationException("El lugar de ejecución es obligatorio.");
+        }
+        if (request.getResearchGroupId() == null) {
+            throw new BusinessRuleValidationException("El grupo de investigación es obligatorio.");
+        }
+        if (request.getCallId() == null) {
+            throw new BusinessRuleValidationException("La convocatoria es obligatoria.");
         }
     }
 
