@@ -113,7 +113,7 @@ public class AuditingAspect {
                     }
                 }
             }
-        } catch (Exception ignored) {
+        } catch (IllegalAccessException | IllegalArgumentException | java.lang.reflect.InvocationTargetException ignored) {
             // Ignored because reflection errors default to return 0L
         }
         return 0L;

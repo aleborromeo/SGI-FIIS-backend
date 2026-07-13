@@ -8,6 +8,8 @@ import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLine
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
 import com.sgi.fiis.shared.infrastructure.persistence.JsonbHelper;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,13 +26,16 @@ public class SaveCallAdapter implements SaveCallPort {
     private final ResearchCallJpaRepository jpaRepository;
     private final DocumentJpaRepository documentRepository;
     private final ResearchLineJpaRepository lineRepository;
+    private final SpringDataUserRepository userRepository;
 
     public SaveCallAdapter(ResearchCallJpaRepository jpaRepository,
                            DocumentJpaRepository documentRepository,
-                           ResearchLineJpaRepository lineRepository) {
+                           ResearchLineJpaRepository lineRepository,
+                           SpringDataUserRepository userRepository) {
         this.jpaRepository = jpaRepository;
         this.documentRepository = documentRepository;
         this.lineRepository = lineRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -90,6 +95,11 @@ public class SaveCallAdapter implements SaveCallPort {
             doc = documentRepository.findById(domain.getDocumentId()).orElse(null);
         }
 
+        UserEntity creator = null;
+        if (domain.getCreatorId() != null) {
+            creator = userRepository.findById(domain.getCreatorId().longValue()).orElse(null);
+        }
+
         List<ResearchLineEntity> lines = null;
         if (domain.getResearchLineIds() != null) {
             lines = domain.getResearchLineIds().stream()
@@ -108,6 +118,7 @@ public class SaveCallAdapter implements SaveCallPort {
                 .endDate(domain.getEndDate())
                 .status(dbStatus)
                 .document(doc)
+                .creator(creator)
                 .researchLines(lines)
                 .build();
     }
@@ -123,7 +134,7 @@ public class SaveCallAdapter implements SaveCallPort {
         List<Integer> lineIds = null;
         if (entity.getResearchLines() != null) {
             lineIds = entity.getResearchLines().stream()
-                    .map(ResearchLineEntity::getId)
+                    .map(line -> line.getId())
                     .toList();
         }
 
@@ -135,6 +146,7 @@ public class SaveCallAdapter implements SaveCallPort {
                 entity.getEndDate(),
                 domainStatus,
                 entity.getDocument() != null ? entity.getDocument().getId() : null,
+                entity.getCreator() != null ? entity.getCreator().getId().intValue() : null,
                 lineIds
         );
     }

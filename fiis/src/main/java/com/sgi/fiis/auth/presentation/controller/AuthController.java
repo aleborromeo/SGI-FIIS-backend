@@ -50,29 +50,6 @@ public class AuthController {
 
     private static final String KEY_MESSAGE = "message";
 
-    @SuppressWarnings("java:S107")
-    public AuthController(LoginUseCase loginUseCase,
-            RegisterUseCase registerUseCase,
-            VerifyRegistrationUseCase verifyRegistrationUseCase,
-            ResendCodeUseCase resendCodeUseCase,
-            ChangePasswordUseCase changePasswordUseCase,
-            ForgotPasswordUseCase forgotPasswordUseCase,
-            SelfResetPasswordUseCase selfResetPasswordUseCase,
-            UserRepositoryPort userRepository,
-            UserMapper userMapper,
-            MessageSource messageSource) {
-        this.loginUseCase = loginUseCase;
-        this.registerUseCase = registerUseCase;
-        this.verifyRegistrationUseCase = verifyRegistrationUseCase;
-        this.resendCodeUseCase = resendCodeUseCase;
-        this.changePasswordUseCase = changePasswordUseCase;
-        this.forgotPasswordUseCase = forgotPasswordUseCase;
-        this.selfResetPasswordUseCase = selfResetPasswordUseCase;
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.messageSource = messageSource;
-    }
-
     /** RF-01, RF-02: Iniciar sesión directo */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto dto) {

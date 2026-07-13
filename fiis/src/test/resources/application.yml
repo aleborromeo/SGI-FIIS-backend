@@ -6,9 +6,9 @@ spring:
     use-code-as-default-message: true
     fallback-to-system-locale: true
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:db_fiis_investigacion}}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:db_fiis_investigacion}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:postgres}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:1tesla}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:12345}}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
@@ -22,10 +22,6 @@ spring:
     baseline-on-migrate: true
     baseline-version: 0
     validate-on-migrate: false
-  messages:
-    basename: i18n/shared/messages,i18n/auth/messages,i18n/convocatorias/messages,i18n/projects/messages
-    use-code-as-default-message: true
-    fallback-to-system-locale: true
   servlet:
     multipart:
       max-file-size: 5MB       # Tamaño máximo permitido por cada archivo individual

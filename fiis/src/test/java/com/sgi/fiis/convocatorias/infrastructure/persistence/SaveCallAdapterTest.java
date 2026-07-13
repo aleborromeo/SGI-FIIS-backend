@@ -2,14 +2,18 @@ package com.sgi.fiis.convocatorias.infrastructure.persistence;
 
 import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
+import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity;
 import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineJpaRepository;
+import com.sgi.fiis.shared.infrastructure.persistence.DocumentEntity;
 import com.sgi.fiis.shared.infrastructure.persistence.DocumentJpaRepository;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,183 +21,378 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@DisplayName("SaveCallAdapter Unit Tests")
 class SaveCallAdapterTest {
 
     private ResearchCallJpaRepository jpaRepository;
-    private DocumentJpaRepository documentJpaRepository;
-    private ResearchLineJpaRepository lineJpaRepository;
+    private DocumentJpaRepository documentRepository;
+    private ResearchLineJpaRepository lineRepository;
+    private SpringDataUserRepository userRepository;
     private SaveCallAdapter adapter;
 
+    private static final LocalDate START = LocalDate.of(2026, Month.JANUARY, 1);
+    private static final LocalDate END = LocalDate.of(2026, Month.DECEMBER, 31);
+
     @BeforeEach
-    void setUp() {
+    void setup() {
         jpaRepository = mock(ResearchCallJpaRepository.class);
-        documentJpaRepository = mock(DocumentJpaRepository.class);
-        lineJpaRepository = mock(ResearchLineJpaRepository.class);
-        adapter = new SaveCallAdapter(jpaRepository, documentJpaRepository, lineJpaRepository);
+        documentRepository = mock(DocumentJpaRepository.class);
+        lineRepository = mock(ResearchLineJpaRepository.class);
+        userRepository = mock(SpringDataUserRepository.class);
+        adapter = new SaveCallAdapter(jpaRepository, documentRepository, lineRepository, userRepository);
+    }
+
+    private ResearchCallEntity createEntity(Integer id, String status) {
+        ResearchCallEntity entity = new ResearchCallEntity();
+        entity.setId(id);
+        entity.setTitle("Test Call");
+        entity.setDescription("Description");
+        entity.setTitleJson("{\"es\":\"Test Call\"}");
+        entity.setDescriptionJson("{\"es\":\"Description\"}");
+        entity.setStartDate(START);
+        entity.setEndDate(END);
+        entity.setStatus(status);
+
+        UserEntity creator = new UserEntity();
+        creator.setId(1L);
+        entity.setCreator(creator);
+
+        return entity;
     }
 
     @Test
-    void shouldSaveCallOpen() {
-        ResearchCall domain = new ResearchCall(1, "Call Open", "Description", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.OPEN, null, null);
-        ResearchCallEntity entity = ResearchCallEntity.builder()
-                .id(1)
-                .title("Call Open")
-                .description("Description")
-                .titleJson("{\"es\":\"Call Open\"}")
-                .descriptionJson("{\"es\":\"Description\"}")
-                .startDate(domain.getStartDate())
-                .endDate(domain.getEndDate())
-                .status("ABIERTA")
-                .build();
+    @DisplayName("save: creates entity and returns domain")
+    void save_createsAndReturns() {
+        ResearchCall domain = new ResearchCall(null, "New Call", "Desc", START, END,
+                CallStatus.OPEN, null, List.of(1));
 
-        when(jpaRepository.save(any(ResearchCallEntity.class))).thenReturn(entity);
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
 
         ResearchCall result = adapter.save(domain);
+
         assertNotNull(result);
         assertEquals(1, result.getId());
-        assertEquals("Call Open", result.getTitle());
-        assertEquals(CallStatus.OPEN, result.getStatus());
+        verify(jpaRepository).save(any());
     }
 
     @Test
-    void shouldSaveCallClosed() {
-        ResearchCall domain = new ResearchCall(1, "Call Closed", "Description", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.CLOSED, null, null);
-        ResearchCallEntity entity = ResearchCallEntity.builder()
-                .id(1)
-                .title("Call Closed")
-                .description("Description")
-                .titleJson("{\"es\":\"Call Closed\"}")
-                .descriptionJson("{\"es\":\"Description\"}")
-                .startDate(domain.getStartDate())
-                .endDate(domain.getEndDate())
-                .status("CERRADA")
-                .build();
+    @DisplayName("save: maps CLOSED status")
+    void save_closedStatus() {
+        ResearchCall domain = new ResearchCall(null, "Closed Call", "Desc", START, END,
+                CallStatus.CLOSED, null, null);
 
-        when(jpaRepository.save(any(ResearchCallEntity.class))).thenReturn(entity);
+        ResearchCallEntity savedEntity = createEntity(1, "CERRADA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
 
-        ResearchCall result = adapter.save(domain);
-        assertEquals(CallStatus.CLOSED, result.getStatus());
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> "CERRADA".equals(e.getStatus())));
     }
 
     @Test
-    void shouldSaveCallFinished() {
-        ResearchCall domain = new ResearchCall(1, "Call Finished", "Description", LocalDate.now(), LocalDate.now().plusDays(10), CallStatus.FINISHED, null, null);
-        ResearchCallEntity entity = ResearchCallEntity.builder()
-                .id(1)
-                .title("Call Finished")
-                .description("Description")
-                .titleJson("{\"es\":\"Call Finished\"}")
-                .descriptionJson("{\"es\":\"Description\"}")
-                .startDate(domain.getStartDate())
-                .endDate(domain.getEndDate())
-                .status("FINALIZADA")
-                .build();
+    @DisplayName("save: maps FINISHED status")
+    void save_finishedStatus() {
+        ResearchCall domain = new ResearchCall(null, "Finished Call", "Desc", START, END,
+                CallStatus.FINISHED, null, null);
 
-        when(jpaRepository.save(any(ResearchCallEntity.class))).thenReturn(entity);
+        ResearchCallEntity savedEntity = createEntity(1, "FINALIZADA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
 
-        ResearchCall result = adapter.save(domain);
-        assertEquals(CallStatus.FINISHED, result.getStatus());
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> "FINALIZADA".equals(e.getStatus())));
     }
 
     @Test
-    void shouldFindById() {
-        ResearchCallEntity entity = ResearchCallEntity.builder()
-                .id(2)
-                .title("Some Call")
-                .description("Description")
-                .titleJson("{\"es\":\"Some Call\"}")
-                .descriptionJson("{\"es\":\"Description\"}")
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusDays(10))
-                .status("CERRADA")
-                .build();
+    @DisplayName("save: with document and creator")
+    void save_withDocumentAndCreator() {
+        ResearchCall domain = new ResearchCall(null, "Call", "Desc", START, END,
+                CallStatus.OPEN, 5, 10, List.of(1));
 
-        when(jpaRepository.findById(2)).thenReturn(Optional.of(entity));
+        DocumentEntity doc = new DocumentEntity();
+        doc.setId(5);
+        UserEntity creator = new UserEntity();
+        creator.setId(10L);
 
-        Optional<ResearchCall> result = adapter.findById(2);
+        when(documentRepository.findById(5)).thenReturn(Optional.of(doc));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(creator));
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> e.getDocument() != null && e.getCreator() != null));
+    }
+
+    @Test
+    @DisplayName("save: with null document and creator")
+    void save_nullDocumentAndCreator() {
+        ResearchCall domain = new ResearchCall(null, "Call", "Desc", START, END,
+                CallStatus.OPEN, null, null);
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> e.getDocument() == null && e.getCreator() == null));
+    }
+
+    @Test
+    @DisplayName("findById: found")
+    void findById_found() {
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(createEntity(1, "ABIERTA")));
+
+        Optional<ResearchCall> result = adapter.findById(1);
+
         assertTrue(result.isPresent());
-        assertEquals(2, result.get().getId());
-        assertEquals(CallStatus.CLOSED, result.get().getStatus());
+        assertEquals(1, result.get().getId());
     }
 
     @Test
-    void shouldFindByIdEmpty() {
+    @DisplayName("findById: not found")
+    void findById_notFound() {
         when(jpaRepository.findById(99)).thenReturn(Optional.empty());
-        Optional<ResearchCall> result = adapter.findById(99);
-        assertTrue(result.isEmpty());
+
+        assertTrue(adapter.findById(99).isEmpty());
     }
 
     @Test
-    void shouldFindByStatus() {
-        ResearchCallEntity openEntity = ResearchCallEntity.builder().id(1).title("Call 1").description("Desc").titleJson("{\"es\":\"Call 1\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
-        ResearchCallEntity closedEntity = ResearchCallEntity.builder().id(2).title("Call 2").description("Desc").titleJson("{\"es\":\"Call 2\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
-        ResearchCallEntity finishedEntity = ResearchCallEntity.builder().id(3).title("Call 3").description("Desc").titleJson("{\"es\":\"Call 3\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("FINALIZADA").build();
+    @DisplayName("findByStatus: OPEN returns ABIERTA")
+    void findByStatus_open() {
+        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(List.of(createEntity(1, "ABIERTA")));
 
-        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(Arrays.asList(openEntity));
-        when(jpaRepository.findByStatus("CERRADA")).thenReturn(Arrays.asList(closedEntity));
-        when(jpaRepository.findByStatus("FINALIZADA")).thenReturn(Arrays.asList(finishedEntity));
+        List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
 
-        List<ResearchCall> openResult = adapter.findByStatus(CallStatus.OPEN);
-        assertEquals(1, openResult.size());
-        assertEquals(CallStatus.OPEN, openResult.get(0).getStatus());
-
-        List<ResearchCall> closedResult = adapter.findByStatus(CallStatus.CLOSED);
-        assertEquals(1, closedResult.size());
-        assertEquals(CallStatus.CLOSED, closedResult.get(0).getStatus());
-
-        List<ResearchCall> finishedResult = adapter.findByStatus(CallStatus.FINISHED);
-        assertEquals(1, finishedResult.size());
-        assertEquals(CallStatus.FINISHED, finishedResult.get(0).getStatus());
+        assertEquals(1, result.size());
+        assertEquals(CallStatus.OPEN, result.get(0).getStatus());
     }
 
     @Test
-    void shouldFindAll() {
-        ResearchCallEntity entity1 = ResearchCallEntity.builder().id(1).title("Call 1").description("Desc").titleJson("{\"es\":\"Call 1\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("ABIERTA").build();
-        ResearchCallEntity entity2 = ResearchCallEntity.builder().id(2).title("Call 2").description("Desc").titleJson("{\"es\":\"Call 2\"}").descriptionJson("{\"es\":\"Desc\"}").startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(10)).status("CERRADA").build();
-        when(jpaRepository.findAll()).thenReturn(Arrays.asList(entity1, entity2));
+    @DisplayName("findByStatus: CLOSED returns CERRADA")
+    void findByStatus_closed() {
+        when(jpaRepository.findByStatus("CERRADA")).thenReturn(List.of(createEntity(1, "CERRADA")));
 
-        List<ResearchCall> result = adapter.findAll();
-        assertEquals(2, result.size());
+        List<ResearchCall> result = adapter.findByStatus(CallStatus.CLOSED);
+
+        assertEquals(1, result.size());
+        assertEquals(CallStatus.CLOSED, result.get(0).getStatus());
     }
 
     @Test
-    void shouldReturnFalseWhenLineIdsIsNullOrEmpty() {
+    @DisplayName("findByStatus: FINISHED returns FINALIZADA")
+    void findByStatus_finished() {
+        when(jpaRepository.findByStatus("FINALIZADA")).thenReturn(List.of(createEntity(1, "FINALIZADA")));
+
+        List<ResearchCall> result = adapter.findByStatus(CallStatus.FINISHED);
+
+        assertEquals(1, result.size());
+        assertEquals(CallStatus.FINISHED, result.get(0).getStatus());
+    }
+
+    @Test
+    @DisplayName("findByStatus: returns empty list")
+    void findByStatus_empty() {
+        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(List.of());
+
+        assertTrue(adapter.findByStatus(CallStatus.OPEN).isEmpty());
+    }
+
+    @Test
+    @DisplayName("areLinesActive: null returns false")
+    void areLinesActive_null() {
         assertFalse(adapter.areLinesActive(null));
+    }
+
+    @Test
+    @DisplayName("areLinesActive: empty returns false")
+    void areLinesActive_empty() {
         assertFalse(adapter.areLinesActive(List.of()));
     }
 
     @Test
-    void shouldReturnTrueWhenAllLinesAreActive() {
-        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity activeLine1 = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
-        activeLine1.setId(10);
-        activeLine1.setActive(true);
+    @DisplayName("areLinesActive: all active returns true")
+    void areLinesActive_allActive() {
+        ResearchLineEntity line1 = new ResearchLineEntity();
+        line1.setId(1);
+        line1.setActive(true);
+        ResearchLineEntity line2 = new ResearchLineEntity();
+        line2.setId(2);
+        line2.setActive(true);
 
-        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity activeLine2 = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
-        activeLine2.setId(20);
-        activeLine2.setActive(true);
+        when(lineRepository.findById(1)).thenReturn(Optional.of(line1));
+        when(lineRepository.findById(2)).thenReturn(Optional.of(line2));
 
-        when(lineJpaRepository.findById(10)).thenReturn(Optional.of(activeLine1));
-        when(lineJpaRepository.findById(20)).thenReturn(Optional.of(activeLine2));
-
-        assertTrue(adapter.areLinesActive(List.of(10, 20)));
+        assertTrue(adapter.areLinesActive(List.of(1, 2)));
     }
 
     @Test
-    void shouldReturnFalseWhenSomeLinesAreInactiveOrNotFound() {
-        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity activeLine = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
-        activeLine.setId(10);
-        activeLine.setActive(true);
+    @DisplayName("areLinesActive: one inactive returns false")
+    void areLinesActive_oneInactive() {
+        ResearchLineEntity line1 = new ResearchLineEntity();
+        line1.setId(1);
+        line1.setActive(true);
+        ResearchLineEntity line2 = new ResearchLineEntity();
+        line2.setId(2);
+        line2.setActive(false);
 
-        com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity inactiveLine = new com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLineEntity();
-        inactiveLine.setId(20);
-        inactiveLine.setActive(false);
+        when(lineRepository.findById(1)).thenReturn(Optional.of(line1));
+        when(lineRepository.findById(2)).thenReturn(Optional.of(line2));
 
-        when(lineJpaRepository.findById(10)).thenReturn(Optional.of(activeLine));
-        when(lineJpaRepository.findById(20)).thenReturn(Optional.of(inactiveLine));
-        when(lineJpaRepository.findById(30)).thenReturn(Optional.empty());
+        assertFalse(adapter.areLinesActive(List.of(1, 2)));
+    }
 
-        assertFalse(adapter.areLinesActive(List.of(10, 20)));
-        assertFalse(adapter.areLinesActive(List.of(10, 30)));
+    @Test
+    @DisplayName("areLinesActive: one not found returns false")
+    void areLinesActive_oneNotFound() {
+        ResearchLineEntity line1 = new ResearchLineEntity();
+        line1.setId(1);
+        line1.setActive(true);
+
+        when(lineRepository.findById(1)).thenReturn(Optional.of(line1));
+        when(lineRepository.findById(2)).thenReturn(Optional.empty());
+
+        assertFalse(adapter.areLinesActive(List.of(1, 2)));
+    }
+
+    @Test
+    @DisplayName("findAll: returns all calls")
+    void findAll_returnsAll() {
+        when(jpaRepository.findAll()).thenReturn(List.of(
+                createEntity(1, "ABIERTA"),
+                createEntity(2, "CERRADA")));
+
+        List<ResearchCall> result = adapter.findAll();
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @DisplayName("toDomain: CLOSED status maps correctly")
+    void toDomain_closedStatus() {
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(createEntity(1, "CERRADA")));
+
+        ResearchCall result = adapter.findById(1).get();
+        assertEquals(CallStatus.CLOSED, result.getStatus());
+    }
+
+    @Test
+    @DisplayName("toDomain: FINISHED status maps correctly")
+    void toDomain_finishedStatus() {
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(createEntity(1, "FINALIZADA")));
+
+        ResearchCall result = adapter.findById(1).get();
+        assertEquals(CallStatus.FINISHED, result.getStatus());
+    }
+
+    @Test
+    @DisplayName("toDomain: with document and creator")
+    void toDomain_withDocumentAndCreator() {
+        ResearchCallEntity entity = createEntity(1, "ABIERTA");
+        DocumentEntity doc = new DocumentEntity();
+        doc.setId(5);
+        entity.setDocument(doc);
+        UserEntity creator = new UserEntity();
+        creator.setId(10L);
+        entity.setCreator(creator);
+
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
+
+        ResearchCall result = adapter.findById(1).get();
+        assertEquals(5, result.getDocumentId());
+        assertEquals(10, result.getCreatorId());
+    }
+
+    @Test
+    @DisplayName("toDomain: with research lines")
+    void toDomain_withResearchLines() {
+        ResearchCallEntity entity = createEntity(1, "ABIERTA");
+        ResearchLineEntity line = new ResearchLineEntity();
+        line.setId(1);
+        entity.setResearchLines(List.of(line));
+
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
+
+        ResearchCall result = adapter.findById(1).get();
+        assertEquals(1, result.getResearchLineIds().size());
+        assertEquals(1, result.getResearchLineIds().get(0));
+    }
+
+    @Test
+    @DisplayName("toDomain: null research lines returns empty list")
+    void toDomain_nullResearchLines() {
+        ResearchCallEntity entity = createEntity(1, "ABIERTA");
+        entity.setResearchLines(null);
+
+        when(jpaRepository.findById(1)).thenReturn(Optional.of(entity));
+
+        ResearchCall result = adapter.findById(1).get();
+        assertNotNull(result.getResearchLineIds());
+        assertTrue(result.getResearchLineIds().isEmpty());
+    }
+
+    @Test
+    @DisplayName("save: with research lines")
+    void save_withResearchLines() {
+        ResearchCall domain = new ResearchCall(null, "Call", "Desc", START, END,
+                CallStatus.OPEN, null, List.of(1, 2));
+
+        ResearchLineEntity line1 = new ResearchLineEntity();
+        line1.setId(1);
+        ResearchLineEntity line2 = new ResearchLineEntity();
+        line2.setId(2);
+        when(lineRepository.findById(1)).thenReturn(Optional.of(line1));
+        when(lineRepository.findById(2)).thenReturn(Optional.of(line2));
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> e.getResearchLines() != null && e.getResearchLines().size() == 2));
+    }
+
+    @Test
+    @DisplayName("save: with null research lines sets empty list")
+    void save_nullResearchLines() {
+        ResearchCall domain = new ResearchCall(null, "Call", "Desc", START, END,
+                CallStatus.OPEN, null, null);
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> e.getResearchLines() != null && e.getResearchLines().isEmpty()));
+    }
+
+    @Test
+    @DisplayName("save: maps OPEN status to ABIERTA")
+    void save_openStatus() {
+        ResearchCall domain = new ResearchCall(null, "Open Call", "Desc", START, END,
+                CallStatus.OPEN, null, null);
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> "ABIERTA".equals(e.getStatus())));
+    }
+
+    @Test
+    @DisplayName("save: with null title and description")
+    void save_nullTitleAndDescription() {
+        ResearchCall domain = new ResearchCall(null, null, null, START, END,
+                CallStatus.OPEN, null, null);
+
+        ResearchCallEntity savedEntity = createEntity(1, "ABIERTA");
+        when(jpaRepository.save(any())).thenReturn(savedEntity);
+
+        adapter.save(domain);
+
+        verify(jpaRepository).save(argThat(e -> e.getTitle() == null && e.getDescription() == null));
     }
 }
-

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ListDocumentsUseCase Unit Tests")
+@SuppressWarnings("all")
 class ListDocumentsUseCaseTest {
 
     @Mock

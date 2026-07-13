@@ -37,15 +37,16 @@ public class ResearchLineController {
     private final ResearchGroupMapper groupMapper;
 
     @SuppressWarnings("java:S107")
-    public ResearchLineController(RegisterResearchLineUseCase registerResearchLineUseCase,
-                                  ListResearchLinesUseCase listResearchLinesUseCase,
-                                  GetResearchLineUseCase getResearchLineUseCase,
-                                  ChangeResearchLineStatusUseCase changeResearchLineStatusUseCase,
-                                  AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase,
-                                  RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase,
-                                  ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase,
-                                  ResearchLineMapper mapper,
-                                  ResearchGroupMapper groupMapper) {
+    public ResearchLineController(
+            RegisterResearchLineUseCase registerResearchLineUseCase,
+            ListResearchLinesUseCase listResearchLinesUseCase,
+            GetResearchLineUseCase getResearchLineUseCase,
+            ChangeResearchLineStatusUseCase changeResearchLineStatusUseCase,
+            AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase,
+            RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase,
+            ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase,
+            ResearchLineMapper mapper,
+            ResearchGroupMapper groupMapper) {
         this.registerResearchLineUseCase = registerResearchLineUseCase;
         this.listResearchLinesUseCase = listResearchLinesUseCase;
         this.getResearchLineUseCase = getResearchLineUseCase;

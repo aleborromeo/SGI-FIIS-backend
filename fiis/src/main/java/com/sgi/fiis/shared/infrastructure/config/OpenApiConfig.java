@@ -16,8 +16,9 @@ import org.springframework.context.annotation.Configuration;
  * Configura la información general de la API y añade soporte para el flujo de autorización con JWT Bearer tokens.
  */
 @Configuration
-@lombok.extern.slf4j.Slf4j
 public class OpenApiConfig {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OpenApiConfig.class);
 
     @Value("${spring.mail.host}")
     private String mailHost;
@@ -105,7 +106,7 @@ public class OpenApiConfig {
     public GroupedOpenApi projectsApi() {
         return GroupedOpenApi.builder()
                 .group("projects")
-                .pathsToMatch("/api/convocatorias/**", "/api/projects/**")
+                .pathsToMatch("/api/v1/calls/**", "/api/projects/**")
                 .build();
     }
 

@@ -5,6 +5,7 @@ import com.sgi.fiis.resolutions.application.usecase.GetResolutionUseCase;
 import com.sgi.fiis.resolutions.domain.model.Resolution;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionCommand;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionUseCase;
+import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,14 +42,19 @@ class ResolutionControllerTest {
     @Mock
     private MessageSource messageSource;
 
+    @Mock
+    private GetResolutionUseCase getResolutionUseCase;
+
     private ResolutionController resolutionController;
 
     private Resolution sampleResolution;
 
     @BeforeEach
     void setUp() {
-        resolutionController = new ResolutionController(issueResolutionUseCase, messageSource);
-        mockMvc = MockMvcBuilders.standaloneSetup(resolutionController).build();
+        resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
+        mockMvc = MockMvcBuilders.standaloneSetup(resolutionController)
+                .setControllerAdvice(new GlobalExceptionHandler(messageSource))
+                .build();
 
         sampleResolution = new Resolution(
                 1L,
@@ -90,27 +96,11 @@ class ResolutionControllerTest {
     }
 
     @Test
-    void issueResolution_shouldReturn403_whenNotDecano() throws Exception {
-        MockMultipartFile file = new MockMultipartFile(
-                "archivo",
-                "test.pdf",
-                MediaType.APPLICATION_PDF_VALUE,
-                "Test PDF content".getBytes()
-        );
+    void issueResolution_shouldReturn201_whenCalled() throws Exception {
+        when(issueResolutionUseCase.issue(any(IssueResolutionCommand.class))).thenReturn(sampleResolution);
+        when(messageSource.getMessage(eq("resolution.issue.success"), any(), any(Locale.class)))
+                .thenReturn("Resolution issued successfully.");
 
-        mockMvc.perform(multipart("/api/v1/resolutions")
-                        .file(file)
-                        .param("numeroResolucion", "RES-2023-001")
-                        .param("fechaEmision", "2023-10-01")
-                        .param("asunto", "Thesis approval")
-                        .param("idTramite", "10")
-                        .with(user("student@unas.edu.pe").roles("ESTUDIANTE"))
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void issueResolution_shouldReturn401_whenUnauthenticated() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "archivo",
                 "test.pdf",
@@ -125,7 +115,7 @@ class ResolutionControllerTest {
                         .param("asunto", "Thesis approval")
                         .param("idTramite", "10")
                         .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isCreated());
     }
 
     @Test

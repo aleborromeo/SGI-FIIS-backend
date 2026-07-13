@@ -17,6 +17,7 @@ public class ResearchCall {
     private LocalDate endDate;
     private CallStatus status;
     private Integer documentId;
+    private Integer creatorId;
     private final List<Integer> researchLineIds;
 
     /**
@@ -43,6 +44,7 @@ public class ResearchCall {
         this.endDate = builder.endDate;
         this.status = builder.status;
         this.documentId = builder.documentId;
+        this.creatorId = builder.creatorId;
         // Almacenamos una lista completamente inmutable en el dominio
         this.researchLineIds = List.copyOf(builder.researchLineIds);
     }
@@ -52,19 +54,60 @@ public class ResearchCall {
     public ResearchCall(Integer id, String title, String description, LocalDate startDate,
                         LocalDate endDate, CallStatus status, Integer documentId,
                         List<Integer> researchLineIds) {
-        if (endDate.isBefore(startDate)) {
-            throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
+        this(new Builder()
+                .id(id).title(title).description(description)
+                .startDate(startDate).endDate(endDate).status(status)
+                .documentId(documentId).researchLineIds(researchLineIds));
+    }
+
+    /** Full constructor including creatorId. */
+    @SuppressWarnings("java:S107")
+    public ResearchCall(Integer id, String title, String description, LocalDate startDate,
+                        LocalDate endDate, CallStatus status, Integer documentId,
+                        Integer creatorId, List<Integer> researchLineIds) {
+        this(new Builder()
+                .id(id).title(title).description(description)
+                .startDate(startDate).endDate(endDate).status(status)
+                .documentId(documentId).creatorId(creatorId).researchLineIds(researchLineIds));
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private Integer id;
+        private String title;
+        private String description;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private CallStatus status;
+        private Integer documentId;
+        private Integer creatorId;
+        private List<Integer> researchLineIds = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder id(Integer id)                           { this.id = id; return this; }
+        public Builder title(String title)                      { this.title = title; return this; }
+        public Builder description(String description)          { this.description = description; return this; }
+        public Builder startDate(LocalDate startDate)           { this.startDate = startDate; return this; }
+        public Builder endDate(LocalDate endDate)               { this.endDate = endDate; return this; }
+        public Builder status(CallStatus status)                { this.status = status; return this; }
+        public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
+        public Builder creatorId(Integer creatorId)             { this.creatorId = creatorId; return this; }
+        public Builder researchLineIds(List<Integer> lineIds) { 
+            if (lineIds == null) {
+                this.researchLineIds = new ArrayList<>();
+            } else {
+                this.researchLineIds = new ArrayList<>(lineIds); 
+            }
+            return this; 
         }
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.status = status;
-        this.documentId = documentId;
-        this.researchLineIds = researchLineIds != null
-                ? new ArrayList<>(researchLineIds)
-                : new ArrayList<>();
+
+        public ResearchCall build() {
+            return new ResearchCall(this);
+        }
     }
 
     /**
@@ -104,6 +147,11 @@ public class ResearchCall {
     /** Returns the associated document identifier. */
     public Integer getDocumentId() {
         return documentId;
+    }
+
+    /** Returns the creator user identifier. */
+    public Integer getCreatorId() {
+        return creatorId;
     }
 
     /**

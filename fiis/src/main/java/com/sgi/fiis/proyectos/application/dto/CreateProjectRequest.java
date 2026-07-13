@@ -48,9 +48,11 @@ public class CreateProjectRequest {
     @NotNull(message = "{proyectos.validation.group.required}")
     private Integer researchGroupId;
 
-    private Integer callId; // Optional if registered outside call
+    private Integer callId;
 
-    private Integer documentId; // Optional file metadata ID
+    private Integer documentId;
 
-    private List<MemberRequest> members; // Optional team members
+    private List<MemberRequest> members;
+
+    private boolean draft;
 }

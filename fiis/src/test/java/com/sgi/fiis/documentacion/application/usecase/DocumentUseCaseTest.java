@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("all")
 class DocumentUseCaseTest {
 
     private DocumentRepositoryPort documentRepositoryPort;
@@ -91,9 +92,8 @@ class DocumentUseCaseTest {
         Long userId = 42L;
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            uploadDocumentUseCase.execute(fakeStream, fileName, sizeBytes, userId);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> uploadDocumentUseCase.execute(fakeStream, fileName, sizeBytes, userId));
 
         assertTrue(exception.getMessage().contains("Extensión de archivo no permitida"));
         verify(documentRepositoryPort, never()).save(any(Document.class));
@@ -150,9 +150,8 @@ class DocumentUseCaseTest {
         when(documentRepositoryPort.findById(docId)).thenReturn(Optional.of(stubDoc));
 
         // Act & Assert
-        assertThrows(DocumentAccessDeniedException.class, () -> {
-            downloadDocumentUseCase.execute(docId, foreignUserId, foreignUserRole);
-        });
+        assertThrows(DocumentAccessDeniedException.class,
+                () -> downloadDocumentUseCase.execute(docId, foreignUserId, foreignUserRole));
 
         verify(fileStoragePort, never()).load(anyString());
     }

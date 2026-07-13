@@ -32,8 +32,6 @@ public class Project {
     private Integer documentId;
     private ProjectStatus status;
 
-
-
     public void validateInvariants() {
         if (budget == null || budget.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessRuleValidationException("proyectos.error.budget-must-be-positive");

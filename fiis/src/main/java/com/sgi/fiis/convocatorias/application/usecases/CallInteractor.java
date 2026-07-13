@@ -74,6 +74,14 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<CallResponse> getVigentCalls() {
+        return saveCallPort.findByStatus(CallStatus.OPEN).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional
     @Auditable(action = "UPDATE_RESEARCH_CALL_STATUS")
     public CallResponse updateStatus(Integer id, String status) {

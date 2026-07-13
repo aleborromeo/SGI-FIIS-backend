@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -140,5 +141,20 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertEquals("Acceso denegado", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleTypeMismatch() {
+        org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex =
+                mock(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class);
+        when(ex.getName()).thenReturn("id");
+        when(ex.getValue()).thenReturn("vigent");
+
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleTypeMismatch(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        String message = (String) response.getBody().get("message");
+        assertTrue(message.contains("id"));
+        assertTrue(message.contains("vigent"));
     }
 }

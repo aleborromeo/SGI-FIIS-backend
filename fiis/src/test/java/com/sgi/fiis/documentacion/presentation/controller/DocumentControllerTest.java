@@ -47,6 +47,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(DocumentController.class)
 @DisplayName("Pruebas Expandidas de Cobertura - DocumentController")
+@SuppressWarnings("all")
 class DocumentControllerTest {
 
     @Autowired
@@ -69,6 +70,7 @@ class DocumentControllerTest {
 
     @MockitoBean
     private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
+
 
     /**
      * Crea un Authentication simulado con CustomUserDetails como principal mockeado.

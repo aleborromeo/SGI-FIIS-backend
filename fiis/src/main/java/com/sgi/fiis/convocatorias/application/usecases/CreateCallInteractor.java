@@ -22,7 +22,7 @@ public class CreateCallInteractor implements CreateCallUseCase {
 
     @Override
     @Auditable(action = "CREATE_RESEARCH_CALL")
-    public CallResponse execute(CreateCallRequest request) {
+    public CallResponse execute(CreateCallRequest request, Integer creatorId) {
         // RN-11: Validate that all research lines are active
         if (!saveCallPort.areLinesActive(request.getResearchLineIds())) {
             throw new BusinessRuleValidationException("convocatorias.error.lines-not-active");
@@ -37,6 +37,7 @@ public class CreateCallInteractor implements CreateCallUseCase {
                 request.getEndDate(),
                 CallStatus.OPEN,
                 request.getDocumentId(),
+                creatorId,
                 request.getResearchLineIds()
         );
 

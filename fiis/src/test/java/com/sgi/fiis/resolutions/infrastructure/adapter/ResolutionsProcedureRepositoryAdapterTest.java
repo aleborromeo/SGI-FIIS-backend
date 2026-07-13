@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("all")
 class ResolutionsProcedureRepositoryAdapterTest {
 
     @Mock

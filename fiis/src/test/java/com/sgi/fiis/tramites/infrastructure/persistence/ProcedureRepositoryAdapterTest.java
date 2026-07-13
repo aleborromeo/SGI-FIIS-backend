@@ -2,8 +2,10 @@ package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
+import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.tramites.domain.model.Procedure;
+import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.ProcedureType;
 import com.sgi.fiis.users.domain.model.RoleEnum;
@@ -30,14 +32,14 @@ import static org.mockito.Mockito.*;
 @DisplayName("ProcedureRepositoryAdapter Unit Tests")
 class ProcedureRepositoryAdapterTest {
 
-    @Mock private SpringDataProcedureRepository tramiteRepository;
-    @Mock private SpringDataProcedureMovementRepository movimientoRepository;
+    @Mock private SpringDataProcedureRepository procedureRepository;
+    @Mock private SpringDataProcedureMovementRepository movementRepository;
     @Mock private SpringDataUserRepository userRepository;
     @Mock private ResearchGroupJpaRepository groupRepository;
     @Mock private ProjectJpaRepository projectRepository;
     @InjectMocks private ProcedureRepositoryAdapter adapter;
 
-    private static final LocalDateTime FECHA = LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0);
+    private static final LocalDateTime DATE = LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0);
 
     private UserEntity buildApplicant() {
         UserEntity u = new UserEntity();
@@ -60,8 +62,8 @@ class ProcedureRepositoryAdapterTest {
         e.setGroup(buildGroup());
         e.setStatus("PENDIENTE_COORDINADOR");
         e.setReviewerRole("COORDINADOR_GRUPO");
-        e.setSentAt(FECHA);
-        e.setUpdatedAt(FECHA);
+        e.setSentAt(DATE);
+        e.setUpdatedAt(DATE);
         return e;
     }
 
@@ -74,8 +76,8 @@ class ProcedureRepositoryAdapterTest {
                 .groupId(1L)
                 .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
                 .currentReviewerRole(RoleEnum.COORDINADOR_GRUPO)
-                .sentAt(FECHA)
-                .updatedAt(FECHA)
+                .sentAt(DATE)
+                .updatedAt(DATE)
                 .movements(new ArrayList<>())
                 .build();
     }
@@ -85,22 +87,22 @@ class ProcedureRepositoryAdapterTest {
     void save_persistsEntityAndReturnsDomain() {
         when(userRepository.getReferenceById(10L)).thenReturn(buildApplicant());
         when(groupRepository.getReferenceById(1)).thenReturn(buildGroup());
-        when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
-        when(movimientoRepository.countByProcedure_Id(1L)).thenReturn(0L);
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
 
         Procedure result = adapter.save(buildDomain());
 
         assertEquals(1L, result.getId());
         assertEquals("TRM-2026-001", result.getCode());
         assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, result.getCurrentStatus());
-        verify(tramiteRepository).save(any());
+        verify(procedureRepository).save(any());
     }
 
     @Test
-    @DisplayName("findById: found → returns mapped domain")
+    @DisplayName("findById: found returns mapped domain")
     void findById_found_returnsDomain() {
-        when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
-        when(movimientoRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
+        when(procedureRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
+        when(movementRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findById(1L);
 
@@ -110,19 +112,19 @@ class ProcedureRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("findById: not found → returns empty Optional")
+    @DisplayName("findById: not found returns empty Optional")
     void findById_notFound_returnsEmpty() {
-        when(tramiteRepository.findById(99)).thenReturn(Optional.empty());
+        when(procedureRepository.findById(99)).thenReturn(Optional.empty());
 
         assertTrue(adapter.findById(99L).isEmpty());
     }
 
     @Test
-    @DisplayName("findByCode: found → returns mapped domain")
+    @DisplayName("findByCode: found returns mapped domain")
     void findByCode_found_returnsDomain() {
-        when(tramiteRepository.findByCode("TRM-2026-001"))
+        when(procedureRepository.findByCode("TRM-2026-001"))
                 .thenReturn(Optional.of(buildEntity(1)));
-        when(movimientoRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
+        when(movementRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findByCode("TRM-2026-001");
 
@@ -133,7 +135,7 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findByApplicantId: returns list of mapped procedures")
     void findByApplicantId_returnsMappedList() {
-        when(tramiteRepository.findByApplicant_Id(10L)).thenReturn(List.of(buildEntity(1)));
+        when(procedureRepository.findByApplicant_Id(10L)).thenReturn(List.of(buildEntity(1)));
 
         List<Procedure> result = adapter.findByApplicantId(10L);
 
@@ -144,7 +146,7 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("findByStatus: returns list filtered by status")
     void findByStatus_returnsMappedList() {
-        when(tramiteRepository.findByStatus("PENDIENTE_COORDINADOR"))
+        when(procedureRepository.findByStatus("PENDIENTE_COORDINADOR"))
                 .thenReturn(List.of(buildEntity(1)));
 
         List<Procedure> result = adapter.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
@@ -156,77 +158,77 @@ class ProcedureRepositoryAdapterTest {
     @Test
     @DisplayName("existsByCode: delegates to repository")
     void existsByCode_delegatesToRepository() {
-        when(tramiteRepository.existsByCode("TRM-2026-001")).thenReturn(true);
+        when(procedureRepository.existsByCode("TRM-2026-001")).thenReturn(true);
 
         assertTrue(adapter.existsByCode("TRM-2026-001"));
-        verify(tramiteRepository).existsByCode("TRM-2026-001");
+        verify(procedureRepository).existsByCode("TRM-2026-001");
     }
 
     @Test
     @DisplayName("save: handles null values correctly")
     void save_handlesNullValuesCorrectly() {
         Procedure minimalDomain = Procedure.builder()
-                .codigoTramite("TRM-MINIMAL")
-                .tipoTramite(ProcedureType.INFORME_AVANCE)
-                .estadoActual(ProcedureStatus.REGISTRADO)
-                .fechaEnvio(FECHA)
-                .fechaActualizacion(FECHA)
-                .movimientos(new ArrayList<>())
+                .code("TRM-MINIMAL")
+                .procedureType(ProcedureType.REPORT_AVANCE)
+                .currentStatus(ProcedureStatus.REGISTRADO)
+                .sentAt(DATE)
+                .updatedAt(DATE)
+                .movements(new ArrayList<>())
                 .build();
-                
+
         ProcedureEntity minimalEntity = new ProcedureEntity();
         minimalEntity.setId(1);
         minimalEntity.setCode("TRM-MINIMAL");
-        minimalEntity.setProcedureType("INFORME_AVANCE");
+        minimalEntity.setProcedureType("REPORTE_AVANCE");
         minimalEntity.setStatus("REGISTRADO");
-        minimalEntity.setSentAt(FECHA);
-        minimalEntity.setUpdatedAt(FECHA);
-        
-        when(tramiteRepository.save(any())).thenReturn(minimalEntity);
-        
+        minimalEntity.setSentAt(DATE);
+        minimalEntity.setUpdatedAt(DATE);
+
+        when(procedureRepository.save(any())).thenReturn(minimalEntity);
+
         Procedure result = adapter.save(minimalDomain);
-        
+
         assertEquals(1L, result.getId());
-        assertNull(result.getIdSolicitante());
-        assertNull(result.getIdGrupo());
-        assertNull(result.getRolRevisorActual());
-        assertNull(result.getIdReferenciaProyecto());
-    }
-    
-    @Test
-    @DisplayName("save: handles movements with null action user")
-    void save_handlesMovementsWithNullActionUser() {
-        List<com.sgi.fiis.tramites.domain.model.ProcedureMovement> movs = new ArrayList<>();
-        movs.add(com.sgi.fiis.tramites.domain.model.ProcedureMovement.builder()
-                .accion("SISTEMA_AUTO")
-                .estadoAnterior(ProcedureStatus.REGISTRADO)
-                .estadoNuevo(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .fechaMovimiento(FECHA)
-                .build());
-                
-        Procedure domain = Procedure.builder()
-                .id(1L)
-                .codigoTramite("TRM-2026-001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .movimientos(movs)
-                .build();
-                
-        when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
-        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
-        when(movimientoRepository.save(any())).thenReturn(null);
-        
-        Procedure result = adapter.save(domain);
-        
-        assertEquals(1, result.getMovements().size());
-        assertNull(result.getMovements().get(0).getIdUsuarioAccion());
-        verify(movimientoRepository, times(1)).save(any());
+        assertNull(result.getApplicantId());
+        assertNull(result.getGroupId());
+        assertNull(result.getCurrentReviewerRole());
+        assertNull(result.getProjectReferenceId());
     }
 
     @Test
-    @DisplayName("findByCode: not found → returns empty Optional")
+    @DisplayName("save: handles movements with null action user")
+    void save_handlesMovementsWithNullActionUser() {
+        List<ProcedureMovement> movs = new ArrayList<>();
+        movs.add(ProcedureMovement.builder()
+                .action("SISTEMA_AUTO")
+                .previousStatus(ProcedureStatus.REGISTRADO)
+                .newStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movementAt(DATE)
+                .build());
+
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movements(movs)
+                .build();
+
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+        when(movementRepository.save(any())).thenReturn(null);
+
+        Procedure result = adapter.save(domain);
+
+        assertEquals(1, result.getMovements().size());
+        assertNull(result.getMovements().get(0).getActionUserId());
+        verify(movementRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("findByCode: not found returns empty Optional")
     void findByCode_notFound_returnsEmpty() {
-        when(tramiteRepository.findByCode("TRM-NONEXISTENT")).thenReturn(Optional.empty());
+        when(procedureRepository.findByCode("TRM-NONEXISTENT")).thenReturn(Optional.empty());
 
         assertTrue(adapter.findByCode("TRM-NONEXISTENT").isEmpty());
     }
@@ -236,32 +238,36 @@ class ProcedureRepositoryAdapterTest {
     void save_handlesProjectReferenceAndThesis() {
         Procedure domain = Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(10L)
-                .idGrupo(1L)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .rolRevisorActual(RoleEnum.COORDINADOR_GRUPO)
-                .idReferenciaProyecto(99L)
-                .idReferenciaTesis(42L)
-                .idReferenciaInforme(7L)
-                .fechaEnvio(FECHA)
-                .fechaActualizacion(FECHA)
-                .movimientos(new ArrayList<>())
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(10L)
+                .groupId(1L)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .currentReviewerRole(RoleEnum.COORDINADOR_GRUPO)
+                .projectReferenceId(99L)
+                .thesisReferenceId(42L)
+                .reportReferenceId(7L)
+                .sentAt(DATE)
+                .updatedAt(DATE)
+                .movements(new ArrayList<>())
                 .build();
 
+        when(userRepository.getReferenceById(10L)).thenReturn(buildApplicant());
+        when(groupRepository.getReferenceById(1)).thenReturn(buildGroup());
+        when(projectRepository.getReferenceById(99)).thenReturn(new ProjectEntity());
+
         ProcedureEntity entityWithRefs = buildEntity(1);
-        entityWithRefs.setProjectReference(new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity());
+        entityWithRefs.setProjectReference(new ProjectEntity());
         entityWithRefs.getProjectReference().setId(99);
         entityWithRefs.setThesisReferenceId(42L);
         entityWithRefs.setReportReferenceId(7L);
 
-        when(tramiteRepository.save(any())).thenReturn(entityWithRefs);
-        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
+        when(procedureRepository.save(any())).thenReturn(entityWithRefs);
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
 
         Procedure result = adapter.save(domain);
 
-        verify(tramiteRepository).save(any());
+        verify(procedureRepository).save(any());
         assertNotNull(result);
     }
 
@@ -269,22 +275,21 @@ class ProcedureRepositoryAdapterTest {
     @DisplayName("findById: maps entity with projectReference and thesisReferenceId")
     void findById_mapsProjectReferenceAndThesis() {
         ProcedureEntity entity = buildEntity(1);
-        com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity pe =
-                new com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity();
+        ProjectEntity pe = new ProjectEntity();
         pe.setId(99);
         entity.setProjectReference(pe);
         entity.setThesisReferenceId(42L);
         entity.setReportReferenceId(7L);
 
-        when(tramiteRepository.findById(1)).thenReturn(Optional.of(entity));
-        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of());
+        when(procedureRepository.findById(1)).thenReturn(Optional.of(entity));
+        when(movementRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findById(1L);
 
         assertTrue(result.isPresent());
-        assertEquals(99L, result.get().getIdReferenciaProyecto());
-        assertEquals(42L, result.get().getIdReferenciaTesis());
-        assertEquals(7L, result.get().getIdReferenciaInforme());
+        assertEquals(99L, result.get().getProjectReferenceId());
+        assertEquals(42L, result.get().getThesisReferenceId());
+        assertEquals(7L, result.get().getReportReferenceId());
     }
 
     @Test
@@ -296,48 +301,48 @@ class ProcedureRepositoryAdapterTest {
         movEntity.setNewState(null);
         movEntity.setComment("test");
 
-        when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
-        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of(movEntity));
+        when(procedureRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
+        when(movementRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of(movEntity));
 
         Optional<Procedure> result = adapter.findById(1L);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getMovements().size());
-        assertNull(result.get().getMovements().get(0).getEstadoAnterior());
-        assertNull(result.get().getMovements().get(0).getEstadoNuevo());
+        assertNull(result.get().getMovements().get(0).getPreviousStatus());
+        assertNull(result.get().getMovements().get(0).getNewStatus());
     }
 
     @Test
-    @DisplayName("save: handles movement with null estadoAnterior and estadoNuevo")
+    @DisplayName("save: handles movement with null previousStatus and newStatus")
     void save_handlesMovementWithNullEnumStates() {
-        List<com.sgi.fiis.tramites.domain.model.ProcedureMovement> movs = new ArrayList<>();
-        movs.add(com.sgi.fiis.tramites.domain.model.ProcedureMovement.builder()
-                .accion("SISTEMA_AUTO")
-                .estadoAnterior(null)
-                .estadoNuevo(null)
-                .fechaMovimiento(FECHA)
+        List<ProcedureMovement> movs = new ArrayList<>();
+        movs.add(ProcedureMovement.builder()
+                .action("SISTEMA_AUTO")
+                .previousStatus(null)
+                .newStatus(null)
+                .movementAt(DATE)
                 .build());
 
         Procedure domain = Procedure.builder()
                 .id(1L)
-                .codigoTramite("TRM-2026-001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .movimientos(movs)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movements(movs)
                 .build();
 
-        when(tramiteRepository.save(any())).thenReturn(buildEntity(1));
-        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
-        when(movimientoRepository.save(any())).thenReturn(null);
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+        when(movementRepository.save(any())).thenReturn(null);
 
         Procedure result = adapter.save(domain);
 
         assertEquals(1, result.getMovements().size());
-        verify(movimientoRepository).save(any());
+        verify(movementRepository).save(any());
     }
 
     @Test
-    @DisplayName("findById: entity con procedureType, status, applicant, group, reviewerRole null")
+    @DisplayName("findById: entity with all null optional fields")
     void findById_entityWithAllNullOptionalFields() {
         ProcedureEntity entity = new ProcedureEntity();
         entity.setId(1);
@@ -353,39 +358,42 @@ class ProcedureRepositoryAdapterTest {
         entity.setSentAt(null);
         entity.setUpdatedAt(null);
 
-        when(tramiteRepository.findById(99)).thenReturn(Optional.of(entity));
-        when(movimientoRepository.findByProcedureIdOrderByDateAsc(nullable(Integer.class))).thenReturn(List.of());
+        when(procedureRepository.findById(99)).thenReturn(Optional.of(entity));
+        when(movementRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of());
 
         Optional<Procedure> result = adapter.findById(99L);
 
         assertTrue(result.isPresent());
-        assertNull(result.get().getTipoTramite());
-        assertNull(result.get().getIdSolicitante());
-        assertNull(result.get().getIdGrupo());
-        assertNull(result.get().getEstadoActual());
-        assertNull(result.get().getRolRevisorActual());
-        assertNull(result.get().getIdReferenciaProyecto());
-        assertNull(result.get().getIdReferenciaTesis());
-        assertNull(result.get().getIdReferenciaInforme());
-        assertNull(result.get().getFechaEnvio());
-        assertNull(result.get().getFechaActualizacion());
+        assertNull(result.get().getProcedureType());
+        assertNull(result.get().getApplicantId());
+        assertNull(result.get().getGroupId());
+        assertNull(result.get().getCurrentStatus());
+        assertNull(result.get().getCurrentReviewerRole());
+        assertNull(result.get().getProjectReferenceId());
+        assertNull(result.get().getThesisReferenceId());
+        assertNull(result.get().getReportReferenceId());
+        assertNull(result.get().getSentAt());
+        assertNull(result.get().getUpdatedAt());
     }
 
     @Test
-    @DisplayName("save: domain sin estadoActual y sin rolRevisorActual")
-    void save_domainWithNullEstadoAndRol() {
+    @DisplayName("save: domain with null currentStatus and reviewerRole")
+    void save_domainWithNullStatusAndRole() {
         Procedure domain = Procedure.builder()
-                .codigoTramite("TRM-X")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(10L)
-                .idGrupo(1L)
-                .estadoActual(null)
-                .rolRevisorActual(null)
-                .idReferenciaProyecto(null)
-                .fechaEnvio(null)
-                .fechaActualizacion(null)
-                .movimientos(new ArrayList<>())
+                .code("TRM-X")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(10L)
+                .groupId(1L)
+                .currentStatus(null)
+                .currentReviewerRole(null)
+                .projectReferenceId(null)
+                .sentAt(null)
+                .updatedAt(null)
+                .movements(new ArrayList<>())
                 .build();
+
+        when(userRepository.getReferenceById(10L)).thenReturn(buildApplicant());
+        when(groupRepository.getReferenceById(1)).thenReturn(buildGroup());
 
         ProcedureEntity saved = new ProcedureEntity();
         saved.setId(1);
@@ -395,27 +403,26 @@ class ProcedureRepositoryAdapterTest {
         saved.setReviewerRole(null);
         saved.setSentAt(null);
         saved.setUpdatedAt(null);
-        com.sgi.fiis.users.infrastructure.persistence.UserEntity applicant = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        UserEntity applicant = new UserEntity();
         applicant.setId(10L);
         saved.setApplicant(applicant);
-        com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity group =
-                new com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity();
+        ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(1);
         saved.setGroup(group);
 
-        when(tramiteRepository.save(any())).thenReturn(saved);
-        when(movimientoRepository.countByProcedureId(1)).thenReturn(0L);
+        when(procedureRepository.save(any())).thenReturn(saved);
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
 
         Procedure result = adapter.save(domain);
 
-        assertNull(result.getEstadoActual());
-        assertNull(result.getRolRevisorActual());
-        assertNull(result.getFechaEnvio());
-        assertNull(result.getFechaActualizacion());
+        assertNull(result.getCurrentStatus());
+        assertNull(result.getCurrentReviewerRole());
+        assertNull(result.getSentAt());
+        assertNull(result.getUpdatedAt());
     }
 
     @Test
-    @DisplayName("findByApplicantId: entity sin optional fields")
+    @DisplayName("findByApplicantId: entity with null optional fields")
     void findByApplicantId_entityWithNullOptionalFields() {
         ProcedureEntity entity = new ProcedureEntity();
         entity.setId(5);
@@ -426,18 +433,18 @@ class ProcedureRepositoryAdapterTest {
         entity.setStatus(null);
         entity.setReviewerRole(null);
 
-        when(tramiteRepository.findByApplicantId(10L)).thenReturn(List.of(entity));
+        when(procedureRepository.findByApplicant_Id(10L)).thenReturn(List.of(entity));
 
         List<Procedure> result = adapter.findByApplicantId(10L);
 
         assertEquals(1, result.size());
-        assertNull(result.get(0).getTipoTramite());
-        assertNull(result.get(0).getIdSolicitante());
-        assertNull(result.get(0).getIdGrupo());
+        assertNull(result.get(0).getProcedureType());
+        assertNull(result.get(0).getApplicantId());
+        assertNull(result.get(0).getGroupId());
     }
 
     @Test
-    @DisplayName("findByStatus: entity sin optional fields")
+    @DisplayName("findByStatus: entity with null optional fields")
     void findByStatus_entityWithNullOptionalFields() {
         ProcedureEntity entity = new ProcedureEntity();
         entity.setId(5);
@@ -448,42 +455,141 @@ class ProcedureRepositoryAdapterTest {
         entity.setStatus(null);
         entity.setReviewerRole(null);
 
-        when(tramiteRepository.findByStatus("PENDIENTE_COORDINADOR")).thenReturn(List.of(entity));
+        when(procedureRepository.findByStatus("PENDIENTE_COORDINADOR")).thenReturn(List.of(entity));
 
         List<Procedure> result = adapter.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
 
         assertEquals(1, result.size());
-        assertNull(result.get(0).getEstadoActual());
+        assertNull(result.get(0).getCurrentStatus());
     }
 
     @Test
-    @DisplayName("toMovimientoDomain: actionUser con id válido, movement completo")
+    @DisplayName("toMovimientoDomain: complete movement with valid actionUser")
     void toMovimientoDomain_completeMovement() {
         ProcedureMovementEntity movEntity = new ProcedureMovementEntity();
         movEntity.setAction("TEST");
-        com.sgi.fiis.users.infrastructure.persistence.UserEntity actionUser =
-                new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
+        UserEntity actionUser = new UserEntity();
         actionUser.setId(77L);
         movEntity.setActionUser(actionUser);
         movEntity.setPreviousState("REGISTRADO");
         movEntity.setNewState("PENDIENTE_COORDINADOR");
         movEntity.setComment("comment");
-        movEntity.setMovementAt(FECHA);
-        movEntity.setDocumentAttachmentId(99L);
+        movEntity.setMovementAt(DATE);
 
-        when(tramiteRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
-        when(movimientoRepository.findByProcedureIdOrderByDateAsc(1)).thenReturn(List.of(movEntity));
+        when(procedureRepository.findById(1)).thenReturn(Optional.of(buildEntity(1)));
+        when(movementRepository.findByProcedure_IdOrderByMovementAtAsc(1L)).thenReturn(List.of(movEntity));
 
         Optional<Procedure> result = adapter.findById(1L);
 
         assertTrue(result.isPresent());
-        com.sgi.fiis.tramites.domain.model.ProcedureMovement mov = result.get().getMovements().get(0);
-        assertEquals(77L, mov.getIdUsuarioAccion());
-        assertEquals("TEST", mov.getAccion());
-        assertEquals(ProcedureStatus.REGISTRADO, mov.getEstadoAnterior());
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, mov.getEstadoNuevo());
-        assertEquals("comment", mov.getObservacion());
-        assertEquals(FECHA, mov.getFechaMovimiento());
-        assertEquals(99L, mov.getIdDocumentoAdjunto());
+        ProcedureMovement mov = result.get().getMovements().get(0);
+        assertEquals(77L, mov.getActionUserId());
+        assertEquals("TEST", mov.getAction());
+        assertEquals(ProcedureStatus.REGISTRADO, mov.getPreviousStatus());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, mov.getNewStatus());
+        assertEquals("comment", mov.getComment());
+        assertEquals(DATE, mov.getMovementAt());
+    }
+
+    @Test
+    @DisplayName("findAll: returns all procedures mapped to domain")
+    void findAll_returnsAllProcedures() {
+        when(procedureRepository.findAll()).thenReturn(List.of(buildEntity(1), buildEntity(2)));
+
+        List<Procedure> result = adapter.findAll();
+
+        assertEquals(2, result.size());
+        verify(procedureRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("save: handles projectReferenceId null and applicant null")
+    void save_handlesProjectReferenceAndApplicantNull() {
+        Procedure domain = Procedure.builder()
+                .code("TRM-NO-REF")
+                .currentStatus(ProcedureStatus.REGISTRADO)
+                .movements(new ArrayList<>())
+                .build();
+
+        ProcedureEntity saved = new ProcedureEntity();
+        saved.setId(1);
+        saved.setCode("TRM-NO-REF");
+        when(procedureRepository.save(any())).thenReturn(saved);
+
+        Procedure result = adapter.save(domain);
+
+        assertNotNull(result);
+        verify(procedureRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("findByApplicantId: toDomain handles null entity id (new code coverage)")
+    void findByApplicantId_toDomainHandlesNullEntityId() {
+        ProcedureEntity entity = new ProcedureEntity();
+        entity.setId(null);
+        entity.setCode("TRM-NULL-ID");
+        entity.setStatus("REGISTRADO");
+
+        when(procedureRepository.findByApplicant_Id(10L)).thenReturn(List.of(entity));
+
+        List<Procedure> result = adapter.findByApplicantId(10L);
+
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getId());
+    }
+
+    @Test
+    @DisplayName("save: toMovimientoEntity sets actionUser when actionUserId is not null")
+    void save_toMovimientoEntitySetsActionUser() {
+        List<ProcedureMovement> movs = new ArrayList<>();
+        movs.add(ProcedureMovement.builder()
+                .actionUserId(42L)
+                .action("APROBADO")
+                .previousStatus(ProcedureStatus.REGISTRADO)
+                .newStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movementAt(DATE)
+                .build());
+
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movements(movs)
+                .build();
+
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+        when(movementRepository.save(any())).thenReturn(null);
+
+        Procedure result = adapter.save(domain);
+
+        assertEquals(1, result.getMovements().size());
+        verify(movementRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("save: skips projectReference when projectReferenceId is null")
+    void save_skipsProjectReferenceWhenNull() {
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(10L)
+                .groupId(1L)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .projectReferenceId(null)
+                .movements(new ArrayList<>())
+                .build();
+
+        when(userRepository.getReferenceById(10L)).thenReturn(buildApplicant());
+        when(groupRepository.getReferenceById(1)).thenReturn(buildGroup());
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+
+        Procedure result = adapter.save(domain);
+
+        verify(projectRepository, never()).getReferenceById(anyInt());
+        assertNotNull(result);
     }
 }

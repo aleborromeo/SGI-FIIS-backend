@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ResearchGroupRepositoryAdapter Unit Tests")
+@SuppressWarnings("all")
 class ResearchGroupRepositoryAdapterTest {
 
     @Mock private SpringDataResearchGroupRepository jpaRepository;

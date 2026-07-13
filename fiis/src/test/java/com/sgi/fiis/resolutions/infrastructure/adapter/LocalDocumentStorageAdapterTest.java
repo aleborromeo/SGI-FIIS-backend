@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("all")
 class LocalDocumentStorageAdapterTest {
 
     private static final String TEST_PDF_NAME = "test.pdf";

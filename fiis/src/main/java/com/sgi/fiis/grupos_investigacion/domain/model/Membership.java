@@ -18,6 +18,7 @@ public class Membership {
     private String userFirstNames;
     private String userLastNames;
     private String userEmail;
+    private String userRoleCode;
     private boolean active;
     private LocalDateTime startDate;
     private LocalDateTime endDate;

@@ -3,11 +3,13 @@ package com.sgi.fiis.shared.infrastructure.persistence;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("JsonbHelper Unit Tests")
+@SuppressWarnings("all")
 class JsonbHelperTest {
 
     @Test
@@ -78,6 +80,7 @@ class JsonbHelperTest {
     void testConstructorIsPrivate() throws NoSuchMethodException {
         java.lang.reflect.Constructor<JsonbHelper> constructor = JsonbHelper.class.getDeclaredConstructor();
         assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
+
     }
 }
 
