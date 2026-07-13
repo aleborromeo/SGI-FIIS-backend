@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -29,9 +30,12 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -159,5 +163,311 @@ class ProjectControllerTest {
 
         mockMvc.perform(get("/api/v1/projects/99"))
                 .andExpect(status().isBadRequest());
+    }
+
+    // === NUEVOS TESTS PARA COBERTURA COMPLETA ===
+
+    @Test
+    void testCreateProject_WrongRole() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        return userDetails;
+                    }
+                }).build();
+
+        CreateProjectRequest request = new CreateProjectRequest();
+        request.setTitle("Test");
+        request.setSummary("Summary");
+        request.setGeneralObjective("Obj");
+        request.setResearchLineId(1);
+        request.setBudget(new BigDecimal("100"));
+        request.setStartDate(LocalDate.of(2026, Month.JUNE, 17));
+        request.setEndDate(LocalDate.of(2026, Month.JUNE, 27));
+        request.setExecutionPlace("Place");
+        request.setResearchGroupId(2);
+
+        customMockMvc.perform(post("/api/v1/projects")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetProjects_CoordinadorGrupo() throws Exception {
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(jdbcTemplate.queryForList(anyString(), eq(Integer.class), any())).thenReturn(List.of(5));
+
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, jdbcTemplate))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_COORDINADOR_GRUPO"));
+                        return userDetails;
+                    }
+                }).build();
+
+        when(createProjectUseCase.getProjectsByGroup(5)).thenReturn(List.of(ProjectResponse.builder().id(1).build()));
+
+        customMockMvc.perform(get("/api/v1/projects"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void testGetProjects_CoordinadorGrupo_NoGroup() throws Exception {
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(jdbcTemplate.queryForList(anyString(), eq(Integer.class), any())).thenReturn(List.of());
+
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, jdbcTemplate))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_COORDINADOR_GRUPO"));
+                        return userDetails;
+                    }
+                }).build();
+
+        customMockMvc.perform(get("/api/v1/projects"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testGetProjects_Estudiante() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        return userDetails;
+                    }
+                }).build();
+
+        customMockMvc.perform(get("/api/v1/projects"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testGetProjects_ByGroupId() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DIRECTOR_INVESTIGACION"));
+                        return userDetails;
+                    }
+                }).build();
+
+        when(createProjectUseCase.getProjectsByGroup(2)).thenReturn(List.of(ProjectResponse.builder().id(1).build()));
+
+        customMockMvc.perform(get("/api/v1/projects?groupId=2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+
+        verify(createProjectUseCase).getProjectsByGroup(2);
+    }
+
+    @Test
+    void testGetProjects_ByResponsibleId() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DIRECTOR_INVESTIGACION"));
+                        return userDetails;
+                    }
+                }).build();
+
+        when(createProjectUseCase.getProjectsByResponsible(5L)).thenReturn(List.of(ProjectResponse.builder().id(2).build()));
+
+        customMockMvc.perform(get("/api/v1/projects?responsibleId=5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2));
+
+        verify(createProjectUseCase).getProjectsByResponsible(5L);
+    }
+
+    @Test
+    void testGetProjects_NoRoleFilters() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DIRECTOR_INVESTIGACION"));
+                        return userDetails;
+                    }
+                }).build();
+
+        when(createProjectUseCase.getAllProjects()).thenReturn(List.of(
+                ProjectResponse.builder().id(1).build(),
+                ProjectResponse.builder().id(2).build()));
+
+        customMockMvc.perform(get("/api/v1/projects"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+
+        verify(createProjectUseCase).getAllProjects();
+    }
+
+    @Test
+    void testGetMyDrafts_Docente() throws Exception {
+        when(createProjectUseCase.getDraftsByResponsible(3L)).thenReturn(List.of(
+                ProjectResponse.builder().id(1).status("BORRADOR").build()));
+
+        mockMvc.perform(get("/api/v1/projects/drafts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].status").value("BORRADOR"));
+
+        verify(createProjectUseCase).getDraftsByResponsible(3L);
+    }
+
+    @Test
+    void testGetMyDrafts_NonDocente() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        return userDetails;
+                    }
+                }).build();
+
+        customMockMvc.perform(get("/api/v1/projects/drafts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testUpdateProjectStatus() throws Exception {
+        when(createProjectUseCase.updateStatus(1, "APROBADO")).thenReturn(
+                ProjectResponse.builder().id(1).status("APROBADO").build());
+
+        mockMvc.perform(patch("/api/v1/projects/1/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":\"APROBADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APROBADO"));
+
+        verify(createProjectUseCase).updateStatus(1, "APROBADO");
+    }
+
+    @Test
+    void testDeleteDraft_Success() throws Exception {
+        mockMvc.perform(delete("/api/v1/projects/1"))
+                .andExpect(status().isOk());
+
+        verify(createProjectUseCase).deleteDraft(1, 3L);
+    }
+
+    @Test
+    void testDeleteDraft_WrongRole() throws Exception {
+        MockMvc customMockMvc = MockMvcBuilders.standaloneSetup(
+                new ProjectController(createProjectUseCase, mock(JdbcTemplate.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(MessageSource.class)))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+                        when(userDetails.getId()).thenReturn(3L);
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        return userDetails;
+                    }
+                }).build();
+
+        customMockMvc.perform(delete("/api/v1/projects/1"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testGetProjectById_Forbidden() throws Exception {
+        when(createProjectUseCase.getProjectById(1)).thenReturn(
+                ProjectResponse.builder().id(1).code("PRJ-1").responsibleId(99L).build());
+
+        mockMvc.perform(get("/api/v1/projects/1"))
+                .andExpect(status().isForbidden());
+
+        verify(createProjectUseCase).getProjectById(1);
+    }
+
+    @Test
+    void testGetProjects_AllFilters() throws Exception {
+        when(createProjectUseCase.getProjectsByGroup(2)).thenReturn(List.of(ProjectResponse.builder().id(1).build()));
+
+        mockMvc.perform(get("/api/v1/projects?groupId=2&responsibleId=3"))
+                .andExpect(status().isOk());
     }
 }

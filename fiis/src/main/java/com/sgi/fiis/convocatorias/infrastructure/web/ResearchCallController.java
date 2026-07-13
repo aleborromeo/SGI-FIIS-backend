@@ -4,9 +4,11 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.convocatorias.application.dto.CallResponse;
 import com.sgi.fiis.convocatorias.application.dto.CreateCallRequest;
 import com.sgi.fiis.convocatorias.application.dto.PrerequisitosResponse;
+import com.sgi.fiis.convocatorias.application.dto.UpdateCallRequest;
 import com.sgi.fiis.convocatorias.application.ports.in.CreateCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.GetCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.UpdateCallStatusUseCase;
+import com.sgi.fiis.convocatorias.application.ports.in.UpdateCallUseCase;
 import com.sgi.fiis.grupos_investigacion.domain.port.MembershipRepositoryPort;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,15 +34,18 @@ public class ResearchCallController {
     private final CreateCallUseCase createCallUseCase;
     private final GetCallUseCase getCallUseCase;
     private final UpdateCallStatusUseCase updateCallStatusUseCase;
+    private final UpdateCallUseCase updateCallUseCase;
     private final MembershipRepositoryPort membershipRepositoryPort;
 
     public ResearchCallController(CreateCallUseCase createCallUseCase,
                                   GetCallUseCase getCallUseCase,
                                   UpdateCallStatusUseCase updateCallStatusUseCase,
+                                  UpdateCallUseCase updateCallUseCase,
                                   MembershipRepositoryPort membershipRepositoryPort) {
         this.createCallUseCase = createCallUseCase;
         this.getCallUseCase = getCallUseCase;
         this.updateCallStatusUseCase = updateCallStatusUseCase;
+        this.updateCallUseCase = updateCallUseCase;
         this.membershipRepositoryPort = membershipRepositoryPort;
     }
 
@@ -113,6 +118,20 @@ public class ResearchCallController {
             @RequestBody Map<String, String> body) {
         String status = body.get("status");
         CallResponse response = updateCallStatusUseCase.updateStatus(id, status);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'ADMIN')")
+    @Operation(summary = "Update a research call", description = "Allows the research director to edit title, description, dates, document and research lines of an OPEN call.")
+    @ApiResponse(responseCode = "200", description = "Research call updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid request payload or call is not in ABIERTA status")
+    @ApiResponse(responseCode = "403", description = "Forbidden - Requires DIRECTOR_INVESTIGACION role")
+    @ApiResponse(responseCode = "404", description = "Research call not found")
+    public ResponseEntity<CallResponse> updateCall(
+            @PathVariable("id") Integer id,
+            @Valid @RequestBody UpdateCallRequest request) {
+        CallResponse response = updateCallUseCase.execute(id, request);
         return ResponseEntity.ok(response);
     }
 

@@ -8,6 +8,7 @@ import com.sgi.fiis.convocatorias.application.dto.CreateCallRequest;
 import com.sgi.fiis.convocatorias.application.ports.in.CreateCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.GetCallUseCase;
 import com.sgi.fiis.convocatorias.application.ports.in.UpdateCallStatusUseCase;
+import com.sgi.fiis.convocatorias.application.ports.in.UpdateCallUseCase;
 import com.sgi.fiis.grupos_investigacion.domain.port.MembershipRepositoryPort;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.infrastructure.exception.GlobalExceptionHandler;
@@ -46,6 +47,7 @@ class ResearchCallControllerTest {
     private CreateCallUseCase createCallUseCase;
     private GetCallUseCase getCallUseCase;
     private UpdateCallStatusUseCase updateCallStatusUseCase;
+    private UpdateCallUseCase updateCallUseCase;
     private MembershipRepositoryPort membershipRepositoryPort;
     private ObjectMapper objectMapper;
 
@@ -54,8 +56,9 @@ class ResearchCallControllerTest {
         createCallUseCase = mock(CreateCallUseCase.class);
         getCallUseCase = mock(GetCallUseCase.class);
         updateCallStatusUseCase = mock(UpdateCallStatusUseCase.class);
+        updateCallUseCase = mock(UpdateCallUseCase.class);
         membershipRepositoryPort = mock(MembershipRepositoryPort.class);
-        ResearchCallController controller = new ResearchCallController(createCallUseCase, getCallUseCase, updateCallStatusUseCase, membershipRepositoryPort);
+        ResearchCallController controller = new ResearchCallController(createCallUseCase, getCallUseCase, updateCallStatusUseCase, updateCallUseCase, membershipRepositoryPort);
         MessageSource messageSource = mock(MessageSource.class);
         lenient().when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenAnswer(inv -> inv.getArgument(2));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)

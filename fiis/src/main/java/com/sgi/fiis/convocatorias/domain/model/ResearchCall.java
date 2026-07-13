@@ -104,6 +104,10 @@ public class ResearchCall {
             }
             return this; 
         }
+
+        public ResearchCall build() {
+            return new ResearchCall(this);
+        }
     }
 
     /**
