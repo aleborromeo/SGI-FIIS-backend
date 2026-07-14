@@ -15,7 +15,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public abstract class TestcontainersConfig {
 
     @SuppressWarnings("resource")
-    private static final PostgreSQLContainer<?> postgres;
+    private static final PostgreSQLContainer<?> POSTGRES;
 
     static {
         PostgreSQLContainer<?> container = null;
@@ -32,16 +32,16 @@ public abstract class TestcontainersConfig {
             // Docker no disponible (local) - usar docker-compose PostgreSQL
             System.out.println("[Testcontainers] Docker no disponible. Usando docker-compose PostgreSQL en localhost:5433");
         }
-        postgres = container;
+        POSTGRES = container;
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        if (postgres != null && postgres.isRunning()) {
+        if (POSTGRES != null && POSTGRES.isRunning()) {
             // Testcontainers esta activo - sobreescribir properties
-            registry.add("spring.datasource.url", postgres::getJdbcUrl);
-            registry.add("spring.datasource.username", postgres::getUsername);
-            registry.add("spring.datasource.password", postgres::getPassword);
+            registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+            registry.add("spring.datasource.username", POSTGRES::getUsername);
+            registry.add("spring.datasource.password", POSTGRES::getPassword);
             registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
         }
         // Si Testcontainers no esta activo, se usan las properties del application.yml

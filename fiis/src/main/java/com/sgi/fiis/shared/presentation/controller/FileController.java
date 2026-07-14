@@ -36,7 +36,6 @@ import java.util.UUID;
 /**
  * @deprecated Use DocumentController (/api/documents) instead
  */
-@Deprecated(since = "2.0.0", forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/files")
 @Tag(name = "Files", description = "DEPRECATED: Use DocumentController (/api/documents) instead")
