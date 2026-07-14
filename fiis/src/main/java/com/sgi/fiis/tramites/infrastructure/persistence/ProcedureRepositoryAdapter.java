@@ -86,6 +86,22 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     }
 
     @Override
+    public List<Procedure> findByReviewerRole(RoleEnum rolRevisor) {
+        return procedureRepository.findByReviewerRole(rolRevisor.name())
+                .stream()
+                .map(entity -> toDomain(entity, new ArrayList<>()))
+                .toList();
+    }
+
+    @Override
+    public List<Procedure> findByStatusAndReviewerRole(ProcedureStatus estado, RoleEnum rolRevisor) {
+        return procedureRepository.findByStatusAndReviewerRole(estado.name(), rolRevisor.name())
+                .stream()
+                .map(entity -> toDomain(entity, new ArrayList<>()))
+                .toList();
+    }
+
+    @Override
     public boolean existsByCode(String codigoTramite) {
         return procedureRepository.existsByCode(codigoTramite);
     }

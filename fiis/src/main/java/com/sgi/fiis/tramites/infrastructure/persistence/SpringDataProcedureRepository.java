@@ -14,5 +14,9 @@ public interface SpringDataProcedureRepository extends JpaRepository<ProcedureEn
 
     List<ProcedureEntity> findByStatus(String status);
 
+    List<ProcedureEntity> findByReviewerRole(String reviewerRole);
+
+    List<ProcedureEntity> findByStatusAndReviewerRole(String status, String reviewerRole);
+
     boolean existsByCode(String code);
 }

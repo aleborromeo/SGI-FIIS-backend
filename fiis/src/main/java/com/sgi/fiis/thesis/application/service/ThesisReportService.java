@@ -17,6 +17,7 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 public class ThesisReportService implements ThesisReportUseCase {
     private static final String ROLE_ESTUDIANTE = "ROLE_ESTUDIANTE";
     private static final String ROLE_DIRECTOR_INVESTIGACION = "ROLE_DIRECTOR_INVESTIGACION";
+    private static final String ROLE_COORDINADOR_GRUPO = "ROLE_COORDINADOR_GRUPO";
 
     private final ThesisReportRepositoryPort informeRepository;
     private final ThesisPlanRepositoryPort planRepository;
@@ -94,8 +95,10 @@ public class ThesisReportService implements ThesisReportUseCase {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             boolean esDirector = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(ROLE_DIRECTOR_INVESTIGACION));
-            if (!esDirector) {
-                throw new BusinessRuleViolationException("Solo los directores de investigación pueden revisar informes de tesis");
+            boolean esCoordinador = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
+            if (!esDirector && !esCoordinador) {
+                throw new BusinessRuleViolationException("Solo el Director de Investigación o Coordinador de Grupo pueden revisar informes de tesis");
             }
             return;
         }

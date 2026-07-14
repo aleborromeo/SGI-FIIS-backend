@@ -4,6 +4,7 @@ import com.sgi.fiis.reports.application.service.ReportService;
 import com.sgi.fiis.reports.domain.model.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
  */
 @RestController
 @RequestMapping("/api/reports")
+@PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO', 'DECANO', 'ADMIN')")
 public class ReportController {
 
     private final ReportService service;
