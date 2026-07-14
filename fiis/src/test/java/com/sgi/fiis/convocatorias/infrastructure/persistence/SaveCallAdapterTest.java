@@ -163,7 +163,8 @@ class SaveCallAdapterTest {
     @Test
     @DisplayName("findByStatus: OPEN returns ABIERTA")
     void findByStatus_open() {
-        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(List.of(createEntity(1, "ABIERTA")));
+        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", java.time.LocalDate.now()))
+                .thenReturn(List.of(createEntity(1, "ABIERTA")));
 
         List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
 

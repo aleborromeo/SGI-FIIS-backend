@@ -43,6 +43,10 @@ class CreateProjectInteractorTest {
         req.setResponsibleId(2);
         req.setResearchLineId(3);
         req.setTitle("Project Title");
+        req.setSummary("Project summary");
+        req.setGeneralObjective("General objective");
+        req.setExecutionPlace("Lima");
+        req.setCallId(5);
         req.setBudget(new BigDecimal("1000"));
         req.setStartDate(LocalDate.now());
         req.setEndDate(LocalDate.now().plusDays(10));
