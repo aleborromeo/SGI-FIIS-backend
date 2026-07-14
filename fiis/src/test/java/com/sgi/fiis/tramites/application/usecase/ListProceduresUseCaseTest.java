@@ -1,0 +1,147 @@
+package com.sgi.fiis.tramites.application.usecase;
+
+import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
+import com.sgi.fiis.tramites.domain.model.Procedure;
+import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
+import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
+import com.sgi.fiis.users.domain.model.RoleEnum;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("ListProceduresUseCase Unit Tests")
+class ListProceduresUseCaseTest {
+
+    @Mock
+    private ProcedureRepositoryPort procedureRepositoryPort;
+
+    private ListProceduresUseCase useCase;
+
+    @BeforeEach
+    void setUp() {
+        useCase = new ListProceduresUseCase(procedureRepositoryPort);
+    }
+
+    private Procedure buildProcedure(Long id, ProcedureStatus status) {
+        return Procedure.builder()
+                .id(id)
+                .code("TRAM-" + id)
+                .currentStatus(status)
+                .applicantId(1L)
+                .build();
+    }
+
+    @Test
+    @DisplayName("execute() - returns all procedures")
+    void executeNoArgsReturnsAll() {
+        List<Procedure> all = List.of(
+                buildProcedure(1L, ProcedureStatus.REGISTRADO),
+                buildProcedure(2L, ProcedureStatus.PENDIENTE_DECANATO)
+        );
+        when(procedureRepositoryPort.findAll()).thenReturn(all);
+
+        List<ProcedureResponseDto> result = useCase.execute();
+
+        assertEquals(2, result.size());
+        verify(procedureRepositoryPort).findAll();
+    }
+
+    @Test
+    @DisplayName("execute(null) - returns all procedures")
+    void executeNullRoleReturnsAll() {
+        List<Procedure> all = List.of(buildProcedure(1L, ProcedureStatus.REGISTRADO));
+        when(procedureRepositoryPort.findAll()).thenReturn(all);
+
+        List<ProcedureResponseDto> result = useCase.execute((RoleEnum) null);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findAll();
+    }
+
+    @Test
+    @DisplayName("execute(DECANO) - returns only PENDIENTE_DECANATO procedures")
+    void executeDecanoFiltersByDecanato() {
+        List<Procedure> decanoList = List.of(
+                buildProcedure(1L, ProcedureStatus.PENDIENTE_DECANATO),
+                buildProcedure(2L, ProcedureStatus.PENDIENTE_DECANATO)
+        );
+        when(procedureRepositoryPort.findByStatus(ProcedureStatus.PENDIENTE_DECANATO)).thenReturn(decanoList);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.DECANO);
+
+        assertEquals(2, result.size());
+        verify(procedureRepositoryPort).findByStatus(ProcedureStatus.PENDIENTE_DECANATO);
+        verifyNoMoreInteractions(procedureRepositoryPort);
+    }
+
+    @Test
+    @DisplayName("execute(COORDINADOR_GRUPO) - returns only PENDIENTE_COORDINADOR procedures")
+    void executeCoordinadorFiltersByCoordinador() {
+        List<Procedure> coordList = List.of(buildProcedure(3L, ProcedureStatus.PENDIENTE_COORDINADOR));
+        when(procedureRepositoryPort.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR)).thenReturn(coordList);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.COORDINADOR_GRUPO);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
+    }
+
+    @Test
+    @DisplayName("execute(DIRECTOR_INVESTIGACION) - returns only PENDIENTE_DIRECCION procedures")
+    void executeDirectorFiltersByDireccion() {
+        List<Procedure> dirList = List.of(
+                buildProcedure(4L, ProcedureStatus.PENDIENTE_DIRECCION),
+                buildProcedure(5L, ProcedureStatus.PENDIENTE_DIRECCION),
+                buildProcedure(6L, ProcedureStatus.PENDIENTE_DIRECCION)
+        );
+        when(procedureRepositoryPort.findByStatus(ProcedureStatus.PENDIENTE_DIRECCION)).thenReturn(dirList);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.DIRECTOR_INVESTIGACION);
+
+        assertEquals(3, result.size());
+        verify(procedureRepositoryPort).findByStatus(ProcedureStatus.PENDIENTE_DIRECCION);
+    }
+
+    @Test
+    @DisplayName("execute(ESTUDIANTE) - returns all procedures (default case)")
+    void executeEstudianteReturnsAll() {
+        List<Procedure> all = List.of(buildProcedure(1L, ProcedureStatus.REGISTRADO));
+        when(procedureRepositoryPort.findAll()).thenReturn(all);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ESTUDIANTE);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findAll();
+    }
+
+    @Test
+    @DisplayName("execute(ADMIN) - returns all procedures (default case)")
+    void executeAdminReturnsAll() {
+        List<Procedure> all = List.of(buildProcedure(1L, ProcedureStatus.FINALIZADO));
+        when(procedureRepositoryPort.findAll()).thenReturn(all);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ADMIN);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findAll();
+    }
+
+    @Test
+    @DisplayName("execute(DECANO) - returns empty when no pending decanato procedures")
+    void executeDecanoReturnsEmpty() {
+        when(procedureRepositoryPort.findByStatus(ProcedureStatus.PENDIENTE_DECANATO)).thenReturn(List.of());
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.DECANO);
+
+        assertTrue(result.isEmpty());
+    }
+}
