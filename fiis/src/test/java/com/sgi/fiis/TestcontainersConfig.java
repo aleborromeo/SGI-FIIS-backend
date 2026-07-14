@@ -12,10 +12,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *
  * Uso: hacer que la clase de test extienda esta clase.
  */
-@SuppressWarnings({"resource", "unused"})
+@SuppressWarnings("resource")
 public abstract class TestcontainersConfig {
 
-    @SuppressWarnings("resource")
     private static final PostgreSQLContainer<?> POSTGRES;
 
     static {
@@ -37,7 +36,7 @@ public abstract class TestcontainersConfig {
     }
 
     @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
+    public static void configureProperties(DynamicPropertyRegistry registry) {
         if (POSTGRES != null && POSTGRES.isRunning()) {
             // Testcontainers esta activo - sobreescribir properties
             registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);

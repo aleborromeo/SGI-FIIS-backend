@@ -50,7 +50,6 @@ class ResolutionControllerTest {
     private Resolution sampleResolution;
 
     @BeforeEach
-    @SuppressWarnings("unused")
     void setUp() {
         resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
         mockMvc = MockMvcBuilders.standaloneSetup(resolutionController)
