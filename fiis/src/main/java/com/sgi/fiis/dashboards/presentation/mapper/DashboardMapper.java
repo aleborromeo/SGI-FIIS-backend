@@ -78,6 +78,9 @@ public class DashboardMapper {
     // =========================================================================
     public DashboardTeacherResponse toTeacherResponse(DashboardTeacher model) {
         return DashboardTeacherResponse.builder()
+                .groupId(model.getGroupId())
+                .groupName(model.getGroupName())
+                .groupCode(model.getGroupCode())
                 .projectsAsLead(model.getProjectsAsLead())
                 .projectsAsMember(model.getProjectsAsMember())
                 .pendingProcedures(model.getPendingProcedures())

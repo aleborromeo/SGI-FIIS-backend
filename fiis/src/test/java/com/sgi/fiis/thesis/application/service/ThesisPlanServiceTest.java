@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -36,6 +37,8 @@ class ThesisPlanServiceTest {
     private DocumentValidationPort documentoValidation;
     @Mock
     private ResearchGroupValidationPort grupoValidation;
+    @Mock
+    private JdbcTemplate jdbcTemplate;
 
     @Mock
     private Authentication authentication;
@@ -46,7 +49,7 @@ class ThesisPlanServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ThesisPlanService(planRepository, tramiteWorkflow, documentoValidation, grupoValidation);
+        service = new ThesisPlanService(planRepository, tramiteWorkflow, documentoValidation, grupoValidation, jdbcTemplate);
         SecurityContextHolder.setContext(securityContext);
     }
 
@@ -285,6 +288,7 @@ class ThesisPlanServiceTest {
     @Test
     @DisplayName("obtenerPorId - retrieves thesis plan successfully")
     void obtenerPorIdSuccessfully() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
         ThesisPlan existingPlan = new ThesisPlan(
                 12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
                 ThesisPlanStatus.POSTULADO, null, null

@@ -108,10 +108,47 @@ public class DocumentController {
                     .replaceAll("[\\r\\n]", "_")
                     .replaceAll("[^a-zA-Z0-9._-]", "_");
 
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"")
-                    .body(resource);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(resolveContentType(downloadResult.getExtension()));
+            headers.setContentDisposition(ContentDisposition.attachment().filename(safeFilename).build());
+            if (downloadResult.getSizeBytes() != null) {
+                headers.setContentLength(downloadResult.getSizeBytes());
+            }
+
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        } catch (DocumentNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (DocumentAccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    // Endpoint para Visualización en Línea de Documentos (RF-67)
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> viewDocument(
+            @PathVariable("id") Long documentId,
+            Authentication authentication) {
+
+        logAuthenticationDetails(authentication);
+
+        try {
+            Long userId = extractUserId(authentication);
+            String role = extractRole(authentication);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            DocumentDownloadResult downloadResult = downloadDocumentUseCase.execute(documentId, userId, role);
+            InputStreamResource resource = new InputStreamResource(downloadResult.getInputStream());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(resolveContentType(downloadResult.getExtension()));
+            headers.setContentDisposition(ContentDisposition.inline().build());
+            if (downloadResult.getSizeBytes() != null) {
+                headers.setContentLength(downloadResult.getSizeBytes());
+            }
+
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
         } catch (DocumentNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (DocumentAccessDeniedException e) {
@@ -187,6 +224,16 @@ public class DocumentController {
             return role.substring(5);
         }
         return role;
+    }
+
+    private MediaType resolveContentType(String extension) {
+        if (extension == null) return MediaType.APPLICATION_OCTET_STREAM;
+        return switch (extension.toUpperCase()) {
+            case "PDF" -> MediaType.APPLICATION_PDF;
+            case "DOC" -> MediaType.parseMediaType("application/msword");
+            case "DOCX" -> MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            default -> MediaType.APPLICATION_OCTET_STREAM;
+        };
     }
 
     /**

@@ -47,6 +47,7 @@ public class LoginUseCase {
         String token = tokenProvider.generateToken(user.getInstitutionalEmail(), user.getRoleCode());
 
         return LoginResponseDto.builder()
+                .id(user.getId())
                 .token(token)
                 .type("Bearer")
                 .email(user.getInstitutionalEmail())

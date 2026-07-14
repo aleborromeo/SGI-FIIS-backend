@@ -51,7 +51,7 @@ public class DownloadDocumentUseCase {
         } catch (Exception e) {
             throw new DocumentNotFoundException("No se pudo acceder al archivo del documento.");
         }
-        return new DocumentDownloadResult(stream, document.getOriginalName());
+        return new DocumentDownloadResult(stream, document.getOriginalName(), document.getExtension(), document.getSizeBytes());
     }
 
     private boolean isProcedureApplicant(Long documentId, Long currentUserId) {

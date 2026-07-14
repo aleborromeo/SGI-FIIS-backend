@@ -19,6 +19,7 @@ import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 import com.sgi.fiis.tramites.domain.model.InvalidTransitionException;
 
 @RestControllerAdvice
@@ -103,6 +104,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidTransitionException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidTransition(InvalidTransitionException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(EvaluacionException.class)
+    public ResponseEntity<Map<String, Object>> handleEvaluacion(EvaluacionException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

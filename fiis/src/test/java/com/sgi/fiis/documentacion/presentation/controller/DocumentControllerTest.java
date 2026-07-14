@@ -191,14 +191,14 @@ class DocumentControllerTest {
                 documentId,
                 userId,
                 role
-        )).thenReturn(new DocumentDownloadResult(fakeInputStream, "tesis_descarga.pdf"));
+        )).thenReturn(new DocumentDownloadResult(fakeInputStream, "tesis_descarga.pdf", "PDF", 1024L));
 
         mockMvc.perform(
                         get("/api/documents/download/{id}", documentId)
                                 .principal(createAuth(userId, role))
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tesis_descarga.pdf\""));
     }
 
@@ -438,7 +438,7 @@ class DocumentControllerTest {
     void downloadDocument_HttpSuccess_SanitizesCrlf() throws Exception {
         ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
         when(downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"))
-                .thenReturn(new DocumentDownloadResult(stream, "file\r\nInjected.pdf"));
+                .thenReturn(new DocumentDownloadResult(stream, "file\r\nInjected.pdf", "PDF", 4L));
         mockMvc.perform(get("/api/documents/download/{id}", 1L)
                         .principal(createAuth(42L, "ESTUDIANTE")))
                 .andExpect(status().isOk())
@@ -452,7 +452,7 @@ class DocumentControllerTest {
     void downloadDocument_HttpSuccess_SanitizesSpecialChars() throws Exception {
         ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
         when(downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"))
-                .thenReturn(new DocumentDownloadResult(stream, "archivo (copia).pdf"));
+                .thenReturn(new DocumentDownloadResult(stream, "archivo (copia).pdf", "PDF", 4L));
         mockMvc.perform(get("/api/documents/download/{id}", 1L)
                         .principal(createAuth(42L, "ESTUDIANTE")))
                 .andExpect(status().isOk())

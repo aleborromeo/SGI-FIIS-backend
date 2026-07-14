@@ -17,6 +17,7 @@ import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
@@ -120,11 +121,19 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
             call = saveCallPort.findById(request.getCallId()).orElse(null);
         }
 
+        String title = request.getTitle() != null ? request.getTitle() : "Borrador sin título";
+        String summary = request.getSummary() != null ? request.getSummary() : "";
+        String generalObjective = request.getGeneralObjective() != null ? request.getGeneralObjective() : "";
+        String executionPlace = request.getExecutionPlace() != null ? request.getExecutionPlace() : "";
+        BigDecimal budget = request.getBudget() != null ? request.getBudget() : BigDecimal.ZERO;
+        LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
+        LocalDate endDate = request.getEndDate() != null ? request.getEndDate() : LocalDate.now().plusMonths(6);
+
         Project project = new Project(
-                null, tempCode, request.getTitle(), request.getSummary(),
-                request.getGeneralObjective(), request.getResearchLineId(), lineName,
-                request.getBudget(), request.getStartDate(), request.getEndDate(),
-                request.getExecutionPlace(), request.getResponsibleId().longValue(),
+                null, tempCode, title, summary,
+                generalObjective, request.getResearchLineId(), lineName,
+                budget, startDate, endDate,
+                executionPlace, request.getResponsibleId().longValue(),
                 request.getResearchGroupId(), groupCode,
                 call != null ? call.getId() : null,
                 request.getDocumentId(), ProjectStatus.DRAFT);

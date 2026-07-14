@@ -40,6 +40,7 @@ public class OAuthLoginUseCase {
         );
 
         return LoginResponseDto.builder()
+                .id(user.getId())
                 .token(token)
                 .type("Bearer")
                 .email(user.getInstitutionalEmail())

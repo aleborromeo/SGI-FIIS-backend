@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/evaluaciones")
+@RequestMapping("/api/v1/evaluaciones")
 @Tag(name = "Evaluaciones", description = "Endpoints para la gestión de evaluaciones de proyectos y documentos")
 @SecurityRequirement(name = "bearerAuth")
 public class EvaluacionController {

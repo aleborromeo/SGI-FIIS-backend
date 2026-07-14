@@ -58,7 +58,13 @@ public class SaveCallAdapter implements SaveCallPort {
         } else if (status == CallStatus.FINISHED) {
             dbStatus = STATUS_FINALIZADA;
         }
-        return jpaRepository.findByStatus(dbStatus).stream()
+        List<ResearchCallEntity> entities;
+        if (status == CallStatus.OPEN) {
+            entities = jpaRepository.findByStatusAndEndDateGreaterThanEqual(dbStatus, java.time.LocalDate.now());
+        } else {
+            entities = jpaRepository.findByStatus(dbStatus);
+        }
+        return entities.stream()
                 .map(this::toDomain)
                 .toList();
     }
@@ -129,6 +135,9 @@ public class SaveCallAdapter implements SaveCallPort {
             domainStatus = CallStatus.CLOSED;
         } else if (STATUS_FINALIZADA.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = CallStatus.FINISHED;
+        } else if (CallStatus.OPEN.name().equals(domainStatus.name()) && entity.getEndDate() != null
+                && entity.getEndDate().isBefore(java.time.LocalDate.now())) {
+            domainStatus = CallStatus.CLOSED;
         }
 
         List<Integer> lineIds = null;
