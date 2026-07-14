@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,36 +82,27 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private void validateRequiredFields(CreateProjectRequest request) {
-        if (request.getTitle() == null || request.getTitle().isBlank()) {
-            throw new BusinessRuleValidationException("El título es obligatorio.");
+        List<String> errors = new ArrayList<>();
+        addIfNullBlank(errors, "El título es obligatorio.", request.getTitle());
+        addIfNullBlank(errors, "El resumen es obligatorio.", request.getSummary());
+        addIfNullBlank(errors, "El objetivo general es obligatorio.", request.getGeneralObjective());
+        addIfNullBlank(errors, "El lugar de ejecución es obligatorio.", request.getExecutionPlace());
+        addIfNull(errors, "La línea de investigación es obligatoria.", request.getResearchLineId());
+        addIfNull(errors, "El presupuesto es obligatorio.", request.getBudget());
+        addIfNull(errors, "La fecha de inicio es obligatoria.", request.getStartDate());
+        addIfNull(errors, "La fecha de fin es obligatoria.", request.getEndDate());
+        addIfNull(errors, "El grupo de investigación es obligatorio.", request.getResearchGroupId());
+        if (!errors.isEmpty()) {
+            throw new BusinessRuleValidationException(String.join("; ", errors));
         }
-        if (request.getSummary() == null || request.getSummary().isBlank()) {
-            throw new BusinessRuleValidationException("El resumen es obligatorio.");
-        }
-        if (request.getGeneralObjective() == null || request.getGeneralObjective().isBlank()) {
-            throw new BusinessRuleValidationException("El objetivo general es obligatorio.");
-        }
-        if (request.getResearchLineId() == null) {
-            throw new BusinessRuleValidationException("La línea de investigación es obligatoria.");
-        }
-        if (request.getBudget() == null) {
-            throw new BusinessRuleValidationException("El presupuesto es obligatorio.");
-        }
-        if (request.getStartDate() == null) {
-            throw new BusinessRuleValidationException("La fecha de inicio es obligatoria.");
-        }
-        if (request.getEndDate() == null) {
-            throw new BusinessRuleValidationException("La fecha de fin es obligatoria.");
-        }
-        if (request.getExecutionPlace() == null || request.getExecutionPlace().isBlank()) {
-            throw new BusinessRuleValidationException("El lugar de ejecución es obligatorio.");
-        }
-        if (request.getResearchGroupId() == null) {
-            throw new BusinessRuleValidationException("El grupo de investigación es obligatorio.");
-        }
-        if (request.getCallId() == null) {
-            throw new BusinessRuleValidationException("La convocatoria es obligatoria.");
-        }
+    }
+
+    private void addIfNullBlank(List<String> errors, String message, String value) {
+        if (value == null || value.isBlank()) errors.add(message);
+    }
+
+    private void addIfNull(List<String> errors, String message, Object value) {
+        if (value == null) errors.add(message);
     }
 
     private ProjectResponse createDraftProject(CreateProjectRequest request, String groupCode, String lineName) {

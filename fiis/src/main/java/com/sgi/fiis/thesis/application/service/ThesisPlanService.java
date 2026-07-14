@@ -341,52 +341,53 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     }
 
     private void validarAccesoPlan(ThesisPlan plan) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
-            throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
-        }
+        CustomUserDetails userDetails = getAuthenticatedUser();
 
-        boolean esEstudiante = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
-        boolean esCoordinador = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
-        boolean esDirector = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(ROLE_DIRECTOR_INVESTIGACION));
-        boolean esDecano = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(ROLE_DECANO));
-
-        if (esEstudiante) {
+        if (hasRole(userDetails, ROLE_ESTUDIANTE)) {
             if (!plan.getIdEstudiante().equals(userDetails.getId())) {
                 throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otros estudiantes");
             }
             return;
         }
-
-        if (esCoordinador) {
-            if (grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), plan.getIdGrupo())) {
-                return;
-            }
-            String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(plan.getIdPlanTesis());
-            if (estadoTramite != null && "PENDIENTE_COORDINADOR".equals(estadoTramite)) {
-                return;
-            }
+        if (hasRole(userDetails, ROLE_COORDINADOR_GRUPO) && tieneAccesoCoordinador(userDetails, plan)) {
+            return;
         }
-
-        if (esDirector) {
-            String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(plan.getIdPlanTesis());
-            if (estadoTramite != null && "PENDIENTE_DIRECCION".equals(estadoTramite)) {
-                return;
-            }
+        if (hasRole(userDetails, ROLE_DIRECTOR_INVESTIGACION) && tieneAccesoPorEstado(plan, ROLE_DIRECTOR_INVESTIGACION)) {
+            return;
         }
-
-        if (esDecano) {
-            String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(plan.getIdPlanTesis());
-            if (estadoTramite != null && "PENDIENTE_DECANATO".equals(estadoTramite)) {
-                return;
-            }
+        if (hasRole(userDetails, ROLE_DECANO) && tieneAccesoPorEstado(plan, ROLE_DECANO)) {
+            return;
         }
-
         throw new BusinessRuleViolationException("No tiene permisos para acceder a este plan de tesis");
+    }
+
+    private CustomUserDetails getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
+        }
+        return userDetails;
+    }
+
+    private boolean hasRole(CustomUserDetails user, String role) {
+        return user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
+    }
+
+    private boolean tieneAccesoCoordinador(CustomUserDetails userDetails, ThesisPlan plan) {
+        if (grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), plan.getIdGrupo())) {
+            return true;
+        }
+        String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(plan.getIdPlanTesis());
+        return estadoTramite != null && "PENDIENTE_COORDINADOR".equals(estadoTramite);
+    }
+
+    private boolean tieneAccesoPorEstado(ThesisPlan plan, String rol) {
+        String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(plan.getIdPlanTesis());
+        return switch (rol) {
+            case ROLE_DIRECTOR_INVESTIGACION -> estadoTramite != null && "PENDIENTE_DIRECCION".equals(estadoTramite);
+            case ROLE_DECANO -> estadoTramite != null && "PENDIENTE_DECANATO".equals(estadoTramite);
+            default -> false;
+        };
     }
 
     private void validarGrupoLineaYDocumento(Integer idGrupo, Integer idLinea, Integer idDocumento, Long idUsuario) {
