@@ -4,6 +4,7 @@ import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.domain.utils.PasswordGenerator;
 import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.RoleRepositoryPort;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
@@ -21,8 +22,6 @@ import java.time.LocalDateTime;
 @Service
 public class CreateUserUseCase {
 
-    private static final java.security.SecureRandom SECURE_RANDOM = new java.security.SecureRandom();
-
     private final UserRepositoryPort userRepository;
     private final RoleRepositoryPort roleRepository;
     private final PasswordEncoderPort passwordEncoder;
@@ -38,43 +37,18 @@ public class CreateUserUseCase {
         this.emailSender = emailSender;
     }
 
-    private String generateSecurePassword() {
-        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String lower = "abcdefghijklmnopqrstuvwxyz";
-        String digits = "0123456789";
-        String symbols = "!@#$%^&*()-_=+[]{}|;:,.<>?";
-        String all = upper + lower + digits + symbols;
-        
-        StringBuilder sb = new StringBuilder();
-        
-        // Ensure at least one of each required type
-        sb.append(upper.charAt(SECURE_RANDOM.nextInt(upper.length())));
-        sb.append(lower.charAt(SECURE_RANDOM.nextInt(lower.length())));
-        sb.append(digits.charAt(SECURE_RANDOM.nextInt(digits.length())));
-        sb.append(symbols.charAt(SECURE_RANDOM.nextInt(symbols.length())));
-        
-        // Fill rest up to 10 characters
-        for (int i = 0; i < 6; i++) {
-            sb.append(all.charAt(SECURE_RANDOM.nextInt(all.length())));
-        }
-        
-        // Shuffle the characters
-        char[] chars = sb.toString().toCharArray();
-        for (int i = chars.length - 1; i > 0; i--) {
-            int j = SECURE_RANDOM.nextInt(i + 1);
-            char temp = chars[i];
-            chars[i] = chars[j];
-            chars[j] = temp;
-        }
-        
-        return new String(chars);
-    }
-
     @Transactional
     public User execute(User user) {
         // Validate that the role exists
-        if (roleRepository.findByCode(user.getRoleCode()).isEmpty()) {
-            throw new ResourceNotFoundException("Rol", "codigo", user.getRoleCode());
+        if (user.getRoleCode() == null) {
+            throw new BusinessException("El código de rol es obligatorio");
+        }
+        var role = roleRepository.findByCode(user.getRoleCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Rol", "código", user.getRoleCode()));
+
+        // Validate that DNI is exactly 8 digits
+        if (user.getDni() == null || !user.getDni().matches("\\d{8}")) {
+            throw new BusinessException("El DNI debe tener exactamente 8 dígitos numéricos");
         }
 
         // Validate DNI uniqueness (RNF-38)
@@ -96,7 +70,7 @@ public class CreateUserUseCase {
         }
 
         // Generate secure temporary password
-        String rawPassword = generateSecurePassword();
+        String rawPassword = PasswordGenerator.generateSecurePassword();
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setTemporaryPassword(rawPassword);
         user.setActive(true);
