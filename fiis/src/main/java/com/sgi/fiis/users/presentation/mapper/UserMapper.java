@@ -30,6 +30,7 @@ public class UserMapper {
                 .lastNames(domain.getLastNames())
                 .institutionalEmail(domain.getInstitutionalEmail())
                 .phone(domain.getPhone())
+                .temporaryPassword(domain.getTemporaryPassword())
                 .active(domain.isActive())
                 .mustChangePassword(domain.isMustChangePassword())
                 .roleCode(domain.getRoleCode())

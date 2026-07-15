@@ -41,7 +41,7 @@ public class MailMockConfig {
 
             @Override
             public MimeMessage createMimeMessage() {
-                return null;
+                return new MimeMessage(jakarta.mail.Session.getInstance(new java.util.Properties()));
             }
 
             @Override

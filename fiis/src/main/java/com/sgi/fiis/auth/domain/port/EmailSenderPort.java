@@ -19,4 +19,12 @@ public interface EmailSenderPort {
      * @param code código de restablecimiento
      */
     void sendPasswordResetCode(String to, String code);
+
+    /**
+     * Envía las credenciales de acceso (usuario y contraseña generada) a un nuevo usuario.
+     *
+     * @param to          correo institucional destinatario
+     * @param rawPassword contraseña temporal generada
+     */
+    void sendNewUserCredentials(String to, String rawPassword);
 }

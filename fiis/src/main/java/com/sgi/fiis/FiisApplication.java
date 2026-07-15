@@ -7,7 +7,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.TimeZone;
 
+import org.springframework.scheduling.annotation.EnableAsync;
+
 @SpringBootApplication
+@EnableAsync
 @EnableScheduling
 public class FiisApplication {
 
