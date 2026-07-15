@@ -74,5 +74,24 @@ class ResetPasswordUseCaseTest {
         verifyNoInteractions(emailSender);
         verifyNoMoreInteractions(userRepository);
     }
+
+    @Test
+    @DisplayName("Should successfully reset password even if email sender fails")
+    void testResetPasswordMailSenderException() {
+        User user = User.builder()
+                .id(1L)
+                .dni("87654321")
+                .institutionalEmail("test.user@unas.edu.pe")
+                .passwordHash("old-hash")
+                .mustChangePassword(false)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(anyString())).thenReturn("new-secure-hash");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new RuntimeException("Mail server down")).when(emailSender).sendNewUserCredentials(anyString(), anyString());
+
+        assertDoesNotThrow(() -> resetPasswordUseCase.execute(1L));
+    }
 }
 
