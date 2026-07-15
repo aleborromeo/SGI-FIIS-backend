@@ -14,6 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -72,5 +73,40 @@ class EmailSenderAdapterTest {
         
         Object content = mimeMessage.getContent();
         assertTrue(content instanceof jakarta.mail.internet.MimeMultipart);
+    }
+
+    @Test
+    @DisplayName("Should successfully send new user credentials email")
+    void sendNewUserCredentials_shouldSendCorrectMail() throws Exception {
+        ReflectionTestUtils.setField(emailSenderAdapter, "fromEmail", "test-sender@unas.edu.pe");
+
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+        String to = "newuser@unas.edu.pe";
+        String password = "temp-password";
+
+        emailSenderAdapter.sendNewUserCredentials(to, password);
+
+        verify(mailSender).send(mimeMessage);
+
+        assertEquals("Bienvenido a SGI FIIS - Tus Credenciales de Acceso", mimeMessage.getSubject());
+        assertEquals("test-sender@unas.edu.pe", mimeMessage.getFrom()[0].toString());
+        assertEquals("newuser@unas.edu.pe", mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
+        
+        Object content = mimeMessage.getContent();
+        assertTrue(content instanceof jakarta.mail.internet.MimeMultipart);
+    }
+
+    @Test
+    @DisplayName("Should log error when mailSender throws exception")
+    void sendHtmlEmail_shouldCatchException() throws Exception {
+        ReflectionTestUtils.setField(emailSenderAdapter, "fromEmail", "test-sender@unas.edu.pe");
+
+        when(mailSender.createMimeMessage()).thenThrow(new RuntimeException("Mail connection failed"));
+
+        assertDoesNotThrow(() -> 
+            emailSenderAdapter.sendVerificationCode("user@unas.edu.pe", "123456")
+        );
     }
 }
