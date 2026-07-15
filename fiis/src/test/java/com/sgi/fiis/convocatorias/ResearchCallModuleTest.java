@@ -41,6 +41,7 @@ class ResearchCallModuleTest {
     private CallInteractor callInteractor;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setup() {
         saveCallPort = mock(SaveCallPort.class);
         createCallInteractor = new CreateCallInteractor(saveCallPort);
@@ -84,15 +85,17 @@ class ResearchCallModuleTest {
         // Closed call - single invocation in lambda
         ResearchCall closedCall = new ResearchCall(2, "Call 2", "Description", FIXED_PAST_5, FIXED_FUTURE_5D,
                 CallStatus.CLOSED, null, null);
-        assertThrows(BusinessRuleValidationException.class,
+        var ex1 = assertThrows(BusinessRuleValidationException.class,
                 () -> closedCall.validateCanSubmitProject(FIXED_TODAY));
+        assertNotNull(ex1);
 
 
         // Expired call - single invocation in lambda
         ResearchCall expiredCall = new ResearchCall(3, "Call 3", "Description", FIXED_PAST_10, FIXED_PAST_2D,
                 CallStatus.OPEN, null, null);
-        assertThrows(BusinessRuleValidationException.class,
+        var ex2 = assertThrows(BusinessRuleValidationException.class,
                 () -> expiredCall.validateCanSubmitProject(FIXED_TODAY));
+        assertNotNull(ex2);
 
     }
 
@@ -126,8 +129,8 @@ class ResearchCallModuleTest {
 
     @Test
     void shouldThrowExceptionForInvalidStatus() {
-        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.getCalls("INVALID_STATUS"));
-
+        var ex = assertThrows(BusinessRuleValidationException.class, () -> callInteractor.getCalls("INVALID_STATUS"));
+        assertNotNull(ex);
     }
 
     @Test
@@ -144,8 +147,8 @@ class ResearchCallModuleTest {
     @Test
     void shouldThrowExceptionWhenGetCallByIdNotFound() {
         when(saveCallPort.findById(99)).thenReturn(java.util.Optional.empty());
-        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.getCallById(99));
-
+        var ex = assertThrows(BusinessRuleValidationException.class, () -> callInteractor.getCallById(99));
+        assertNotNull(ex);
     }
 
     @Test
@@ -168,15 +171,15 @@ class ResearchCallModuleTest {
                 null, null);
         when(saveCallPort.findById(1)).thenReturn(java.util.Optional.of(call));
 
-        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(1, "INVALID_STATUS"));
-
+        var ex = assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(1, "INVALID_STATUS"));
+        assertNotNull(ex);
     }
 
     @Test
     void shouldThrowExceptionWhenUpdateStatusNotFound() {
         when(saveCallPort.findById(99)).thenReturn(java.util.Optional.empty());
-        assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(99, "CERRADA"));
-
+        var ex = assertThrows(BusinessRuleValidationException.class, () -> callInteractor.updateStatus(99, "CERRADA"));
+        assertNotNull(ex);
     }
 
     @Test
@@ -204,7 +207,8 @@ class ResearchCallModuleTest {
 
     @Test
     void shouldThrowWhenEndDateBeforeStartDate() {
-        assertThrows(BusinessRuleValidationException.class, () ->
+        var ex = assertThrows(BusinessRuleValidationException.class, () ->
                 new ResearchCall(1, "Bad", "Desc", FIXED_FUTURE_2M, FIXED_PAST_5, CallStatus.OPEN, null, null));
+        assertNotNull(ex);
     }
 }

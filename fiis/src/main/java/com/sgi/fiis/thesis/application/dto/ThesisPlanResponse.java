@@ -18,5 +18,11 @@ public record ThesisPlanResponse(
         LocalDateTime fechaActualizacion,
         Integer idTramite,
         ThesisProcedureStatus estadoTramite,
-        ReviewerRole revisorActual
+        ReviewerRole revisorActual,
+        String nombreEstudiante,
+        String apellidoEstudiante,
+        String nombreGrupo,
+        String codigoGrupo,
+        String nombreLinea,
+        String nombreDocumento
 ) {}

@@ -32,7 +32,7 @@ class DocumentUseCaseTest {
     private DownloadDocumentUseCase downloadDocumentUseCase;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         this.documentRepositoryPort = mock(DocumentRepositoryPort.class);
         this.fileStoragePort = mock(FileStoragePort.class);
         this.resolutionRepositoryPort = mock(ResolutionRepositoryPort.class);
@@ -150,8 +150,9 @@ class DocumentUseCaseTest {
         when(documentRepositoryPort.findById(docId)).thenReturn(Optional.of(stubDoc));
 
         // Act & Assert
-        assertThrows(DocumentAccessDeniedException.class,
+        Exception exception = assertThrows(DocumentAccessDeniedException.class,
                 () -> downloadDocumentUseCase.execute(docId, foreignUserId, foreignUserRole));
+        assertNotNull(exception);
 
         verify(fileStoragePort, never()).load(anyString());
     }

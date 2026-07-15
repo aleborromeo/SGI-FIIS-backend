@@ -21,5 +21,9 @@ public class DashboardTeacherResponse {
     private int projectsInExecution;
     private int completedProjects;
 
+    private Integer groupId;
+    private String groupName;
+    private String groupCode;
+
     private List<AlertItemResponse> alerts;
 }

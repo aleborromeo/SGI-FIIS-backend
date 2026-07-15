@@ -2,6 +2,7 @@ package com.sgi.fiis.tramites.domain.port;
 
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.Procedure;
+import com.sgi.fiis.users.domain.model.RoleEnum;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,10 @@ public interface ProcedureRepositoryPort {
     List<Procedure> findByApplicantId(Long idSolicitante);
 
     List<Procedure> findByStatus(ProcedureStatus estado);
+
+    List<Procedure> findByReviewerRole(RoleEnum rolRevisor);
+
+    List<Procedure> findByStatusAndReviewerRole(ProcedureStatus estado, RoleEnum rolRevisor);
 
     boolean existsByCode(String codigoTramite);
 }

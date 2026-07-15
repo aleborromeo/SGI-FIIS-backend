@@ -39,6 +39,7 @@ public class ProjectController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
     @Operation(summary = "Postulate a new research project or save as draft")
     @ApiResponse(responseCode = "200", description = "Project successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid project request or business rule validation error")
@@ -63,6 +64,7 @@ public class ProjectController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List research projects with optional filters")
     @ApiResponse(responseCode = "200", description = "List of projects retrieved successfully")
     public ResponseEntity<List<ProjectResponse>> getProjects(
@@ -105,6 +107,7 @@ public class ProjectController {
     }
 
     @GetMapping("/drafts")
+    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
     @Operation(summary = "List draft projects for the authenticated user")
     @ApiResponse(responseCode = "200", description = "List of draft projects")
     public ResponseEntity<List<ProjectResponse>> getMyDrafts(
@@ -121,6 +124,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get project details by ID")
     @ApiResponse(responseCode = "200", description = "Details retrieved successfully")
     @ApiResponse(responseCode = "403", description = "Forbidden - not your project")
@@ -159,6 +163,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
     @Operation(summary = "Delete a draft project")
     @ApiResponse(responseCode = "200", description = "Draft deleted successfully")
     @ApiResponse(responseCode = "403", description = "Forbidden")

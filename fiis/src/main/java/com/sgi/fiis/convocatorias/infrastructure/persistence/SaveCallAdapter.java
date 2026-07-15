@@ -12,6 +12,8 @@ import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,15 +29,18 @@ public class SaveCallAdapter implements SaveCallPort {
     private final DocumentJpaRepository documentRepository;
     private final ResearchLineJpaRepository lineRepository;
     private final SpringDataUserRepository userRepository;
+    private final Clock clock;
 
     public SaveCallAdapter(ResearchCallJpaRepository jpaRepository,
                            DocumentJpaRepository documentRepository,
                            ResearchLineJpaRepository lineRepository,
-                           SpringDataUserRepository userRepository) {
+                           SpringDataUserRepository userRepository,
+                           Clock clock) {
         this.jpaRepository = jpaRepository;
         this.documentRepository = documentRepository;
         this.lineRepository = lineRepository;
         this.userRepository = userRepository;
+        this.clock = clock;
     }
 
     @Override
@@ -58,7 +63,13 @@ public class SaveCallAdapter implements SaveCallPort {
         } else if (status == CallStatus.FINISHED) {
             dbStatus = STATUS_FINALIZADA;
         }
-        return jpaRepository.findByStatus(dbStatus).stream()
+        List<ResearchCallEntity> entities;
+        if (status == CallStatus.OPEN) {
+            entities = jpaRepository.findByStatusAndEndDateGreaterThanEqual(dbStatus, LocalDate.now(clock));
+        } else {
+            entities = jpaRepository.findByStatus(dbStatus);
+        }
+        return entities.stream()
                 .map(this::toDomain)
                 .toList();
     }
@@ -129,6 +140,9 @@ public class SaveCallAdapter implements SaveCallPort {
             domainStatus = CallStatus.CLOSED;
         } else if (STATUS_FINALIZADA.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = CallStatus.FINISHED;
+        } else if (CallStatus.OPEN.name().equals(domainStatus.name()) && entity.getEndDate() != null
+                && entity.getEndDate().isBefore(LocalDate.now(clock))) {
+            domainStatus = CallStatus.CLOSED;
         }
 
         List<Integer> lineIds = null;

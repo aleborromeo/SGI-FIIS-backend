@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
@@ -39,7 +40,7 @@ class SaveCallAdapterTest {
         documentRepository = mock(DocumentJpaRepository.class);
         lineRepository = mock(ResearchLineJpaRepository.class);
         userRepository = mock(SpringDataUserRepository.class);
-        adapter = new SaveCallAdapter(jpaRepository, documentRepository, lineRepository, userRepository);
+        adapter = new SaveCallAdapter(jpaRepository, documentRepository, lineRepository, userRepository, Clock.systemDefaultZone());
     }
 
     private ResearchCallEntity createEntity(Integer id, String status) {
@@ -162,7 +163,8 @@ class SaveCallAdapterTest {
     @Test
     @DisplayName("findByStatus: OPEN returns ABIERTA")
     void findByStatus_open() {
-        when(jpaRepository.findByStatus("ABIERTA")).thenReturn(List.of(createEntity(1, "ABIERTA")));
+        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", java.time.LocalDate.now()))
+                .thenReturn(List.of(createEntity(1, "ABIERTA")));
 
         List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
 
@@ -380,6 +382,22 @@ class SaveCallAdapterTest {
         adapter.save(domain);
 
         verify(jpaRepository).save(argThat(e -> "ABIERTA".equals(e.getStatus())));
+    }
+
+    @Test
+    @DisplayName("toDomain: ABIERTA with past endDate maps to CLOSED")
+    void toDomain_abiertaWithPastEndDateMapsToClosed() {
+        ResearchCallEntity entity = createEntity(1, "ABIERTA");
+        entity.setStartDate(LocalDate.of(2025, Month.JANUARY, 1));
+        entity.setEndDate(LocalDate.of(2025, Month.JUNE, 1));
+
+        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", LocalDate.now()))
+                .thenReturn(List.of(entity));
+
+        List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
+
+        assertEquals(1, result.size());
+        assertEquals(CallStatus.CLOSED, result.get(0).getStatus());
     }
 
     @Test

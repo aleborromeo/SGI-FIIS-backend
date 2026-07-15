@@ -3,7 +3,6 @@ package com.sgi.fiis.documentacion.application.usecase;
 import com.sgi.fiis.documentacion.application.dto.DocumentResponseDto;
 import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -47,6 +47,7 @@ public class FileController {
     private final GroupMembershipJpaRepository membershipRepository;
     private final String uploadDir;
 
+    @Deprecated(since = "2.0.0", forRemoval = true)
     public FileController(DocumentJpaRepository documentRepository,
                           ProjectJpaRepository projectRepository,
                           GroupMembershipJpaRepository membershipRepository,
@@ -67,6 +68,7 @@ public class FileController {
     @Operation(summary = "Upload proposal document", description = "Only allows PDF, DOC, and DOCX files up to 10 MB.")
     @ApiResponse(responseCode = "200", description = "File successfully uploaded")
     @ApiResponse(responseCode = "400", description = "Invalid file extension or size exceeds 10 MB")
+    @Deprecated(since = "2.0.0", forRemoval = true)
     public ResponseEntity<Map<String, Object>> uploadFile(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
@@ -135,6 +137,7 @@ public class FileController {
     @ApiResponse(responseCode = "200", description = "File downloaded successfully")
     @ApiResponse(responseCode = "403", description = "Forbidden - Unauthorized to download this file")
     @ApiResponse(responseCode = "404", description = "File not found")
+    @Deprecated(since = "2.0.0", forRemoval = true)
     public ResponseEntity<Resource> downloadFile(
             @PathVariable Integer id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {

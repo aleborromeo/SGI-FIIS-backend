@@ -63,6 +63,7 @@ public class ResearchCallController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List research calls", description = "Retrieves all research calls, optionally filtered by status.")
     @ApiResponse(responseCode = "200", description = "List of research calls retrieved successfully")
     public ResponseEntity<List<CallResponse>> getCalls(
@@ -72,6 +73,7 @@ public class ResearchCallController {
     }
 
     @GetMapping("/vigent")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get open/vigent research calls", description = "Retrieves all research calls with OPEN status.")
     @ApiResponse(responseCode = "200", description = "List of vigent calls retrieved successfully")
     public ResponseEntity<List<CallResponse>> getVigentCalls() {
@@ -80,6 +82,7 @@ public class ResearchCallController {
     }
 
     @GetMapping("/prerequisitos")
+    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
     @Operation(summary = "Check user prerequisites", description = "Checks if the authenticated user meets prerequisites for project submission.")
     @ApiResponse(responseCode = "200", description = "Prerequisites check result")
     public ResponseEntity<PrerequisitosResponse> checkPrerequisitos(
@@ -98,6 +101,7 @@ public class ResearchCallController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get research call by ID", description = "Retrieves a single research call by its ID.")
     @ApiResponse(responseCode = "200", description = "Research call found")
     @ApiResponse(responseCode = "404", description = "Research call not found")

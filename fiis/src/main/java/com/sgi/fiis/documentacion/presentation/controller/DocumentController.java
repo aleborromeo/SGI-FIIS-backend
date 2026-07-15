@@ -30,6 +30,9 @@ public class DocumentController {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentController.class);
 
+    private static final String MIME_MSWORD = "application/msword";
+    private static final String MIME_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
     private final UploadDocumentUseCase uploadDocumentUseCase;
     private final DownloadDocumentUseCase downloadDocumentUseCase;
     private final DeactivateDocumentUseCase deactivateDocumentUseCase;
@@ -59,8 +62,8 @@ public class DocumentController {
 
         String contentType = file.getContentType();
         if (contentType == null || !(contentType.equalsIgnoreCase("application/pdf")
-                || contentType.equalsIgnoreCase("application/msword")
-                || contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+                || contentType.equalsIgnoreCase(MIME_MSWORD)
+                || contentType.equalsIgnoreCase(MIME_DOCX))) {
             return ResponseEntity.badRequest().header("X-Error-Cause", "Tipo de archivo (MIME) no permitido. Solo se admite PDF, DOC o DOCX.").build();
         }
 
@@ -91,7 +94,18 @@ public class DocumentController {
     public ResponseEntity<Resource> downloadDocument(
             @PathVariable("id") Long documentId,
             Authentication authentication) {
+        return serveDocument(documentId, authentication, true);
+    }
 
+    // Endpoint para Visualización en Línea de Documentos (RF-67)
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> viewDocument(
+            @PathVariable("id") Long documentId,
+            Authentication authentication) {
+        return serveDocument(documentId, authentication, false);
+    }
+
+    private ResponseEntity<Resource> serveDocument(Long documentId, Authentication authentication, boolean asAttachment) {
         logAuthenticationDetails(authentication);
 
         try {
@@ -104,19 +118,26 @@ public class DocumentController {
             DocumentDownloadResult downloadResult = downloadDocumentUseCase.execute(documentId, userId, role);
             InputStreamResource resource = new InputStreamResource(downloadResult.getInputStream());
 
-            String safeFilename = downloadResult.getOriginalName()
-                    .replaceAll("[\\r\\n]", "_")
-                    .replaceAll("[^a-zA-Z0-9._-]", "_");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(resolveContentType(downloadResult.getExtension()));
+            headers.setContentDisposition(
+                    asAttachment
+                            ? ContentDisposition.attachment().filename(sanitizeFilename(downloadResult.getOriginalName())).build()
+                            : ContentDisposition.inline().build());
+            if (downloadResult.getSizeBytes() != null) {
+                headers.setContentLength(downloadResult.getSizeBytes());
+            }
 
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"")
-                    .body(resource);
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
         } catch (DocumentNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (DocumentAccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+    }
+
+    private String sanitizeFilename(String filename) {
+        return filename.replaceAll("[\\r\\n]", "_").replaceAll("[^a-zA-Z0-9._-]", "_");
     }
 
     // Endpoint para listar todos los documentos activos (M3)
@@ -189,6 +210,16 @@ public class DocumentController {
         return role;
     }
 
+    private MediaType resolveContentType(String extension) {
+        if (extension == null) return MediaType.APPLICATION_OCTET_STREAM;
+        return switch (extension.toUpperCase()) {
+            case "PDF" -> MediaType.APPLICATION_PDF;
+            case "DOC" -> MediaType.parseMediaType(MIME_MSWORD);
+            case "DOCX" -> MediaType.parseMediaType(MIME_DOCX);
+            default -> MediaType.APPLICATION_OCTET_STREAM;
+        };
+    }
+
     /**
      * Valida los magic bytes del archivo para confirmar que el contenido real
      * coincide con el Content-Type declarado. Previene spoofing de MIME type.
@@ -207,9 +238,9 @@ public class DocumentController {
             if (contentType.equalsIgnoreCase("application/pdf")) {
                 return header[0] == (byte) '%' && header[1] == (byte) 'P' && header[2] == (byte) 'D' && header[3] == (byte) 'F';
             }
-            if (contentType.equalsIgnoreCase("application/msword"))
+            if (contentType.equalsIgnoreCase(MIME_MSWORD))
                 return header[0] == (byte) 0xD0 && header[1] == (byte) 0xCF;
-            if (contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+            if (contentType.equalsIgnoreCase(MIME_DOCX))
                 return header[0] == (byte) 'P' && header[1] == (byte) 'K';
             return false;
         } catch (IOException e) {

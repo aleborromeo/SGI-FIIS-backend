@@ -82,6 +82,7 @@ public class VerifyRegistrationUseCase {
         String token = tokenProvider.generateToken(saved.getInstitutionalEmail(), saved.getRoleCode());
 
         return LoginResponseDto.builder()
+                .id(saved.getId())
                 .token(token)
                 .type("Bearer")
                 .email(saved.getInstitutionalEmail())

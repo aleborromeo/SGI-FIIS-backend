@@ -17,30 +17,31 @@ import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class CreateProjectInteractor implements CreateProjectUseCase {
 
+    // Trigger rebuild to resolve compilation in JDT LS
     private static final String PROJECT_NOT_FOUND = "proyectos.error.project-not-found";
 
     private final SaveProjectPort saveProjectPort;
     private final SaveCallPort saveCallPort;
     private final CreateProcedurePort createProcedurePort;
-    private Clock clock = Clock.systemDefaultZone();
+    private final Clock clock;
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
             SaveCallPort saveCallPort,
-            CreateProcedurePort createProcedurePort) {
+            CreateProcedurePort createProcedurePort,
+            Clock clock) {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
-    }
-
-    public void setClock(Clock clock) {
         this.clock = clock;
     }
 
@@ -48,6 +49,9 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     @Transactional
     @Auditable(action = "CREATE_PROJECT")
     public ProjectResponse execute(CreateProjectRequest request) {
+        if (!request.isDraft()) {
+            validateRequiredFields(request);
+        }
         validateGroupAndLine(request);
 
         String groupCode = saveProjectPort.getGroupCode(request.getResearchGroupId())
@@ -62,16 +66,41 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private void validateGroupAndLine(CreateProjectRequest request) {
-        if (!saveProjectPort.isGroupActive(request.getResearchGroupId())) {
+        if (request.getResearchGroupId() != null && !saveProjectPort.isGroupActive(request.getResearchGroupId())) {
             throw new BusinessRuleValidationException("proyectos.error.group-not-active");
         }
-        if (!saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
+        if (request.getResponsibleId() != null && request.getResearchGroupId() != null
+                && !saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
                 request.getResearchGroupId())) {
             throw new BusinessRuleValidationException("proyectos.error.responsible-not-member");
         }
-        if (!saveProjectPort.isLineActive(request.getResearchLineId())) {
+        if (request.getResearchLineId() != null && !saveProjectPort.isLineActive(request.getResearchLineId())) {
             throw new BusinessRuleValidationException("proyectos.error.line-not-active");
         }
+    }
+
+    private void validateRequiredFields(CreateProjectRequest request) {
+        List<String> errors = new ArrayList<>();
+        addIfNullBlank(errors, "El título es obligatorio.", request.getTitle());
+        addIfNullBlank(errors, "El resumen es obligatorio.", request.getSummary());
+        addIfNullBlank(errors, "El objetivo general es obligatorio.", request.getGeneralObjective());
+        addIfNullBlank(errors, "El lugar de ejecución es obligatorio.", request.getExecutionPlace());
+        addIfNull(errors, "La línea de investigación es obligatoria.", request.getResearchLineId());
+        addIfNull(errors, "El presupuesto es obligatorio.", request.getBudget());
+        addIfNull(errors, "La fecha de inicio es obligatoria.", request.getStartDate());
+        addIfNull(errors, "La fecha de fin es obligatoria.", request.getEndDate());
+        addIfNull(errors, "El grupo de investigación es obligatorio.", request.getResearchGroupId());
+        if (!errors.isEmpty()) {
+            throw new BusinessRuleValidationException(String.join("; ", errors));
+        }
+    }
+
+    private void addIfNullBlank(List<String> errors, String message, String value) {
+        if (value == null || value.isBlank()) errors.add(message);
+    }
+
+    private void addIfNull(List<String> errors, String message, Object value) {
+        if (value == null) errors.add(message);
     }
 
     private ProjectResponse createDraftProject(CreateProjectRequest request, String groupCode, String lineName) {
@@ -82,11 +111,19 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
             call = saveCallPort.findById(request.getCallId()).orElse(null);
         }
 
+        String title = request.getTitle() != null ? request.getTitle() : "Borrador sin título";
+        String summary = request.getSummary() != null ? request.getSummary() : "";
+        String generalObjective = request.getGeneralObjective() != null ? request.getGeneralObjective() : "";
+        String executionPlace = request.getExecutionPlace() != null ? request.getExecutionPlace() : "";
+        BigDecimal budget = request.getBudget() != null ? request.getBudget() : BigDecimal.ZERO;
+        LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now(clock);
+        LocalDate endDate = request.getEndDate() != null ? request.getEndDate() : LocalDate.now(clock).plusMonths(6);
+
         Project project = new Project(
-                null, tempCode, request.getTitle(), request.getSummary(),
-                request.getGeneralObjective(), request.getResearchLineId(), lineName,
-                request.getBudget(), request.getStartDate(), request.getEndDate(),
-                request.getExecutionPlace(), request.getResponsibleId().longValue(),
+                null, tempCode, title, summary,
+                generalObjective, request.getResearchLineId(), lineName,
+                budget, startDate, endDate,
+                executionPlace, request.getResponsibleId().longValue(),
                 request.getResearchGroupId(), groupCode,
                 call != null ? call.getId() : null,
                 request.getDocumentId(), ProjectStatus.DRAFT);
@@ -217,20 +254,15 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     }
 
     private ProjectResponse mapToResponse(Project project) {
-        String dbStatus = "POSTULADO";
-        if (project.getStatus() == ProjectStatus.DRAFT) {
-            dbStatus = "BORRADOR";
-        } else if (project.getStatus() == ProjectStatus.OBSERVED) {
-            dbStatus = "OBSERVADO";
-        } else if (project.getStatus() == ProjectStatus.APPROVED) {
-            dbStatus = "APROBADO";
-        } else if (project.getStatus() == ProjectStatus.REJECTED) {
-            dbStatus = "RECHAZADO";
-        } else if (project.getStatus() == ProjectStatus.IN_PROGRESS) {
-            dbStatus = "EN_EJECUCION";
-        } else if (project.getStatus() == ProjectStatus.COMPLETED) {
-            dbStatus = "FINALIZADO";
-        }
+        String dbStatus = switch (project.getStatus()) {
+            case DRAFT -> "BORRADOR";
+            case OBSERVED -> "OBSERVADO";
+            case APPROVED -> "APROBADO";
+            case REJECTED -> "RECHAZADO";
+            case IN_PROGRESS -> "EN_EJECUCION";
+            case COMPLETED -> "FINALIZADO";
+            default -> "POSTULADO";
+        };
 
         List<com.sgi.fiis.proyectos.application.dto.MemberResponse> members = null;
         if (project.getId() != null) {

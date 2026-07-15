@@ -72,7 +72,7 @@ class EvaluacionControllerTest {
         when(asignarEvaluadorUseCase.asignarEvaluador(any(AsignarEvaluadorCommand.class)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/evaluaciones/asignar")
+        mockMvc.perform(post("/api/v1/evaluaciones/asignar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isCreated())
@@ -117,7 +117,7 @@ class EvaluacionControllerTest {
         when(registrarResultadoEvaluacionUseCase.registrarResultado(any(RegistrarResultadoEvaluacionCommand.class)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/evaluaciones/1/resultado")
+        mockMvc.perform(post("/api/v1/evaluaciones/1/resultado")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
@@ -154,7 +154,7 @@ class EvaluacionControllerTest {
         when(consultarEvaluacionesUseCase.listarTodas())
                 .thenReturn(List.of(response));
 
-        mockMvc.perform(get("/evaluaciones"))
+        mockMvc.perform(get("/api/v1/evaluaciones"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idEvaluacion").value(1))
                 .andExpect(jsonPath("$[0].idEvaluador").value(2));
@@ -178,7 +178,7 @@ class EvaluacionControllerTest {
         when(consultarEvaluacionesUseCase.buscarPorId(1L))
                 .thenReturn(response);
 
-        mockMvc.perform(get("/evaluaciones/1"))
+        mockMvc.perform(get("/api/v1/evaluaciones/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idEvaluacion").value(1))
                 .andExpect(jsonPath("$.idProyecto").value(1));
@@ -202,7 +202,7 @@ class EvaluacionControllerTest {
         when(consultarEvaluacionesUseCase.listarPorEvaluador(2L))
                 .thenReturn(List.of(response));
 
-        mockMvc.perform(get("/evaluaciones/evaluador/2"))
+        mockMvc.perform(get("/api/v1/evaluaciones/evaluador/2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idEvaluacion").value(1))
                 .andExpect(jsonPath("$[0].idEvaluador").value(2));

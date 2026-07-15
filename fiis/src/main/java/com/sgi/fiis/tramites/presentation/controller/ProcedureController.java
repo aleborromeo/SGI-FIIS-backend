@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,16 +31,21 @@ public class ProcedureController {
     private final GetTraceabilityUseCase getTraceabilityUseCase;
 
     @GetMapping
-    public ResponseEntity<List<ProcedureResponseDto>> list() {
-        return ResponseEntity.ok(listProceduresUseCase.execute());
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ProcedureResponseDto>> list(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        RoleEnum rol = extractRole(userDetails);
+        return ResponseEntity.ok(listProceduresUseCase.execute(rol));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProcedureResponseDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(getProcedureUseCase.execute(id));
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProcedureResponseDto> create(
             @Valid @RequestBody ProcedureRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -49,6 +55,7 @@ public class ProcedureController {
     }
 
     @PutMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('COORDINADOR_GRUPO', 'DIRECTOR_INVESTIGACION')")
     public ResponseEntity<ProcedureResponseDto> approve(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -57,6 +64,7 @@ public class ProcedureController {
     }
 
     @PutMapping("/{id}/flag")
+    @PreAuthorize("hasAnyRole('COORDINADOR_GRUPO', 'DIRECTOR_INVESTIGACION', 'DECANO')")
     public ResponseEntity<ProcedureResponseDto> flag(
             @PathVariable Long id,
             @Valid @RequestBody FlagProcedureRequestDto body,
@@ -67,6 +75,7 @@ public class ProcedureController {
     }
 
     @PutMapping("/{id}/remediate")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProcedureResponseDto> remediate(
             @PathVariable Long id,
             @Valid @RequestBody RemediateProcedureRequestDto body,
@@ -76,6 +85,7 @@ public class ProcedureController {
     }
 
     @PutMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('COORDINADOR_GRUPO', 'DIRECTOR_INVESTIGACION')")
     public ResponseEntity<ProcedureResponseDto> reject(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -84,6 +94,7 @@ public class ProcedureController {
     }
 
     @PutMapping("/{id}/resolution")
+    @PreAuthorize("hasRole('DECANO')")
     public ResponseEntity<ProcedureResponseDto> registerResolution(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -92,6 +103,7 @@ public class ProcedureController {
     }
 
     @GetMapping("/{id}/traceability")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProcedureMovementResponseDto>> getTraceability(@PathVariable Long id) {
         return ResponseEntity.ok(getTraceabilityUseCase.execute(id));
     }

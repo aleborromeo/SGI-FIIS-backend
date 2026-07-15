@@ -2,7 +2,6 @@ package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
-import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,6 @@ import static org.mockito.Mockito.*;
 class ProcedureMovementRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureMovementRepository repository;
-    @Mock private SpringDataUserRepository userRepository;
     @InjectMocks private ProcedureMovementRepositoryAdapter adapter;
 
     private ProcedureMovementEntity buildMovementEntity() {

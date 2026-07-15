@@ -47,6 +47,7 @@ class LocalDocumentStorageAdapterTest {
     private LocalDocumentStorageAdapter adapter;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
         adapter = new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, "target/test-uploads");
     }
@@ -127,30 +128,34 @@ class LocalDocumentStorageAdapterTest {
 
     @Test
     void saveDocumentWithNullFileNameShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        var ex1 = assertThrows(IllegalArgumentException.class, () -> {
             adapter.saveDocument(new byte[]{1, 2}, null, APPLICATION_PDF_TYPE);
         });
+        org.junit.jupiter.api.Assertions.assertNotNull(ex1);
     }
 
     @Test
     void saveDocumentWithEmptyFileNameShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        var ex2 = assertThrows(IllegalArgumentException.class, () -> {
             adapter.saveDocument(new byte[]{1, 2}, "", APPLICATION_PDF_TYPE);
         });
+        org.junit.jupiter.api.Assertions.assertNotNull(ex2);
     }
 
     @Test
     void saveDocumentWithPathTraversalFileNameShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        var ex3 = assertThrows(IllegalArgumentException.class, () -> {
             adapter.saveDocument(new byte[]{1, 2}, "../escaped.pdf", APPLICATION_PDF_TYPE);
         });
+        org.junit.jupiter.api.Assertions.assertNotNull(ex3);
     }
 
     @Test
     void saveDocumentWithPathTraversalFileNameContainsDoubleDotShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        var ex4 = assertThrows(IllegalArgumentException.class, () -> {
             adapter.saveDocument(new byte[]{1, 2}, "some..path.pdf", APPLICATION_PDF_TYPE);
         });
+        org.junit.jupiter.api.Assertions.assertNotNull(ex4);
     }
 
     @Test
@@ -158,7 +163,8 @@ class LocalDocumentStorageAdapterTest {
         java.io.File tempFile = java.io.File.createTempFile("fiis-test-file", ".tmp");
         String tempPath = tempFile.getAbsolutePath();
         try {
-            assertThrows(IllegalStateException.class, () -> new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, tempPath));
+            var ex = assertThrows(IllegalStateException.class, () -> new LocalDocumentStorageAdapter(jdbcTemplate, messageSource, tempPath));
+            org.junit.jupiter.api.Assertions.assertNotNull(ex);
         } finally {
             tempFile.delete();
         }

@@ -176,6 +176,31 @@ class DashboardRepositoryAdapterTest {
     }
 
     @Test
+    @DisplayName("Should get director dashboard with all three alert types when counts > 0")
+    void getDirectorDashboard_withAlerts_returnsAllAlertTypes() {
+        mockAllCounts(1);
+
+        DashboardDirector result = repository.getDirectorDashboard(1);
+
+        assertNotNull(result.getAlerts());
+        assertEquals(3, result.getAlerts().size());
+        assertEquals("REVIEW", result.getAlerts().get(0).getType());
+        assertEquals("ALERT", result.getAlerts().get(1).getType());
+        assertEquals("INFO", result.getAlerts().get(2).getType());
+    }
+
+    @Test
+    @DisplayName("Should get director dashboard with no alerts when counts are 0")
+    void getDirectorDashboard_noAlerts() {
+        mockAllCounts(0);
+
+        DashboardDirector result = repository.getDirectorDashboard(1);
+
+        assertNotNull(result.getAlerts());
+        assertTrue(result.getAlerts().isEmpty());
+    }
+
+    @Test
     @DisplayName("Should get coordinator dashboard when group is assigned")
     void getCoordinatorDashboard_withGroup_shouldReturnMetrics() {
         mockAllCounts(1);
@@ -221,10 +246,12 @@ class DashboardRepositoryAdapterTest {
         DashboardCoordinator result = repository.getCoordinatorDashboard(1);
 
         assertNotNull(result);
+        assertEquals(0, result.getGroupId());
         assertEquals("No group assigned", result.getGroupName());
         assertEquals("", result.getGroupCode());
         assertNotNull(result.getAlerts());
         assertEquals(1, result.getAlerts().size());
+        assertEquals("ALERT", result.getAlerts().get(0).getType());
         assertEquals("No group assigned", result.getAlerts().get(0).getTitle());
         assertEquals("No active group found coordinated by this user.", result.getAlerts().get(0).getDescription());
     }

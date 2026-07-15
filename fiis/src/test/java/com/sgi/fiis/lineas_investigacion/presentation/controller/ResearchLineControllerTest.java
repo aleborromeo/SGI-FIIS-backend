@@ -66,9 +66,11 @@ class ResearchLineControllerTest {
     private com.sgi.fiis.grupos_investigacion.presentation.mapper.ResearchGroupMapper groupMapper;
 
     @MockitoBean
+    @SuppressWarnings("unused")
     private com.sgi.fiis.auth.domain.port.TokenProviderPort tokenProviderPort;
 
     @MockitoBean
+    @SuppressWarnings("unused")
     private com.sgi.fiis.auth.infrastructure.security.CustomUserDetailsService customUserDetailsService;
 
 

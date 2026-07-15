@@ -10,8 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -36,6 +40,8 @@ class ThesisPlanServiceTest {
     private DocumentValidationPort documentoValidation;
     @Mock
     private ResearchGroupValidationPort grupoValidation;
+    @Mock
+    private JdbcTemplate jdbcTemplate;
 
     @Mock
     private Authentication authentication;
@@ -46,7 +52,7 @@ class ThesisPlanServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ThesisPlanService(planRepository, tramiteWorkflow, documentoValidation, grupoValidation);
+        service = new ThesisPlanService(planRepository, tramiteWorkflow, documentoValidation, grupoValidation, jdbcTemplate);
         SecurityContextHolder.setContext(securityContext);
     }
 
@@ -285,6 +291,7 @@ class ThesisPlanServiceTest {
     @Test
     @DisplayName("obtenerPorId - retrieves thesis plan successfully")
     void obtenerPorIdSuccessfully() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
         ThesisPlan existingPlan = new ThesisPlan(
                 12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
                 ThesisPlanStatus.POSTULADO, null, null
@@ -316,6 +323,9 @@ class ThesisPlanServiceTest {
     @Test
     @DisplayName("listarPorGrupo - lists all thesis plans for research group")
     void listarPorGrupoSuccessfully() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
+
         ThesisPlan existingPlan = new ThesisPlan(
                 12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
                 ThesisPlanStatus.POSTULADO, null, null
@@ -527,5 +537,358 @@ class ThesisPlanServiceTest {
 
         mockAuthentication(505L, "ROLE_DECANO");
         assertNotNull(service.listarPendientesPorRevisor(ReviewerRole.DECANO));
+    }
+
+    @Test
+    @DisplayName("listarPorEstudiante - decano only sees PENDIENTE_DECANATO plans")
+    void listarPorEstudianteDecanoFiltersPendienteDecanato() {
+        mockAuthentication(505L, "ROLE_DECANO");
+
+        ThesisPlan planDecanato = new ThesisPlan(
+                10, "Thesis A", "Abstract A", 200L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        ThesisPlan planCoord = new ThesisPlan(
+                11, "Thesis B", "Abstract B", 200L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findByEstudiante(200L)).thenReturn(List.of(planDecanato, planCoord));
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(10)).thenReturn(100);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(10)).thenReturn("PENDIENTE_DECANATO");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(10)).thenReturn("DECANO");
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(11)).thenReturn(101);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(11)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(11)).thenReturn("COORDINADOR_GRUPO");
+
+        List<ThesisPlanResponse> list = service.listarPorEstudiante(200L);
+
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        assertEquals(10, list.get(0).idPlanTesis());
+    }
+
+    @Test
+    @DisplayName("listarPorEstudiante - decano returns empty when no PENDIENTE_DECANATO plans")
+    void listarPorEstudianteDecanoReturnsEmpty() {
+        mockAuthentication(505L, "ROLE_DECANO");
+
+        ThesisPlan planCoord = new ThesisPlan(
+                11, "Thesis B", "Abstract B", 200L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findByEstudiante(200L)).thenReturn(List.of(planCoord));
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(11)).thenReturn(101);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(11)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(11)).thenReturn("COORDINADOR_GRUPO");
+
+        List<ThesisPlanResponse> list = service.listarPorEstudiante(200L);
+
+        assertNotNull(list);
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    @DisplayName("listarPorEstudiante - non-decano sees all plans")
+    void listarPorEstudianteNonDecanoSeesAll() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+
+        ThesisPlan planDecanato = new ThesisPlan(
+                10, "Thesis A", "Abstract A", 200L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        ThesisPlan planCoord = new ThesisPlan(
+                11, "Thesis B", "Abstract B", 200L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findByEstudiante(200L)).thenReturn(List.of(planDecanato, planCoord));
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(10)).thenReturn(100);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(10)).thenReturn("PENDIENTE_DECANATO");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(10)).thenReturn("DECANO");
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(11)).thenReturn(101);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(11)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(11)).thenReturn("COORDINADOR_GRUPO");
+
+        List<ThesisPlanResponse> list = service.listarPorEstudiante(200L);
+
+        assertNotNull(list);
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - decano can access PENDIENTE_DECANATO plan")
+    void decanoCanAccessPendienteDecanatoPlan() {
+        mockAuthentication(505L, "ROLE_DECANO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_DECANATO");
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(12)).thenReturn(100);
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(12)).thenReturn("DECANO");
+
+        ThesisPlanResponse response = service.obtenerPorId(12);
+
+        assertNotNull(response);
+        assertEquals(12, response.idPlanTesis());
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - decano denied access to non-PENDIENTE_DECANATO plan")
+    void decanoDeniedAccessToNonPendienteDecanatoPlan() {
+        mockAuthentication(505L, "ROLE_DECANO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+
+        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+    }
+
+    private enum CoordinatorOperation {
+        APPROVE, OBSERVE, REJECT
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("coordinator not in same group throws for all operations")
+    @EnumSource(CoordinatorOperation.class)
+    void coordinatorNotInSameGroupThrows(CoordinatorOperation op) {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
+
+        Executable action = switch (op) {
+            case APPROVE -> () -> service.aprobarPorCoordinador(12);
+            case OBSERVE -> () -> service.observarPorCoordinador(12,
+                    new ObserveThesisPlanCommand("Observación", 100));
+            case REJECT -> () -> service.rechazarPorCoordinador(12, "Motivo");
+        };
+        assertThrows(BusinessRuleViolationException.class, action);
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("rechazarPorCoordinador - throws when motivo is blank")
+    void rechazarPorCoordinadorThrowsWhenMotivoIsBlank() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
+
+        assertThrows(BusinessRuleViolationException.class, () -> service.rechazarPorCoordinador(12, "   "));
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("rechazarPorCoordinador - throws when motivo is null")
+    void rechazarPorCoordinadorThrowsWhenMotivoIsNull() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
+
+        assertThrows(BusinessRuleViolationException.class, () -> service.rechazarPorCoordinador(12, null));
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("subsanarPlan - throws when student is not the plan owner")
+    void subsanarPlanThrowsWhenStudentIsNotOwner() {
+        mockAuthentication(999L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.OBSERVADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+
+        RectifyThesisPlanCommand cmd = new RectifyThesisPlanCommand(101, "Nuevo resumen", "Corregido");
+        assertThrows(BusinessRuleViolationException.class, () -> service.subsanarPlan(12, cmd));
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("subsanarPlan - throws when provided document does not exist")
+    void subsanarPlanThrowsWhenDocumentNotFound() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.OBSERVADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(documentoValidation.existeDocumentoActivo(101)).thenReturn(false);
+
+        RectifyThesisPlanCommand cmd = new RectifyThesisPlanCommand(101, "Nuevo resumen", "Corregido");
+        assertThrows(BusinessRuleViolationException.class, () -> service.subsanarPlan(12, cmd));
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("subsanarPlan - throws when no document and resumen is blank")
+    void subsanarPlanThrowsWhenNullDocAndBlankResumen() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.OBSERVADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+
+        RectifyThesisPlanCommand cmd = new RectifyThesisPlanCommand(null, "   ", "Corregido");
+        assertThrows(BusinessRuleViolationException.class, () -> service.subsanarPlan(12, cmd));
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("subsanarPlan - throws when no document and resumen is null")
+    void subsanarPlanThrowsWhenNullDocAndNullResumen() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.OBSERVADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+
+        RectifyThesisPlanCommand cmd = new RectifyThesisPlanCommand(null, null, "Corregido");
+        assertThrows(BusinessRuleViolationException.class, () -> service.subsanarPlan(12, cmd));
+        verify(planRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("registrarResolucion - throws when tramite is not PENDIENTE_DECANATO")
+    void registrarResolucionThrowsWhenTramiteNotPendienteDecanato() {
+        mockAuthentication(505L, "ROLE_DECANO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+
+        RegisterResolutionCommand cmd = new RegisterResolutionCommand(
+                "RES-01", java.time.LocalDate.now(), "Asunto", 99
+        );
+        assertThrows(BusinessRuleViolationException.class, () -> service.registrarResolucion(12, cmd));
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - throws when student tries to access another student's plan")
+    void obtenerPorIdThrowsWhenStudentViewsOtherStudentPlan() {
+        mockAuthentication(999L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+
+        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - throws when director tries to access non-PENDIENTE_DIRECCION plan")
+    void obtenerPorIdThrowsWhenDirectorAccessNonPendienteDireccionPlan() {
+        mockAuthentication(404L, "ROLE_DIRECTOR_INVESTIGACION");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+
+        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - coordinator from other group can access plan when PENDIENTE_COORDINADOR")
+    void obtenerPorIdCoordinatorFromOtherGroupAccessPendienteCoordPlan() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+
+        ThesisPlanResponse response = service.obtenerPorId(12);
+
+        assertNotNull(response);
+        assertEquals(12, response.idPlanTesis());
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - coordinator denied when not in group and tramite is not PENDIENTE_COORDINADOR")
+    void obtenerPorIdCoordinatorDeniedWhenNotInGroupAndNotPendienteCoord() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_DIRECCION");
+
+        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+    }
+
+    @Test
+    @DisplayName("obtenerPorId - director can access plan when tramite is PENDIENTE_DIRECCION")
+    void obtenerPorIdDirectorCanAccessPendienteDireccionPlan() {
+        mockAuthentication(404L, "ROLE_DIRECTOR_INVESTIGACION");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.APROBADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_DIRECCION");
+
+        ThesisPlanResponse response = service.obtenerPorId(12);
+
+        assertNotNull(response);
+        assertEquals(12, response.idPlanTesis());
+    }
+
+    @Test
+    @DisplayName("listarPorEstudiante - coordinator sees all plans for given student id (non-decano path)")
+    void listarPorEstudianteCoordinatorSeesAllPlansForGivenStudentId() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 200L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findByEstudiante(200L)).thenReturn(List.of(plan));
+
+        List<ThesisPlanResponse> list = service.listarPorEstudiante(200L);
+
+        assertNotNull(list);
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    @DisplayName("resolverIdEstudianteSegunRol - student uses own id regardless of param")
+    void resolverIdEstudianteSegunRolStudentUsesOwnId() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findByEstudiante(101L)).thenReturn(List.of(plan));
+
+        List<ThesisPlanResponse> list = service.listarPorEstudiante(999L);
+
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        verify(planRepository).findByEstudiante(101L);
     }
 }
