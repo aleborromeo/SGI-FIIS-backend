@@ -241,6 +241,82 @@ class CreateProjectInteractorTest {
     }
 
     @Test
+    void execute_DraftTrue_CreatesDraftProject() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setDraft(true);
+        request.setCallId(null);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        Project savedProject = new Project(100, "BOR-2026-ABC12345", "Project Title", "Project summary",
+                "General objective", 3, "Line-01", new BigDecimal("1000"), LocalDate.now(), LocalDate.now().plusMonths(6),
+                "Lima", 2L, 1, "GRP-01", null, null, ProjectStatus.DRAFT);
+        when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
+
+        ProjectResponse response = interactor.execute(request);
+
+        assertNotNull(response);
+        assertEquals("BORRADOR", response.getStatus());
+        verify(createProcedurePort, never()).createPostulationProcedure(any());
+    }
+
+    @Test
+    void execute_DraftTrue_WithCallId() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setDraft(true);
+        request.setCallId(5);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        ResearchCall call = mock(ResearchCall.class);
+        when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
+
+        Project savedProject = new Project(100, "BOR-2026-XYZ99999", "Project Title", "Project summary",
+                "General objective", 3, "Line-01", new BigDecimal("1000"), LocalDate.now(), LocalDate.now().plusMonths(6),
+                "Lima", 2L, 1, "GRP-01", 5, null, ProjectStatus.DRAFT);
+        when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
+
+        ProjectResponse response = interactor.execute(request);
+
+        assertNotNull(response);
+        assertEquals("BORRADOR", response.getStatus());
+    }
+
+    @Test
+    void execute_DraftTrue_NullOptionalFields_DefaultsApplied() {
+        CreateProjectRequest request = new CreateProjectRequest();
+        request.setDraft(true);
+        request.setResearchGroupId(1);
+        request.setResponsibleId(2);
+        request.setResearchLineId(3);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        Project savedProject = new Project(100, "BOR-2026-DEF67890", "Borrador sin título", "",
+                "", 3, "Line-01", BigDecimal.ZERO, LocalDate.now(), LocalDate.now().plusMonths(6),
+                "", 2L, 1, "GRP-01", null, null, ProjectStatus.DRAFT);
+        when(saveProjectPort.save(any(Project.class))).thenReturn(savedProject);
+
+        ProjectResponse response = interactor.execute(request);
+
+        assertNotNull(response);
+        assertEquals("BORRADOR", response.getStatus());
+        verify(createProcedurePort, never()).createPostulationProcedure(any());
+    }
+
+    @Test
     void mapStatusFromString_TestAllValues() {
         Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.POSTULATED);
         when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));

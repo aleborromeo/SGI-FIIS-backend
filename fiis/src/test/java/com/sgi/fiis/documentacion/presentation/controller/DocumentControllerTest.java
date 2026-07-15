@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -526,5 +527,39 @@ class DocumentControllerTest {
         mockMvc.perform(multipart("/api/documents/upload").file(mockFile)
                         .principal(createAuth(42L, "ESTUDIANTE")))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP GET download retorna 200 cuando sizeBytes es null (no设置Content-Length)")
+    void downloadDocument_HttpSuccess_NullSizeBytes() throws Exception {
+        ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
+        when(downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"))
+                .thenReturn(new DocumentDownloadResult(stream, "tesis.pdf", "PDF", null));
+        mockMvc.perform(get("/api/documents/download/{id}", 1L)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
+                .andExpect(header().doesNotExist(HttpHeaders.CONTENT_LENGTH));
+    }
+
+    @Test
+    @DisplayName("HTTP GET download retorna 200 cuando authentication tiene authorities vacías (extractRole retorna null)")
+    void downloadDocument_HttpSuccess_EmptyAuthorities() throws Exception {
+        CustomUserDetails userDetails = org.mockito.Mockito.mock(CustomUserDetails.class);
+        org.mockito.Mockito.when(userDetails.getId()).thenReturn(42L);
+        org.mockito.Mockito.when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
+        org.mockito.Mockito.when(userDetails.getAuthorities())
+                .thenReturn(Collections.emptyList());
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(userDetails, null, Collections.emptyList());
+
+        ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
+        when(downloadDocumentUseCase.execute(1L, 42L, null))
+                .thenReturn(new DocumentDownloadResult(stream, "tesis.pdf", "PDF", 100L));
+        mockMvc.perform(get("/api/documents/download/{id}", 1L)
+                        .principal(auth))
+                .andExpect(status().isOk());
     }
 }

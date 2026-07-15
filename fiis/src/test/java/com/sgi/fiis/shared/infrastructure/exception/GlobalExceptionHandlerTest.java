@@ -1,5 +1,6 @@
 package com.sgi.fiis.shared.infrastructure.exception;
 
+import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
@@ -132,6 +133,15 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Invalid transition", response.getBody().get("message"));
+    }
+
+    @Test
+    void handleEvaluacion() {
+        EvaluacionException ex = new EvaluacionException("Evaluacion error");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleEvaluacion(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Evaluacion error", response.getBody().get("message"));
     }
 
     @Test

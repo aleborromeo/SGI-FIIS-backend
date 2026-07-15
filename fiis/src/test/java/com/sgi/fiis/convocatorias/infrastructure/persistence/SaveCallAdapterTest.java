@@ -385,6 +385,22 @@ class SaveCallAdapterTest {
     }
 
     @Test
+    @DisplayName("toDomain: ABIERTA with past endDate maps to CLOSED")
+    void toDomain_abiertaWithPastEndDateMapsToClosed() {
+        ResearchCallEntity entity = createEntity(1, "ABIERTA");
+        entity.setStartDate(LocalDate.of(2025, Month.JANUARY, 1));
+        entity.setEndDate(LocalDate.of(2025, Month.JUNE, 1));
+
+        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", LocalDate.now()))
+                .thenReturn(List.of(entity));
+
+        List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
+
+        assertEquals(1, result.size());
+        assertEquals(CallStatus.CLOSED, result.get(0).getStatus());
+    }
+
+    @Test
     @DisplayName("save: with null title and description")
     void save_nullTitleAndDescription() {
         ResearchCall domain = new ResearchCall(null, null, null, START, END,

@@ -569,6 +569,23 @@ class ProcedureRepositoryAdapterTest {
     }
 
     @Test
+    @DisplayName("findByStatus: entity with non-null projectReference maps correctly")
+    void findByStatus_entityWithProjectReference() {
+        ProcedureEntity entity = buildEntity(1);
+        ProjectEntity pe = new ProjectEntity();
+        pe.setId(42);
+        entity.setProjectReference(pe);
+
+        when(procedureRepository.findByStatus("PENDIENTE_COORDINADOR"))
+                .thenReturn(List.of(entity));
+
+        List<Procedure> result = adapter.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
+
+        assertEquals(1, result.size());
+        assertEquals(42L, result.get(0).getProjectReferenceId());
+    }
+
+    @Test
     @DisplayName("save: skips projectReference when projectReferenceId is null")
     void save_skipsProjectReferenceWhenNull() {
         Procedure domain = Procedure.builder()
