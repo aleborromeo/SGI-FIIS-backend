@@ -33,14 +33,16 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     private final SaveProjectPort saveProjectPort;
     private final SaveCallPort saveCallPort;
     private final CreateProcedurePort createProcedurePort;
-    private Clock clock = Clock.systemDefaultZone();
+    private final Clock clock;
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
             SaveCallPort saveCallPort,
-            CreateProcedurePort createProcedurePort) {
+            CreateProcedurePort createProcedurePort,
+            Clock clock) {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
+        this.clock = clock;
     }
 
     public void setClock(Clock clock) {
@@ -118,8 +120,8 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         String generalObjective = request.getGeneralObjective() != null ? request.getGeneralObjective() : "";
         String executionPlace = request.getExecutionPlace() != null ? request.getExecutionPlace() : "";
         BigDecimal budget = request.getBudget() != null ? request.getBudget() : BigDecimal.ZERO;
-        LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
-        LocalDate endDate = request.getEndDate() != null ? request.getEndDate() : LocalDate.now().plusMonths(6);
+        LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now(clock);
+        LocalDate endDate = request.getEndDate() != null ? request.getEndDate() : LocalDate.now(clock).plusMonths(6);
 
         Project project = new Project(
                 null, tempCode, title, summary,

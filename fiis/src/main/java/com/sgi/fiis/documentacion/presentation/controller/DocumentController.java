@@ -91,7 +91,18 @@ public class DocumentController {
     public ResponseEntity<Resource> downloadDocument(
             @PathVariable("id") Long documentId,
             Authentication authentication) {
+        return serveDocument(documentId, authentication, true);
+    }
 
+    // Endpoint para Visualización en Línea de Documentos (RF-67)
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> viewDocument(
+            @PathVariable("id") Long documentId,
+            Authentication authentication) {
+        return serveDocument(documentId, authentication, false);
+    }
+
+    private ResponseEntity<Resource> serveDocument(Long documentId, Authentication authentication, boolean asAttachment) {
         logAuthenticationDetails(authentication);
 
         try {
@@ -104,13 +115,12 @@ public class DocumentController {
             DocumentDownloadResult downloadResult = downloadDocumentUseCase.execute(documentId, userId, role);
             InputStreamResource resource = new InputStreamResource(downloadResult.getInputStream());
 
-            String safeFilename = downloadResult.getOriginalName()
-                    .replaceAll("[\\r\\n]", "_")
-                    .replaceAll("[^a-zA-Z0-9._-]", "_");
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(resolveContentType(downloadResult.getExtension()));
-            headers.setContentDisposition(ContentDisposition.attachment().filename(safeFilename).build());
+            headers.setContentDisposition(
+                    asAttachment
+                            ? ContentDisposition.attachment().filename(sanitizeFilename(downloadResult.getOriginalName())).build()
+                            : ContentDisposition.inline().build());
             if (downloadResult.getSizeBytes() != null) {
                 headers.setContentLength(downloadResult.getSizeBytes());
             }
@@ -123,37 +133,8 @@ public class DocumentController {
         }
     }
 
-    // Endpoint para Visualización en Línea de Documentos (RF-67)
-    @GetMapping("/view/{id}")
-    public ResponseEntity<Resource> viewDocument(
-            @PathVariable("id") Long documentId,
-            Authentication authentication) {
-
-        logAuthenticationDetails(authentication);
-
-        try {
-            Long userId = extractUserId(authentication);
-            String role = extractRole(authentication);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
-            DocumentDownloadResult downloadResult = downloadDocumentUseCase.execute(documentId, userId, role);
-            InputStreamResource resource = new InputStreamResource(downloadResult.getInputStream());
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(resolveContentType(downloadResult.getExtension()));
-            headers.setContentDisposition(ContentDisposition.inline().build());
-            if (downloadResult.getSizeBytes() != null) {
-                headers.setContentLength(downloadResult.getSizeBytes());
-            }
-
-            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
-        } catch (DocumentNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (DocumentAccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+    private String sanitizeFilename(String filename) {
+        return filename.replaceAll("[\\r\\n]", "_").replaceAll("[^a-zA-Z0-9._-]", "_");
     }
 
     // Endpoint para listar todos los documentos activos (M3)

@@ -13,6 +13,8 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -34,7 +36,7 @@ class CreateProjectInteractorTest {
         saveProjectPort = mock(SaveProjectPort.class);
         saveCallPort = mock(SaveCallPort.class);
         createProcedurePort = mock(CreateProcedurePort.class);
-        interactor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort);
+        interactor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, Clock.systemDefaultZone());
     }
 
     private CreateProjectRequest buildValidRequest() {

@@ -15,7 +15,7 @@ class OpenApiConfigTest {
     private OpenApiConfig openApiConfig;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         openApiConfig = new OpenApiConfig();
         // Provide mock values to avoid null pointer issues during logging, if any
         ReflectionTestUtils.setField(openApiConfig, "mailHost", "smtp.test.com");

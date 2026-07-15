@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
@@ -39,7 +40,7 @@ class SaveCallAdapterTest {
         documentRepository = mock(DocumentJpaRepository.class);
         lineRepository = mock(ResearchLineJpaRepository.class);
         userRepository = mock(SpringDataUserRepository.class);
-        adapter = new SaveCallAdapter(jpaRepository, documentRepository, lineRepository, userRepository);
+        adapter = new SaveCallAdapter(jpaRepository, documentRepository, lineRepository, userRepository, Clock.systemDefaultZone());
     }
 
     private ResearchCallEntity createEntity(Integer id, String status) {

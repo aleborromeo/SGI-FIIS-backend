@@ -56,10 +56,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     public List<Procedure> findAll() {
-        return procedureRepository.findAll()
-                .stream()
-                .map(entity -> toDomain(entity, new ArrayList<>()))
-                .toList();
+        return toDomainList(procedureRepository.findAll());
     }
 
     private List<ProcedureMovement> loadMovements(Long procedureId) {
@@ -71,32 +68,26 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     public List<Procedure> findByApplicantId(Long idSolicitante) {
-        return procedureRepository.findByApplicant_Id(idSolicitante)
-                .stream()
-                .map(entity -> toDomain(entity, new ArrayList<>()))
-                .toList();
+        return toDomainList(procedureRepository.findByApplicant_Id(idSolicitante));
     }
 
     @Override
     public List<Procedure> findByStatus(ProcedureStatus estado) {
-        return procedureRepository.findByStatus(estado.name())
-                .stream()
-                .map(entity -> toDomain(entity, new ArrayList<>()))
-                .toList();
+        return toDomainList(procedureRepository.findByStatus(estado.name()));
     }
 
     @Override
     public List<Procedure> findByReviewerRole(RoleEnum rolRevisor) {
-        return procedureRepository.findByReviewerRole(rolRevisor.name())
-                .stream()
-                .map(entity -> toDomain(entity, new ArrayList<>()))
-                .toList();
+        return toDomainList(procedureRepository.findByReviewerRole(rolRevisor.name()));
     }
 
     @Override
     public List<Procedure> findByStatusAndReviewerRole(ProcedureStatus estado, RoleEnum rolRevisor) {
-        return procedureRepository.findByStatusAndReviewerRole(estado.name(), rolRevisor.name())
-                .stream()
+        return toDomainList(procedureRepository.findByStatusAndReviewerRole(estado.name(), rolRevisor.name()));
+    }
+
+    private List<Procedure> toDomainList(List<ProcedureEntity> entities) {
+        return entities.stream()
                 .map(entity -> toDomain(entity, new ArrayList<>()))
                 .toList();
     }

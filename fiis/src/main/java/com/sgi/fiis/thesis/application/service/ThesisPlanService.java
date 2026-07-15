@@ -55,16 +55,11 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     }
 
     private Long extraerIdEstudianteDelContexto() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean esEstudiante = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
-            if (!esEstudiante) {
-                throw new BusinessRuleViolationException("Solo los estudiantes pueden registrar un plan de tesis");
-            }
-            return userDetails.getId();
+        CustomUserDetails user = getAuthenticatedUser();
+        if (!hasRole(user, ROLE_ESTUDIANTE)) {
+            throw new BusinessRuleViolationException("Solo los estudiantes pueden registrar un plan de tesis");
         }
-        throw new BusinessRuleViolationException("No se pudo identificar al estudiante autenticado");
+        return user.getId();
     }
 
     @Override
@@ -212,30 +207,22 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     }
 
     private boolean esRolDecano() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_DECANO));
+        try {
+            return hasRole(getAuthenticatedUser(), ROLE_DECANO);
+        } catch (BusinessRuleViolationException e) {
+            return false;
         }
-        return false;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ThesisPlanResponse> listarPorGrupo(Integer idGrupo) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean esCoordinador = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
-            boolean esEstudiante = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
-
-            if (esEstudiante) {
-                throw new BusinessRuleViolationException("Los estudiantes no tienen permisos para listar planes de tesis de un grupo");
-            }
-            if (esCoordinador && !grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), idGrupo)) {
-                throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otro grupo de investigación");
-            }
+        CustomUserDetails userDetails = getAuthenticatedUser();
+        if (hasRole(userDetails, ROLE_ESTUDIANTE)) {
+            throw new BusinessRuleViolationException("Los estudiantes no tienen permisos para listar planes de tesis de un grupo");
+        }
+        if (hasRole(userDetails, ROLE_COORDINADOR_GRUPO) && !grupoValidation.esCoordinadorDelGrupo(userDetails.getId(), idGrupo)) {
+            throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otro grupo de investigación");
         }
         return planRepository.findByGrupo(idGrupo).stream().map(this::toResponse).toList();
     }
@@ -255,85 +242,44 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     }
 
     private Long extraerIdUsuarioDelContexto() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return userDetails.getId();
-        }
-        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
+        return getAuthenticatedUser().getId();
     }
 
     private void validarRolCoordinador() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean esCoordinador = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
-            if (!esCoordinador) {
-                throw new BusinessRuleViolationException("Solo los coordinadores de grupo pueden realizar esta acción");
-            }
-            return;
+        if (!hasRole(getAuthenticatedUser(), ROLE_COORDINADOR_GRUPO)) {
+            throw new BusinessRuleViolationException("Solo los coordinadores de grupo pueden realizar esta acción");
         }
-        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private void validarRolDirector() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean esDirector = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_DIRECTOR_INVESTIGACION));
-            if (!esDirector) {
-                throw new BusinessRuleViolationException("Solo los directores de investigación pueden realizar esta acción");
-            }
-            return;
+        if (!hasRole(getAuthenticatedUser(), ROLE_DIRECTOR_INVESTIGACION)) {
+            throw new BusinessRuleViolationException("Solo los directores de investigación pueden realizar esta acción");
         }
-        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private void validarRolDecano() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean esDecano = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_DECANO));
-            if (!esDecano) {
-                throw new BusinessRuleViolationException("Solo el decano puede registrar resoluciones");
-            }
-            return;
+        if (!hasRole(getAuthenticatedUser(), ROLE_DECANO)) {
+            throw new BusinessRuleViolationException("Solo el decano puede registrar resoluciones");
         }
-        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private Long resolverIdEstudianteSegunRol(Long idEstudiante) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean esEstudiante = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
-            if (esEstudiante) {
-                return userDetails.getId();
-            }
-            return idEstudiante;
-        }
-        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
+        CustomUserDetails user = getAuthenticatedUser();
+        return hasRole(user, ROLE_ESTUDIANTE) ? user.getId() : idEstudiante;
     }
 
     private void validarRevisorParaRol(ReviewerRole revisor) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            boolean autorizado = switch (revisor) {
-                case ESTUDIANTE -> userDetails.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals(ROLE_ESTUDIANTE));
-                case COORDINADOR_GRUPO -> userDetails.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals(ROLE_COORDINADOR_GRUPO));
-                case DIRECTOR_INVESTIGACION -> userDetails.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals(ROLE_DIRECTOR_INVESTIGACION));
-                case DECANO -> userDetails.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals(ROLE_DECANO));
-                case SIN_REVISOR -> false;
-            };
-            if (!autorizado) {
-                throw new BusinessRuleViolationException("No tiene permisos para consultar pendientes del rol " + revisor);
-            }
-            return;
+        CustomUserDetails userDetails = getAuthenticatedUser();
+        boolean autorizado = switch (revisor) {
+            case ESTUDIANTE -> hasRole(userDetails, ROLE_ESTUDIANTE);
+            case COORDINADOR_GRUPO -> hasRole(userDetails, ROLE_COORDINADOR_GRUPO);
+            case DIRECTOR_INVESTIGACION -> hasRole(userDetails, ROLE_DIRECTOR_INVESTIGACION);
+            case DECANO -> hasRole(userDetails, ROLE_DECANO);
+            case SIN_REVISOR -> false;
+        };
+        if (!autorizado) {
+            throw new BusinessRuleViolationException("No tiene permisos para consultar pendientes del rol " + revisor);
         }
-        throw new BusinessRuleViolationException(MSG_USUARIO_NO_AUTENTICADO);
     }
 
     private ThesisPlan obtenerPlan(Integer idPlanTesis) {
@@ -403,61 +349,8 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     }
 
     private ThesisPlanResponse toResponse(ThesisPlan p) {
-        try {
-            Integer idTramite = tramiteWorkflow.obtenerIdTramitePorPlanTesis(p.getIdPlanTesis());
-            String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(p.getIdPlanTesis());
-            String revisorActual = tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(p.getIdPlanTesis());
-
-            String nombreEstudiante = null;
-            String apellidoEstudiante = null;
-            try {
-                var row = jdbcTemplate.queryForMap("SELECT nombres, apellidos FROM usuarios WHERE id_usuario = ?", p.getIdEstudiante());
-                nombreEstudiante = (String) row.get("nombres");
-                apellidoEstudiante = (String) row.get("apellidos");
-            } catch (Exception e) {
-                log.warn("Error resolving student name for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            }
-
-            String nombreGrupo = null;
-            String codigoGrupo = null;
-            try {
-                var row = jdbcTemplate.queryForMap("SELECT nombre_grupo, codigo_grupo FROM grupos_investigacion WHERE id_grupo = ?", p.getIdGrupo());
-                nombreGrupo = (String) row.get("nombre_grupo");
-                codigoGrupo = (String) row.get("codigo_grupo");
-            } catch (Exception e) {
-                log.warn("Error resolving group info for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            }
-
-            String nombreLinea = null;
-            try {
-                var row = jdbcTemplate.queryForMap("SELECT nombre_linea FROM lineas_investigacion WHERE id_linea = ?", p.getIdLinea());
-                nombreLinea = (String) row.get("nombre_linea");
-            } catch (Exception e) {
-                log.warn("Error resolving line name for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            }
-
-            String nombreDocumento = null;
-            if (p.getIdDocumentoActual() != null) {
-                try {
-                    var row = jdbcTemplate.queryForMap("SELECT nombre_original FROM documentos WHERE id_documento = ?", p.getIdDocumentoActual());
-                    nombreDocumento = (String) row.get("nombre_original");
-                } catch (Exception e) {
-                    log.warn("Error resolving document name for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-                }
-            }
-
-            return new ThesisPlanResponse(p.getIdPlanTesis(), p.getTituloTesis(), p.getResumen(),
-                    p.getIdEstudiante(), p.getIdLinea(), p.getIdGrupo(), p.getIdDocumentoActual(),
-                    p.getEstadoPlan(), p.getFechaCreacion(), p.getFechaActualizacion(),
-                    idTramite, ThesisProcedureStatus.valueOf(estadoTramite), ReviewerRole.valueOf(revisorActual),
-                    nombreEstudiante, apellidoEstudiante, nombreGrupo, codigoGrupo, nombreLinea, nombreDocumento);
-        } catch (Exception e) {
-            log.warn("Error resolving thesis plan details for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            return new ThesisPlanResponse(p.getIdPlanTesis(), p.getTituloTesis(), p.getResumen(),
-                    p.getIdEstudiante(), p.getIdLinea(), p.getIdGrupo(), p.getIdDocumentoActual(),
-                    p.getEstadoPlan(), p.getFechaCreacion(), p.getFechaActualizacion(),
-                    null, null, null, null, null, null, null, null, null);
-        }
+        Integer idTramite = tramiteWorkflow.obtenerIdTramitePorPlanTesis(p.getIdPlanTesis());
+        return toResponse(p, idTramite);
     }
 
     private ThesisPlanResponse toResponse(ThesisPlan p, Integer idTramite) {
@@ -465,55 +358,63 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             String estadoTramite = tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(p.getIdPlanTesis());
             String revisorActual = tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(p.getIdPlanTesis());
 
-            String nombreEstudiante = null;
-            String apellidoEstudiante = null;
-            try {
-                var row = jdbcTemplate.queryForMap("SELECT nombres, apellidos FROM usuarios WHERE id_usuario = ?", p.getIdEstudiante());
-                nombreEstudiante = (String) row.get("nombres");
-                apellidoEstudiante = (String) row.get("apellidos");
-            } catch (Exception e) {
-                log.warn("Error resolving student name for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            }
-
-            String nombreGrupo = null;
-            String codigoGrupo = null;
-            try {
-                var row = jdbcTemplate.queryForMap("SELECT nombre_grupo, codigo_grupo FROM grupos_investigacion WHERE id_grupo = ?", p.getIdGrupo());
-                nombreGrupo = (String) row.get("nombre_grupo");
-                codigoGrupo = (String) row.get("codigo_grupo");
-            } catch (Exception e) {
-                log.warn("Error resolving group info for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            }
-
-            String nombreLinea = null;
-            try {
-                var row = jdbcTemplate.queryForMap("SELECT nombre_linea FROM lineas_investigacion WHERE id_linea = ?", p.getIdLinea());
-                nombreLinea = (String) row.get("nombre_linea");
-            } catch (Exception e) {
-                log.warn("Error resolving line name for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-            }
-
-            String nombreDocumento = null;
-            if (p.getIdDocumentoActual() != null) {
-                try {
-                    var row = jdbcTemplate.queryForMap("SELECT nombre_original FROM documentos WHERE id_documento = ?", p.getIdDocumentoActual());
-                    nombreDocumento = (String) row.get("nombre_original");
-                } catch (Exception e) {
-                    log.warn("Error resolving document name for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
-                }
-            }
+            String[] estudiante = resolveStudentName(p.getIdEstudiante(), p.getIdPlanTesis());
+            String[] grupo = resolveGroupInfo(p.getIdGrupo(), p.getIdPlanTesis());
+            String nombreLinea = resolveLineName(p.getIdLinea(), p.getIdPlanTesis());
+            String nombreDocumento = resolveDocumentName(p.getIdDocumentoActual(), p.getIdPlanTesis());
 
             return new ThesisPlanResponse(p.getIdPlanTesis(), p.getTituloTesis(), p.getResumen(),
                     p.getIdEstudiante(), p.getIdLinea(), p.getIdGrupo(), p.getIdDocumentoActual(),
                     p.getEstadoPlan(), p.getFechaCreacion(), p.getFechaActualizacion(),
                     idTramite, ThesisProcedureStatus.valueOf(estadoTramite), ReviewerRole.valueOf(revisorActual),
-                    nombreEstudiante, apellidoEstudiante, nombreGrupo, codigoGrupo, nombreLinea, nombreDocumento);
+                    estudiante[0], estudiante[1], grupo[0], grupo[1], nombreLinea, nombreDocumento);
         } catch (Exception e) {
             log.warn("Error resolving thesis plan details for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
             return new ThesisPlanResponse(p.getIdPlanTesis(), p.getTituloTesis(), p.getResumen(),
                     p.getIdEstudiante(), p.getIdLinea(), p.getIdGrupo(), p.getIdDocumentoActual(),
                     p.getEstadoPlan(), p.getFechaCreacion(), p.getFechaActualizacion(),
                     idTramite, null, null, null, null, null, null, null, null);
+        }
+    }
+
+    private String[] resolveStudentName(Long idEstudiante, Integer planId) {
+        try {
+            var row = jdbcTemplate.queryForMap("SELECT nombres, apellidos FROM usuarios WHERE id_usuario = ?", idEstudiante);
+            return new String[]{(String) row.get("nombres"), (String) row.get("apellidos")};
+        } catch (Exception e) {
+            log.warn("Error resolving student name for plan {}: {}", planId, e.getMessage());
+            return new String[]{null, null};
+        }
+    }
+
+    private String[] resolveGroupInfo(Integer idGrupo, Integer planId) {
+        try {
+            var row = jdbcTemplate.queryForMap("SELECT nombre_grupo, codigo_grupo FROM grupos_investigacion WHERE id_grupo = ?", idGrupo);
+            return new String[]{(String) row.get("nombre_grupo"), (String) row.get("codigo_grupo")};
+        } catch (Exception e) {
+            log.warn("Error resolving group info for plan {}: {}", planId, e.getMessage());
+            return new String[]{null, null};
+        }
+    }
+
+    private String resolveLineName(Integer idLinea, Integer planId) {
+        try {
+            var row = jdbcTemplate.queryForMap("SELECT nombre_linea FROM lineas_investigacion WHERE id_linea = ?", idLinea);
+            return (String) row.get("nombre_linea");
+        } catch (Exception e) {
+            log.warn("Error resolving line name for plan {}: {}", planId, e.getMessage());
+            return null;
+        }
+    }
+
+    private String resolveDocumentName(Integer idDocumento, Integer planId) {
+        if (idDocumento == null) return null;
+        try {
+            var row = jdbcTemplate.queryForMap("SELECT nombre_original FROM documentos WHERE id_documento = ?", idDocumento);
+            return (String) row.get("nombre_original");
+        } catch (Exception e) {
+            log.warn("Error resolving document name for plan {}: {}", planId, e.getMessage());
+            return null;
         }
     }
 }

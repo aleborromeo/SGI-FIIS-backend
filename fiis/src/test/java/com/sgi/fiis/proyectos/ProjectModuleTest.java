@@ -54,8 +54,7 @@ class ProjectModuleTest {
         saveCallPort = mock(SaveCallPort.class);
         createProcedurePort = mock(CreateProcedurePort.class);
         fixedClock = Clock.fixed(Instant.parse("2026-06-01T00:00:00Z"), ZoneId.of("UTC"));
-        createProjectInteractor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort);
-        createProjectInteractor.setClock(fixedClock);
+        createProjectInteractor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, fixedClock);
     }
 
     @Test

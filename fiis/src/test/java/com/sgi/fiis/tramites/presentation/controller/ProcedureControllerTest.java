@@ -29,6 +29,8 @@ import static org.mockito.Mockito.*;
 class ProcedureControllerTest {
 
     @Mock private CreateProcedureUseCase createProcedureUseCase;
+    @Mock private ListProceduresUseCase listProceduresUseCase;
+    @Mock private GetProcedureUseCase getProcedureUseCase;
     @Mock private ApproveProcedureUseCase approveProcedureUseCase;
     @Mock private FlagProcedureUseCase flagProcedureUseCase;
     @Mock private RemediateProcedureUseCase remediateProcedureUseCase;
@@ -66,9 +68,51 @@ class ProcedureControllerTest {
         ResponseEntity<ProcedureResponseDto> response = controller.create(dto, student);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(5L, dto.getApplicantId()); // security: set from JWT, not HTTP body
+        assertEquals(5L, dto.getApplicantId());
         assertSame(expected, response.getBody());
         verify(createProcedureUseCase).execute(dto);
+    }
+
+    @Test
+    @DisplayName("list: returns procedures filtered by role from JWT")
+    void list_returnsProceduresByRole() {
+        List<ProcedureResponseDto> expected = List.of(
+                ProcedureResponseDto.builder().id(1L).build(),
+                ProcedureResponseDto.builder().id(2L).build()
+        );
+        when(listProceduresUseCase.execute(RoleEnum.COORDINADOR_GRUPO)).thenReturn(expected);
+
+        ResponseEntity<List<ProcedureResponseDto>> response = controller.list(coordinator);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        verify(listProceduresUseCase).execute(RoleEnum.COORDINADOR_GRUPO);
+    }
+
+    @Test
+    @DisplayName("list: student role filters to student procedures")
+    void list_studentRole() {
+        List<ProcedureResponseDto> expected = List.of(
+                ProcedureResponseDto.builder().id(3L).build()
+        );
+        when(listProceduresUseCase.execute(RoleEnum.ESTUDIANTE)).thenReturn(expected);
+
+        ResponseEntity<List<ProcedureResponseDto>> response = controller.list(student);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    @DisplayName("get: returns procedure by id")
+    void get_returnsProcedureById() {
+        ProcedureResponseDto expected = ProcedureResponseDto.builder().id(7L).build();
+        when(getProcedureUseCase.execute(7L)).thenReturn(expected);
+
+        ResponseEntity<ProcedureResponseDto> response = controller.get(7L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(expected, response.getBody());
     }
 
     @Test

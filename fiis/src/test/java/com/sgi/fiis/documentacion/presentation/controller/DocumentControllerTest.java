@@ -485,6 +485,40 @@ class DocumentControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "docente@unas.edu.pe", roles = {"DOCENTE_INVESTIGADOR"})
+    @DisplayName("HTTP GET view retorna 200 con content-disposition inline")
+    void viewDocument_HttpSuccess() throws Exception {
+        ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
+        when(downloadDocumentUseCase.execute(1L, 42L, "ESTUDIANTE"))
+                .thenReturn(new DocumentDownloadResult(stream, "tesis.pdf", "PDF", 1024L));
+        mockMvc.perform(get("/api/documents/view/{id}", 1L)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline"));
+    }
+
+    @Test
+    @DisplayName("HTTP GET view retorna 403 si no tiene permisos")
+    void viewDocument_HttpForbidden() throws Exception {
+        when(downloadDocumentUseCase.execute(1L, 99L, "ESTUDIANTE"))
+                .thenThrow(new DocumentAccessDeniedException("Acceso denegado"));
+        mockMvc.perform(get("/api/documents/view/{id}", 1L)
+                        .principal(createAuth(99L, "ESTUDIANTE")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("HTTP GET view retorna 404 si el documento no existe")
+    void viewDocument_HttpNotFound() throws Exception {
+        when(downloadDocumentUseCase.execute(404L, 42L, "ESTUDIANTE"))
+                .thenThrow(new DocumentNotFoundException("No existe"));
+        mockMvc.perform(get("/api/documents/view/{id}", 404L)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("HTTP POST: upload con content-type application/zip (no permitido)")
     void uploadDocument_HttpBadRequest_ZipMimeType() throws Exception {
         MockMultipartFile mockFile = new MockMultipartFile(

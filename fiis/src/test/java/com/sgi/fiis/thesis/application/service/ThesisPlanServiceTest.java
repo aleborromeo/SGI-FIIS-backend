@@ -320,6 +320,9 @@ class ThesisPlanServiceTest {
     @Test
     @DisplayName("listarPorGrupo - lists all thesis plans for research group")
     void listarPorGrupoSuccessfully() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(true);
+
         ThesisPlan existingPlan = new ThesisPlan(
                 12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
                 ThesisPlanStatus.POSTULADO, null, null

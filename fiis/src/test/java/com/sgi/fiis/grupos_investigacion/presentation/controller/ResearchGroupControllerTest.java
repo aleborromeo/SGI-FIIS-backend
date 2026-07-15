@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
@@ -196,5 +197,29 @@ class ResearchGroupControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(2))
                 .andExpect(jsonPath("$[0].lineName").value("Robótica"));
+    }
+
+    @Test
+    void availableUsers_shouldReturn200_withUsersList() throws Exception {
+        given(jdbcTemplate.queryForList(anyString())).willReturn(List.of(
+                Map.of("id", 1, "firstNames", "Juan", "lastNames", "Perez", "institutionalEmail", "juan@unas.edu.pe")
+        ));
+
+        mockMvc.perform(get("/api/v1/research-groups/available-users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].firstNames").value("Juan"));
+    }
+
+    @Test
+    void coordinatorCandidates_shouldReturn200_withCandidatesList() throws Exception {
+        given(jdbcTemplate.queryForList(anyString())).willReturn(List.of(
+                Map.of("id", 2, "firstNames", "Maria", "lastNames", "Lopez", "institutionalEmail", "maria@unas.edu.pe")
+        ));
+
+        mockMvc.perform(get("/api/v1/research-groups/coordinator-candidates"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2))
+                .andExpect(jsonPath("$[0].firstNames").value("Maria"));
     }
 }

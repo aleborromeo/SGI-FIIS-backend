@@ -1,5 +1,6 @@
 package com.sgi.fiis.shared.infrastructure.config;
 
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -10,6 +11,11 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 @Configuration
 public class LocaleConfig {
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
+    }
 
     @Bean
     public AcceptHeaderLocaleResolver localeResolver() {
