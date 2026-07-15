@@ -82,7 +82,7 @@ public class ResearchCallController {
     }
 
     @GetMapping("/prerequisitos")
-    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
+    @PreAuthorize("hasAnyRole('DOCENTE_INVESTIGADOR', 'ESTUDIANTE')")
     @Operation(summary = "Check user prerequisites", description = "Checks if the authenticated user meets prerequisites for project submission.")
     @ApiResponse(responseCode = "200", description = "Prerequisites check result")
     public ResponseEntity<PrerequisitosResponse> checkPrerequisitos(
