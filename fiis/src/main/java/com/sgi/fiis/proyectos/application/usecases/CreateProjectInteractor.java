@@ -45,10 +45,6 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         this.clock = clock;
     }
 
-    public void setClock(Clock clock) {
-        this.clock = clock;
-    }
-
     @Override
     @Transactional
     @Auditable(action = "CREATE_PROJECT")
