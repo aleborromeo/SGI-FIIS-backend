@@ -43,7 +43,7 @@ public class CreateUserUseCase {
         if (user.getRoleCode() == null) {
             throw new BusinessException("El código de rol es obligatorio");
         }
-        var role = roleRepository.findByCode(user.getRoleCode())
+        roleRepository.findByCode(user.getRoleCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "código", user.getRoleCode()));
 
         // Validate that DNI is exactly 8 digits
