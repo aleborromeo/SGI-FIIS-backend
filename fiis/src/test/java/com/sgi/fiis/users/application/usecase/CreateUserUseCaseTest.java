@@ -51,7 +51,7 @@ class CreateUserUseCaseTest {
         when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
         when(userRepository.existsByDni("12345678")).thenReturn(false);
         when(userRepository.existsByEmail("carlos.santana@unas.edu.pe")).thenReturn(false);
-        when(passwordEncoder.encode("12345678")).thenReturn("encoded-password");
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User result = createUserUseCase.execute(userInput);
@@ -65,7 +65,7 @@ class CreateUserUseCaseTest {
         verify(roleRepository).findByCode("DOCENTE_INVESTIGADOR");
         verify(userRepository).existsByDni("12345678");
         verify(userRepository).existsByEmail("carlos.santana@unas.edu.pe");
-        verify(passwordEncoder).encode("12345678");
+        verify(passwordEncoder).encode(anyString());
         verify(userRepository).save(any(User.class));
     }
 

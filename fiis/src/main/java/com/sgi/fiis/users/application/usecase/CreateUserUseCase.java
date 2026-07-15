@@ -21,16 +21,53 @@ import java.time.LocalDateTime;
 @Service
 public class CreateUserUseCase {
 
+    private static final java.security.SecureRandom SECURE_RANDOM = new java.security.SecureRandom();
+
     private final UserRepositoryPort userRepository;
     private final RoleRepositoryPort roleRepository;
     private final PasswordEncoderPort passwordEncoder;
+    private final com.sgi.fiis.auth.domain.port.EmailSenderPort emailSender;
 
     public CreateUserUseCase(UserRepositoryPort userRepository,
                              RoleRepositoryPort roleRepository,
-                             PasswordEncoderPort passwordEncoder) {
+                             PasswordEncoderPort passwordEncoder,
+                             com.sgi.fiis.auth.domain.port.EmailSenderPort emailSender) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailSender = emailSender;
+    }
+
+    private String generateSecurePassword() {
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String symbols = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+        String all = upper + lower + digits + symbols;
+        
+        StringBuilder sb = new StringBuilder();
+        
+        // Ensure at least one of each required type
+        sb.append(upper.charAt(SECURE_RANDOM.nextInt(upper.length())));
+        sb.append(lower.charAt(SECURE_RANDOM.nextInt(lower.length())));
+        sb.append(digits.charAt(SECURE_RANDOM.nextInt(digits.length())));
+        sb.append(symbols.charAt(SECURE_RANDOM.nextInt(symbols.length())));
+        
+        // Fill rest up to 10 characters
+        for (int i = 0; i < 6; i++) {
+            sb.append(all.charAt(SECURE_RANDOM.nextInt(all.length())));
+        }
+        
+        // Shuffle the characters
+        char[] chars = sb.toString().toCharArray();
+        for (int i = chars.length - 1; i > 0; i--) {
+            int j = SECURE_RANDOM.nextInt(i + 1);
+            char temp = chars[i];
+            chars[i] = chars[j];
+            chars[j] = temp;
+        }
+        
+        return new String(chars);
     }
 
     @Transactional
@@ -58,13 +95,25 @@ public class CreateUserUseCase {
             throw new DuplicateResourceException("Usuario", "correo", user.getInstitutionalEmail());
         }
 
-        // Initial password = hashed DNI
-        user.setPasswordHash(passwordEncoder.encode(user.getDni()));
+        // Generate secure temporary password
+        String rawPassword = generateSecurePassword();
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setTemporaryPassword(rawPassword);
         user.setActive(true);
         user.setMustChangePassword(true);
         user.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         user.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Send email with credentials
+        try {
+            emailSender.sendNewUserCredentials(savedUser.getInstitutionalEmail(), rawPassword);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(CreateUserUseCase.class)
+                .error("Error al enviar credenciales al correo del usuario: " + e.getMessage(), e);
+        }
+
+        return savedUser;
     }
 }

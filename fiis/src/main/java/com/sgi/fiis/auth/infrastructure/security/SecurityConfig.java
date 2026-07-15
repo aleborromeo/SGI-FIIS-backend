@@ -37,6 +37,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/health").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/calls/**").permitAll()
                     // Rutas protegidas por rol
                     .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
