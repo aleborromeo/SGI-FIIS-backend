@@ -25,17 +25,17 @@ class MailMockConfigTest {
     void javaMailSender_shouldReturnMockedInstance() {
         MailMockConfig config = new MailMockConfig();
         JavaMailSender mailSender = config.javaMailSender();
-        
+
         assertNotNull(mailSender);
-        
-        // createMimeMessage() returns null in the mock
-        assertNull(mailSender.createMimeMessage());
+
+        // createMimeMessage() returns a non-null MimeMessage in the mock
+        assertNotNull(mailSender.createMimeMessage());
         assertNull(mailSender.createMimeMessage((InputStream) null));
-        
+
         // send() operations should be no-op and not throw exceptions
         assertDoesNotThrow(() -> mailSender.send(new MimeMessage[0]));
         assertDoesNotThrow(() -> mailSender.send(new SimpleMailMessage[0]));
-        
+
         MimeMessagePreparator preparator = mock(MimeMessagePreparator.class);
         assertDoesNotThrow(() -> mailSender.send(preparator));
     }

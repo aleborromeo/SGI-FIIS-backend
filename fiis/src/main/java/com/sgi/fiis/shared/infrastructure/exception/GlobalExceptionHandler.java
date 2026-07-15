@@ -128,7 +128,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        log.error("Unhandled exception caught: ", ex);
+        log.error("Error no manejado en la aplicación: ", ex);
         String message = messageSource.getMessage("shared.error.internal", null, "Error interno del servidor", resolveLocale());
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }

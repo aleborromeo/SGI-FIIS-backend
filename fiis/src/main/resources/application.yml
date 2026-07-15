@@ -35,12 +35,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-  # Java Mail Sender Config
+  # Java Mail Sender Config (Gmail SMTP)
   mail:
     host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME:tu_correo@unas.edu.pe}
-    password: ${SPRING_MAIL_PASSWORD:tu_contraseña}
+    username: ${SPRING_MAIL_USERNAME:sgifiis@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:odsjmagkrsqrtvxj}
     properties:
       mail:
         smtp:
@@ -73,6 +73,9 @@ app:
     secret: ${JWT_SECRET:default-dev-secret-key-change-in-production-min-32-chars}
     expiration-ms: 86400000
   frontend-url: ${APP_FRONTEND_URL:http://localhost:3000}
+  mail:
+    mock: ${APP_MAIL_MOCK:true}
+    from: ${APP_MAIL_FROM:sgifiis@gmail.com}
 
 # Debug logging para OAuth2 (quitar en producción)
 logging:

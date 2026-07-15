@@ -32,6 +32,7 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String oauthProvider;
+    private String temporaryPassword;
 
     // ========== Business Logic ==========
 
