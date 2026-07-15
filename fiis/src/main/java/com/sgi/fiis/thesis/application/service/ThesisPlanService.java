@@ -291,7 +291,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
 
         if (hasRole(userDetails, ROLE_ESTUDIANTE)) {
             if (!plan.getIdEstudiante().equals(userDetails.getId())) {
-                throw new BusinessRuleViolationException("No tiene permisos para ver planes de tesis de otros estudiantes");
+                throw new PlanAccessDeniedException("No tiene permisos para ver planes de tesis de otros estudiantes");
             }
             return;
         }
@@ -304,7 +304,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         if (hasRole(userDetails, ROLE_DECANO) && tieneAccesoPorEstado(plan, ROLE_DECANO)) {
             return;
         }
-        throw new BusinessRuleViolationException("No tiene permisos para acceder a este plan de tesis");
+        throw new PlanAccessDeniedException("No tiene permisos para acceder a este plan de tesis");
     }
 
     private CustomUserDetails getAuthenticatedUser() {
