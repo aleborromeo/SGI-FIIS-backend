@@ -10,6 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -644,25 +647,14 @@ class ThesisPlanServiceTest {
         assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
     }
 
-    @Test
-    @DisplayName("aprobarPorCoordinador - throws when coordinator is not in same research group")
-    void aprobarPorCoordinadorThrowsWhenNotInSameGroup() {
-        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
-        ThesisPlan plan = new ThesisPlan(
-                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
-                ThesisPlanStatus.POSTULADO, null, null
-        );
-        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
-        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
-
-        assertThrows(BusinessRuleViolationException.class, () -> service.aprobarPorCoordinador(12));
-        verify(planRepository, never()).save(any());
-        verifyNoInteractions(tramiteWorkflow);
+    private enum CoordinatorOperation {
+        APPROVE, OBSERVE, REJECT
     }
 
-    @Test
-    @DisplayName("observarPorCoordinador - throws when coordinator is not in same research group")
-    void observarPorCoordinadorThrowsWhenNotInSameGroup() {
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("coordinator not in same group throws for all operations")
+    @EnumSource(CoordinatorOperation.class)
+    void coordinatorNotInSameGroupThrows(CoordinatorOperation op) {
         mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
         ThesisPlan plan = new ThesisPlan(
                 12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
@@ -671,23 +663,13 @@ class ThesisPlanServiceTest {
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
         when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
 
-        ObserveThesisPlanCommand cmd = new ObserveThesisPlanCommand("Observación", 100);
-        assertThrows(BusinessRuleViolationException.class, () -> service.observarPorCoordinador(12, cmd));
-        verify(planRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("rechazarPorCoordinador - throws when coordinator is not in same research group")
-    void rechazarPorCoordinadorThrowsWhenNotInSameGroup() {
-        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
-        ThesisPlan plan = new ThesisPlan(
-                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
-                ThesisPlanStatus.POSTULADO, null, null
-        );
-        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
-        when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
-
-        assertThrows(BusinessRuleViolationException.class, () -> service.rechazarPorCoordinador(12, "Motivo"));
+        Executable action = switch (op) {
+            case APPROVE -> () -> service.aprobarPorCoordinador(12);
+            case OBSERVE -> () -> service.observarPorCoordinador(12,
+                    new ObserveThesisPlanCommand("Observación", 100));
+            case REJECT -> () -> service.rechazarPorCoordinador(12, "Motivo");
+        };
+        assertThrows(BusinessRuleViolationException.class, action);
         verify(planRepository, never()).save(any());
     }
 

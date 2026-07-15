@@ -30,6 +30,9 @@ public class DocumentController {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentController.class);
 
+    private static final String MIME_MSWORD = "application/msword";
+    private static final String MIME_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
     private final UploadDocumentUseCase uploadDocumentUseCase;
     private final DownloadDocumentUseCase downloadDocumentUseCase;
     private final DeactivateDocumentUseCase deactivateDocumentUseCase;
@@ -59,8 +62,8 @@ public class DocumentController {
 
         String contentType = file.getContentType();
         if (contentType == null || !(contentType.equalsIgnoreCase("application/pdf")
-                || contentType.equalsIgnoreCase("application/msword")
-                || contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+                || contentType.equalsIgnoreCase(MIME_MSWORD)
+                || contentType.equalsIgnoreCase(MIME_DOCX))) {
             return ResponseEntity.badRequest().header("X-Error-Cause", "Tipo de archivo (MIME) no permitido. Solo se admite PDF, DOC o DOCX.").build();
         }
 
@@ -211,8 +214,8 @@ public class DocumentController {
         if (extension == null) return MediaType.APPLICATION_OCTET_STREAM;
         return switch (extension.toUpperCase()) {
             case "PDF" -> MediaType.APPLICATION_PDF;
-            case "DOC" -> MediaType.parseMediaType("application/msword");
-            case "DOCX" -> MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            case "DOC" -> MediaType.parseMediaType(MIME_MSWORD);
+            case "DOCX" -> MediaType.parseMediaType(MIME_DOCX);
             default -> MediaType.APPLICATION_OCTET_STREAM;
         };
     }
@@ -235,9 +238,9 @@ public class DocumentController {
             if (contentType.equalsIgnoreCase("application/pdf")) {
                 return header[0] == (byte) '%' && header[1] == (byte) 'P' && header[2] == (byte) 'D' && header[3] == (byte) 'F';
             }
-            if (contentType.equalsIgnoreCase("application/msword"))
+            if (contentType.equalsIgnoreCase(MIME_MSWORD))
                 return header[0] == (byte) 0xD0 && header[1] == (byte) 0xCF;
-            if (contentType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+            if (contentType.equalsIgnoreCase(MIME_DOCX))
                 return header[0] == (byte) 'P' && header[1] == (byte) 'K';
             return false;
         } catch (IOException e) {

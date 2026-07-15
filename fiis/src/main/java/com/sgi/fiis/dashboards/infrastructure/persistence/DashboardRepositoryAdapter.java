@@ -37,6 +37,10 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             " AND estado_actual NOT IN ('APROBADO_CON_RESOLUCION','RECHAZADO','FINALIZADO')";
     private static final String ALERT_ACTIVE_CALL_TITLE = "dashboard.alert.active-call.title";
 
+    private static final String COL_ID_GRUPO = "id_grupo";
+    private static final String COL_NOMBRE_GRUPO = "nombre_grupo";
+    private static final String COL_CODIGO_GRUPO = "codigo_grupo";
+
     private final JdbcTemplate jdbcTemplate;
     private final DashboardMessageService messages;
 
@@ -189,10 +193,10 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         List<java.util.Map<String, Object>> groupResult = jdbcTemplate.queryForList(sqlGroup, userId);
         if (!groupResult.isEmpty()) {
             java.util.Map<String, Object> row = groupResult.get(0);
-            Object idVal = row.get("id_grupo");
+            Object idVal = row.get(COL_ID_GRUPO);
             groupId = idVal instanceof Number number ? number.intValue() : null;
-            groupName = (String) row.get("nombre_grupo");
-            groupCode = (String) row.get("codigo_grupo");
+            groupName = (String) row.get(COL_NOMBRE_GRUPO);
+            groupCode = (String) row.get(COL_CODIGO_GRUPO);
         }
 
         if (groupId == null) {
@@ -297,9 +301,9 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
                 LIMIT 1
                 """, userId);
         if (!groupResult.isEmpty()) {
-            groupId = ((Number) groupResult.get(0).get("id_grupo")).intValue();
-            groupName = (String) groupResult.get(0).get("nombre_grupo");
-            groupCode = (String) groupResult.get(0).get("codigo_grupo");
+            groupId = ((Number) groupResult.get(0).get(COL_ID_GRUPO)).intValue();
+            groupName = (String) groupResult.get(0).get(COL_NOMBRE_GRUPO);
+            groupCode = (String) groupResult.get(0).get(COL_CODIGO_GRUPO);
         }
         if (groupId == null) {
             List<java.util.Map<String, Object>> coordResult = jdbcTemplate.queryForList(
@@ -310,9 +314,9 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
                     LIMIT 1
                     """, userId);
             if (!coordResult.isEmpty()) {
-                groupId = ((Number) coordResult.get(0).get("id_grupo")).intValue();
-                groupName = (String) coordResult.get(0).get("nombre_grupo");
-                groupCode = (String) coordResult.get(0).get("codigo_grupo");
+                groupId = ((Number) coordResult.get(0).get(COL_ID_GRUPO)).intValue();
+                groupName = (String) coordResult.get(0).get(COL_NOMBRE_GRUPO);
+                groupCode = (String) coordResult.get(0).get(COL_CODIGO_GRUPO);
             }
         }
 
@@ -485,8 +489,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
                 LIMIT 1
                 """, userId);
         if (!groupResult.isEmpty()) {
-            groupName = (String) groupResult.get(0).get("nombre_grupo");
-            groupCode = (String) groupResult.get(0).get("codigo_grupo");
+            groupName = (String) groupResult.get(0).get(COL_NOMBRE_GRUPO);
+            groupCode = (String) groupResult.get(0).get(COL_CODIGO_GRUPO);
         }
 
         List<AlertItem> alerts = new ArrayList<>();

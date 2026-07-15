@@ -29,7 +29,9 @@ public class ListProceduresUseCase {
     @Transactional(readOnly = true)
     public List<ProcedureResponseDto> execute(RoleEnum rolUsuario) {
         if (rolUsuario == null) {
-            return execute();
+            return procedureRepositoryPort.findAll().stream()
+                    .map(ProcedureMapper::toResponse)
+                    .toList();
         }
 
         return switch (rolUsuario) {
