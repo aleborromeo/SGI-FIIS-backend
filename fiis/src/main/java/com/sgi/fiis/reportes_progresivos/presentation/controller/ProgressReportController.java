@@ -37,6 +37,15 @@ public class ProgressReportController {
         this.amendUseCase  = amendUseCase;
     }
 
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ProgressReportResponse>> list(@RequestParam(required = false) String status) {
+        List<ProgressReportResponse> result = (status != null && !status.isBlank())
+                ? queryUseCase.listByStatus(status)
+                : queryUseCase.listAll();
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('DOCENTE_INVESTIGADOR', 'ESTUDIANTE')")
     public ResponseEntity<ProgressReportResponse> create(@RequestBody CreateReportCommand command) {

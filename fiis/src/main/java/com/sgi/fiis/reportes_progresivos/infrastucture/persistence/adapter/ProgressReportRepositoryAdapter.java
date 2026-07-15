@@ -44,6 +44,22 @@ public class ProgressReportRepositoryAdapter implements ProgressReportRepository
     }
 
     @Override
+    public List<ProgressReport> findAll() {
+        return jpaRepository.findAllByOrderByRegistrationDateDesc()
+                .stream()
+                .map(ProgressReportMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<ProgressReport> findByStatus(String status) {
+        return jpaRepository.findByReportStatusOrderByRegistrationDateDesc(status)
+                .stream()
+                .map(ProgressReportMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
     }
