@@ -861,6 +861,25 @@ class ThesisPlanServiceTest {
     }
 
     @Test
+    @DisplayName("obtenerPorId - admin can access any thesis plan")
+    void obtenerPorIdAdminCanAccessAnyPlan() {
+        mockAuthentication(999L, "ROLE_ADMIN");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(12)).thenReturn(100);
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(12)).thenReturn("COORDINADOR_GRUPO");
+
+        ThesisPlanResponse response = service.obtenerPorId(12);
+
+        assertNotNull(response);
+        assertEquals(12, response.idPlanTesis());
+    }
+
+    @Test
     @DisplayName("listarPorEstudiante - coordinator sees all plans for given student id (non-decano path)")
     void listarPorEstudianteCoordinatorSeesAllPlansForGivenStudentId() {
         mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");

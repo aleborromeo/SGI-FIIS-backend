@@ -5,6 +5,7 @@ import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.thesis.domain.exception.PlanAccessDeniedException;
 import com.sgi.fiis.tramites.domain.model.InvalidTransitionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -151,6 +152,15 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertEquals("Acceso denegado", response.getBody().get("message"));
+    }
+
+    @Test
+    void handlePlanAccessDenied() {
+        PlanAccessDeniedException ex = new PlanAccessDeniedException("No tiene permisos para acceder a este plan de tesis");
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handlePlanAccessDenied(ex);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("No tiene permisos para acceder a este plan de tesis", response.getBody().get("message"));
     }
 
     @Test

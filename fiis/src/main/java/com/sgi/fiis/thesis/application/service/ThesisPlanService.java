@@ -22,6 +22,7 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     private static final String ROLE_COORDINADOR_GRUPO = "ROLE_COORDINADOR_GRUPO";
     private static final String ROLE_DIRECTOR_INVESTIGACION = "ROLE_DIRECTOR_INVESTIGACION";
     private static final String ROLE_DECANO = "ROLE_DECANO";
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String MSG_USUARIO_NO_AUTENTICADO = "No se pudo identificar al usuario autenticado";
     private static final Logger log = LoggerFactory.getLogger(ThesisPlanService.class);
 
@@ -289,6 +290,9 @@ public class ThesisPlanService implements ThesisPlanUseCase {
     private void validarAccesoPlan(ThesisPlan plan) {
         CustomUserDetails userDetails = getAuthenticatedUser();
 
+        if (hasRole(userDetails, ROLE_ADMIN)) {
+            return;
+        }
         if (hasRole(userDetails, ROLE_ESTUDIANTE)) {
             if (!plan.getIdEstudiante().equals(userDetails.getId())) {
                 throw new PlanAccessDeniedException("No tiene permisos para ver planes de tesis de otros estudiantes");
