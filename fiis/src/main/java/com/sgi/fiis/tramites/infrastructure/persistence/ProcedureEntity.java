@@ -33,13 +33,13 @@ public class ProcedureEntity {
     private UserEntity applicant;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_grupo", nullable = false)
+    @JoinColumn(name = "id_grupo")
     private ResearchGroupEntity group;
 
     @Column(name = "estado_actual", nullable = false, length = 30)
     private String status;
 
-    @Column(name = "rol_revisor_actual", nullable = false, length = 30)
+    @Column(name = "rol_revisor_actual", length = 30)
     private String reviewerRole;
 
     @Column(name = "fecha_envio", nullable = false, updatable = false)
