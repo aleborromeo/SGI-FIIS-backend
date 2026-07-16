@@ -34,6 +34,7 @@ CREATE TABLE usuarios (
     fecha_actualizacion     TIMESTAMP DEFAULT NOW() NOT NULL,
     CONSTRAINT uq_dni_usuario UNIQUE (dni),
     CONSTRAINT uq_correo_usuario UNIQUE (correo_institucional),
+    CONSTRAINT chk_dni_formato CHECK (dni ~ '^\d{8}$'),
     CONSTRAINT fk_usuarios_rol FOREIGN KEY (id_rol_principal) REFERENCES roles(id_rol)
 );
 
@@ -105,7 +106,7 @@ CREATE TABLE documentos (
     id_usuario_subio    INT NOT NULL,
     fecha_carga         TIMESTAMP DEFAULT NOW() NOT NULL,
     es_activo           BOOLEAN DEFAULT TRUE NOT NULL,
-    CONSTRAINT chk_extension_documento CHECK (tipo_extension IN ('PDF', 'DOC', 'DOCX')),
+    CONSTRAINT chk_extension_documento CHECK (UPPER(tipo_extension) IN ('PDF', 'DOC', 'DOCX')),
     CONSTRAINT fk_documentos_usuario FOREIGN KEY (id_usuario_subio) REFERENCES usuarios(id_usuario)
 );
 
@@ -117,6 +118,8 @@ CREATE TABLE convocatorias (
     id_convocatoria     SERIAL PRIMARY KEY,
     titulo_convocatoria VARCHAR(150) NOT NULL,
     descripcion         TEXT NOT NULL DEFAULT '',
+    titulo_jsonb        JSONB NOT NULL DEFAULT '{"es": ""}',
+    descripcion_jsonb   JSONB NOT NULL DEFAULT '{"es": ""}',
     fecha_inicio        DATE NOT NULL,
     fecha_fin           DATE NOT NULL,
     estado              VARCHAR(20) DEFAULT 'ABIERTA' NOT NULL,
@@ -151,23 +154,23 @@ CREATE TABLE proyectos (
     lugar_ejecucion_jsonb   JSONB NOT NULL DEFAULT '{"es": ""}',
     id_linea                INT NOT NULL,
     id_grupo                INT NOT NULL,
-    presupuesto             DECIMAL(18,2) NOT NULL,
+    presupuesto             DECIMAL(12,2) NOT NULL,
     fecha_inicio            DATE NOT NULL,
     fecha_fin               DATE NOT NULL,
     lugar_ejecucion         VARCHAR(255) NOT NULL,
     id_responsable          INT NOT NULL,
     id_convocatoria         INT,
-    id_documento_propuesta  INT,
-    estado                  VARCHAR(50) DEFAULT 'POSTULADO' NOT NULL,
+    id_documento_actual     INT,
+    estado_proyecto         VARCHAR(50) DEFAULT 'POSTULADO' NOT NULL,
     fecha_creacion          TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_actualizacion     TIMESTAMP DEFAULT NOW() NOT NULL,
     CONSTRAINT uq_codigo_proyecto UNIQUE (codigo_proyecto),
-    CONSTRAINT chk_estado_proyecto CHECK (estado IN ('POSTULADO', 'OBSERVADO', 'APROBADO', 'RECHAZADO', 'EN_EJECUCION', 'FINALIZADO')),
+    CONSTRAINT chk_estado_proyecto CHECK (estado_proyecto IN ('BORRADOR', 'POSTULADO', 'OBSERVADO', 'APROBADO', 'RECHAZADO', 'EN_EJECUCION', 'FINALIZADO')),
     CONSTRAINT fk_proyectos_linea FOREIGN KEY (id_linea) REFERENCES lineas_investigacion(id_linea),
     CONSTRAINT fk_proyectos_grupo FOREIGN KEY (id_grupo) REFERENCES grupos_investigacion(id_grupo),
     CONSTRAINT fk_proyectos_responsable FOREIGN KEY (id_responsable) REFERENCES usuarios(id_usuario),
     CONSTRAINT fk_proyectos_convocatoria FOREIGN KEY (id_convocatoria) REFERENCES convocatorias(id_convocatoria),
-    CONSTRAINT fk_proyectos_documento FOREIGN KEY (id_documento_propuesta) REFERENCES documentos(id_documento)
+    CONSTRAINT fk_proyectos_documento FOREIGN KEY (id_documento_actual) REFERENCES documentos(id_documento)
 );
 
 CREATE TABLE miembros_proyecto (
@@ -245,11 +248,11 @@ CREATE TABLE informes_avance (
 CREATE TABLE tramites (
     id_tramite              SERIAL PRIMARY KEY,
     codigo_tramite          VARCHAR(30) NOT NULL,
-    tipo_tramite            VARCHAR(50) NOT NULL,
+    tipo_tramite            VARCHAR(30) NOT NULL,
     id_solicitante          INT NOT NULL,
     id_grupo                INT,
-    estado_actual           VARCHAR(50) NOT NULL,
-    rol_revisor_actual      VARCHAR(50),
+    estado_actual           VARCHAR(30) NOT NULL,
+    rol_revisor_actual      VARCHAR(30),
     fecha_envio             TIMESTAMP DEFAULT NOW() NOT NULL,
     fecha_actualizacion     TIMESTAMP DEFAULT NOW() NOT NULL,
     id_referencia_proyecto  INT,
@@ -262,7 +265,6 @@ CREATE TABLE tramites (
     CONSTRAINT fk_tramites_proyecto FOREIGN KEY (id_referencia_proyecto) REFERENCES proyectos(id_proyecto),
     CONSTRAINT fk_tramites_tesis FOREIGN KEY (id_referencia_tesis) REFERENCES planes_tesis(id_plan_tesis),
     CONSTRAINT fk_tramites_informe FOREIGN KEY (id_referencia_informe) REFERENCES informes_avance(id_informe),
-    -- Arco excluyente 3NF
     CONSTRAINT chk_tramites_exclusividad CHECK (
         (id_referencia_proyecto IS NOT NULL AND id_referencia_tesis IS NULL AND id_referencia_informe IS NULL) OR
         (id_referencia_proyecto IS NULL AND id_referencia_tesis IS NOT NULL AND id_referencia_informe IS NULL) OR
@@ -274,9 +276,9 @@ CREATE TABLE movimientos_tramite (
     id_movimiento       SERIAL PRIMARY KEY,
     id_tramite          INT NOT NULL,
     id_usuario_accion   INT NOT NULL,
-    accion              VARCHAR(50) NOT NULL,
-    estado_anterior     VARCHAR(50) NOT NULL,
-    estado_nuevo        VARCHAR(50) NOT NULL,
+    accion              VARCHAR(30) NOT NULL,
+    estado_anterior     VARCHAR(30) NOT NULL,
+    estado_nuevo        VARCHAR(30) NOT NULL,
     observacion         TEXT,
     id_documento_adjunto INT,
     fecha_movimiento    TIMESTAMP DEFAULT NOW() NOT NULL,
@@ -385,7 +387,7 @@ CREATE INDEX ix_usuarios_roles_rol ON usuarios_roles(id_rol);
 -- Proyectos
 CREATE INDEX ix_proyectos_responsable ON proyectos(id_responsable);
 CREATE INDEX ix_proyectos_grupo ON proyectos(id_grupo);
-CREATE INDEX ix_proyectos_estado ON proyectos(estado);
+CREATE INDEX ix_proyectos_estado ON proyectos(estado_proyecto);
 
 -- Planes de tesis
 CREATE INDEX ix_planes_estudiante ON planes_tesis(id_estudiante);
