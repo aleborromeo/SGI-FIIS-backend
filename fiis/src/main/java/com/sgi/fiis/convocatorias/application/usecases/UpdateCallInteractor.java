@@ -52,6 +52,7 @@ public class UpdateCallInteractor implements UpdateCallUseCase {
                 .status(call.getStatus())
                 .documentId(resolveIfNotNull(request.getDocumentId(), call.getDocumentId()))
                 .creatorId(call.getCreatorId())
+                .poblacionObjetivo(resolveString(request.getPoblacionObjetivo(), call.getPoblacionObjetivo()))
                 .researchLineIds(request.getResearchLineIds() != null
                         ? request.getResearchLineIds() : call.getResearchLineIds())
                 .build();
@@ -87,6 +88,7 @@ public class UpdateCallInteractor implements UpdateCallUseCase {
                 call.getEndDate(),
                 statusName,
                 call.getDocumentId(),
+                call.getPoblacionObjetivo(),
                 call.getResearchLineIds()
         );
     }

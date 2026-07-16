@@ -19,5 +19,6 @@ public class UpdateCallRequest {
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer documentId;
+    private String poblacionObjetivo;
     private List<Integer> researchLineIds;
 }

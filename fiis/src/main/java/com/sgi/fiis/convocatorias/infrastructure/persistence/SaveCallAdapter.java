@@ -130,6 +130,8 @@ public class SaveCallAdapter implements SaveCallPort {
                 .status(dbStatus)
                 .document(doc)
                 .creator(creator)
+                .poblacionObjetivo(domain.getPoblacionObjetivo() != null
+                        ? domain.getPoblacionObjetivo() : "AMBOS")
                 .researchLines(lines)
                 .build();
     }
@@ -152,16 +154,18 @@ public class SaveCallAdapter implements SaveCallPort {
                     .toList();
         }
 
-        return new ResearchCall(
-                entity.getId(),
-                JsonbHelper.getText(entity.getTitleJson(), "es"),
-                JsonbHelper.getText(entity.getDescriptionJson(), "es"),
-                entity.getStartDate(),
-                entity.getEndDate(),
-                domainStatus,
-                entity.getDocument() != null ? entity.getDocument().getId() : null,
-                entity.getCreator() != null ? entity.getCreator().getId().intValue() : null,
-                lineIds
-        );
+        return ResearchCall.builder()
+                .id(entity.getId())
+                .title(JsonbHelper.getText(entity.getTitleJson(), "es"))
+                .description(JsonbHelper.getText(entity.getDescriptionJson(), "es"))
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .status(domainStatus)
+                .documentId(entity.getDocument() != null ? entity.getDocument().getId() : null)
+                .creatorId(entity.getCreator() != null ? entity.getCreator().getId().intValue() : null)
+                .poblacionObjetivo(entity.getPoblacionObjetivo() != null
+                        ? entity.getPoblacionObjetivo() : "AMBOS")
+                .researchLineIds(lineIds)
+                .build();
     }
 }

@@ -29,17 +29,18 @@ public class CreateCallInteractor implements CreateCallUseCase {
         }
 
         // Create domain model which executes business rule checks (e.g. endDate is not before startDate)
-        ResearchCall call = new ResearchCall(
-                null,
-                request.getTitle(),
-                request.getDescription(),
-                request.getStartDate(),
-                request.getEndDate(),
-                CallStatus.OPEN,
-                request.getDocumentId(),
-                creatorId,
-                request.getResearchLineIds()
-        );
+        ResearchCall call = ResearchCall.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .status(CallStatus.OPEN)
+                .documentId(request.getDocumentId())
+                .creatorId(creatorId)
+                .poblacionObjetivo(request.getPoblacionObjetivo() != null
+                        ? request.getPoblacionObjetivo() : "AMBOS")
+                .researchLineIds(request.getResearchLineIds())
+                .build();
 
         ResearchCall savedCall = saveCallPort.save(call);
 
@@ -58,6 +59,7 @@ public class CreateCallInteractor implements CreateCallUseCase {
                 savedCall.getEndDate(),
                 statusName,
                 savedCall.getDocumentId(),
+                savedCall.getPoblacionObjetivo(),
                 savedCall.getResearchLineIds()
         );
     }

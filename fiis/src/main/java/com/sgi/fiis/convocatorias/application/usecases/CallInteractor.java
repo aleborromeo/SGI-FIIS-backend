@@ -124,6 +124,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
                 call.getEndDate(),
                 statusName,
                 call.getDocumentId(),
+                call.getPoblacionObjetivo(),
                 call.getResearchLineIds()
         );
     }

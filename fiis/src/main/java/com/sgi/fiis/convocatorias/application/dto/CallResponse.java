@@ -20,5 +20,6 @@ public class CallResponse {
     private LocalDate endDate;
     private String status;
     private Integer documentId;
+    private String poblacionObjetivo;
     private List<Integer> researchLineIds;
 }
