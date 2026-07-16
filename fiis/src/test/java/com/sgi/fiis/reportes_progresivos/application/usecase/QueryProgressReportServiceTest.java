@@ -85,4 +85,50 @@ class QueryProgressReportServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> service.getById(999L));
     }
+
+    @Test
+    @DisplayName("List all returns mapped responses")
+    void listAllReturnsMappedResponses() {
+        ProgressReport r1 = buildReport(1L, 5L);
+        ProgressReport r2 = buildReport(2L, 6L);
+        when(repositoryPort.findAll()).thenReturn(Arrays.asList(r1, r2));
+
+        List<ProgressReportResponse> result = service.listAll();
+
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
+    }
+
+    @Test
+    @DisplayName("List all returns empty list")
+    void listAllReturnsEmptyList() {
+        when(repositoryPort.findAll()).thenReturn(Collections.emptyList());
+
+        List<ProgressReportResponse> result = service.listAll();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("List by status returns mapped responses")
+    void listByStatusReturnsMappedResponses() {
+        ProgressReport r1 = buildReport(1L, 5L);
+        when(repositoryPort.findByStatus("PENDIENTE")).thenReturn(Arrays.asList(r1));
+
+        List<ProgressReportResponse> result = service.listByStatus("PENDIENTE");
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
+    }
+
+    @Test
+    @DisplayName("List by status returns empty list")
+    void listByStatusReturnsEmptyList() {
+        when(repositoryPort.findByStatus("RECHAZADO")).thenReturn(Collections.emptyList());
+
+        List<ProgressReportResponse> result = service.listByStatus("RECHAZADO");
+
+        assertTrue(result.isEmpty());
+    }
 }

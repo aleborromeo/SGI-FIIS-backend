@@ -64,6 +64,24 @@ class ResearchGroupMapperTest {
     }
 
     @Test
+    @DisplayName("Should map ResearchGroup with createdAt to ResponseDto")
+    void toResponseDto_shouldMapCreatedAt() {
+        LocalDateTime now = LocalDateTime.of(2026, 7, 16, 10, 30);
+        ResearchGroup domain = ResearchGroup.builder()
+                .id(1)
+                .groupCode("GI-01")
+                .groupName("Grupo Test")
+                .active(true)
+                .createdAt(now)
+                .build();
+
+        ResearchGroupResponseDto dto = mapper.toResponseDto(domain);
+
+        assertNotNull(dto);
+        assertEquals(now.toString(), dto.getCreatedAt());
+    }
+
+    @Test
     @DisplayName("Should return null when toResponseDto receives null domain model")
     void toResponseDto_shouldReturnNullWhenDomainIsNull() {
         assertNull(mapper.toResponseDto(null));

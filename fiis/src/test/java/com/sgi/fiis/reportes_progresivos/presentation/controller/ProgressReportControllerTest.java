@@ -197,4 +197,63 @@ class ProgressReportControllerTest {
 
         verify(amendUseCase, times(1)).amend(any(AmendReportCommand.class));
     }
+
+    @Test
+    @DisplayName("GET /api/progress-reports - Should list all reports when no status filter")
+    void shouldListAllReports() throws Exception {
+        ProgressReportResponse r1 = ProgressReportTestHelper.createResponse(1L, 10L, ProgressReportStatus.PENDING);
+        ProgressReportResponse r2 = ProgressReportTestHelper.createResponse(2L, 11L, ProgressReportStatus.APPROVED);
+
+        when(queryUseCase.listAll()).thenReturn(List.of(r1, r2));
+
+        mockMvc.perform(get("/api/progress-reports"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2));
+
+        verify(queryUseCase, times(1)).listAll();
+        verify(queryUseCase, never()).listByStatus(any());
+    }
+
+    @Test
+    @DisplayName("GET /api/progress-reports?status=PENDIENTE - Should list by status")
+    void shouldListReportsByStatus() throws Exception {
+        ProgressReportResponse r1 = ProgressReportTestHelper.createResponse(1L, 10L, ProgressReportStatus.PENDING);
+
+        when(queryUseCase.listByStatus("PENDIENTE")).thenReturn(List.of(r1));
+
+        mockMvc.perform(get("/api/progress-reports").param("status", "PENDIENTE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].reportStatus").value("PENDING"));
+
+        verify(queryUseCase, times(1)).listByStatus("PENDIENTE");
+        verify(queryUseCase, never()).listAll();
+    }
+
+    @Test
+    @DisplayName("GET /api/progress-reports?status= - Should list all when status is blank")
+    void shouldListAllWhenStatusIsBlank() throws Exception {
+        when(queryUseCase.listAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/progress-reports").param("status", "  "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(queryUseCase, times(1)).listAll();
+    }
+
+    @Test
+    @DisplayName("PATCH /api/progress-reports/{id}/observe - Should use default empty observation")
+    void shouldObserveReportWithDefaultEmptyObservation() throws Exception {
+        ProgressReportResponse response = ProgressReportTestHelper.createResponse(1L, null, ProgressReportStatus.OBSERVED);
+
+        when(reviewUseCase.observe(1L, "")).thenReturn(response);
+
+        mockMvc.perform(patch("/api/progress-reports/{id}/observe", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+
+        verify(reviewUseCase, times(1)).observe(1L, "");
+    }
 }
