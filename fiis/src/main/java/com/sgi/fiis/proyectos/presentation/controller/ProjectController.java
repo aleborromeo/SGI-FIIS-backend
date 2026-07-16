@@ -107,7 +107,7 @@ public class ProjectController {
     }
 
     @GetMapping("/drafts")
-    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List draft projects for the authenticated user")
     @ApiResponse(responseCode = "200", description = "List of draft projects")
     public ResponseEntity<List<ProjectResponse>> getMyDrafts(

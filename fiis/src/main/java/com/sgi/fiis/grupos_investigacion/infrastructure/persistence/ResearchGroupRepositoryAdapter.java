@@ -41,7 +41,7 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     public List<ResearchGroup> findAll() {
         String sql = """
                  SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
-                        g.id_coordinador_actual, g.es_activo,
+                        g.id_coordinador_actual, g.es_activo, g.fecha_creacion,
                         u.nombres AS coordinator_first_names,
                         u.apellidos AS coordinator_last_names
                    FROM grupos_investigacion g
@@ -57,6 +57,8 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
                 .active(rs.getBoolean("es_activo"))
                 .coordinatorFirstNames(rs.getString("coordinator_first_names"))
                 .coordinatorLastNames(rs.getString("coordinator_last_names"))
+                .createdAt(rs.getTimestamp("fecha_creacion") != null
+                        ? rs.getTimestamp("fecha_creacion").toLocalDateTime() : null)
                 .build());
     }
 
@@ -117,6 +119,7 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
                 .currentCoordinatorId(entity.getCurrentCoordinator() != null
                         ? entity.getCurrentCoordinator().getId().intValue() : null)
                 .active(entity.isActive())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 
