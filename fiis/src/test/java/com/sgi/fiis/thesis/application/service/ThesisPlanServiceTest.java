@@ -4,6 +4,7 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.thesis.application.dto.*;
 import com.sgi.fiis.thesis.domain.*;
 import com.sgi.fiis.thesis.domain.exception.BusinessRuleViolationException;
+import com.sgi.fiis.thesis.domain.exception.PlanAccessDeniedException;
 import com.sgi.fiis.thesis.domain.port.out.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -644,7 +645,7 @@ class ThesisPlanServiceTest {
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
         when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
 
-        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+        assertThrows(PlanAccessDeniedException.class, () -> service.obtenerPorId(12));
     }
 
     private enum CoordinatorOperation {
@@ -792,7 +793,7 @@ class ThesisPlanServiceTest {
         );
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
 
-        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+        assertThrows(PlanAccessDeniedException.class, () -> service.obtenerPorId(12));
     }
 
     @Test
@@ -806,7 +807,7 @@ class ThesisPlanServiceTest {
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
         when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
 
-        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+        assertThrows(PlanAccessDeniedException.class, () -> service.obtenerPorId(12));
     }
 
     @Test
@@ -839,7 +840,7 @@ class ThesisPlanServiceTest {
         when(grupoValidation.esCoordinadorDelGrupo(303L, 2)).thenReturn(false);
         when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_DIRECCION");
 
-        assertThrows(BusinessRuleViolationException.class, () -> service.obtenerPorId(12));
+        assertThrows(PlanAccessDeniedException.class, () -> service.obtenerPorId(12));
     }
 
     @Test
