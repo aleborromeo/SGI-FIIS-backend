@@ -13,4 +13,10 @@ public interface ProgressReportJpaRepository extends JpaRepository<ProgressRepor
 
     /** Find all reports for a project, ordered by registration date descending. */
     List<ProgressReportEntity> findByProjectIdOrderByRegistrationDateDesc(Long projectId);
+
+    /** Find all reports ordered by registration date descending. */
+    List<ProgressReportEntity> findAllByOrderByRegistrationDateDesc();
+
+    /** Find all reports by status ordered by registration date descending. */
+    List<ProgressReportEntity> findByReportStatusOrderByRegistrationDateDesc(String reportStatus);
 }

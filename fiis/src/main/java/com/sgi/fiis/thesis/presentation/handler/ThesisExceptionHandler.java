@@ -17,6 +17,11 @@ public class ThesisExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 404, ex.getMessage()));
     }
 
+    @ExceptionHandler(PlanAccessDeniedException.class)
+    public ResponseEntity<ApiError> forbidden(PlanAccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 403, ex.getMessage()));
+    }
+
     @ExceptionHandler({BusinessRuleViolationException.class, InvalidStateTransitionException.class})
     public ResponseEntity<ApiError> business(RuntimeException ex) {
         return ResponseEntity.badRequest().body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 400, ex.getMessage()));

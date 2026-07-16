@@ -10,5 +10,5 @@ public record RegisterThesisPlanCommand(
         @NotBlank @Size(max = 5000) String resumen,
         @NotNull @Min(1) Integer idLinea,
         @NotNull @Min(1) Integer idGrupo,
-        @Min(1) Integer idDocumentoActual
+        @NotNull @Min(1) Integer idDocumentoActual
 ) {}

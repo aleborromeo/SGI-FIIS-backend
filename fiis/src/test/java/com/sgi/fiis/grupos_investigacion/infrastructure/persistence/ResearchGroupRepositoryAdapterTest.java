@@ -161,6 +161,8 @@ class ResearchGroupRepositoryAdapterTest {
             when(rs.getBoolean("es_activo")).thenReturn(true);
             when(rs.getString("coordinator_first_names")).thenReturn("Maria");
             when(rs.getString("coordinator_last_names")).thenReturn("Lopez");
+            java.sql.Timestamp ts = java.sql.Timestamp.valueOf("2026-07-16 10:30:00");
+            when(rs.getTimestamp("fecha_creacion")).thenReturn(ts);
             return List.of(mapper.mapRow(rs, 0));
         });
 
@@ -176,6 +178,32 @@ class ResearchGroupRepositoryAdapterTest {
         assertTrue(g.isActive());
         assertEquals("Maria", g.getCoordinatorFirstNames());
         assertEquals("Lopez", g.getCoordinatorLastNames());
+        assertNotNull(g.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Should map ResearchGroups with null fecha_creacion")
+    @SuppressWarnings("unchecked")
+    void testFindAllWithNullCreatedAt() {
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class))).thenAnswer(invocation -> {
+            RowMapper<ResearchGroup> mapper = invocation.getArgument(1);
+            ResultSet rs = mock(ResultSet.class);
+            when(rs.getInt("id_grupo")).thenReturn(2);
+            when(rs.getString("codigo_grupo")).thenReturn("GI-002");
+            when(rs.getString("nombre_grupo")).thenReturn("Grupo Test");
+            when(rs.getObject("id_coordinador_actual")).thenReturn(null);
+            when(rs.getBoolean("es_activo")).thenReturn(true);
+            when(rs.getString("coordinator_first_names")).thenReturn(null);
+            when(rs.getString("coordinator_last_names")).thenReturn(null);
+            when(rs.getTimestamp("fecha_creacion")).thenReturn(null);
+            return List.of(mapper.mapRow(rs, 0));
+        });
+
+        List<ResearchGroup> result = adapter.findAll();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getCreatedAt());
     }
 
     @Test

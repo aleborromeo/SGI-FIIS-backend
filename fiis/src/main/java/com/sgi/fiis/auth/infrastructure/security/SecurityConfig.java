@@ -2,6 +2,7 @@ package com.sgi.fiis.auth.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,10 +36,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     // Rutas públicas
                     .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/api/v1/calls/vigent").permitAll()
                     .requestMatchers("/health").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/calls/**").permitAll()
                     // Rutas protegidas por rol
+                    .requestMatchers(HttpMethod.GET, "/api/v1/users").authenticated()
                     .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
                     // Cualquier otra petición requiere autenticación

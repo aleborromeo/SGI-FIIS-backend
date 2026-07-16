@@ -29,6 +29,22 @@ public class QueryProgressReportService implements QueryProgressReportUseCase {
     }
 
     @Override
+    public List<ProgressReportResponse> listAll() {
+        return repositoryPort.findAll()
+                .stream()
+                .map(ProgressReportMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ProgressReportResponse> listByStatus(String status) {
+        return repositoryPort.findByStatus(status)
+                .stream()
+                .map(ProgressReportMapper::toResponse)
+                .toList();
+    }
+
+    @Override
     public ProgressReportResponse getById(Long reportId) {
         ProgressReport report = repositoryPort.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException(

@@ -20,6 +20,7 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
+import com.sgi.fiis.thesis.domain.exception.PlanAccessDeniedException;
 import com.sgi.fiis.tramites.domain.model.InvalidTransitionException;
 
 @RestControllerAdvice
@@ -116,6 +117,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
         String message = messageSource.getMessage("shared.error.forbidden", null, "Acceso denegado", resolveLocale());
         return buildResponse(HttpStatus.FORBIDDEN, message);
+    }
+
+    @ExceptionHandler(PlanAccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handlePlanAccessDenied(PlanAccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)

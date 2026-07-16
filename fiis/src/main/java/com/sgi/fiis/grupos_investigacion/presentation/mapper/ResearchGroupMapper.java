@@ -32,6 +32,7 @@ public class ResearchGroupMapper {
                 .coordinatorFirstNames(domain.getCoordinatorFirstNames())
                 .coordinatorLastNames(domain.getCoordinatorLastNames())
                 .active(domain.isActive())
+                .createdAt(domain.getCreatedAt() != null ? domain.getCreatedAt().toString() : null)
                 .build();
     }
 
