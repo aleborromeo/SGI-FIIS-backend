@@ -376,7 +376,7 @@ INSERT INTO proyectos (codigo_proyecto, titulo_proyecto, resumen, objetivo_gener
 -- 13. INTEGRANTES DE PROYECTO
 -- ============================================================================
 
-INSERT INTO integrantes_proyecto (id_proyecto, id_usuario, rol_en_proyecto) VALUES
+INSERT INTO miembros_proyecto (id_proyecto, id_usuario, rol) VALUES
     -- PROY-2026-001 (Ciberseguridad)
     ((SELECT id_proyecto FROM proyectos WHERE codigo_proyecto = 'PROY-2026-001'),
      (SELECT id_usuario FROM usuarios WHERE dni = '50123456'), 'RESPONSABLE'),
