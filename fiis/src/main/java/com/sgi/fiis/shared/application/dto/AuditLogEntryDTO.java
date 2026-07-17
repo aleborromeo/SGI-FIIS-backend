@@ -12,6 +12,8 @@ public class AuditLogEntryDTO {
     private String accion;
     private Long idUsuario;
     private String nombreUsuario;
+    private String datosAnteriores;
+    private String datosNuevos;
     private String ipOrigen;
     private LocalDateTime fechaAccion;
 }
