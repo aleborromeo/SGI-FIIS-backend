@@ -12,7 +12,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *
  * Uso: hacer que la clase de test extienda esta clase.
  */
-@SuppressWarnings({"resource", "java:S1118", "java:S106"})
+@SuppressWarnings("resource")
 public abstract class TestcontainersConfig {
 
     private static final PostgreSQLContainer<?> POSTGRES;
