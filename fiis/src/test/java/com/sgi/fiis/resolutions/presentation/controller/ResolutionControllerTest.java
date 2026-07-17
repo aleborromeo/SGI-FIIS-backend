@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"java:S100", "java:S1192", "java:S5786"})
 class ResolutionControllerTest {
 
     private MockMvc mockMvc;
@@ -45,13 +46,11 @@ class ResolutionControllerTest {
     @Mock
     private GetResolutionUseCase getResolutionUseCase;
 
-    private ResolutionController resolutionController;
-
     private Resolution sampleResolution;
 
     @BeforeEach
-    void setUp() {
-        resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
+    public void setUp() {
+        ResolutionController resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
         mockMvc = MockMvcBuilders.standaloneSetup(resolutionController)
                 .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .build();

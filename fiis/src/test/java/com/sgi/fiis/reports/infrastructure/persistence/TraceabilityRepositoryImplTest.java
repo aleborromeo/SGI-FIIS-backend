@@ -93,4 +93,26 @@ class TraceabilityRepositoryImplTest {
         TraceabilityMovement m = result.get(0);
         assertNull(m.getMovementDate());
     }
+
+    @Test
+    @DisplayName("Should return true when procedure belongs to group")
+    void testIsProcedureInGroup_true() {
+        when(jdbc.queryForObject(anyString(), eq(Boolean.class), eq(10), eq(5)))
+                .thenReturn(true);
+
+        boolean result = repository.isProcedureInGroup(10, 5);
+
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Should return false when procedure does not belong to group")
+    void testIsProcedureInGroup_false() {
+        when(jdbc.queryForObject(anyString(), eq(Boolean.class), eq(10), eq(99)))
+                .thenReturn(false);
+
+        boolean result = repository.isProcedureInGroup(10, 99);
+
+        assertFalse(result);
+    }
 }

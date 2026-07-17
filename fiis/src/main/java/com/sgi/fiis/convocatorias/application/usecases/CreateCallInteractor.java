@@ -21,7 +21,7 @@ public class CreateCallInteractor implements CreateCallUseCase {
     }
 
     @Override
-    @Auditable(action = "CREATE_RESEARCH_CALL")
+    @Auditable(action = "CREATE_RESEARCH_CALL", table = "convocatorias", description = "Creación de convocatoria de investigación")
     public CallResponse execute(CreateCallRequest request, Integer creatorId) {
         // RN-11: Validate that all research lines are active
         if (!saveCallPort.areLinesActive(request.getResearchLineIds())) {

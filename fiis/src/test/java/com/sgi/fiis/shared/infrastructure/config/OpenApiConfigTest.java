@@ -10,12 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings({"java:S100", "java:S5786"})
 class OpenApiConfigTest {
 
     private OpenApiConfig openApiConfig;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         openApiConfig = new OpenApiConfig();
         // Provide mock values to avoid null pointer issues during logging, if any
         ReflectionTestUtils.setField(openApiConfig, "mailHost", "smtp.test.com");

@@ -1,44 +1,69 @@
 package com.sgi.fiis.reports.presentation.controller;
 
 import com.sgi.fiis.reports.application.service.TraceabilityService;
+import com.sgi.fiis.reports.domain.model.ProcedureRecentActivity;
 import com.sgi.fiis.reports.domain.model.TraceabilityMovement;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST controller for procedure traceability.
- *
- * Endpoint:
- *   GET /api/reports/traceability/{procedureId}
- *
- * Returns the complete chronological history of movements for a procedure:
- * who acted, what action was performed, when, and the status changes recorded.
- */
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
+
 @RestController
 @RequestMapping("/api/reports")
 @PreAuthorize("isAuthenticated()")
 public class TraceabilityController {
 
     private final TraceabilityService service;
+    private final JdbcTemplate jdbcTemplate;
 
-    public TraceabilityController(TraceabilityService service) {
+    public TraceabilityController(TraceabilityService service, JdbcTemplate jdbcTemplate) {
         this.service = service;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    /**
-     * Queries the history of movements for a procedure.
-     *
-     * @param procedureId identifier of the procedure
-     * @return empty list if the procedure does not exist or has no movements
-     */
     @GetMapping("/traceability/{procedureId}")
-    public ResponseEntity<List<TraceabilityMovement>> getTraceability(
+    public ResponseEntity<?> getTraceability(
             @PathVariable Integer procedureId) {
 
-        List<TraceabilityMovement> history = service.getTraceability(procedureId);
-        return ResponseEntity.ok(history);
+        Integer userGroupId = resolveUserGroupId();
+        try {
+            List<TraceabilityMovement> history = service.getTraceability(procedureId, userGroupId);
+            return ResponseEntity.ok(history);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/traceability/recent")
+    public ResponseEntity<List<ProcedureRecentActivity>> getRecentActivity(
+            @RequestParam(defaultValue = "7") int days) {
+
+        Integer userGroupId = resolveUserGroupId();
+        List<ProcedureRecentActivity> activities = service.getProceduresWithRecentActivity(userGroupId, days);
+        return ResponseEntity.ok(activities);
+    }
+
+    private Integer resolveUserGroupId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            return null;
+        }
+
+        boolean isCoordinator = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR_GRUPO"));
+        if (!isCoordinator) {
+            return null;
+        }
+
+        String sql = "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ?";
+        List<Integer> groups = jdbcTemplate.queryForList(sql, Integer.class, userDetails.getId());
+        return groups.isEmpty() ? null : groups.get(0);
     }
 }

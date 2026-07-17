@@ -40,7 +40,7 @@ public class EvaluacionController {
     }
 
     @PostMapping("/asignar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION')")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     @Operation(summary = "Asignar un evaluador", description = "Asigna un evaluador a un proyecto o plan de tesis.")
     @ApiResponse(responseCode = "201", description = "Evaluador asignado exitosamente")
     @ApiResponse(responseCode = "400", description = "Datos de asignación inválidos")
@@ -60,7 +60,7 @@ public class EvaluacionController {
     }
 
     @PostMapping("/{idEvaluacion}/resultado")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EVALUADOR')")
+    @PreAuthorize("hasRole('EVALUADOR')")
     @Operation(summary = "Registrar resultado de evaluación", description = "Permite a un evaluador registrar el puntaje y las observaciones de su evaluación.")
     @ApiResponse(responseCode = "200", description = "Resultado registrado exitosamente")
     @ApiResponse(responseCode = "400", description = "Datos de evaluación inválidos")
@@ -83,7 +83,7 @@ public class EvaluacionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION')")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     @Operation(summary = "Listar todas las evaluaciones", description = "Obtiene la lista completa de evaluaciones en el sistema.")
     @ApiResponse(responseCode = "200", description = "Lista recuperada exitosamente")
     @ApiResponse(responseCode = "403", description = "Acceso denegado. Requiere rol DIRECTOR_INVESTIGACION")
@@ -92,7 +92,7 @@ public class EvaluacionController {
     }
 
     @GetMapping("/{idEvaluacion}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION', 'EVALUADOR')")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'EVALUADOR')")
     @Operation(summary = "Obtener evaluación por ID", description = "Obtiene los detalles de una evaluación específica por su identificador.")
     @ApiResponse(responseCode = "200", description = "Evaluación encontrada")
     @ApiResponse(responseCode = "403", description = "Acceso denegado")
@@ -104,7 +104,7 @@ public class EvaluacionController {
     }
 
     @GetMapping("/evaluador/{idEvaluador}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION', 'EVALUADOR')")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'EVALUADOR')")
     @Operation(summary = "Listar evaluaciones por evaluador", description = "Obtiene la lista de evaluaciones asignadas a un evaluador en específico.")
     @ApiResponse(responseCode = "200", description = "Lista recuperada exitosamente")
     @ApiResponse(responseCode = "403", description = "Acceso denegado")

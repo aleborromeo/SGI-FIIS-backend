@@ -42,6 +42,7 @@ public class SecurityConfig {
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/calls/**").permitAll()
                     // Rutas protegidas por rol
                     .requestMatchers(HttpMethod.GET, "/api/v1/users").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
                     .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/v1/roles/**").hasRole("ADMIN")
                     // Cualquier otra petición requiere autenticación

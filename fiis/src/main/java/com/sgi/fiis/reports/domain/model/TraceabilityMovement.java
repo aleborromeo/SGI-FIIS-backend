@@ -12,19 +12,16 @@ public class TraceabilityMovement {
     private Integer       procedureId;
     private String        procedureCode;
     private String        actionUserName;
+    private String        actionUserRole;
     private String        action;
     private String        previousStatus;
     private String        newStatus;
     private String        observation;
     private LocalDateTime movementDate;
+    private String        ipOrigen;
 
     public TraceabilityMovement() {
-        // required by JdbcTemplate RowMapper
     }
-
-    // -------------------------------------------------------------------------
-    // Getters & Setters
-    // -------------------------------------------------------------------------
 
     public Integer       getMovementId()            { return movementId; }
     public void          setMovementId(Integer v)    { this.movementId = v; }
@@ -37,6 +34,9 @@ public class TraceabilityMovement {
 
     public String        getActionUserName()            { return actionUserName; }
     public void          setActionUserName(String v)    { this.actionUserName = v; }
+
+    public String        getActionUserRole()            { return actionUserRole; }
+    public void          setActionUserRole(String v)    { this.actionUserRole = v; }
 
     public String        getAction()            { return action; }
     public void          setAction(String v)    { this.action = v; }
@@ -52,4 +52,7 @@ public class TraceabilityMovement {
 
     public LocalDateTime getMovementDate()              { return movementDate; }
     public void          setMovementDate(LocalDateTime v){ this.movementDate = v; }
+
+    public String        getIpOrigen()            { return ipOrigen; }
+    public void          setIpOrigen(String v)    { this.ipOrigen = v; }
 }

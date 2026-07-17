@@ -9,6 +9,7 @@ import java.time.Month;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("ResearchCallEntity Unit Tests")
+@SuppressWarnings("java:S1192")
 class ResearchCallEntityTest {
 
     @Test

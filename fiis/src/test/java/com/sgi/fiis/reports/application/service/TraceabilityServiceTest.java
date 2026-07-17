@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 /**
@@ -175,5 +176,55 @@ class TraceabilityServiceTest {
 
         // assert
         assertThat(result).isNotNull().isEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // Permission: COORDINADOR_GRUPO with access to own group
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("COORDINADOR_GRUPO should see traceability of procedures in their group")
+    void getTraceability_coordinatorOwnGroup_returnsMovements() {
+        when(repo.isProcedureInGroup(10, 5)).thenReturn(true);
+        when(repo.findByProcedureId(10)).thenReturn(List.of(movement1));
+
+        List<TraceabilityMovement> result = service.getTraceability(10, 5);
+
+        assertThat(result).hasSize(1);
+        verify(repo).isProcedureInGroup(10, 5);
+        verify(repo).findByProcedureId(10);
+    }
+
+    // -------------------------------------------------------------------------
+    // Permission: COORDINADOR_GRUPO blocked from other group
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("COORDINADOR_GRUPO should be denied access to procedures in other groups")
+    void getTraceability_coordinatorOtherGroup_throwsSecurityException() {
+        when(repo.isProcedureInGroup(10, 5)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.getTraceability(10, 5))
+                .isInstanceOf(SecurityException.class)
+                .hasMessageContaining("Acceso denegado");
+
+        verify(repo).isProcedureInGroup(10, 5);
+        verify(repo, never()).findByProcedureId(anyInt());
+    }
+
+    // -------------------------------------------------------------------------
+    // Permission: ADMIN/DIRECTOR sees everything (no group filter)
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("ADMIN/DIRECTOR (no groupId) should see all traceability")
+    void getTraceability_noGroupId_returnsAllMovements() {
+        when(repo.findByProcedureId(10)).thenReturn(List.of(movement1, movement2));
+
+        List<TraceabilityMovement> result = service.getTraceability(10, null);
+
+        assertThat(result).hasSize(2);
+        verify(repo, never()).isProcedureInGroup(anyInt(), anyInt());
+        verify(repo).findByProcedureId(10);
     }
 }

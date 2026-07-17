@@ -26,7 +26,7 @@ public class UpdateCallInteractor implements UpdateCallUseCase {
 
     @Override
     @Transactional
-    @Auditable(action = "UPDATE_RESEARCH_CALL")
+    @Auditable(action = "UPDATE_RESEARCH_CALL", table = "convocatorias", description = "Actualización de convocatoria de investigación")
     public CallResponse execute(Integer id, UpdateCallRequest request) {
         ResearchCall call = saveCallPort.findById(id)
                 .orElseThrow(() -> new BusinessRuleValidationException("convocatorias.error.not-found", id));

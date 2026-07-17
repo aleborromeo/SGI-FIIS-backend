@@ -31,6 +31,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ThesisPlanService Unit Tests")
+@SuppressWarnings({"unused", "ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored"})
 class ThesisPlanServiceTest {
 
     @Mock
@@ -278,7 +279,7 @@ class ThesisPlanServiceTest {
         when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_DECANATO");
 
         RegisterResolutionCommand cmd = new RegisterResolutionCommand(
-                "RES-001", java.time.LocalDate.now(), "Asunto de prueba", 200
+                "RES-001", java.time.LocalDate.now(java.time.ZoneId.systemDefault()), "Asunto de prueba", 200
         );
 
         ThesisPlanResponse response = service.registrarResolucion(12, cmd);
@@ -435,7 +436,7 @@ class ThesisPlanServiceTest {
         mockAuthentication(101L, "ROLE_ESTUDIANTE");
         ThesisPlan plan = new ThesisPlan(12, "AI", "Abstract", 101L, 1, 2, 99, ThesisPlanStatus.APROBADO, null, null);
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
-        RegisterResolutionCommand cmd = new RegisterResolutionCommand("RES-01", java.time.LocalDate.now(), "Asunto", 99);
+        RegisterResolutionCommand cmd = new RegisterResolutionCommand("RES-01", java.time.LocalDate.now(java.time.ZoneId.systemDefault()), "Asunto", 99);
         assertThrows(BusinessRuleViolationException.class, () -> service.registrarResolucion(12, cmd));
     }
 
@@ -495,7 +496,7 @@ class ThesisPlanServiceTest {
         mockAuthentication(505L, "ROLE_DECANO");
         ThesisPlan plan = new ThesisPlan(12, "AI", "Abstract", 101L, 1, 2, 99, ThesisPlanStatus.POSTULADO, null, null);
         when(planRepository.findById(12)).thenReturn(Optional.of(plan));
-        RegisterResolutionCommand cmd = new RegisterResolutionCommand("RES-01", java.time.LocalDate.now(), "Asunto", 99);
+        RegisterResolutionCommand cmd = new RegisterResolutionCommand("RES-01", java.time.LocalDate.now(java.time.ZoneId.systemDefault()), "Asunto", 99);
         assertThrows(BusinessRuleViolationException.class, () -> service.registrarResolucion(12, cmd));
     }
 
@@ -777,7 +778,7 @@ class ThesisPlanServiceTest {
         when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
 
         RegisterResolutionCommand cmd = new RegisterResolutionCommand(
-                "RES-01", java.time.LocalDate.now(), "Asunto", 99
+                "RES-01", java.time.LocalDate.now(java.time.ZoneId.systemDefault()), "Asunto", 99
         );
         assertThrows(BusinessRuleViolationException.class, () -> service.registrarResolucion(12, cmd));
         verifyNoInteractions(jdbcTemplate);
