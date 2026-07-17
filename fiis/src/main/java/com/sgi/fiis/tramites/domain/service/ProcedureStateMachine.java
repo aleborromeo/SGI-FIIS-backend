@@ -2,6 +2,7 @@ package com.sgi.fiis.tramites.domain.service;
 
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.Procedure;
+import com.sgi.fiis.tramites.domain.model.ProcedureType;
 import com.sgi.fiis.tramites.domain.model.InvalidTransitionException;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 
@@ -98,14 +99,22 @@ public class ProcedureStateMachine {
 
     public void observarPorDirector(Procedure tramite, Long idDirector, String observacion) {
         validateReviewerRole(tramite, RoleEnum.DIRECTOR_INVESTIGACION);
-        // RN-07: la observación del Director devuelve al Coordinador, no al solicitante
+        // RN-07/RN-08: Director observe returns to student for thesis plans, to coordinator for projects
+        RoleEnum targetRole;
+        if (tramite.getProcedureType() != null &&
+            (tramite.getProcedureType() == ProcedureType.PLAN_TESIS ||
+             tramite.getProcedureType() == ProcedureType.THESIS)) {
+            targetRole = null;
+        } else {
+            targetRole = RoleEnum.COORDINADOR_GRUPO;
+        }
         tramite.transitionTo(
                 ProcedureStatus.OBSERVADO,
                 RoleEnum.DIRECTOR_INVESTIGACION,
                 idDirector,
                 OBSERVADO_POR_DIRECTOR,
                 observacion,
-                RoleEnum.COORDINADOR_GRUPO
+                targetRole
         );
     }
 

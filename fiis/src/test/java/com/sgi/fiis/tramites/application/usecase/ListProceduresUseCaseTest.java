@@ -1,5 +1,6 @@
 package com.sgi.fiis.tramites.application.usecase;
 
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.domain.model.Procedure;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
@@ -24,11 +25,14 @@ class ListProceduresUseCaseTest {
     @Mock
     private ProcedureRepositoryPort procedureRepositoryPort;
 
+    @Mock
+    private ResearchGroupJpaRepository groupRepository;
+
     private ListProceduresUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ListProceduresUseCase(procedureRepositoryPort);
+        useCase = new ListProceduresUseCase(procedureRepositoryPort, groupRepository);
     }
 
     private Procedure buildProcedure(Long id, ProcedureStatus status) {

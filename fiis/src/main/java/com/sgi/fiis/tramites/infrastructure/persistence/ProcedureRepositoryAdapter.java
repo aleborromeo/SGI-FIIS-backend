@@ -86,6 +86,11 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         return toDomainList(procedureRepository.findByStatusAndReviewerRole(estado.name(), rolRevisor.name()));
     }
 
+    @Override
+    public List<Procedure> findByStatusAndGroupId(ProcedureStatus estado, Long groupId) {
+        return toDomainList(procedureRepository.findByStatusAndGroupId(estado.name(), groupId.intValue()));
+    }
+
     private List<Procedure> toDomainList(List<ProcedureEntity> entities) {
         return entities.stream()
                 .map(entity -> toDomain(entity, new ArrayList<>()))

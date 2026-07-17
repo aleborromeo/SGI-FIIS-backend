@@ -1,5 +1,7 @@
 package com.sgi.fiis.tramites.application.usecase;
 
+import com.sgi.fiis.observations.application.dto.ObservationRequestDTO;
+import com.sgi.fiis.observations.application.usecase.RegisterObservationUseCase;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
@@ -21,12 +23,15 @@ public class FlagProcedureUseCase {
 
     private final ProcedureRepositoryPort procedureRepositoryPort;
     private final ProcedureEventPublisherPort eventPublisherPort;
+    private final RegisterObservationUseCase registerObservationUseCase;
     private final ProcedureStateMachine stateMachine = new ProcedureStateMachine();
 
     public FlagProcedureUseCase(ProcedureRepositoryPort procedureRepositoryPort,
-                                   ProcedureEventPublisherPort eventPublisherPort) {
+                                   ProcedureEventPublisherPort eventPublisherPort,
+                                   RegisterObservationUseCase registerObservationUseCase) {
         this.procedureRepositoryPort = procedureRepositoryPort;
         this.eventPublisherPort    = eventPublisherPort;
+        this.registerObservationUseCase = registerObservationUseCase;
     }
 
     @Transactional
@@ -44,6 +49,14 @@ public class FlagProcedureUseCase {
         }
 
         Procedure guardado = procedureRepositoryPort.save(tramite);
+
+        registerObservationUseCase.execute(ObservationRequestDTO.builder()
+                .procedureId(Math.toIntExact(guardado.getId()))
+                .reviewerId(Math.toIntExact(idEjecutor))
+                .type("TECNICA")
+                .description(textoObservacion)
+                .reviewerRole(rolEjecutor.name())
+                .build());
 
         eventPublisherPort.publishProcedureFlagged(ProcedureFlaggedEvent.builder()
                 .procedureId(guardado.getId())

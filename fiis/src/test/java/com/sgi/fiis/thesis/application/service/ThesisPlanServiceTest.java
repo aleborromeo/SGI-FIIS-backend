@@ -237,7 +237,7 @@ class ThesisPlanServiceTest {
         assertEquals(ThesisPlanStatus.OBSERVADO, existingPlan.getEstadoPlan());
         verify(tramiteWorkflow).derivarPlanTesis(
                 12, 404L, ThesisProcedureStatus.OBSERVADO,
-                ReviewerRole.COORDINADOR_GRUPO, "OBSERVAR_DIRECTOR", "Faltan firmas", 100
+                ReviewerRole.ESTUDIANTE, "OBSERVAR_DIRECTOR", "Faltan firmas", 100
         );
     }
 

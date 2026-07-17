@@ -80,13 +80,13 @@ class ProcedureControllerTest {
                 ProcedureResponseDto.builder().id(1L).build(),
                 ProcedureResponseDto.builder().id(2L).build()
         );
-        when(listProceduresUseCase.execute(RoleEnum.COORDINADOR_GRUPO)).thenReturn(expected);
+        when(listProceduresUseCase.execute(RoleEnum.COORDINADOR_GRUPO, 10L)).thenReturn(expected);
 
         ResponseEntity<List<ProcedureResponseDto>> response = controller.list(coordinator);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
-        verify(listProceduresUseCase).execute(RoleEnum.COORDINADOR_GRUPO);
+        verify(listProceduresUseCase).execute(RoleEnum.COORDINADOR_GRUPO, 10L);
     }
 
     @Test
@@ -95,7 +95,7 @@ class ProcedureControllerTest {
         List<ProcedureResponseDto> expected = List.of(
                 ProcedureResponseDto.builder().id(3L).build()
         );
-        when(listProceduresUseCase.execute(RoleEnum.ESTUDIANTE)).thenReturn(expected);
+        when(listProceduresUseCase.execute(RoleEnum.ESTUDIANTE, 5L)).thenReturn(expected);
 
         ResponseEntity<List<ProcedureResponseDto>> response = controller.list(student);
 
