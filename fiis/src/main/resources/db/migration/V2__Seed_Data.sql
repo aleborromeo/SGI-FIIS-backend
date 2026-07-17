@@ -217,13 +217,10 @@ INSERT INTO membresias_grupo (id_grupo, id_usuario, es_activo, fecha_inicio) VAL
     ((SELECT id_grupo FROM grupos_investigacion WHERE codigo_grupo = 'CICO'),
      (SELECT id_usuario FROM usuarios WHERE dni = '48903456'), TRUE, '2025-04-01'),  -- Alberto Linares
 
-    -- EAP (grupo 5)
-    ((SELECT id_grupo FROM grupos_investigacion WHERE codigo_grupo = 'EAP'),
-     (SELECT id_usuario FROM usuarios WHERE dni = '43198234'), TRUE, '2025-05-01'),  -- Humberto Rojas
-
-    -- EU (grupo 7)
+    -- EU (grupo 7): Rosa Huamán es coord. de EU pero ya es activa en GISI,
+    -- se agrega como miembro inactivo para indicar su rol de coordinadora
     ((SELECT id_grupo FROM grupos_investigacion WHERE codigo_grupo = 'EU'),
-     (SELECT id_usuario FROM usuarios WHERE dni = '48903456'), TRUE, '2025-02-15');  -- Alberto Linares
+     (SELECT id_usuario FROM usuarios WHERE dni = '49123789'), FALSE, '2025-02-15');  -- Rosa Huamán (coord EU, ya activa en GISI)
 
 -- ============================================================================
 -- 9. CONVOCATORIAS (3 — una por cada estado)
