@@ -42,6 +42,10 @@ public record AnonymousProjectDetailResponse(
         );
     }
 
+    public boolean isPlaceholder() {
+        return this.titulo != null && this.titulo.contains("información anónima");
+    }
+
     public record CronogramaItem(
             String actividad,
             String fechaInicio,
