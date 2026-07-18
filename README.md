@@ -250,12 +250,7 @@ DB_PASSWORD=
 JWT_SECRET=
 APP_FRONTEND_URL=http://localhost:3000
 
-# Correo (SMTP)
-SPRING_MAIL_HOST=smtp.gmail.com
-SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=sgifiisunas@gmail.com
-SPRING_MAIL_PASSWORD=<tu_password_aqui>
-APP_MAIL_MOCK=false          # true para entornos de desarrollo sin SMTP
+# Correo (SMTP) — preguntar credenciales al administrador
 ```
 
 > **Importante:** Nunca subas el archivo `.env` al repositorio. Está incluido en `.gitignore`.

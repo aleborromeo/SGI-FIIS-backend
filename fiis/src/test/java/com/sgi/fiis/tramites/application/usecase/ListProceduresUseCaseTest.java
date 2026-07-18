@@ -116,15 +116,24 @@ class ListProceduresUseCaseTest {
     }
 
     @Test
-    @DisplayName("execute(ESTUDIANTE) - returns all procedures (default case)")
-    void executeEstudianteReturnsAll() {
-        List<Procedure> all = List.of(buildProcedure(1L, ProcedureStatus.REGISTRADO));
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+    @DisplayName("execute(ESTUDIANTE) - returns procedures by applicant id")
+    void executeEstudianteReturnsByApplicantId() {
+        List<Procedure> byApplicant = List.of(buildProcedure(1L, ProcedureStatus.REGISTRADO));
+        when(procedureRepositoryPort.findByApplicantId(1L)).thenReturn(byApplicant);
 
-        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ESTUDIANTE);
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ESTUDIANTE, 1L);
 
         assertEquals(1, result.size());
-        verify(procedureRepositoryPort).findAll();
+        verify(procedureRepositoryPort).findByApplicantId(1L);
+    }
+
+    @Test
+    @DisplayName("execute(ESTUDIANTE, null) - returns empty list")
+    void executeEstudianteNullUserIdReturnsEmpty() {
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ESTUDIANTE, null);
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(procedureRepositoryPort);
     }
 
     @Test

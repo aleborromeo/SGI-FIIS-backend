@@ -39,10 +39,12 @@ class TraceabilityRepositoryImplTest {
         when(rs.getInt("id_tramite")).thenReturn(100);
         when(rs.getString("codigo_tramite")).thenReturn("TRM-100");
         when(rs.getString("nombre_usuario_accion")).thenReturn("Juan Perez");
+        when(rs.getString("rol_usuario_accion")).thenReturn("DIRECTOR_INVESTIGACION");
         when(rs.getString("accion")).thenReturn("APROBAR");
         when(rs.getString("estado_anterior")).thenReturn("EN_PROGRESO");
         when(rs.getString("estado_nuevo")).thenReturn("APROBADO");
         when(rs.getString("observacion")).thenReturn("Todo conforme");
+        when(rs.getString("ip_origen")).thenReturn("192.168.1.1");
         when(rs.getObject("fecha_movimiento", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.MAY, 20, 10, 30));
 
         when(jdbc.query(anyString(), any(RowMapper.class), eq(100))).thenAnswer(invocation -> {
@@ -75,10 +77,12 @@ class TraceabilityRepositoryImplTest {
         when(rs.getInt("id_tramite")).thenReturn(100);
         when(rs.getString("codigo_tramite")).thenReturn("TRM-100");
         when(rs.getString("nombre_usuario_accion")).thenReturn("Juan Perez");
+        when(rs.getString("rol_usuario_accion")).thenReturn("DIRECTOR_INVESTIGACION");
         when(rs.getString("accion")).thenReturn("APROBAR");
         when(rs.getString("estado_anterior")).thenReturn("EN_PROGRESO");
         when(rs.getString("estado_nuevo")).thenReturn("APROBADO");
         when(rs.getString("observacion")).thenReturn("Todo conforme");
+        when(rs.getString("ip_origen")).thenReturn("192.168.1.1");
         when(rs.getObject("fecha_movimiento", LocalDateTime.class)).thenReturn(null);
 
         when(jdbc.query(anyString(), any(RowMapper.class), eq(100))).thenAnswer(invocation -> {

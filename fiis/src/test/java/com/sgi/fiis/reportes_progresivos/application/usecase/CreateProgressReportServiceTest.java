@@ -62,7 +62,7 @@ class CreateProgressReportServiceTest {
     }
 
     @Test
-    @DisplayName("Create persists report in UNDER_REVIEW status")
+    @DisplayName("Create persists report in PENDING status")
     void createPersistsReportInReview() {
         CreateReportCommand cmd = buildCommand();
         ArgumentCaptor<ProgressReport> captor = ArgumentCaptor.forClass(ProgressReport.class);
@@ -73,7 +73,7 @@ class CreateProgressReportServiceTest {
 
         verify(repositoryPort).save(captor.capture());
         ProgressReport saved = captor.getValue();
-        assertEquals(ProgressReportStatus.UNDER_REVIEW, saved.getReportStatus());
+        assertEquals(ProgressReportStatus.PENDING, saved.getReportStatus());
         assertEquals(1L, saved.getProjectId());
         assertNotNull(response);
         assertEquals(100L, response.getId());

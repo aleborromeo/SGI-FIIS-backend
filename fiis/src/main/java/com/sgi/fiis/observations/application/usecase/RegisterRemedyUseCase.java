@@ -35,8 +35,8 @@ public class RegisterRemedyUseCase {
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long applicantId = (auth != null && auth.getPrincipal() instanceof CustomUserDetails user)
-                ? user.getId() : dto.getApplicantId();
+        Integer applicantId = (auth != null && auth.getPrincipal() instanceof CustomUserDetails user)
+                ? user.getId().intValue() : dto.getApplicantId();
         Remedy remedy = Remedy.create(
                 observationId, applicantId,
                 dto.getDescription(), dto.getAttachedDocumentId());

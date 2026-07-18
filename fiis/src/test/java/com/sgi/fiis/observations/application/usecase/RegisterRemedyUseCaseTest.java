@@ -1,5 +1,6 @@
 package com.sgi.fiis.observations.application.usecase;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.observations.application.dto.RemedyRequestDTO;
 import com.sgi.fiis.observations.application.dto.RemedyResponseDTO;
 import com.sgi.fiis.observations.domain.exception.ObservationNotFoundException;
@@ -10,14 +11,18 @@ import com.sgi.fiis.observations.domain.model.Remedy;
 import com.sgi.fiis.observations.domain.model.ObservationType;
 import com.sgi.fiis.observations.domain.port.ObservationRepository;
 import com.sgi.fiis.observations.domain.port.RemedyRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +43,11 @@ class RegisterRemedyUseCaseTest {
     @BeforeEach
     void setUp() {
         registerRemedyUseCase = new RegisterRemedyUseCase(observationRepository, remedyRepository);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -141,5 +151,82 @@ class RegisterRemedyUseCaseTest {
         assertThrows(InvalidRemedyException.class, () -> registerRemedyUseCase.execute(observationId, request));
         verify(observationRepository, never()).save(any(Observation.class));
         verify(remedyRepository, never()).save(any(Remedy.class));
+    }
+
+    @Test
+    void execute_WhenAuthenticatedUser_ShouldUseUserIdFromSecurityContext() {
+        Integer observationId = 100;
+        RemedyRequestDTO request = RemedyRequestDTO.builder()
+                .applicantId(null)
+                .description("Documento firmado")
+                .attachedDocumentId(45)
+                .build();
+
+        CustomUserDetails userDetails = new CustomUserDetails(99L, "student@test.com", "pass", true, List.of());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(userDetails);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        Observation observation = Observation.builder()
+                .id(observationId).procedureId(1).reviewerId(10)
+                .type(ObservationType.TECNICA)
+                .description("Falta firma")
+                .status(ObservationStatus.PENDIENTE)
+                .reviewerRole("COORDINADOR_GRUPO")
+                .createdAt(LocalDateTime.of(2026, Month.JUNE, 17, 12, 0))
+                .updatedAt(LocalDateTime.of(2026, Month.JUNE, 17, 12, 0))
+                .build();
+
+        when(observationRepository.findById(observationId)).thenReturn(Optional.of(observation));
+        when(observationRepository.save(any(Observation.class))).thenAnswer(inv -> inv.getArgument(0));
+        LocalDateTime now = LocalDateTime.of(2026, Month.JUNE, 17, 12, 0);
+        when(remedyRepository.save(any(Remedy.class))).thenReturn(
+                Remedy.builder().id(200).observationId(observationId).applicantId(99)
+                        .description("Documento firmado").attachedDocumentId(45)
+                        .createdAt(now).updatedAt(now).build()
+        );
+
+        RemedyResponseDTO response = registerRemedyUseCase.execute(observationId, request);
+
+        assertNotNull(response);
+        assertEquals(99, response.getApplicantId());
+    }
+
+    @Test
+    void execute_WhenAuthPrincipalNotCustomUserDetails_ShouldFallbackToDto() {
+        Integer observationId = 100;
+        RemedyRequestDTO request = RemedyRequestDTO.builder()
+                .applicantId(5)
+                .description("Documento firmado")
+                .attachedDocumentId(45)
+                .build();
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn("anonymousUser");
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        Observation observation = Observation.builder()
+                .id(observationId).procedureId(1).reviewerId(10)
+                .type(ObservationType.TECNICA)
+                .description("Falta firma")
+                .status(ObservationStatus.PENDIENTE)
+                .reviewerRole("COORDINADOR_GRUPO")
+                .createdAt(LocalDateTime.of(2026, Month.JUNE, 17, 12, 0))
+                .updatedAt(LocalDateTime.of(2026, Month.JUNE, 17, 12, 0))
+                .build();
+
+        LocalDateTime now = LocalDateTime.of(2026, Month.JUNE, 17, 12, 0);
+        when(observationRepository.findById(observationId)).thenReturn(Optional.of(observation));
+        when(observationRepository.save(any(Observation.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(remedyRepository.save(any(Remedy.class))).thenReturn(
+                Remedy.builder().id(201).observationId(observationId).applicantId(5)
+                        .description("Documento firmado").attachedDocumentId(45)
+                        .createdAt(now).updatedAt(now).build()
+        );
+
+        RemedyResponseDTO response = registerRemedyUseCase.execute(observationId, request);
+
+        assertNotNull(response);
+        assertEquals(5, response.getApplicantId());
     }
 }
