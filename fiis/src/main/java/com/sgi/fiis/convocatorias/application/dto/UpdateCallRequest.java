@@ -76,7 +76,7 @@ public class UpdateCallRequest {
     }
 
     public List<Integer> getResearchLineIds() {
-        return researchLineIds;
+        return researchLineIds == null ? null : List.copyOf(researchLineIds);
     }
 
     public void setResearchLineIds(List<Integer> researchLineIds) {

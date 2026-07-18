@@ -15,6 +15,7 @@ public record AnonymousProjectDetailResponse(
         List<DocumentoItem> documentos,
         List<CriterioItem> criterios
 ) {
+    @SuppressWarnings("java:W1035")
     public static AnonymousProjectDetailResponse placeholder(String expedienteCode) {
         return new AnonymousProjectDetailResponse(
                 expedienteCode,
