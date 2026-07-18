@@ -70,6 +70,16 @@ public class ListProceduresUseCase {
                     .stream()
                     .map(ProcedureMapper::toResponse)
                     .toList();
+            case ESTUDIANTE -> {
+                if (userId != null) {
+                    yield procedureRepositoryPort
+                            .findByApplicantId(userId)
+                            .stream()
+                            .map(ProcedureMapper::toResponse)
+                            .toList();
+                }
+                yield List.of();
+            }
             default -> procedureRepositoryPort.findAll().stream()
                     .map(ProcedureMapper::toResponse)
                     .toList();

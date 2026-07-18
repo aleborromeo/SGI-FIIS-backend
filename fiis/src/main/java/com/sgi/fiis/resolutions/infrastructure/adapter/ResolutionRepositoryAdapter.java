@@ -43,4 +43,10 @@ public class ResolutionRepositoryAdapter implements ResolutionRepositoryPort {
         return repository.findByIdDocumentoAdjunto(documentId)
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Optional<Resolution> findByProcedureId(Long idTramite) {
+        return repository.findByIdTramite(idTramite)
+                .map(mapper::toDomain);
+    }
 }

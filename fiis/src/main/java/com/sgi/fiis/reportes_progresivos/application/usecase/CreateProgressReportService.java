@@ -38,7 +38,6 @@ public class CreateProgressReportService implements CreateProgressReportUseCase 
             report.attachDocument(command.getAttachedDocumentId());
         }
 
-        report.submitForReview();
         ProgressReport saved = repositoryPort.save(report);
 
         procedureEventPort.publishReportProcedure(

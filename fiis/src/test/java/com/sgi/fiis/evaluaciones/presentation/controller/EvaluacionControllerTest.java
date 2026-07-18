@@ -4,7 +4,10 @@ import com.sgi.fiis.evaluaciones.application.dto.command.AsignarEvaluadorCommand
 import com.sgi.fiis.evaluaciones.application.dto.command.RegistrarResultadoEvaluacionCommand;
 import com.sgi.fiis.evaluaciones.application.dto.response.EvaluacionResponse;
 import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadorUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadoresUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarDetalleAnonimoUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarEvaluacionesUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.EvaluarEvaluacionUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.RegistrarResultadoEvaluacionUseCase;
 import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,20 +30,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class EvaluacionControllerTest {
 
     private AsignarEvaluadorUseCase asignarEvaluadorUseCase;
+    private AsignarEvaluadoresUseCase asignarEvaluadoresUseCase;
     private RegistrarResultadoEvaluacionUseCase registrarResultadoEvaluacionUseCase;
     private ConsultarEvaluacionesUseCase consultarEvaluacionesUseCase;
+    private EvaluarEvaluacionUseCase evaluarEvaluacionUseCase;
+    private ConsultarDetalleAnonimoUseCase consultarDetalleAnonimoUseCase;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         asignarEvaluadorUseCase = mock(AsignarEvaluadorUseCase.class);
+        asignarEvaluadoresUseCase = mock(AsignarEvaluadoresUseCase.class);
         registrarResultadoEvaluacionUseCase = mock(RegistrarResultadoEvaluacionUseCase.class);
         consultarEvaluacionesUseCase = mock(ConsultarEvaluacionesUseCase.class);
+        evaluarEvaluacionUseCase = mock(EvaluarEvaluacionUseCase.class);
+        consultarDetalleAnonimoUseCase = mock(ConsultarDetalleAnonimoUseCase.class);
 
         EvaluacionController controller = new EvaluacionController(
                 asignarEvaluadorUseCase,
+                asignarEvaluadoresUseCase,
                 registrarResultadoEvaluacionUseCase,
-                consultarEvaluacionesUseCase
+                consultarEvaluacionesUseCase,
+                evaluarEvaluacionUseCase,
+                consultarDetalleAnonimoUseCase
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();

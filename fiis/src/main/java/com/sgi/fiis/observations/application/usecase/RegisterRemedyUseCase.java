@@ -1,5 +1,6 @@
 package com.sgi.fiis.observations.application.usecase;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.observations.application.dto.RemedyRequestDTO;
 import com.sgi.fiis.observations.application.dto.RemedyResponseDTO;
 import com.sgi.fiis.observations.domain.exception.ObservationNotFoundException;
@@ -9,6 +10,8 @@ import com.sgi.fiis.observations.domain.model.Remedy;
 import com.sgi.fiis.observations.domain.port.ObservationRepository;
 import com.sgi.fiis.observations.domain.port.RemedyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +34,11 @@ public class RegisterRemedyUseCase {
             throw new InvalidRemedyException(observationId);
         }
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long applicantId = (auth != null && auth.getPrincipal() instanceof CustomUserDetails user)
+                ? user.getId() : dto.getApplicantId();
         Remedy remedy = Remedy.create(
-                observationId, dto.getApplicantId(),
+                observationId, applicantId,
                 dto.getDescription(), dto.getAttachedDocumentId());
 
         observation.markAsRemedied();
