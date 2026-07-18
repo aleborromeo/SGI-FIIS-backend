@@ -29,6 +29,8 @@ public class EvaluacionService implements
         EvaluarEvaluacionUseCase,
         ConsultarDetalleAnonimoUseCase {
 
+    private static final String NO_ENCONTRADA = "No se encontró la evaluación solicitada.";
+
     private final EvaluacionRepositoryPort evaluacionRepositoryPort;
 
     public EvaluacionService(EvaluacionRepositoryPort evaluacionRepositoryPort) {
@@ -59,7 +61,7 @@ public class EvaluacionService implements
         validarResultado(command);
 
         Evaluacion evaluacion = evaluacionRepositoryPort.buscarPorId(command.idEvaluacion())
-                .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+                .orElseThrow(() -> new EvaluacionException(NO_ENCONTRADA));
 
         if (!evaluacion.getIdEvaluador().equals(command.idEvaluador())) {
             throw new EvaluacionException("El evaluador no tiene permiso para registrar esta evaluación.");
@@ -104,7 +106,7 @@ public class EvaluacionService implements
 
         return evaluacionRepositoryPort.buscarPorId(idEvaluacion)
                 .map(this::convertirAResponse)
-                .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+                .orElseThrow(() -> new EvaluacionException(NO_ENCONTRADA));
     }
 
     @Override
@@ -125,7 +127,7 @@ public class EvaluacionService implements
     @Override
     public EvaluacionResponse evaluar(Long idEvaluacion, EvaluarEvaluacionRequest request) {
         Evaluacion evaluacion = evaluacionRepositoryPort.buscarPorId(idEvaluacion)
-                .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+                .orElseThrow(() -> new EvaluacionException(NO_ENCONTRADA));
 
         if (!evaluacion.getIdEvaluador().equals(request.evaluatorId())) {
             throw new EvaluacionException("El evaluador no tiene permiso para evaluar esta asignación.");
@@ -151,7 +153,7 @@ public class EvaluacionService implements
     @Override
     public AnonymousProjectDetailResponse consultarDetalleAnonimo(Long idEvaluacion) {
         Evaluacion evaluacion = evaluacionRepositoryPort.buscarPorId(idEvaluacion)
-                .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+                .orElseThrow(() -> new EvaluacionException(NO_ENCONTRADA));
 
         String codigo = evaluacion.perteneceAProyecto()
                 ? "PROY-" + evaluacion.getIdProyecto()

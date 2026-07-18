@@ -29,7 +29,7 @@ public class TraceabilityController {
     }
 
     @GetMapping("/traceability/{procedureId}")
-    public ResponseEntity<?> getTraceability(
+    public ResponseEntity<Object> getTraceability(
             @PathVariable Integer procedureId) {
 
         Integer userGroupId = resolveUserGroupId();

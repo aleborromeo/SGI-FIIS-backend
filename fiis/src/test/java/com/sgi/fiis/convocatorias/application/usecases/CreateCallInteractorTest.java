@@ -5,10 +5,10 @@ import com.sgi.fiis.convocatorias.application.dto.CreateCallRequest;
 import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
 import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -26,12 +26,8 @@ class CreateCallInteractorTest {
     @Mock
     private SaveCallPort saveCallPort;
 
+    @InjectMocks
     private CreateCallInteractor interactor;
-
-    @BeforeEach
-    void setUp() {
-        interactor = new CreateCallInteractor(saveCallPort);
-    }
 
     @Test
     @DisplayName("Should create a call successfully")

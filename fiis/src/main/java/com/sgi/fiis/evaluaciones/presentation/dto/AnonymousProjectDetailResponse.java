@@ -18,7 +18,7 @@ public record AnonymousProjectDetailResponse(
     public static AnonymousProjectDetailResponse placeholder(String expedienteCode) {
         return new AnonymousProjectDetailResponse(
                 expedienteCode,
-                "Convocatoria " + java.time.Year.now().getValue(),
+                "Convocatoria " + java.time.Year.now(java.time.ZoneId.of("America/Lima")).getValue(),
                 "Título del expediente (información anónima)",
                 "Resumen técnico del proyecto de investigación.",
                 "Objetivo general del proyecto.",

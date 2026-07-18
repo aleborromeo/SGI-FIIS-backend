@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +41,7 @@ class AuditLogRepositoryTest {
         when(rs.getString("datos_anteriores")).thenReturn(null);
         when(rs.getString("datos_nuevos")).thenReturn("{\"key\":\"val\"}");
         when(rs.getString("ip_origen")).thenReturn("192.168.1.1");
-        when(rs.getTimestamp("fecha_accion")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, 1, 15, 10, 0)));
+        when(rs.getTimestamp("fecha_accion")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 0)));
 
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyInt(), anyInt())).thenAnswer(invocation -> {
             RowMapper<AuditLogEntryDTO> mapper = invocation.getArgument(1);

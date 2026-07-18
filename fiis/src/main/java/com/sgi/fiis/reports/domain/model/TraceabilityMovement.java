@@ -21,6 +21,7 @@ public class TraceabilityMovement {
     private String        ipOrigen;
 
     public TraceabilityMovement() {
+        // required for JSON deserialization / ORM mapping
     }
 
     public Integer       getMovementId()            { return movementId; }

@@ -14,6 +14,7 @@ public class ProcedureRecentActivity {
     private String lastUserName;
 
     public ProcedureRecentActivity() {
+        // required for JSON deserialization / ORM mapping
     }
 
     public Integer getProcedureId() {

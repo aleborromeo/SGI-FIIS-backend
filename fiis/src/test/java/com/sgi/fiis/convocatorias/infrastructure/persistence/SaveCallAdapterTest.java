@@ -37,7 +37,7 @@ class SaveCallAdapterTest {
     private static final LocalDate END = LocalDate.of(2026, Month.DECEMBER, 31);
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         jpaRepository = mock(ResearchCallJpaRepository.class);
         documentRepository = mock(DocumentJpaRepository.class);
         lineRepository = mock(ResearchLineJpaRepository.class);

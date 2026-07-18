@@ -7,10 +7,10 @@ import com.sgi.fiis.tramites.domain.model.Procedure;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import com.sgi.fiis.users.domain.model.RoleEnum;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,12 +29,8 @@ class ListProceduresUseCaseTest {
     @Mock
     private ResearchGroupJpaRepository groupRepository;
 
+    @InjectMocks
     private ListProceduresUseCase useCase;
-
-    @BeforeEach
-    void setUp() {
-        useCase = new ListProceduresUseCase(procedureRepositoryPort, groupRepository);
-    }
 
     private Procedure buildProcedure(Long id, ProcedureStatus status) {
         return Procedure.builder()
