@@ -127,4 +127,49 @@ class TraceabilityControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
+
+    @Test
+    @DisplayName("GET /api/reports/traceability/10 → 403 when access denied")
+    void getTraceability_accessDenied_returns403() throws Exception {
+        when(traceabilityService.getTraceability(eq(10), isNull()))
+                .thenThrow(new SecurityException("Acceso denegado"));
+
+        mockMvc.perform(get("/api/reports/traceability/10")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("Acceso denegado"));
+    }
+
+    @Test
+    @DisplayName("GET /api/reports/traceability/recent?days=7 → 200 OK with activities")
+    void getRecentActivity_returns200() throws Exception {
+        var activity = new com.sgi.fiis.reports.domain.model.ProcedureRecentActivity();
+        activity.setProcedureId(1);
+        activity.setProcedureCode("TRM-001");
+        activity.setCurrentStatus("PENDIENTE");
+
+        when(traceabilityService.getProceduresWithRecentActivity(isNull(), eq(7)))
+                .thenReturn(List.of(activity));
+
+        mockMvc.perform(get("/api/reports/traceability/recent")
+                        .param("days", "7")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].procedureId").value(1))
+                .andExpect(jsonPath("$[0].procedureCode").value("TRM-001"))
+                .andExpect(jsonPath("$[0].currentStatus").value("PENDIENTE"));
+    }
+
+    @Test
+    @DisplayName("GET /api/reports/traceability/recent → uses default 7 days")
+    void getRecentActivity_defaultDays() throws Exception {
+        when(traceabilityService.getProceduresWithRecentActivity(isNull(), eq(7)))
+                .thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/reports/traceability/recent")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
 }

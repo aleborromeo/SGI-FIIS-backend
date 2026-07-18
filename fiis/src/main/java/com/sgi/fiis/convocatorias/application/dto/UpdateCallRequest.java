@@ -127,7 +127,7 @@ public class UpdateCallRequest {
         }
 
         public UpdateCallRequestBuilder researchLineIds(List<Integer> researchLineIds) {
-            this.researchLineIds = researchLineIds;
+            this.researchLineIds = researchLineIds == null ? null : List.copyOf(researchLineIds);
             return this;
         }
 

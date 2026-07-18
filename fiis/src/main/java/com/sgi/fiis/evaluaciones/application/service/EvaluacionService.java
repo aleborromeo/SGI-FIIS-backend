@@ -157,29 +157,7 @@ public class EvaluacionService implements
                 ? "PROY-" + evaluacion.getIdProyecto()
                 : "TESIS-" + evaluacion.getIdPlanTesis();
 
-        return new AnonymousProjectDetailResponse(
-                codigo,
-                "Convocatoria " + java.time.Year.now().getValue(),
-                "Título del expediente (información anónima)",
-                "Resumen técnico del proyecto de investigación.",
-                "Objetivo general del proyecto.",
-                List.of("Objetivo específico 1", "Objetivo específico 2"),
-                50000.0,
-                12,
-                List.of(
-                        new AnonymousProjectDetailResponse.CronogramaItem("Actividad 1", "2026-01-01", "2026-03-01"),
-                        new AnonymousProjectDetailResponse.CronogramaItem("Actividad 2", "2026-03-01", "2026-06-01")
-                ),
-                List.of(
-                        new AnonymousProjectDetailResponse.DocumentoItem("documento.pdf", "PDF", "/api/documentos/1")
-                ),
-                List.of(
-                        new AnonymousProjectDetailResponse.CriterioItem(1L, "Pertinencia", "Pertinencia del tema", 20, 0.2),
-                        new AnonymousProjectDetailResponse.CriterioItem(2L, "Metodología", "Metodología propuesta", 30, 0.3),
-                        new AnonymousProjectDetailResponse.CriterioItem(3L, "Impacto", "Impacto esperado", 25, 0.25),
-                        new AnonymousProjectDetailResponse.CriterioItem(4L, "Viabilidad", "Viabilidad del proyecto", 25, 0.25)
-                )
-        );
+        return AnonymousProjectDetailResponse.placeholder(codigo);
     }
 
     private void validarAsignacion(AsignarEvaluadorCommand command) {

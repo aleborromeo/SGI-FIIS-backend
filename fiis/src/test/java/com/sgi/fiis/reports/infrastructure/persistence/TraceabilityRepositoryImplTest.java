@@ -119,4 +119,67 @@ class TraceabilityRepositoryImplTest {
 
         assertFalse(result);
     }
+
+    @Test
+    @DisplayName("Should find procedures with recent activity by group")
+    @SuppressWarnings("unchecked")
+    void testFindProceduresWithRecentActivity_byGroup() throws Exception {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt("id_tramite")).thenReturn(1);
+        when(rs.getString("codigo_tramite")).thenReturn("TRM-001");
+        when(rs.getString("tipo_tramite")).thenReturn("PROYECTO");
+        when(rs.getString("estado_actual")).thenReturn("PENDIENTE");
+        when(rs.getInt("movement_count")).thenReturn(3);
+        when(rs.getObject("last_movement_date", LocalDateTime.class)).thenReturn(LocalDateTime.of(2026, Month.JULY, 1, 10, 0));
+        when(rs.getString("last_action")).thenReturn("APROBAR");
+        when(rs.getString("last_user_name")).thenReturn("Juan Perez");
+
+        when(jdbc.query(anyString(), any(RowMapper.class), anyInt(), anyInt())).thenAnswer(invocation -> {
+            RowMapper<?> mapper = invocation.getArgument(1);
+            return List.of(mapper.mapRow(rs, 0));
+        });
+
+        List<com.sgi.fiis.reports.domain.model.ProcedureRecentActivity> result = repository.findProceduresWithRecentActivity(5, 7);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        var a = result.get(0);
+        assertEquals(1, a.getProcedureId().intValue());
+        assertEquals("TRM-001", a.getProcedureCode());
+        assertEquals("PENDIENTE", a.getCurrentStatus());
+        assertEquals(3, a.getMovementCount().intValue());
+        assertEquals("APROBAR", a.getLastAction());
+        assertEquals("Juan Perez", a.getLastUserName());
+    }
+
+    @Test
+    @DisplayName("Should find procedures with recent activity without group")
+    @SuppressWarnings("unchecked")
+    void testFindProceduresWithRecentActivity_noGroup() throws Exception {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt("id_tramite")).thenReturn(2);
+        when(rs.getString("codigo_tramite")).thenReturn("TRM-002");
+        when(rs.getString("tipo_tramite")).thenReturn("TESIS");
+        when(rs.getString("estado_actual")).thenReturn("APROBADO");
+        when(rs.getInt("movement_count")).thenReturn(1);
+        when(rs.getObject("last_movement_date", LocalDateTime.class)).thenReturn(null);
+        when(rs.getString("last_action")).thenReturn("CREAR");
+        when(rs.getString("last_user_name")).thenReturn("Ana Lopez");
+
+        when(jdbc.query(anyString(), any(RowMapper.class), anyInt())).thenAnswer(invocation -> {
+            RowMapper<?> mapper = invocation.getArgument(1);
+            return List.of(mapper.mapRow(rs, 0));
+        });
+
+        List<com.sgi.fiis.reports.domain.model.ProcedureRecentActivity> result = repository.findProceduresWithRecentActivity(null, 7);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        var a = result.get(0);
+        assertEquals(2, a.getProcedureId().intValue());
+        assertEquals("TRM-002", a.getProcedureCode());
+        assertEquals("APROBADO", a.getCurrentStatus());
+        assertEquals(1, a.getMovementCount().intValue());
+        assertNull(a.getLastMovementDate());
+    }
 }
