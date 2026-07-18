@@ -136,9 +136,9 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         plan.marcarObservado();
         ThesisPlan guardado = planRepository.save(plan);
         Long idUsuarioAccion = extraerIdUsuarioDelContexto();
-        // RF-50: si el Director observa, retorna al Coordinador de Grupo, no directamente al estudiante.
+        // RN-07: Director observation returns to student for thesis plans
         tramiteWorkflow.derivarPlanTesis(idPlanTesis, idUsuarioAccion, ThesisProcedureStatus.OBSERVADO,
-                ReviewerRole.COORDINADOR_GRUPO, "OBSERVAR_DIRECTOR", command.observacion(), command.idDocumentoAdjunto());
+                ReviewerRole.ESTUDIANTE, "OBSERVAR_DIRECTOR", command.observacion(), command.idDocumentoAdjunto());
         return toResponse(guardado);
     }
 

@@ -143,9 +143,19 @@ class ProgressReportTest {
     }
 
     @Test
-    @DisplayName("Forward from PENDING throws IllegalStateException")
-    void forwardFromPendienteThrows() {
+    @DisplayName("Forward from PENDING transitions to UNDER_REVIEW and updates timestamp")
+    void forwardFromPendienteTransitionsToUnderReview() {
         ProgressReport report = buildDefaultReport();
+        var before = report.getLastUpdatedDate();
+        report.forwardToDirector();
+        assertEquals(ProgressReportStatus.UNDER_REVIEW, report.getReportStatus());
+        assertTrue(report.getLastUpdatedDate().compareTo(before) >= 0);
+    }
+
+    @Test
+    @DisplayName("Forward from OBSERVED throws IllegalStateException")
+    void forwardFromObservadoThrows() {
+        ProgressReport report = buildObservedReport();
         assertThrows(IllegalStateException.class, report::forwardToDirector);
     }
 

@@ -108,7 +108,7 @@ class ProgressReportRepositoryAdapterTest {
 
         when(jpaRepository.findByReportStatusOrderByRegistrationDateDesc("PENDIENTE")).thenReturn(List.of(entity));
 
-        List<ProgressReport> found = repositoryAdapter.findByStatus("PENDIENTE");
+        List<ProgressReport> found = repositoryAdapter.findByStatus("PENDING");
 
         assertFalse(found.isEmpty());
         assertEquals(1, found.size());

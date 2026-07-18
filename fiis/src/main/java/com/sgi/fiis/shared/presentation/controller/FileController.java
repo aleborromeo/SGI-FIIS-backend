@@ -36,6 +36,8 @@ import java.util.UUID;
 /**
  * @deprecated Use DocumentController (/api/documents) instead
  */
+@Deprecated(since = "2.0.0", forRemoval = true)
+@SuppressWarnings("java:S1133")
 @RestController
 @RequestMapping("/api/v1/files")
 @Tag(name = "Files", description = "DEPRECATED: Use DocumentController (/api/documents) instead")
@@ -65,9 +67,9 @@ public class FileController {
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload proposal document", description = "Only allows PDF, DOC, and DOCX files up to 10 MB.")
+    @Operation(summary = "Upload proposal document", description = "Only allows PDF, DOC, and DOCX files up to 8 MB.")
     @ApiResponse(responseCode = "200", description = "File successfully uploaded")
-    @ApiResponse(responseCode = "400", description = "Invalid file extension or size exceeds 10 MB")
+    @ApiResponse(responseCode = "400", description = "Invalid file extension or size exceeds 8 MB")
     @Deprecated(since = "2.0.0", forRemoval = true)
     public ResponseEntity<Map<String, Object>> uploadFile(
             @RequestParam("file") MultipartFile file,
@@ -77,10 +79,10 @@ public class FileController {
             throw new BusinessRuleValidationException("File is empty.");
         }
 
-        // 1. Check file size (max 10 MB = 10 * 1024 * 1024 bytes)
-        long maxSize = 10L * 1024 * 1024;
+        // 1. Check file size (max 8 MB = 8 * 1024 * 1024 bytes)
+        long maxSize = 8L * 1024 * 1024;
         if (file.getSize() > maxSize) {
-            throw new BusinessRuleValidationException("File size exceeds the 10 MB limit.");
+            throw new BusinessRuleValidationException("File size exceeds the 8 MB limit.");
         }
 
         // 2. Check extension

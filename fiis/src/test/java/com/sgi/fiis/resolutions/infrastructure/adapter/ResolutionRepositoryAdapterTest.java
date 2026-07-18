@@ -135,6 +135,33 @@ class ResolutionRepositoryAdapterTest {
     }
 
     @Test
+    @DisplayName("Should find resolution by procedure id successfully")
+    void findByProcedureId_Success() {
+        when(repository.findByIdTramite(10L)).thenReturn(Optional.of(resolutionEntity));
+        when(mapper.toDomain(resolutionEntity)).thenReturn(resolution);
+
+        Optional<Resolution> result = adapter.findByProcedureId(10L);
+
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().idResolucion());
+
+        verify(repository).findByIdTramite(10L);
+        verify(mapper).toDomain(resolutionEntity);
+    }
+
+    @Test
+    @DisplayName("Should return empty when resolution not found by procedure id")
+    void findByProcedureId_NotFound() {
+        when(repository.findByIdTramite(999L)).thenReturn(Optional.empty());
+
+        Optional<Resolution> result = adapter.findByProcedureId(999L);
+
+        assertTrue(result.isEmpty());
+        verify(repository).findByIdTramite(999L);
+        verify(mapper, never()).toDomain(any());
+    }
+
+    @Test
     @DisplayName("Should return empty when resolution not found by document adjunto id")
     void findByDocumentAdjuntoId_NotFound() {
         when(repository.findByIdDocumentoAdjunto(999L)).thenReturn(Optional.empty());

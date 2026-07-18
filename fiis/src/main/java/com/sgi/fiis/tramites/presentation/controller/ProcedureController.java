@@ -35,7 +35,7 @@ public class ProcedureController {
     public ResponseEntity<List<ProcedureResponseDto>> list(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         RoleEnum rol = extractRole(userDetails);
-        return ResponseEntity.ok(listProceduresUseCase.execute(rol));
+        return ResponseEntity.ok(listProceduresUseCase.execute(rol, userDetails.getId()));
     }
 
     @GetMapping("/{id}")

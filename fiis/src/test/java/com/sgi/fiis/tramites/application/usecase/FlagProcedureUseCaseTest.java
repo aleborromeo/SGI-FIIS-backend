@@ -1,5 +1,6 @@
 package com.sgi.fiis.tramites.application.usecase;
 
+import com.sgi.fiis.observations.application.usecase.RegisterObservationUseCase;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
@@ -30,6 +31,9 @@ class FlagProcedureUseCaseTest {
 
     @Mock
     private ProcedureEventPublisherPort eventPublisherPort;
+
+    @Mock
+    private RegisterObservationUseCase registerObservationUseCase;
 
     @InjectMocks
     private FlagProcedureUseCase flagProcedureUseCase;

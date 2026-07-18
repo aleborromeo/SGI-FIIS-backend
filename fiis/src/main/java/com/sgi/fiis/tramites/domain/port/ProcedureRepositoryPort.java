@@ -25,5 +25,7 @@ public interface ProcedureRepositoryPort {
 
     List<Procedure> findByStatusAndReviewerRole(ProcedureStatus estado, RoleEnum rolRevisor);
 
+    List<Procedure> findByStatusAndGroupId(ProcedureStatus estado, Long groupId);
+
     boolean existsByCode(String codigoTramite);
 }

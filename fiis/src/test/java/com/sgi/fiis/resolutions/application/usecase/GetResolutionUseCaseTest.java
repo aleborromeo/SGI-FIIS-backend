@@ -64,6 +64,33 @@ class GetResolutionUseCaseTest {
     }
 
     @Test
+    @DisplayName("Should return resolution DTO when found by procedure id")
+    void findByProcedureId_ReturnsDto_WhenFound() {
+        when(resolutionRepositoryPort.findByProcedureId(10L)).thenReturn(Optional.of(sampleResolution));
+
+        Optional<ResolutionResponseDTO> result = getResolutionUseCase.findByProcedureId(10L);
+
+        assertTrue(result.isPresent());
+        ResolutionResponseDTO dto = result.get();
+        assertEquals(1L, dto.idResolucion());
+        assertEquals("RES-2023-001", dto.numeroResolucion());
+        assertEquals(10L, dto.idTramite());
+
+        verify(resolutionRepositoryPort).findByProcedureId(10L);
+    }
+
+    @Test
+    @DisplayName("Should return empty when resolution not found by procedure id")
+    void findByProcedureId_ReturnsEmpty_WhenNotFound() {
+        when(resolutionRepositoryPort.findByProcedureId(999L)).thenReturn(Optional.empty());
+
+        Optional<ResolutionResponseDTO> result = getResolutionUseCase.findByProcedureId(999L);
+
+        assertTrue(result.isEmpty());
+        verify(resolutionRepositoryPort).findByProcedureId(999L);
+    }
+
+    @Test
     @DisplayName("Should return empty when resolution not found")
     void execute_ReturnsEmpty_WhenNotFound() {
         when(resolutionRepositoryPort.findById(999L)).thenReturn(Optional.empty());

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -91,7 +92,7 @@ class DocumentEntityTest {
     @DisplayName("Should set and get createdAt via setter")
     void testSetCreatedAt() {
         DocumentEntity entity = new DocumentEntity();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
         entity.setCreatedAt(now);
         assertEquals(now, entity.getCreatedAt());
     }

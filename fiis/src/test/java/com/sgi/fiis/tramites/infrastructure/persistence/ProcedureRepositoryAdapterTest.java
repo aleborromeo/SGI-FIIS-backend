@@ -30,6 +30,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProcedureRepositoryAdapter Unit Tests")
+@SuppressWarnings({"unused", "java:S100", "java:S1192", "MethodName", "MultipleStringLiterals"})
 class ProcedureRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureRepository procedureRepository;
@@ -608,5 +609,29 @@ class ProcedureRepositoryAdapterTest {
 
         verify(projectRepository, never()).getReferenceById(anyInt());
         assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("findByStatusAndGroupId should delegate and map entities")
+    void findByStatusAndGroupId_returnsMappedProcedures() {
+        when(procedureRepository.findByStatusAndGroupId("PENDIENTE_COORDINADOR", 5L))
+                .thenReturn(List.of(buildEntity(1), buildEntity(2)));
+
+        List<Procedure> result = adapter.findByStatusAndGroupId(ProcedureStatus.PENDIENTE_COORDINADOR, 5L);
+
+        assertEquals(2, result.size());
+        verify(procedureRepository).findByStatusAndGroupId("PENDIENTE_COORDINADOR", 5L);
+    }
+
+    @Test
+    @DisplayName("findByStatusAndGroupId should return empty when no entities")
+    void findByStatusAndGroupId_returnsEmpty() {
+        when(procedureRepository.findByStatusAndGroupId("PENDIENTE_DIRECCION", 99L))
+                .thenReturn(List.of());
+
+        List<Procedure> result = adapter.findByStatusAndGroupId(ProcedureStatus.PENDIENTE_DIRECCION, 99L);
+
+        assertTrue(result.isEmpty());
+        verify(procedureRepository).findByStatusAndGroupId("PENDIENTE_DIRECCION", 99L);
     }
 }

@@ -18,6 +18,7 @@ public class ResearchCall {
     private CallStatus status;
     private Integer documentId;
     private Integer creatorId;
+    private String poblacionObjetivo;
     private final List<Integer> researchLineIds;
 
     /**
@@ -45,6 +46,7 @@ public class ResearchCall {
         this.status = builder.status;
         this.documentId = builder.documentId;
         this.creatorId = builder.creatorId;
+        this.poblacionObjetivo = builder.poblacionObjetivo;
         // Almacenamos una lista completamente inmutable en el dominio
         this.researchLineIds = List.copyOf(builder.researchLineIds);
     }
@@ -84,6 +86,7 @@ public class ResearchCall {
         private CallStatus status;
         private Integer documentId;
         private Integer creatorId;
+        private String poblacionObjetivo = "AMBOS";
         private List<Integer> researchLineIds = new ArrayList<>();
 
         private Builder() {}
@@ -96,6 +99,7 @@ public class ResearchCall {
         public Builder status(CallStatus status)                { this.status = status; return this; }
         public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
         public Builder creatorId(Integer creatorId)             { this.creatorId = creatorId; return this; }
+        public Builder poblacionObjetivo(String poblacionObjetivo) { this.poblacionObjetivo = poblacionObjetivo; return this; }
         public Builder researchLineIds(List<Integer> lineIds) { 
             if (lineIds == null) {
                 this.researchLineIds = new ArrayList<>();
@@ -152,6 +156,11 @@ public class ResearchCall {
     /** Returns the creator user identifier. */
     public Integer getCreatorId() {
         return creatorId;
+    }
+
+    /** Returns the target audience (DOCENTES, ESTUDIANTES, or AMBOS). */
+    public String getPoblacionObjetivo() {
+        return poblacionObjetivo;
     }
 
     /**

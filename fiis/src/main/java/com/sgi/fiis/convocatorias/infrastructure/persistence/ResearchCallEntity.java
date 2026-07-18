@@ -54,6 +54,10 @@ public class ResearchCallEntity {
     @Column(name = "estado", nullable = false, length = 20)
     private String status;
 
+    @Column(name = "poblacion_objetivo", nullable = false, length = 30)
+    @Builder.Default
+    private String poblacionObjetivo = "AMBOS";
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_documento_bases")
     private DocumentEntity document;

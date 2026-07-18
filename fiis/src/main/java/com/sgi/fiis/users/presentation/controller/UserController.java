@@ -10,6 +10,7 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class UserController {
 
     /** RF-07: Register user */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> create(@Valid @RequestBody UserRequestDto dto) {
         User user = mapper.toDomain(dto);
         User created = createUserUseCase.execute(user);
@@ -53,6 +55,7 @@ public class UserController {
 
     /** RF-08: Edit user */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> update(@PathVariable Long id,
                                                      @Valid @RequestBody UserUpdateDto dto) {
         User updated = updateUserUseCase.execute(
@@ -64,6 +67,7 @@ public class UserController {
 
     /** RF-14: List and search users */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> list(
             @RequestParam(required = false) String query) {
         List<UserResponseDto> users = listUsersUseCase.execute(query).stream()
@@ -74,6 +78,7 @@ public class UserController {
 
     /** Get user by ID */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> get(@PathVariable Long id) {
         User user = getUserUseCase.execute(id);
         return ResponseEntity.ok(mapper.toResponseDto(user));
@@ -81,6 +86,7 @@ public class UserController {
 
     /** RF-11: Activate or deactivate user */
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> toggleStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> body) {
@@ -96,6 +102,7 @@ public class UserController {
 
     /** RF-12: Reset password */
     @PatchMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id) {
         resetPasswordUseCase.execute(id);
         return ResponseEntity.ok(Map.of("message", "Contraseña reiniciada exitosamente"));

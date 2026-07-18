@@ -21,6 +21,11 @@ public class GetResolutionUseCase {
                 .map(this::toDto);
     }
 
+    public Optional<ResolutionResponseDTO> findByProcedureId(Long procedureId) {
+        return resolutionRepositoryPort.findByProcedureId(procedureId)
+                .map(this::toDto);
+    }
+
     private ResolutionResponseDTO toDto(Resolution resolution) {
         return new ResolutionResponseDTO(
                 resolution.idResolucion(),

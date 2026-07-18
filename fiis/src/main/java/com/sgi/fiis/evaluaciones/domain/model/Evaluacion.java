@@ -4,6 +4,7 @@ import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class Evaluacion {
 
@@ -53,7 +54,7 @@ public class Evaluacion {
                 null,
                 null,
                 null,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 null
         );
     }
@@ -67,7 +68,7 @@ public class Evaluacion {
                 null,
                 null,
                 null,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 null
         );
     }
@@ -121,7 +122,7 @@ public class Evaluacion {
         this.resultado = resultado;
         this.puntaje = puntaje;
         this.observaciones = observaciones;
-        this.fechaEvaluacion = LocalDateTime.now();
+        this.fechaEvaluacion = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     public boolean estaPendiente() {

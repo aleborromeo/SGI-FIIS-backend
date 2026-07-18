@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"java:S100", "java:S1192", "java:S5786"})
 class ResolutionControllerTest {
 
     private MockMvc mockMvc;
@@ -45,13 +46,11 @@ class ResolutionControllerTest {
     @Mock
     private GetResolutionUseCase getResolutionUseCase;
 
-    private ResolutionController resolutionController;
-
     private Resolution sampleResolution;
 
     @BeforeEach
-    void setUp() {
-        resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
+    public void setUp() {
+        ResolutionController resolutionController = new ResolutionController(issueResolutionUseCase, getResolutionUseCase, messageSource);
         mockMvc = MockMvcBuilders.standaloneSetup(resolutionController)
                 .setControllerAdvice(new GlobalExceptionHandler(messageSource))
                 .build();
@@ -138,6 +137,37 @@ class ResolutionControllerTest {
                 .andExpect(jsonPath("$.idResolucion").value(1))
                 .andExpect(jsonPath("$.numeroResolucion").value("RES-2023-001"))
                 .andExpect(jsonPath("$.asunto").value("Thesis approval"));
+    }
+
+    @Test
+    void getByProcedureId_shouldReturn200_whenFound() throws Exception {
+        ResolutionResponseDTO responseDTO = new ResolutionResponseDTO(
+                1L,
+                "RES-2023-001",
+                LocalDate.of(2023, Month.OCTOBER, 1),
+                "Thesis approval",
+                10L,
+                100L,
+                LocalDateTime.of(2023, Month.OCTOBER, 1, 10, 0)
+        );
+
+        when(getResolutionUseCase.findByProcedureId(10L)).thenReturn(Optional.of(responseDTO));
+
+        mockMvc.perform(get("/api/v1/resolutions/procedure/10")
+                        .with(user("user@unas.edu.pe").roles("DOCENTE_INVESTIGADOR")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idResolucion").value(1))
+                .andExpect(jsonPath("$.numeroResolucion").value("RES-2023-001"))
+                .andExpect(jsonPath("$.idTramite").value(10));
+    }
+
+    @Test
+    void getByProcedureId_shouldReturn404_whenNotFound() throws Exception {
+        when(getResolutionUseCase.findByProcedureId(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/resolutions/procedure/999")
+                        .with(user("user@unas.edu.pe").roles("DOCENTE_INVESTIGADOR")))
+                .andExpect(status().isNotFound());
     }
 
     @Test

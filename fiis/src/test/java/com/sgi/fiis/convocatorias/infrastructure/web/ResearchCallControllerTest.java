@@ -97,7 +97,7 @@ class ResearchCallControllerTest {
         request.setEndDate(FIXED_END);
         request.setResearchLineIds(Collections.singletonList(1));
 
-        CallResponse response = new CallResponse(1, "Call Test", "Description", FIXED_START, FIXED_END, "ABIERTA", null, null);
+        CallResponse response = new CallResponse(1, "Call Test", "Description", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null);
 
         when(createCallUseCase.execute(any(CreateCallRequest.class), anyInt())).thenReturn(response);
 
@@ -114,7 +114,7 @@ class ResearchCallControllerTest {
 
     @Test
     void shouldGetAllCalls() throws Exception {
-        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, null);
+        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null);
         when(getCallUseCase.getCalls(null)).thenReturn(List.of(call));
 
         mockMvc.perform(get("/api/v1/calls"))
@@ -127,7 +127,7 @@ class ResearchCallControllerTest {
 
     @Test
     void shouldGetCallById() throws Exception {
-        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, null);
+        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null);
         when(getCallUseCase.getCallById(1)).thenReturn(call);
 
         mockMvc.perform(get("/api/v1/calls/1"))
@@ -149,7 +149,7 @@ class ResearchCallControllerTest {
 
     @Test
     void shouldUpdateCallStatus() throws Exception {
-        CallResponse updated = new CallResponse(1, "Call", "Desc", FIXED_START, FIXED_END, "CERRADA", null, null);
+        CallResponse updated = new CallResponse(1, "Call", "Desc", FIXED_START, FIXED_END, "CERRADA", null, "AMBOS", null);
         when(updateCallStatusUseCase.updateStatus(1, "CERRADA")).thenReturn(updated);
 
         mockMvc.perform(patch("/api/v1/calls/1/status")
@@ -163,8 +163,8 @@ class ResearchCallControllerTest {
 
     @Test
     void shouldGetVigentCalls() throws Exception {
-        CallResponse call1 = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, null);
-        CallResponse call2 = new CallResponse(2, "Call 2", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, null);
+        CallResponse call1 = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null);
+        CallResponse call2 = new CallResponse(2, "Call 2", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null);
         when(getCallUseCase.getVigentCalls()).thenReturn(List.of(call1, call2));
 
         mockMvc.perform(get("/api/v1/calls/vigent"))
@@ -194,7 +194,7 @@ class ResearchCallControllerTest {
         authenticateAs(1L, "docente@unas.edu.pe", "DOCENTE_INVESTIGADOR");
         when(membershipRepositoryPort.existsActiveByUser(1)).thenReturn(true);
         when(getCallUseCase.getVigentCalls()).thenReturn(List.of(
-                new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, null)
+                new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null)
         ));
 
         mockMvc.perform(get("/api/v1/calls/prerequisitos"))
@@ -238,7 +238,7 @@ class ResearchCallControllerTest {
         authenticateAs(1L, "admin@unas.edu.pe", "DIRECTOR_INVESTIGACION");
 
         CallResponse updated = new CallResponse(1, "Updated Title", "Updated Desc",
-                FIXED_START, FIXED_END, "ABIERTA", null, List.of(1));
+                FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", List.of(1));
         UpdateCallRequest request = new UpdateCallRequest();
         request.setTitle("Updated Title");
         request.setDescription("Updated Desc");
@@ -256,7 +256,7 @@ class ResearchCallControllerTest {
 
     @Test
     void shouldGetCallsWithStatusFilter() throws Exception {
-        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "CERRADA", null, null);
+        CallResponse call = new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "CERRADA", null, "AMBOS", null);
         when(getCallUseCase.getCalls("CERRADA")).thenReturn(List.of(call));
 
         mockMvc.perform(get("/api/v1/calls?status=CERRADA"))

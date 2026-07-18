@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @DisplayName("SaveCallAdapter Unit Tests")
+@SuppressWarnings({"java:S100", "java:S1192"})
 class SaveCallAdapterTest {
 
     private ResearchCallJpaRepository jpaRepository;
@@ -163,7 +165,7 @@ class SaveCallAdapterTest {
     @Test
     @DisplayName("findByStatus: OPEN returns ABIERTA")
     void findByStatus_open() {
-        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", java.time.LocalDate.now()))
+        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", java.time.LocalDate.now(ZoneId.of("UTC"))))
                 .thenReturn(List.of(createEntity(1, "ABIERTA")));
 
         List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);
@@ -391,7 +393,7 @@ class SaveCallAdapterTest {
         entity.setStartDate(LocalDate.of(2025, Month.JANUARY, 1));
         entity.setEndDate(LocalDate.of(2025, Month.JUNE, 1));
 
-        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", LocalDate.now()))
+        when(jpaRepository.findByStatusAndEndDateGreaterThanEqual("ABIERTA", LocalDate.now(ZoneId.of("UTC"))))
                 .thenReturn(List.of(entity));
 
         List<ResearchCall> result = adapter.findByStatus(CallStatus.OPEN);

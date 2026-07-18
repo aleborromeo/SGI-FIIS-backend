@@ -83,7 +83,7 @@ public final class ProgressReportMapper {
         };
     }
 
-    private static String mapStatusToEntity(ProgressReportStatus status) {
+    static String mapStatusToEntity(ProgressReportStatus status) {
         if (status == null) return null;
         return switch (status) {
             case PENDING -> "PENDIENTE";
@@ -94,7 +94,7 @@ public final class ProgressReportMapper {
         };
     }
 
-    private static ProgressReportStatus mapStatusToDomain(String statusStr) {
+    static ProgressReportStatus mapStatusToDomain(String statusStr) {
         if (statusStr == null) return null;
         return switch (statusStr) {
             case "PENDIENTE" -> ProgressReportStatus.PENDING;

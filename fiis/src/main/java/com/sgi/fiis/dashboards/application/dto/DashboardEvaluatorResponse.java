@@ -14,6 +14,8 @@ public class DashboardEvaluatorResponse {
     private int completedEvaluations;
     private int assignedProjects;
     private int assignedThesisPlans;
+    private String groupName;
+    private String groupCode;
 
     private int approvedEvaluations;
     private int rejectedEvaluations;

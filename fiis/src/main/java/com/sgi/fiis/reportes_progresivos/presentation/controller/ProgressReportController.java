@@ -66,13 +66,13 @@ public class ProgressReportController {
     }
 
     @PatchMapping("/{id}/forward")
-    @PreAuthorize("hasAnyRole('DOCENTE_INVESTIGADOR', 'ESTUDIANTE')")
+    @PreAuthorize("hasRole('COORDINADOR_GRUPO')")
     public ResponseEntity<ProgressReportResponse> forward(@PathVariable Long id) {
         return ResponseEntity.ok(reviewUseCase.forwardToDirector(id));
     }
 
     @PatchMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     public ResponseEntity<ProgressReportResponse> approve(@PathVariable Long id) {
         return ResponseEntity.ok(reviewUseCase.approve(id));
     }

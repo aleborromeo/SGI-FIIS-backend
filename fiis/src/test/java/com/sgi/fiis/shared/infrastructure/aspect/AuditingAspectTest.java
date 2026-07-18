@@ -64,7 +64,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, new Object());
 
         verify(jdbcTemplate).update(anyString(), eq("object"), eq(0L), eq("CREAR"),
-                eq(10L), eq("192.168.1.1"), any());
+                eq(10L), any(), any(), eq("192.168.1.1"), any());
     }
 
     @Test
@@ -84,7 +84,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, null);
 
         verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), eq("EDITAR"),
-                eq(1L), eq("203.0.113.1"), any());
+                eq(1L), any(), any(), eq("203.0.113.1"), any());
     }
 
     @Test
@@ -100,7 +100,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, null);
 
         verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), eq("ELIMINAR"),
-                eq(1L), eq("0.0.0.0"), any());
+                eq(1L), any(), any(), eq("0.0.0.0"), any());
     }
 
     @Test
@@ -118,7 +118,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, result);
 
         verify(jdbcTemplate).update(anyString(), anyString(), eq(42L), eq("CREAR"),
-                eq(1L), eq("0.0.0.0"), any());
+                eq(1L), any(), any(), eq("0.0.0.0"), any());
     }
 
     @Test
@@ -134,7 +134,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, null);
 
         verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), eq("EDITAR"),
-                eq(1L), eq("0.0.0.0"), any());
+                eq(1L), any(), any(), eq("0.0.0.0"), any());
     }
 
     @Test
@@ -149,7 +149,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, null);
 
         verify(jdbcTemplate).update(anyString(), eq("test"), eq(0L), eq("CREAR"),
-                eq(1L), eq("0.0.0.0"), any());
+                eq(1L), any(), any(), eq("0.0.0.0"), any());
     }
 
     @Test
@@ -164,7 +164,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, null);
 
         verify(jdbcTemplate).update(anyString(), eq("test"), eq(0L), eq("EDITAR"),
-                eq(1L), eq("0.0.0.0"), any());
+                eq(1L), any(), any(), eq("0.0.0.0"), any());
     }
 
     @Test
@@ -199,7 +199,7 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable, null);
 
         ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), actionCaptor.capture(), anyLong(), anyString(), any());
+        verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), actionCaptor.capture(), anyLong(), any(), any(), anyString(), any());
         String mapped = actionCaptor.getValue();
         clearInvocations(jdbcTemplate);
         return mapped;
@@ -216,7 +216,7 @@ class AuditingAspectTest {
 
         auditingAspect.audit(joinPoint, auditable, "simple string");
 
-        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), anyString(), any());
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any());
     }
 
     @Test
@@ -230,7 +230,7 @@ class AuditingAspectTest {
 
         auditingAspect.audit(joinPoint, auditable, null);
 
-        verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), anyString(), any());
+        verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any());
     }
 
     private static class TestInteractor {}

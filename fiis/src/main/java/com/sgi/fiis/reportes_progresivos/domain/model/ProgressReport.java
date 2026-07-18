@@ -50,7 +50,13 @@ public class ProgressReport {
 
     /** Coordinator forwards to Director (RF-74). */
     public void forwardToDirector() {
-        requireStatus(ProgressReportStatus.UNDER_REVIEW, "forward to director");
+        if (this.reportStatus != ProgressReportStatus.PENDING
+                && this.reportStatus != ProgressReportStatus.UNDER_REVIEW) {
+            throw new IllegalStateException(
+                "Cannot forward to director a report in status " + this.reportStatus
+                + ". Expected: PENDING or UNDER_REVIEW");
+        }
+        this.reportStatus   = ProgressReportStatus.UNDER_REVIEW;
         this.lastUpdatedDate = LocalDateTime.now(ZoneId.systemDefault());
     }
 

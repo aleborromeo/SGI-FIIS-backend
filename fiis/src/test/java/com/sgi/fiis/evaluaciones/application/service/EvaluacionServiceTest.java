@@ -4,6 +4,7 @@ import com.sgi.fiis.evaluaciones.application.dto.command.AsignarEvaluadorCommand
 import com.sgi.fiis.evaluaciones.application.dto.command.RegistrarResultadoEvaluacionCommand;
 import com.sgi.fiis.evaluaciones.application.dto.response.EvaluacionResponse;
 import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
+import com.sgi.fiis.evaluaciones.presentation.dto.EvaluarEvaluacionRequest;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 import com.sgi.fiis.evaluaciones.domain.model.Evaluacion;
 import com.sgi.fiis.evaluaciones.domain.ports.out.EvaluacionRepositoryPort;
@@ -448,6 +449,160 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         );
 
         verify(evaluacionRepositoryPort, never()).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void consultarDetalleAnonimoConProyectoDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var response = evaluacionService.consultarDetalleAnonimo(1L);
+
+        assertEquals("PROY-10", response.expedienteCode());
+        assertEquals(4, response.criterios().size());
+        assertEquals(2, response.objetivosEspecificos().size());
+        assertEquals(50000.0, response.presupuestoTotal());
+        assertEquals(12, response.duracionMeses());
+    }
+
+    @Test
+    void consultarDetalleAnonimoConPlanTesisDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, null, 5L, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var response = evaluacionService.consultarDetalleAnonimo(1L);
+
+        assertEquals("TESIS-5", response.expedienteCode());
+    }
+
+    @Test
+    void consultarDetalleAnonimoNoExistenteDebeLanzarExcepcion() {
+        when(evaluacionRepositoryPort.buscarPorId(99L)).thenReturn(Optional.empty());
+
+        assertThrows(EvaluacionException.class, () -> evaluacionService.consultarDetalleAnonimo(99L));
+    }
+
+    @Test
+    void asignarEvaluadoresDebeAsignarMultiple() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 20L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
+                .thenReturn(false);
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 30L))
+                .thenReturn(false);
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenReturn(evaluacion);
+
+        var responses = evaluacionService.asignarEvaluadores(10L, null, List.of(20L, 30L));
+
+        assertEquals(2, responses.size());
+        verify(evaluacionRepositoryPort, times(2)).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void asignarEvaluadoresConListaVaciaDebeLanzarExcepcion() {
+        assertThrows(EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluadores(1L, null, List.of()));
+    }
+
+    @Test
+    void asignarEvaluadoresConListaNulaDebeLanzarExcepcion() {
+        assertThrows(EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluadores(1L, null, null));
+    }
+
+    @Test
+    void evaluarConDictamenAprobadoDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 85, "Bueno", "Aprobar", "APROBADO"
+        );
+        var response = evaluacionService.evaluar(1L, request);
+
+        assertEquals(ResultadoEvaluacion.APROBADO, response.resultado());
+        assertEquals(85, response.puntaje());
+        assertEquals("Bueno", response.observaciones());
+    }
+
+    @Test
+    void evaluarConDictamenAprobadoConObservacionesDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 70, "Observaciones", "Aprobar con cambios", "APROBADO_CON_OBSERVACIONES"
+        );
+        var response = evaluacionService.evaluar(1L, request);
+
+        assertEquals(ResultadoEvaluacion.CON_OBSERVACIONES, response.resultado());
+    }
+
+    @Test
+    void evaluarConDictamenDesaprobadoDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 30, "Insuficiente", "Rechazar", "DESAPROBADO"
+        );
+        var response = evaluacionService.evaluar(1L, request);
+
+        assertEquals(ResultadoEvaluacion.RECHAZADO, response.resultado());
+    }
+
+    @Test
+    void evaluarConDictamenInvalidoDebeLanzarExcepcion() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 50, "N/A", "N/A", "INVALIDO"
+        );
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, request));
+    }
+
+    @Test
+    void evaluarConEvaluadorIncorrectoDebeLanzarExcepcion() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var request = new EvaluarEvaluacionRequest(
+                99L, List.of(), 85, "Ok", "Aprobar", "APROBADO"
+        );
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, request));
+    }
+
+    @Test
+    void evaluarNoExistenteDebeLanzarExcepcion() {
+        when(evaluacionRepositoryPort.buscarPorId(99L)).thenReturn(Optional.empty());
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 85, "Ok", "Aprobar", "APROBADO"
+        );
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(99L, request));
     }
 
     @Test

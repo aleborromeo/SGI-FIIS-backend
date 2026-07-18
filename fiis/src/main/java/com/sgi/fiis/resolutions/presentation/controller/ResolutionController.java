@@ -84,4 +84,12 @@ public class ResolutionController {
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("resolution.not.found", id));
     }
+
+    @GetMapping("/procedure/{procedureId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResolutionResponseDTO> getByProcedureId(@PathVariable Long procedureId) {
+        return getResolutionUseCase.findByProcedureId(procedureId)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("resolution.not.found", procedureId));
+    }
 }

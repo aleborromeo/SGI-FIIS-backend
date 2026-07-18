@@ -47,7 +47,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
 
     @Override
     @Transactional
-    @Auditable(action = "CREATE_PROJECT")
+    @Auditable(action = "CREATE_PROJECT", table = "proyectos", description = "Creación de proyecto de investigación")
     public ProjectResponse execute(CreateProjectRequest request) {
         if (!request.isDraft()) {
             validateRequiredFields(request);
@@ -189,7 +189,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
 
     @Override
     @Transactional
-    @Auditable(action = "UPDATE_PROJECT_STATUS")
+    @Auditable(action = "UPDATE_PROJECT_STATUS", table = "proyectos", description = "Cambio de estado de proyecto a {status}")
     public ProjectResponse updateStatus(Integer id, String status) {
         Project project = saveProjectPort.findById(id)
                 .orElseThrow(() -> new BusinessRuleValidationException(PROJECT_NOT_FOUND, id));
@@ -240,7 +240,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
 
     @Override
     @Transactional
-    @Auditable(action = "DELETE_DRAFT")
+    @Auditable(action = "DELETE_DRAFT", table = "proyectos", description = "Eliminación de borrador de proyecto")
     public void deleteDraft(Integer projectId, Long userId) {
         Project project = saveProjectPort.findById(projectId)
                 .orElseThrow(() -> new BusinessRuleValidationException(PROJECT_NOT_FOUND, projectId));
