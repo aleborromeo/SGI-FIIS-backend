@@ -260,4 +260,55 @@ class ProcedureStateMachineTest {
                 stateMachine.aprobarPorDirector(tramite, ID_DIRECTOR)
         );
     }
+
+    @Test
+    @DisplayName("observarPorDirector con PLAN_TESIS deja targetRole en null (RN-07/08)")
+    void observarPorDirector_conPlanTesis_dejaTargetRoleNull() {
+        Procedure tramite = Procedure.builder()
+                .code("TRM-002").procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_DIRECCION).currentReviewerRole(DIRECTOR_INVESTIGACION)
+                .projectReferenceId(null).thesisReferenceId(200L)
+                .sentAt(FECHA).updatedAt(FECHA)
+                .build();
+
+        stateMachine.observarPorDirector(tramite, ID_DIRECTOR, "Revisar metodología");
+
+        assertEquals(OBSERVADO, tramite.getCurrentStatus());
+        assertNull(tramite.getCurrentReviewerRole());
+    }
+
+    @Test
+    @DisplayName("observarPorDirector con THESIS deja targetRole en null (RN-07/08)")
+    void observarPorDirector_conThesis_dejaTargetRoleNull() {
+        Procedure tramite = Procedure.builder()
+                .code("TRM-003").procedureType(ProcedureType.THESIS)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_DIRECCION).currentReviewerRole(DIRECTOR_INVESTIGACION)
+                .projectReferenceId(null).thesisReferenceId(300L)
+                .sentAt(FECHA).updatedAt(FECHA)
+                .build();
+
+        stateMachine.observarPorDirector(tramite, ID_DIRECTOR, "Ajustar cronograma");
+
+        assertEquals(OBSERVADO, tramite.getCurrentStatus());
+        assertNull(tramite.getCurrentReviewerRole());
+    }
+
+    @Test
+    @DisplayName("aprobarPorCoordinador con solicitud de PLAN_TESIS avanza correctamente")
+    void aprobarPorCoordinador_conPlanTesis_avanzaADireccion() {
+        Procedure tramite = Procedure.builder()
+                .code("TRM-004").procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(ID_SOLICITANTE).groupId(1L)
+                .currentStatus(PENDIENTE_COORDINADOR).currentReviewerRole(COORDINADOR_GRUPO)
+                .projectReferenceId(null).thesisReferenceId(400L)
+                .sentAt(FECHA).updatedAt(FECHA)
+                .build();
+
+        stateMachine.aprobarPorCoordinador(tramite, ID_COORDINADOR);
+
+        assertEquals(PENDIENTE_DIRECCION, tramite.getCurrentStatus());
+        assertEquals(DIRECTOR_INVESTIGACION, tramite.getCurrentReviewerRole());
+    }
 }

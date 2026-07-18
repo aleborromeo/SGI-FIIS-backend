@@ -227,4 +227,26 @@ class TraceabilityServiceTest {
         verify(repo, never()).isProcedureInGroup(anyInt(), anyInt());
         verify(repo).findByProcedureId(10);
     }
+
+    @Test
+    @DisplayName("getProceduresWithRecentActivity should delegate to repo with groupId")
+    void getProceduresWithRecentActivity_withGroupId() {
+        when(repo.findProceduresWithRecentActivity(5, 7)).thenReturn(Collections.emptyList());
+
+        var result = service.getProceduresWithRecentActivity(5, 7);
+
+        assertThat(result).isEmpty();
+        verify(repo).findProceduresWithRecentActivity(5, 7);
+    }
+
+    @Test
+    @DisplayName("getProceduresWithRecentActivity should delegate to repo without groupId")
+    void getProceduresWithRecentActivity_noGroupId() {
+        when(repo.findProceduresWithRecentActivity(null, 7)).thenReturn(Collections.emptyList());
+
+        var result = service.getProceduresWithRecentActivity(null, 7);
+
+        assertThat(result).isEmpty();
+        verify(repo).findProceduresWithRecentActivity(null, 7);
+    }
 }

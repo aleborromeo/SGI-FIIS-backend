@@ -1,5 +1,6 @@
 package com.sgi.fiis.tramites.application.usecase;
 
+import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupEntity;
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.domain.model.Procedure;
@@ -156,5 +157,52 @@ class ListProceduresUseCaseTest {
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.DECANO);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("execute(COORDINADOR_GRUPO, userId) - finds group and filters by group")
+    void executeCoordinadorWithUserIdAndGroupFound() {
+        var groupEntity = new ResearchGroupEntity();
+        groupEntity.setId(5);
+
+        when(groupRepository.findByCurrentCoordinatorId(10L)).thenReturn(groupEntity);
+
+        List<Procedure> coordList = List.of(buildProcedure(1L, ProcedureStatus.PENDIENTE_COORDINADOR));
+        when(procedureRepositoryPort.findByStatusAndGroupId(ProcedureStatus.PENDIENTE_COORDINADOR, 5L))
+                .thenReturn(coordList);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.COORDINADOR_GRUPO, 10L);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findByStatusAndGroupId(ProcedureStatus.PENDIENTE_COORDINADOR, 5L);
+        verify(procedureRepositoryPort, never()).findByStatus(any());
+    }
+
+    @Test
+    @DisplayName("execute(COORDINADOR_GRUPO, userId) - falls back when group not found")
+    void executeCoordinadorWithUserIdAndGroupNotFound() {
+        when(groupRepository.findByCurrentCoordinatorId(99L)).thenReturn(null);
+
+        List<Procedure> coordList = List.of(buildProcedure(1L, ProcedureStatus.PENDIENTE_COORDINADOR));
+        when(procedureRepositoryPort.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR)).thenReturn(coordList);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.COORDINADOR_GRUPO, 99L);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
+        verify(procedureRepositoryPort, never()).findByStatusAndGroupId(any(), any());
+    }
+
+    @Test
+    @DisplayName("execute(COORDINADOR_GRUPO, null) - falls back without userId")
+    void executeCoordinadorNullUserId() {
+        List<Procedure> coordList = List.of(buildProcedure(1L, ProcedureStatus.PENDIENTE_COORDINADOR));
+        when(procedureRepositoryPort.findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR)).thenReturn(coordList);
+
+        List<ProcedureResponseDto> result = useCase.execute(RoleEnum.COORDINADOR_GRUPO, null);
+
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findByStatus(ProcedureStatus.PENDIENTE_COORDINADOR);
+        verifyNoInteractions(groupRepository);
     }
 }
