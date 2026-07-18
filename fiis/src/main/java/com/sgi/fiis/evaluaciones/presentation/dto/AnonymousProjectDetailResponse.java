@@ -2,6 +2,7 @@ package com.sgi.fiis.evaluaciones.presentation.dto;
 
 import java.util.List;
 
+// skipcq: JAVA-W1035
 public record AnonymousProjectDetailResponse(
         String expedienteCode,
         String convocatoria,
@@ -15,7 +16,6 @@ public record AnonymousProjectDetailResponse(
         List<DocumentoItem> documentos,
         List<CriterioItem> criterios
 ) {
-    @SuppressWarnings("java:W1035")
     public static AnonymousProjectDetailResponse placeholder(String expedienteCode) {
         return new AnonymousProjectDetailResponse(
                 expedienteCode,

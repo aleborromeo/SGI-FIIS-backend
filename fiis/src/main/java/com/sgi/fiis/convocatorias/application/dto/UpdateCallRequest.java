@@ -24,6 +24,7 @@ public class UpdateCallRequest {
         this.endDate = endDate;
         this.documentId = documentId;
         this.poblacionObjetivo = poblacionObjetivo;
+        // skipcq: JAVA-E1086
         this.researchLineIds = researchLineIds == null ? null : List.copyOf(researchLineIds);
     }
 
@@ -80,6 +81,7 @@ public class UpdateCallRequest {
     }
 
     public void setResearchLineIds(List<Integer> researchLineIds) {
+        // skipcq: JAVA-E1086
         this.researchLineIds = researchLineIds == null ? null : List.copyOf(researchLineIds);
     }
 
@@ -127,6 +129,7 @@ public class UpdateCallRequest {
         }
 
         public UpdateCallRequestBuilder researchLineIds(List<Integer> researchLineIds) {
+            // skipcq: JAVA-E1086
             this.researchLineIds = researchLineIds == null ? null : List.copyOf(researchLineIds);
             return this;
         }
