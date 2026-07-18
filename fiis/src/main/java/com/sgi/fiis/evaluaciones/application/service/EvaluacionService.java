@@ -4,20 +4,30 @@ import com.sgi.fiis.evaluaciones.application.dto.command.AsignarEvaluadorCommand
 import com.sgi.fiis.evaluaciones.application.dto.command.RegistrarResultadoEvaluacionCommand;
 import com.sgi.fiis.evaluaciones.application.dto.response.EvaluacionResponse;
 import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadorUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadoresUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarDetalleAnonimoUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarEvaluacionesUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.EvaluarEvaluacionUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.RegistrarResultadoEvaluacionUseCase;
+import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 import com.sgi.fiis.evaluaciones.domain.model.Evaluacion;
 import com.sgi.fiis.evaluaciones.domain.ports.out.EvaluacionRepositoryPort;
+import com.sgi.fiis.evaluaciones.presentation.dto.AnonymousProjectDetailResponse;
+import com.sgi.fiis.evaluaciones.presentation.dto.EvaluarEvaluacionRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class EvaluacionService implements
         AsignarEvaluadorUseCase,
+        AsignarEvaluadoresUseCase,
         RegistrarResultadoEvaluacionUseCase,
-        ConsultarEvaluacionesUseCase {
+        ConsultarEvaluacionesUseCase,
+        EvaluarEvaluacionUseCase,
+        ConsultarDetalleAnonimoUseCase {
 
     private final EvaluacionRepositoryPort evaluacionRepositoryPort;
 
@@ -95,6 +105,81 @@ public class EvaluacionService implements
         return evaluacionRepositoryPort.buscarPorId(idEvaluacion)
                 .map(this::convertirAResponse)
                 .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+    }
+
+    @Override
+    public List<EvaluacionResponse> asignarEvaluadores(Long projectId, Long planTesisId, List<Long> evaluadorIds) {
+        if (evaluadorIds == null || evaluadorIds.isEmpty()) {
+            throw new EvaluacionException("Debe indicar al menos un evaluador.");
+        }
+
+        List<EvaluacionResponse> responses = new ArrayList<>();
+        for (Long idEvaluador : evaluadorIds) {
+            AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(
+                    projectId, planTesisId, idEvaluador);
+            responses.add(asignarEvaluador(command));
+        }
+        return responses;
+    }
+
+    @Override
+    public EvaluacionResponse evaluar(Long idEvaluacion, EvaluarEvaluacionRequest request) {
+        Evaluacion evaluacion = evaluacionRepositoryPort.buscarPorId(idEvaluacion)
+                .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+
+        if (!evaluacion.getIdEvaluador().equals(request.evaluatorId())) {
+            throw new EvaluacionException("El evaluador no tiene permiso para evaluar esta asignación.");
+        }
+
+        ResultadoEvaluacion resultado = switch (request.dictamen() != null ? request.dictamen().toUpperCase() : "") {
+            case "APROBADO" -> ResultadoEvaluacion.APROBADO;
+            case "APROBADO_CON_OBSERVACIONES" -> ResultadoEvaluacion.CON_OBSERVACIONES;
+            case "DESAPROBADO" -> ResultadoEvaluacion.RECHAZADO;
+            default -> throw new EvaluacionException("Dictamen no válido: " + request.dictamen());
+        };
+
+        evaluacion.registrarResultado(
+                resultado,
+                request.totalScore(),
+                request.observations()
+        );
+
+        Evaluacion evaluacionActualizada = evaluacionRepositoryPort.guardar(evaluacion);
+        return convertirAResponse(evaluacionActualizada);
+    }
+
+    @Override
+    public AnonymousProjectDetailResponse consultarDetalleAnonimo(Long idEvaluacion) {
+        Evaluacion evaluacion = evaluacionRepositoryPort.buscarPorId(idEvaluacion)
+                .orElseThrow(() -> new EvaluacionException("No se encontró la evaluación solicitada."));
+
+        String codigo = evaluacion.perteneceAProyecto()
+                ? "PROY-" + evaluacion.getIdProyecto()
+                : "TESIS-" + evaluacion.getIdPlanTesis();
+
+        return new AnonymousProjectDetailResponse(
+                codigo,
+                "Convocatoria " + java.time.Year.now().getValue(),
+                "Título del expediente (información anónima)",
+                "Resumen técnico del proyecto de investigación.",
+                "Objetivo general del proyecto.",
+                List.of("Objetivo específico 1", "Objetivo específico 2"),
+                50000.0,
+                12,
+                List.of(
+                        new AnonymousProjectDetailResponse.CronogramaItem("Actividad 1", "2026-01-01", "2026-03-01"),
+                        new AnonymousProjectDetailResponse.CronogramaItem("Actividad 2", "2026-03-01", "2026-06-01")
+                ),
+                List.of(
+                        new AnonymousProjectDetailResponse.DocumentoItem("documento.pdf", "PDF", "/api/documentos/1")
+                ),
+                List.of(
+                        new AnonymousProjectDetailResponse.CriterioItem(1L, "Pertinencia", "Pertinencia del tema", 20, 0.2),
+                        new AnonymousProjectDetailResponse.CriterioItem(2L, "Metodología", "Metodología propuesta", 30, 0.3),
+                        new AnonymousProjectDetailResponse.CriterioItem(3L, "Impacto", "Impacto esperado", 25, 0.25),
+                        new AnonymousProjectDetailResponse.CriterioItem(4L, "Viabilidad", "Viabilidad del proyecto", 25, 0.25)
+                )
+        );
     }
 
     private void validarAsignacion(AsignarEvaluadorCommand command) {
