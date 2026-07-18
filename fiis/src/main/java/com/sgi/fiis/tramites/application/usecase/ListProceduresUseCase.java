@@ -50,7 +50,7 @@ public class ListProceduresUseCase {
                     .toList();
             case COORDINADOR_GRUPO -> {
                 if (userId != null) {
-                    ResearchGroupEntity group = groupRepository.findByCurrentCoordinatorId(userId.intValue());
+                    ResearchGroupEntity group = groupRepository.findByCurrentCoordinatorId(userId);
                     if (group != null) {
                         yield procedureRepositoryPort
                                 .findByStatusAndGroupId(ProcedureStatus.PENDIENTE_COORDINADOR, group.getId().longValue())

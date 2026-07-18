@@ -99,7 +99,7 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
 
     @Override
     public List<Procedure> findByStatusAndGroupId(ProcedureStatus estado, Long groupId) {
-        return toDomainList(procedureRepository.findByStatusAndGroupId(estado.name(), groupId.intValue()));
+        return toDomainList(procedureRepository.findByStatusAndGroupId(estado.name(), groupId));
     }
 
     private List<Procedure> toDomainList(List<ProcedureEntity> entities) {

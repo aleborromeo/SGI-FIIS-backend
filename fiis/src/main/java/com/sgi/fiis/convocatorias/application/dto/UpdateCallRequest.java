@@ -24,7 +24,7 @@ public class UpdateCallRequest {
         this.endDate = endDate;
         this.documentId = documentId;
         this.poblacionObjetivo = poblacionObjetivo;
-        this.researchLineIds = researchLineIds;
+        this.researchLineIds = researchLineIds == null ? null : List.copyOf(researchLineIds);
     }
 
     public String getTitle() {
@@ -80,7 +80,7 @@ public class UpdateCallRequest {
     }
 
     public void setResearchLineIds(List<Integer> researchLineIds) {
-        this.researchLineIds = researchLineIds;
+        this.researchLineIds = researchLineIds == null ? null : List.copyOf(researchLineIds);
     }
 
     public static UpdateCallRequestBuilder builder() {

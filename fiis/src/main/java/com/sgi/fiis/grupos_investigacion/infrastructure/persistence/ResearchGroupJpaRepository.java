@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ResearchGroupJpaRepository extends JpaRepository<ResearchGroupEntity, Integer> {
 
-    ResearchGroupEntity findByCurrentCoordinatorId(Integer coordinatorId);
+    ResearchGroupEntity findByCurrentCoordinatorId(Long coordinatorId);
 }
