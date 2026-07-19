@@ -38,10 +38,10 @@ public class ResearchCallController {
     private final MembershipRepositoryPort membershipRepositoryPort;
 
     public ResearchCallController(CreateCallUseCase createCallUseCase,
-                                  GetCallUseCase getCallUseCase,
-                                  UpdateCallStatusUseCase updateCallStatusUseCase,
-                                  UpdateCallUseCase updateCallUseCase,
-                                  MembershipRepositoryPort membershipRepositoryPort) {
+            GetCallUseCase getCallUseCase,
+            UpdateCallStatusUseCase updateCallStatusUseCase,
+            UpdateCallUseCase updateCallUseCase,
+            MembershipRepositoryPort membershipRepositoryPort) {
         this.createCallUseCase = createCallUseCase;
         this.getCallUseCase = getCallUseCase;
         this.updateCallStatusUseCase = updateCallStatusUseCase;
@@ -63,7 +63,6 @@ public class ResearchCallController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List research calls", description = "Retrieves all research calls, optionally filtered by status.")
     @ApiResponse(responseCode = "200", description = "List of research calls retrieved successfully")
     public ResponseEntity<List<CallResponse>> getCalls(
@@ -73,7 +72,6 @@ public class ResearchCallController {
     }
 
     @GetMapping("/vigent")
-    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get open/vigent research calls", description = "Retrieves all research calls with OPEN status.")
     @ApiResponse(responseCode = "200", description = "List of vigent calls retrieved successfully")
     public ResponseEntity<List<CallResponse>> getVigentCalls() {
