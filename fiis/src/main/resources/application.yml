@@ -67,7 +67,6 @@ spring:
             user-info-uri: https://graph.microsoft.com/oidc/userinfo
             user-name-attribute: email
 
-
 app:
   jwt:
     secret: ${JWT_SECRET:default-dev-secret-key-change-in-production-min-32-chars}

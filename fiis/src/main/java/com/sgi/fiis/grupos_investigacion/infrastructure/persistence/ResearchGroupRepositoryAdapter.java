@@ -17,8 +17,8 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     private final SpringDataUserRepository userRepository;
 
     public ResearchGroupRepositoryAdapter(SpringDataResearchGroupRepository jpaRepository,
-                                         JdbcTemplate jdbcTemplate,
-                                         SpringDataUserRepository userRepository) {
+            JdbcTemplate jdbcTemplate,
+            SpringDataUserRepository userRepository) {
         this.jpaRepository = jpaRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.userRepository = userRepository;
@@ -53,12 +53,14 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
                 .groupCode(rs.getString("codigo_grupo"))
                 .groupName(rs.getString("nombre_grupo"))
                 .currentCoordinatorId(rs.getObject("id_coordinador_actual") != null
-                        ? rs.getInt("id_coordinador_actual") : null)
+                        ? rs.getInt("id_coordinador_actual")
+                        : null)
                 .active(rs.getBoolean("es_activo"))
                 .coordinatorFirstNames(rs.getString("coordinator_first_names"))
                 .coordinatorLastNames(rs.getString("coordinator_last_names"))
                 .createdAt(rs.getTimestamp("fecha_creacion") != null
-                        ? rs.getTimestamp("fecha_creacion").toLocalDateTime() : null)
+                        ? rs.getTimestamp("fecha_creacion").toLocalDateTime()
+                        : null)
                 .build());
     }
 
@@ -86,7 +88,7 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     public boolean existsActiveUserWithRole(Integer userId, String roleCode) {
         String sql = """
                 SELECT COUNT(*) FROM usuarios u
-                WHERE u.id_usuario = ? AND u.es_activo = TRUE 
+                WHERE u.id_usuario = ? AND u.es_activo = TRUE
                   AND (
                     EXISTS (SELECT 1 FROM roles r WHERE r.id_rol = u.id_rol_principal AND r.codigo_rol = ?)
                     OR EXISTS (SELECT 1 FROM usuarios_roles ur JOIN roles r ON ur.id_rol = r.id_rol WHERE ur.id_usuario = u.id_usuario AND r.codigo_rol = ?)
@@ -117,7 +119,8 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
                 .groupCode(entity.getCode())
                 .groupName(entity.getName())
                 .currentCoordinatorId(entity.getCurrentCoordinator() != null
-                        ? entity.getCurrentCoordinator().getId().intValue() : null)
+                        ? entity.getCurrentCoordinator().getId().intValue()
+                        : null)
                 .active(entity.isActive())
                 .createdAt(entity.getCreatedAt())
                 .build();
@@ -129,6 +132,9 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
         entity.setCode(domain.getGroupCode());
         entity.setName(domain.getGroupName());
         entity.setActive(domain.isActive());
+        if (domain.getCreatedAt() != null) {
+            entity.setCreatedAt(domain.getCreatedAt());
+        }
         if (domain.getCurrentCoordinatorId() != null) {
             entity.setCurrentCoordinator(
                     userRepository.getReferenceById(domain.getCurrentCoordinatorId().longValue()));

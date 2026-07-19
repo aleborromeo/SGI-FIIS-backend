@@ -6,6 +6,9 @@ import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Service
 public class CreateGroupUseCase {
 
@@ -19,6 +22,9 @@ public class CreateGroupUseCase {
     public ResearchGroup execute(ResearchGroup group) {
         if (groupRepository.existsByCode(group.getGroupCode())) {
             throw new DuplicateResourceException("grupos.error.duplicate-code", group.getGroupCode());
+        }
+        if (group.getCreatedAt() == null) {
+            group.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         }
         group.setActive(true);
         return groupRepository.save(group);
