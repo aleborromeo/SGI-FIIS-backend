@@ -44,6 +44,10 @@ jobs:
       - name: Create external network
         run: docker network create sgifiis-network-shared
 
+      - name: Build backend JAR
+        working-directory: ./fiis
+        run: bash mvnw -DskipTests clean package
+
       - name: Build containers
         run: docker compose build
 
@@ -65,10 +69,15 @@ jobs:
       # 7. Verificar que el contenedor backend siga vivo
       - name: Verify backend container
         run: |
-          docker ps
+          docker ps -a
+          if ! docker ps -a --format '{{.Names}}' | grep -qx 'sgifiis-backend-api-dev'; then
+            echo "Container sgifiis-backend-api-dev was not created."
+            exit 1
+          fi
+
           if [ "$(docker inspect -f '{{.State.Running}}' sgifiis-backend-api-dev)" != "true" ]; then
             echo "El contenedor backend no está ejecutándose."
-            docker logs sgifiis-backend-api-dev
+            docker logs sgifiis-backend-api-dev || true
             exit 1
           fi
 
