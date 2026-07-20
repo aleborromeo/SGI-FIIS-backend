@@ -58,7 +58,7 @@ class ThesisReportServiceTest {
     private void mockAuthentication(Long id, String role) {
         CustomUserDetails userDetails = new CustomUserDetails(
                 id, "user@unas.edu.pe", "password", true,
-                List.of(new SimpleGrantedAuthority(role))
+                List.of(new SimpleGrantedAuthority(role)), role.replace("ROLE_", "")
         );
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetails);

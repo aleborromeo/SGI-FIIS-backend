@@ -14,6 +14,19 @@ public record EvaluacionResponse(
         String observaciones,
         LocalDateTime fechaAsignacion,
         LocalDateTime fechaEvaluacion,
-        boolean pendiente
+        boolean pendiente,
+        String proyectoTitulo,
+        String proyectoResumen,
+        String planTesisTitulo,
+        String planTesisResumen
 ) {
+    public EvaluacionResponse(
+            Long idEvaluacion, Long idProyecto, Long idPlanTesis, Long idEvaluador,
+            ResultadoEvaluacion resultado, Integer puntaje, String observaciones,
+            LocalDateTime fechaAsignacion, LocalDateTime fechaEvaluacion, boolean pendiente
+    ) {
+        this(idEvaluacion, idProyecto, idPlanTesis, idEvaluador, resultado, puntaje,
+                observaciones, fechaAsignacion, fechaEvaluacion, pendiente,
+                null, null, null, null);
+    }
 }

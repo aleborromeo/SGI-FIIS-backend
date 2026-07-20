@@ -68,6 +68,7 @@ class ProjectControllerTest {
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getUsername()).thenReturn("testuser");
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DOCENTE_INVESTIGADOR"));
+                        when(userDetails.getRole()).thenReturn("DOCENTE_INVESTIGADOR");
                         return userDetails;
                     }
                 })
@@ -130,7 +131,7 @@ class ProjectControllerTest {
 
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
+                .andExpect(jsonPath("$.content[0].id").value(1));
 
         verify(createProjectUseCase, times(1)).getProjectsByResponsible(3L);
     }
@@ -173,6 +174,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        when(userDetails.getRole()).thenReturn("ESTUDIANTE");
                         return userDetails;
                     }
                 }).build();
@@ -212,6 +214,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_COORDINADOR_GRUPO"));
+                        when(userDetails.getRole()).thenReturn("COORDINADOR_GRUPO");
                         return userDetails;
                     }
                 }).build();
@@ -220,7 +223,7 @@ class ProjectControllerTest {
 
         customMockMvc.perform(get("/api/v1/projects"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
+                .andExpect(jsonPath("$.content[0].id").value(1));
     }
 
     @Test
@@ -241,14 +244,15 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_COORDINADOR_GRUPO"));
+                        when(userDetails.getRole()).thenReturn("COORDINADOR_GRUPO");
                         return userDetails;
                     }
                 }).build();
 
         customMockMvc.perform(get("/api/v1/projects"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty());
     }
 
     @Test
@@ -266,13 +270,14 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        when(userDetails.getRole()).thenReturn("ESTUDIANTE");
                         return userDetails;
                     }
                 }).build();
 
         customMockMvc.perform(get("/api/v1/projects"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
+                .andExpect(jsonPath("$.content").isEmpty());
     }
 
     @Test
@@ -290,6 +295,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DIRECTOR_INVESTIGACION"));
+                        when(userDetails.getRole()).thenReturn("DIRECTOR_INVESTIGACION");
                         return userDetails;
                     }
                 }).build();
@@ -298,7 +304,7 @@ class ProjectControllerTest {
 
         customMockMvc.perform(get("/api/v1/projects?groupId=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
+                .andExpect(jsonPath("$.content[0].id").value(1));
 
         verify(createProjectUseCase).getProjectsByGroup(2);
     }
@@ -318,6 +324,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DIRECTOR_INVESTIGACION"));
+                        when(userDetails.getRole()).thenReturn("DIRECTOR_INVESTIGACION");
                         return userDetails;
                     }
                 }).build();
@@ -326,7 +333,7 @@ class ProjectControllerTest {
 
         customMockMvc.perform(get("/api/v1/projects?responsibleId=5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(2));
+                .andExpect(jsonPath("$.content[0].id").value(2));
 
         verify(createProjectUseCase).getProjectsByResponsible(5L);
     }
@@ -346,6 +353,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_DIRECTOR_INVESTIGACION"));
+                        when(userDetails.getRole()).thenReturn("DIRECTOR_INVESTIGACION");
                         return userDetails;
                     }
                 }).build();
@@ -356,7 +364,7 @@ class ProjectControllerTest {
 
         customMockMvc.perform(get("/api/v1/projects"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2));
 
         verify(createProjectUseCase).getAllProjects();
     }
@@ -368,8 +376,8 @@ class ProjectControllerTest {
 
         mockMvc.perform(get("/api/v1/projects/drafts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].status").value("BORRADOR"));
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].status").value("BORRADOR"));
 
         verify(createProjectUseCase).getDraftsByResponsible(3L);
     }
@@ -389,13 +397,14 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        when(userDetails.getRole()).thenReturn("ESTUDIANTE");
                         return userDetails;
                     }
                 }).build();
 
         customMockMvc.perform(get("/api/v1/projects/drafts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
+                .andExpect(jsonPath("$.content").isEmpty());
     }
 
     @Test
@@ -435,6 +444,7 @@ class ProjectControllerTest {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
                         when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
+                        when(userDetails.getRole()).thenReturn("ESTUDIANTE");
                         return userDetails;
                     }
                 }).build();

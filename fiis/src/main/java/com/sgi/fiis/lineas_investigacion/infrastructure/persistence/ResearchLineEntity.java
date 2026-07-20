@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "lineas_investigacion")
 @Getter
@@ -20,4 +22,10 @@ public class ResearchLineEntity {
 
     @Column(name = "es_activa", nullable = false)
     private boolean active;
+
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "fecha_actualizacion", nullable = false)
+    private LocalDateTime updatedAt;
 }

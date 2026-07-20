@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.application.usecase;
 
+import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
@@ -54,5 +55,40 @@ class ListUsersUseCaseTest {
 
         verify(userRepository).search("Juan");
         verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    @DisplayName("Should execute paginated search without filters")
+    void testPaginatedWithoutFilters() {
+        User user = User.builder().id(1L).firstNames("Juan").build();
+        when(userRepository.findAllPaged(0, 10)).thenReturn(List.of(user));
+        when(userRepository.countAll()).thenReturn(1L);
+
+        PageDto<User> result = listUsersUseCase.execute(null, 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(1L, result.getTotalElements());
+        assertEquals(0, result.getPage());
+        assertEquals(10, result.getSize());
+
+        verify(userRepository).findAllPaged(0, 10);
+        verify(userRepository).countAll();
+    }
+
+    @Test
+    @DisplayName("Should execute paginated search with search query, role, and active status")
+    void testPaginatedWithFilters() {
+        User user = User.builder().id(1L).firstNames("Juan").build();
+        when(userRepository.search("Juan", "ADMIN", true)).thenReturn(List.of(user));
+
+        PageDto<User> result = listUsersUseCase.execute("  Juan  ", 0, 10, "ADMIN", true);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(0, result.getPage());
+
+        verify(userRepository).search("Juan", "ADMIN", true);
     }
 }

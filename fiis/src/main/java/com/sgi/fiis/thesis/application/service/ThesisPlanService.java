@@ -136,9 +136,9 @@ public class ThesisPlanService implements ThesisPlanUseCase {
         plan.marcarObservado();
         ThesisPlan guardado = planRepository.save(plan);
         Long idUsuarioAccion = extraerIdUsuarioDelContexto();
-        // RN-07: Director observation returns to student for thesis plans
+        // RN-07: Director observation returns to coordinator, not directly to student (RF-50)
         tramiteWorkflow.derivarPlanTesis(idPlanTesis, idUsuarioAccion, ThesisProcedureStatus.OBSERVADO,
-                ReviewerRole.ESTUDIANTE, "OBSERVAR_DIRECTOR", command.observacion(), command.idDocumentoAdjunto());
+                ReviewerRole.COORDINADOR_GRUPO, "OBSERVAR_DIRECTOR", command.observacion(), command.idDocumentoAdjunto());
         return toResponse(guardado);
     }
 
@@ -366,18 +366,20 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             String[] grupo = resolveGroupInfo(p.getIdGrupo(), p.getIdPlanTesis());
             String nombreLinea = resolveLineName(p.getIdLinea(), p.getIdPlanTesis());
             String nombreDocumento = resolveDocumentName(p.getIdDocumentoActual(), p.getIdPlanTesis());
+            String observacionActual = resolveObservacionActual(p.getIdPlanTesis());
 
             return new ThesisPlanResponse(p.getIdPlanTesis(), p.getTituloTesis(), p.getResumen(),
                     p.getIdEstudiante(), p.getIdLinea(), p.getIdGrupo(), p.getIdDocumentoActual(),
                     p.getEstadoPlan(), p.getFechaCreacion(), p.getFechaActualizacion(),
                     idTramite, ThesisProcedureStatus.valueOf(estadoTramite), ReviewerRole.valueOf(revisorActual),
-                    estudiante[0], estudiante[1], grupo[0], grupo[1], nombreLinea, nombreDocumento);
+                    estudiante[0], estudiante[1], grupo[0], grupo[1], nombreLinea, nombreDocumento,
+                    observacionActual);
         } catch (Exception e) {
             log.warn("Error resolving thesis plan details for plan {}: {}", p.getIdPlanTesis(), e.getMessage());
             return new ThesisPlanResponse(p.getIdPlanTesis(), p.getTituloTesis(), p.getResumen(),
                     p.getIdEstudiante(), p.getIdLinea(), p.getIdGrupo(), p.getIdDocumentoActual(),
                     p.getEstadoPlan(), p.getFechaCreacion(), p.getFechaActualizacion(),
-                    idTramite, null, null, null, null, null, null, null, null);
+                    idTramite, null, null, null, null, null, null, null, null, null);
         }
     }
 
@@ -418,6 +420,21 @@ public class ThesisPlanService implements ThesisPlanUseCase {
             return (String) row.get("nombre_original");
         } catch (Exception e) {
             log.warn("Error resolving document name for plan {}: {}", planId, e.getMessage());
+            return null;
+        }
+    }
+
+    private String resolveObservacionActual(Integer planId) {
+        try {
+            Integer idTramite = tramiteWorkflow.obtenerIdTramitePorPlanTesis(planId);
+            if (idTramite == null) return null;
+            var rows = jdbcTemplate.queryForList(
+                    "SELECT observacion FROM movimientos_tramite WHERE id_tramite = ? AND observacion IS NOT NULL AND observacion != '' ORDER BY fecha_movimiento DESC LIMIT 1",
+                    idTramite);
+            if (rows.isEmpty()) return null;
+            return (String) rows.get(0).get("observacion");
+        } catch (Exception e) {
+            log.warn("Error resolving observation for plan {}: {}", planId, e.getMessage());
             return null;
         }
     }

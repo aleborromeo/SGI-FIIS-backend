@@ -1,6 +1,7 @@
 package com.sgi.fiis.tramites.presentation.controller;
 
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
+import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.tramites.application.dto.*;
 import com.sgi.fiis.tramites.application.usecase.*;
@@ -32,10 +33,16 @@ public class ProcedureController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<ProcedureResponseDto>> list(
+    public ResponseEntity<PageDto<ProcedureResponseDto>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         RoleEnum rol = extractRole(userDetails);
-        return ResponseEntity.ok(listProceduresUseCase.execute(rol, userDetails.getId()));
+        List<ProcedureResponseDto> all = listProceduresUseCase.execute(rol, userDetails.getId());
+        int total = all.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        return ResponseEntity.ok(new PageDto<>(all.subList(fromIndex, toIndex), total, page, size));
     }
 
     @GetMapping("/{id}")
@@ -109,9 +116,10 @@ public class ProcedureController {
     }
 
     private RoleEnum extractRole(CustomUserDetails userDetails) {
-        return userDetails.getAuthorities().stream()
-                .findFirst()
-                .map(a -> RoleEnum.valueOf(a.getAuthority().replace("ROLE_", "")))
-                .orElseThrow(() -> new BusinessException("Authenticated user has no role assigned"));
+        String role = userDetails.getRole();
+        if (role == null || role.isBlank()) {
+            throw new BusinessException("Authenticated user has no role assigned");
+        }
+        return RoleEnum.valueOf(role);
     }
 }

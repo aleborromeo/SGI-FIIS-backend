@@ -2,6 +2,7 @@ package com.sgi.fiis.tramites.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.infrastructure.persistence.ResearchGroupJpaRepository;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.ProcedureMovement;
 import com.sgi.fiis.tramites.domain.model.ProcedureType;
@@ -26,18 +27,21 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
     private final SpringDataUserRepository userRepository;
     private final ResearchGroupJpaRepository groupRepository;
     private final ProjectJpaRepository projectRepository;
+    private final CorrelationContext correlationContext;
 
     public ProcedureRepositoryAdapter(
             SpringDataProcedureRepository procedureRepository,
             SpringDataProcedureMovementRepository movementRepository,
             SpringDataUserRepository userRepository,
             ResearchGroupJpaRepository groupRepository,
-            ProjectJpaRepository projectRepository) {
+            ProjectJpaRepository projectRepository,
+            CorrelationContext correlationContext) {
         this.procedureRepository = procedureRepository;
         this.movementRepository = movementRepository;
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
         this.projectRepository = projectRepository;
+        this.correlationContext = correlationContext;
     }
 
     @Override
@@ -193,6 +197,11 @@ public class ProcedureRepositoryAdapter implements ProcedureRepositoryPort {
         entity.setNewState(domain.getNewStatus() != null ? domain.getNewStatus().name() : null);
         entity.setComment(domain.getComment());
         entity.setMovementAt(domain.getMovementAt());
+
+        String corrId = correlationContext.getCorrelationId();
+        if (corrId != null) {
+            entity.setCorrelationId(corrId);
+        }
 
         return entity;
     }

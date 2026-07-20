@@ -72,7 +72,8 @@ class DashboardControllerTest {
                 "test@unas.edu.pe",
                 "password",
                 true,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                List.of(new SimpleGrantedAuthority("ROLE_" + role)),
+                role
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
@@ -403,7 +404,8 @@ class DashboardControllerTest {
                 "admin@unas.edu.pe",
                 "password",
                 true,
-                List.of(new SimpleGrantedAuthority("ADMIN"))
+                List.of(new SimpleGrantedAuthority("ADMIN")),
+                "ADMIN"
         );
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

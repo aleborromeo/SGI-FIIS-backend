@@ -1,6 +1,7 @@
 package com.sgi.fiis.proyectos.application.usecases;
 
 import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
+import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
 import com.sgi.fiis.proyectos.application.dto.CreateProjectRequest;
 import com.sgi.fiis.proyectos.application.dto.MemberRequest;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings({"unused", "ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored", "java:S1192"})
 class CreateProjectInteractorTest {
 
     private SaveProjectPort saveProjectPort;
@@ -71,6 +73,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
         
         Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
@@ -193,6 +196,25 @@ class CreateProjectInteractorTest {
     }
     
     @Test
+    void execute_CallNotOpen_ThrowsException() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setCallId(5);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.CLOSED);
+        when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
+
+        BusinessRuleValidationException ex = assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+        assertEquals("La convocatoria especificada no está abierta", ex.getMessage());
+    }
+
+    @Test
     void execute_EmptyMembers_DoesNotCallSaveMembers() {
         CreateProjectRequest request = buildValidRequest();
         request.setMembers(null);
@@ -205,6 +227,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
@@ -229,6 +252,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
@@ -277,6 +301,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(100, "BOR-2026-XYZ99999", "Project Title", "Project summary",
@@ -332,5 +357,69 @@ class CreateProjectInteractorTest {
         assertEquals(ProjectStatus.COMPLETED, p.getStatus());
         interactor.updateStatus(1, "POSTULADO");
         assertEquals(ProjectStatus.POSTULATED, p.getStatus());
+    }
+
+    @Test
+    void execute_RequiredFieldsMissing_ThrowsException() {
+        CreateProjectRequest request = new CreateProjectRequest();
+        request.setDraft(false);
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+    }
+
+    @Test
+    void getDraftsByResponsible_Success() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.DRAFT);
+        when(saveProjectPort.findByResponsibleIdAndStatus(2L, ProjectStatus.DRAFT)).thenReturn(List.of(p));
+
+        var result = interactor.getDraftsByResponsible(2L);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void deleteDraft_Success() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.DRAFT);
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+
+        interactor.deleteDraft(1, 2L);
+        verify(saveProjectPort).deleteById(1);
+    }
+
+    @Test
+    void deleteDraft_NotDraft_ThrowsException() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.APPROVED);
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.deleteDraft(1, 2L));
+    }
+
+    @Test
+    void deleteDraft_NotResponsible_ThrowsException() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.DRAFT);
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.deleteDraft(1, 99L));
+    }
+
+    @Test
+    void deleteDraft_NotFound_ThrowsException() {
+        when(saveProjectPort.findById(1)).thenReturn(Optional.empty());
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.deleteDraft(1, 2L));
+    }
+
+    @Test
+    void execute_CallIdNull_NoOpenCalls_ThrowsException() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setCallId(null);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(List.of());
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
     }
 }

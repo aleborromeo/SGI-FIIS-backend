@@ -30,6 +30,7 @@ class ProgressReportMapperTest {
                 .difficulties("dificultades")
                 .recommendations("recomendaciones")
                 .attachedDocumentId(99L)
+                .observation("Corregir tabla 3")
                 .reportStatus("PENDIENTE")
                 .registrationDate(now)
                 .lastUpdatedDate(now)
@@ -38,6 +39,7 @@ class ProgressReportMapperTest {
         ProgressReport domain = ProgressReportMapper.toDomain(entity);
 
         assertNotNull(domain);
+        assertEquals("Corregir tabla 3", domain.getObservation());
         assertFields(domain, 1L, 10L, ProgressReportType.PARTIAL, "2026-I",
                 new BigDecimal("45.50"), "logros", "dificultades", "recomendaciones", 99L, ProgressReportStatus.PENDING, now, now);
     }
@@ -50,6 +52,7 @@ class ProgressReportMapperTest {
                 new BigDecimal("100.00"), "logros", "dificultades", "recomendaciones");
         domain.setId(1L);
         domain.setAttachedDocumentId(99L);
+        domain.setObservation("Corregir tabla 3");
         domain.setReportStatus(ProgressReportStatus.APPROVED);
         domain.setRegistrationDate(now);
         domain.setLastUpdatedDate(now);
@@ -60,6 +63,7 @@ class ProgressReportMapperTest {
         assertEntityMatches(domain, entity);
         assertEquals("FINAL", entity.getReportType());
         assertEquals("APROBADO", entity.getReportStatus());
+        assertEquals("Corregir tabla 3", entity.getObservation());
     }
 
     @Test
@@ -70,6 +74,7 @@ class ProgressReportMapperTest {
                 new BigDecimal("45.50"), "logros", "dificultades", "recomendaciones");
         domain.setId(1L);
         domain.setAttachedDocumentId(99L);
+        domain.setObservation("Corregir tabla 3");
         domain.setReportStatus(ProgressReportStatus.PENDING);
         domain.setRegistrationDate(now);
         domain.setLastUpdatedDate(now);
@@ -77,6 +82,7 @@ class ProgressReportMapperTest {
         ProgressReportResponse response = ProgressReportMapper.toResponse(domain);
 
         assertNotNull(response);
+        assertEquals("Corregir tabla 3", response.getObservation());
         assertResponseMatches(domain, response);
     }
 
@@ -106,6 +112,7 @@ class ProgressReportMapperTest {
         assertEquals(domain.getDifficulties(), entity.getDifficulties());
         assertEquals(domain.getRecommendations(), entity.getRecommendations());
         assertEquals(domain.getAttachedDocumentId(), entity.getAttachedDocumentId());
+        assertEquals(domain.getObservation(), entity.getObservation());
         assertEquals(domain.getRegistrationDate(), entity.getRegistrationDate());
         assertEquals(domain.getLastUpdatedDate(), entity.getLastUpdatedDate());
     }
@@ -120,6 +127,7 @@ class ProgressReportMapperTest {
         assertEquals(domain.getDifficulties(), response.getDifficulties());
         assertEquals(domain.getRecommendations(), response.getRecommendations());
         assertEquals(domain.getAttachedDocumentId(), response.getAttachedDocumentId());
+        assertEquals(domain.getObservation(), response.getObservation());
         assertEquals(domain.getReportStatus(), response.getReportStatus());
         assertEquals(domain.getRegistrationDate(), response.getRegistrationDate());
         assertEquals(domain.getLastUpdatedDate(), response.getLastUpdatedDate());

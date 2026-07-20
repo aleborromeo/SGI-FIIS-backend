@@ -26,6 +26,7 @@ public class ProgressReportResponse {
     private String difficulties;
     private String recommendations;
     private Long attachedDocumentId;
+    private String observation;
     private ProgressReportStatus reportStatus;
     private LocalDateTime registrationDate;
     private LocalDateTime lastUpdatedDate;

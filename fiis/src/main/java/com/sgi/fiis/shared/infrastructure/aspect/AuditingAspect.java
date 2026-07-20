@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,6 +18,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.Map;
 
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 
@@ -26,26 +29,46 @@ public class AuditingAspect {
 
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
+    private final CorrelationContext correlationContext;
 
-    public AuditingAspect(JdbcTemplate jdbcTemplate) {
+    public AuditingAspect(JdbcTemplate jdbcTemplate, CorrelationContext correlationContext) {
         this.jdbcTemplate = jdbcTemplate;
+        this.correlationContext = correlationContext;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @AfterReturning(value = "@annotation(auditable)", returning = "result")
-    public void audit(JoinPoint joinPoint, Auditable auditable, Object result) {
-        Long idUsuario = extractUserId();
-        String ipAddress = extractIpAddress();
+    @Around("@annotation(auditable)")
+    public Object audit(ProceedingJoinPoint joinPoint, Auditable auditable) throws Throwable {
         String mappedAction = mapAction(auditable.action());
         String tablaAfectada = resolveTableName(auditable, joinPoint);
+        Long idRegistro = extractRegisterIdFromArgs(joinPoint);
 
-        Long idRegistro = extractRegisterId(result);
+        String datosAnteriores = null;
+        if (!"CREAR".equals(mappedAction) && idRegistro > 0 && !tablaAfectada.isBlank()) {
+            datosAnteriores = queryPreviousState(tablaAfectada, idRegistro);
+        }
+
+        String correlationId = java.util.UUID.randomUUID().toString();
+        correlationContext.setCorrelationId(correlationId);
+
+        Object result;
+        try {
+            result = joinPoint.proceed();
+        } finally {
+            correlationContext.clear();
+        }
+
+        if (result != null && idRegistro == 0L) {
+            idRegistro = extractRegisterId(result);
+        }
+
+        Long idUsuario = extractUserId();
+        String ipAddress = extractIpAddress();
         String datosNuevos = serializeArgs(joinPoint, result);
-        String datosAnteriores = buildDescription(auditable.description(), joinPoint);
 
         jdbcTemplate.update(
-                "INSERT INTO auditoria_general (tabla_afectada, id_registro, accion, id_usuario, datos_anteriores, datos_nuevos, ip_origen, fecha_accion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO auditoria_general (tabla_afectada, id_registro, accion, id_usuario, datos_anteriores, datos_nuevos, ip_origen, fecha_accion, correlation_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 tablaAfectada,
                 idRegistro,
                 mappedAction,
@@ -53,8 +76,11 @@ public class AuditingAspect {
                 datosAnteriores,
                 datosNuevos,
                 ipAddress,
-                LocalDateTime.now(ZoneId.of("UTC"))
+                LocalDateTime.now(ZoneId.of("UTC")),
+                correlationId
         );
+
+        return result;
     }
 
     private String resolveTableName(Auditable auditable, JoinPoint joinPoint) {
@@ -73,23 +99,42 @@ public class AuditingAspect {
         return tableName;
     }
 
-    private String buildDescription(String descriptionTemplate, JoinPoint joinPoint) {
-        if (descriptionTemplate == null || descriptionTemplate.isBlank()) {
+    @SuppressWarnings("java:S2077")
+    private String queryPreviousState(String tableName, Long idRegistro) {
+        if (tableName == null || !tableName.matches("^\\w+$")) {
             return null;
         }
+        try {
+            String sql = "SELECT * FROM " + tableName + " WHERE id = ?";
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, idRegistro);
+            if (rows.isEmpty()) {
+                sql = "SELECT * FROM " + tableName + " WHERE id_" + tableName + " = ?";
+                rows = jdbcTemplate.queryForList(sql, idRegistro);
+            }
+            if (!rows.isEmpty()) {
+                return objectMapper.writeValueAsString(rows.get(0));
+            }
+        } catch (JsonProcessingException | org.springframework.dao.DataAccessException ignored) {
+            // Ignored because falling back to returning null is the default safe state
+        }
+        return null;
+    }
+
+    private Long extractRegisterIdFromArgs(JoinPoint joinPoint) {
+        Object[] args = joinPoint.getArgs();
+        if (args == null) return 0L;
         MethodSignature sig = (MethodSignature) joinPoint.getSignature();
         String[] paramNames = sig.getParameterNames();
-        Object[] args = joinPoint.getArgs();
-        String result = descriptionTemplate;
-        if (paramNames != null) {
-            for (int i = 0; i < paramNames.length; i++) {
-                String placeholder = "{" + paramNames[i] + "}";
-                if (result.contains(placeholder) && args[i] != null) {
-                    result = result.replace(placeholder, args[i].toString());
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] == null) continue;
+            if (args[i] instanceof Number number) {
+                String name = (paramNames != null && i < paramNames.length) ? paramNames[i] : "";
+                if (name.contains("id") || name.contains("Id") || name.contains("ID")) {
+                    return number.longValue();
                 }
             }
         }
-        return result;
+        return 0L;
     }
 
     private String serializeArgs(JoinPoint joinPoint, Object result) {

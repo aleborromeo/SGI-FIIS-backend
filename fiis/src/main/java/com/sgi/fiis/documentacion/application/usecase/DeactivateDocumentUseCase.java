@@ -4,6 +4,7 @@ import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedExce
 import com.sgi.fiis.documentacion.application.exception.DocumentNotFoundException;
 import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,7 @@ public class DeactivateDocumentUseCase {
         this.documentRepositoryPort = documentRepositoryPort;
     }
 
+    @Auditable(action = "DEACTIVATE_DOCUMENT", table = "documentos")
     public void execute(Long documentId, Long currentUserId, String currentUserRol) {
 
         // 1. Buscar el documento en la BD

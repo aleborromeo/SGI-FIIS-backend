@@ -82,6 +82,7 @@ class DocumentControllerTest {
         org.mockito.Mockito.when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
         org.mockito.Mockito.when(userDetails.getAuthorities())
                 .thenReturn(List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+        org.mockito.Mockito.when(userDetails.getRole()).thenReturn(role);
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,
@@ -561,5 +562,42 @@ class DocumentControllerTest {
         mockMvc.perform(get("/api/documents/download/{id}", 1L)
                         .principal(auth))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("HTTP GET download con principal no CustomUserDetails y extension TXT")
+    void downloadDocument_HttpSuccess_NonCustomUserDetailsAndTxt() throws Exception {
+        org.springframework.security.core.userdetails.User simpleUser =
+                new org.springframework.security.core.userdetails.User("test@test.com", "pass",
+                        List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(simpleUser, null, simpleUser.getAuthorities());
+
+        ByteArrayInputStream stream = new ByteArrayInputStream("data".getBytes());
+        when(downloadDocumentUseCase.execute(eq(1L), anyLong(), eq("USER")))
+                .thenReturn(new DocumentDownloadResult(stream, "file.txt", "TXT", 4L));
+
+        mockMvc.perform(get("/api/documents/download/{id}", 1L)
+                        .principal(auth))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM));
+    }
+
+    @Test
+    @DisplayName("HTTP POST: upload rechaza DOC y DOCX con magic bytes incorrectos")
+    void uploadDocument_HttpBadRequest_DocDocxInvalidMagicBytes() throws Exception {
+        // Invalid DOC magic bytes
+        MockMultipartFile docFile = new MockMultipartFile(
+                "file", "fake.doc", "application/msword", "not-a-doc-file".getBytes());
+        mockMvc.perform(multipart("/api/documents/upload").file(docFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isBadRequest());
+
+        // Invalid DOCX magic bytes
+        MockMultipartFile docxFile = new MockMultipartFile(
+                "file", "fake.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "not-a-docx-file".getBytes());
+        mockMvc.perform(multipart("/api/documents/upload").file(docxFile)
+                        .principal(createAuth(42L, "ESTUDIANTE")))
+                .andExpect(status().isBadRequest());
     }
 }

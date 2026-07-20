@@ -19,6 +19,7 @@ import java.util.Collections;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import com.sgi.fiis.shared.application.dto.PageDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -132,13 +133,13 @@ class UserControllerTest extends TestcontainersConfig {
                                 .roleCode("ADMIN")
                                 .build();
 
-                when(listUsersUseCase.execute(null)).thenReturn(Collections.singletonList(userDomain));
+                when(listUsersUseCase.execute(null, 0, 20, null, null)).thenReturn(new PageDto<>(Collections.singletonList(userDomain), 1, 0, 20));
 
                 mockMvc.perform(get("/api/v1/users")
                                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
                                                 .user("admin@unas.edu.pe").roles("ADMIN")))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].institutionalEmail").value("admin@unas.edu.pe"))
-                                .andExpect(jsonPath("$[0].roleCode").value("ADMIN"));
+                                .andExpect(jsonPath("$.content[0].institutionalEmail").value("admin@unas.edu.pe"))
+                                .andExpect(jsonPath("$.content[0].roleCode").value("ADMIN"));
         }
 }

@@ -26,6 +26,7 @@ public final class ProgressReportMapper {
         domain.setDifficulties(entity.getDifficulties());
         domain.setRecommendations(entity.getRecommendations());
         domain.setAttachedDocumentId(entity.getAttachedDocumentId());
+        domain.setObservation(entity.getObservation());
         domain.setReportStatus(mapStatusToDomain(entity.getReportStatus()));
         domain.setRegistrationDate(entity.getRegistrationDate());
         domain.setLastUpdatedDate(entity.getLastUpdatedDate());
@@ -43,6 +44,7 @@ public final class ProgressReportMapper {
                 .difficulties(domain.getDifficulties())
                 .recommendations(domain.getRecommendations())
                 .attachedDocumentId(domain.getAttachedDocumentId())
+                .observation(domain.getObservation())
                 .reportStatus(mapStatusToEntity(domain.getReportStatus()))
                 .registrationDate(domain.getRegistrationDate())
                 .lastUpdatedDate(domain.getLastUpdatedDate())
@@ -60,6 +62,7 @@ public final class ProgressReportMapper {
         response.setDifficulties(domain.getDifficulties());
         response.setRecommendations(domain.getRecommendations());
         response.setAttachedDocumentId(domain.getAttachedDocumentId());
+        response.setObservation(domain.getObservation());
         response.setReportStatus(domain.getReportStatus());
         response.setRegistrationDate(domain.getRegistrationDate());
         response.setLastUpdatedDate(domain.getLastUpdatedDate());

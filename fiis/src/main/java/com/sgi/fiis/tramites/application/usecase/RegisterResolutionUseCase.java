@@ -1,6 +1,7 @@
 package com.sgi.fiis.tramites.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
 import com.sgi.fiis.tramites.domain.event.ProcedureFinalizedEvent;
@@ -28,6 +29,7 @@ public class RegisterResolutionUseCase {
     }
 
     @Transactional
+    @Auditable(action = "REGISTER_RESOLUTION", table = "tramites")
     public ProcedureResponseDto execute(Long idTramite, Long idDecano) {
         Procedure tramite = procedureRepositoryPort.findById(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));

@@ -2,6 +2,7 @@ package com.sgi.fiis.tramites.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
 import com.sgi.fiis.tramites.domain.event.ProcedureApprovedEvent;
@@ -30,6 +31,7 @@ public class ApproveProcedureUseCase {
     }
 
     @Transactional
+    @Auditable(action = "APPROVE_PROCEDURE", table = "tramites")
     public ProcedureResponseDto execute(Long idTramite, RoleEnum rolEjecutor, Long idEjecutor) {
         Procedure tramite = procedureRepositoryPort.findById(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));

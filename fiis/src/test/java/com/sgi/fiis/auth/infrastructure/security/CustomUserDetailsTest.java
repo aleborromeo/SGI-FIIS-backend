@@ -19,7 +19,8 @@ class CustomUserDetailsTest {
                 "user@example.com",
                 "password",
                 true,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                "USER"
         );
 
         assertEquals(42L, userDetails.getId());
@@ -36,7 +37,8 @@ class CustomUserDetailsTest {
                 "user@example.com",
                 "password",
                 true,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                "USER"
         );
 
         CustomUserDetails user2 = new CustomUserDetails(
@@ -44,7 +46,8 @@ class CustomUserDetailsTest {
                 "user@example.com",
                 "password",
                 true,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                "USER"
         );
 
         CustomUserDetails user3 = new CustomUserDetails(
@@ -52,7 +55,8 @@ class CustomUserDetailsTest {
                 "user@example.com",
                 "password",
                 true,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                "USER"
         );
 
         // Same reference

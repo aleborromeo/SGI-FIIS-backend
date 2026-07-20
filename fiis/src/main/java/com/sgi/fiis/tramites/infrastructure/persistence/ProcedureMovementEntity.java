@@ -44,4 +44,7 @@ public class ProcedureMovementEntity {
 
     @Column(name = "id_documento_adjunto")
     private Long documentAttachmentId;
+
+    @Column(name = "correlation_id", length = 36)
+    private String correlationId;
 }

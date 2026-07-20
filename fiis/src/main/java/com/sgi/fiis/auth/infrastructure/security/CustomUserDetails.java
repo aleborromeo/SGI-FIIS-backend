@@ -11,15 +11,21 @@ import java.util.Objects;
  */
 public class CustomUserDetails extends User {
     private final Long id;
+    private final String role;
 
     public CustomUserDetails(Long id, String username, String password, boolean enabled,
-                             Collection<? extends GrantedAuthority> authorities) {
+                             Collection<? extends GrantedAuthority> authorities, String role) {
         super(username, password, enabled, true, true, true, authorities);
         this.id = id;
+        this.role = role;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getRole() {
+        return role;
     }
 
     @Override

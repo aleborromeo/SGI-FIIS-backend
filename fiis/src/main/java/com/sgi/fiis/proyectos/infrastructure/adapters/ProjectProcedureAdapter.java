@@ -6,6 +6,7 @@ import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.tramites.infrastructure.persistence.*;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.springframework.stereotype.Component;
@@ -21,13 +22,16 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
     private final ProjectJpaRepository projectRepository;
     private final SpringDataProcedureRepository procedureRepository;
     private final ProcedureMovementJpaRepository movementRepository;
+    private final CorrelationContext correlationContext;
 
     public ProjectProcedureAdapter(ProjectJpaRepository projectRepository,
                                    SpringDataProcedureRepository procedureRepository,
-                                   ProcedureMovementJpaRepository movementRepository) {
+                                   ProcedureMovementJpaRepository movementRepository,
+                                   CorrelationContext correlationContext) {
         this.projectRepository = projectRepository;
         this.procedureRepository = procedureRepository;
         this.movementRepository = movementRepository;
+        this.correlationContext = correlationContext;
     }
 
     @Override
@@ -61,15 +65,20 @@ public class ProjectProcedureAdapter implements CreateProcedurePort {
         ProcedureEntity savedProcedure = procedureRepository.save(procedure);
 
         // 3. Log initial movement in movimientos_tramite
-        ProcedureMovementEntity movement = ProcedureMovementEntity.builder()
+        ProcedureMovementEntity.ProcedureMovementEntityBuilder movementBuilder = ProcedureMovementEntity.builder()
                 .procedure(savedProcedure)
                 .actionUser(applicant)
                 .action("CREAR")
                 .previousState("REGISTRADO")
                 .newState("PENDIENTE_COORDINADOR")
                 .comment("Postulacion de proyecto de investigacion registrada automaticamente.")
-                .movementAt(LocalDateTime.now(ZoneId.of("UTC")))
-                .build();
+                .movementAt(LocalDateTime.now(ZoneId.of("UTC")));
+
+        String corrId = correlationContext.getCorrelationId();
+        if (corrId != null) {
+            movementBuilder.correlationId(corrId);
+        }
+        ProcedureMovementEntity movement = movementBuilder.build();
 
         movementRepository.save(movement);
     }

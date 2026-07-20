@@ -298,6 +298,9 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         if (callId != null) {
             call = saveCallPort.findById(callId)
                     .orElseThrow(() -> new BusinessRuleValidationException("proyectos.error.call-not-found", callId));
+            if (call.getStatus() != CallStatus.OPEN) {
+                throw new BusinessRuleValidationException("La convocatoria especificada no está abierta");
+            }
         } else {
             List<ResearchCall> openCalls = saveCallPort.findByStatus(CallStatus.OPEN);
             if (openCalls.isEmpty()) {

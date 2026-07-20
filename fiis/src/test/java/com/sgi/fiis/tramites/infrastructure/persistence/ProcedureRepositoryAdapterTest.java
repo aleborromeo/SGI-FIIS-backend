@@ -10,6 +10,7 @@ import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.ProcedureType;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProcedureRepositoryAdapter Unit Tests")
-@SuppressWarnings({"unused", "java:S100", "java:S1192", "MethodName", "MultipleStringLiterals"})
+@SuppressWarnings({"java:S100", "java:S1192", "MethodName", "MultipleStringLiterals"})
 class ProcedureRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureRepository procedureRepository;
@@ -38,6 +39,7 @@ class ProcedureRepositoryAdapterTest {
     @Mock private SpringDataUserRepository userRepository;
     @Mock private ResearchGroupJpaRepository groupRepository;
     @Mock private ProjectJpaRepository projectRepository;
+    @Mock private CorrelationContext correlationContext;
     @InjectMocks private ProcedureRepositoryAdapter adapter;
 
     private static final LocalDateTime DATE = LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0);
@@ -633,5 +635,55 @@ class ProcedureRepositoryAdapterTest {
 
         assertTrue(result.isEmpty());
         verify(procedureRepository).findByStatusAndGroupId("PENDIENTE_DIRECCION", 99L);
+    }
+
+    @Test
+    @DisplayName("findByReviewerRole should return mapped list")
+    void findByReviewerRole_returnsList() {
+        when(procedureRepository.findByReviewerRole("COORDINADOR_GRUPO")).thenReturn(List.of(buildEntity(1)));
+
+        List<Procedure> result = adapter.findByReviewerRole(RoleEnum.COORDINADOR_GRUPO);
+
+        assertEquals(1, result.size());
+        verify(procedureRepository).findByReviewerRole("COORDINADOR_GRUPO");
+    }
+
+    @Test
+    @DisplayName("findByStatusAndReviewerRole should return mapped list")
+    void findByStatusAndReviewerRole_returnsList() {
+        when(procedureRepository.findByStatusAndReviewerRole("PENDIENTE_COORDINADOR", "COORDINADOR_GRUPO"))
+                .thenReturn(List.of(buildEntity(1)));
+
+        List<Procedure> result = adapter.findByStatusAndReviewerRole(
+                ProcedureStatus.PENDIENTE_COORDINADOR, RoleEnum.COORDINADOR_GRUPO
+        );
+
+        assertEquals(1, result.size());
+        verify(procedureRepository).findByStatusAndReviewerRole("PENDIENTE_COORDINADOR", "COORDINADOR_GRUPO");
+    }
+
+    @Test
+    @DisplayName("save: movement sets correlationId from context when present")
+    void save_setsCorrelationIdFromContext() {
+        List<ProcedureMovement> movs = List.of(ProcedureMovement.builder()
+                .action("APROBADO")
+                .movementAt(DATE)
+                .build());
+
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .code("TRM-2026-001")
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movements(movs)
+                .build();
+
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+        when(correlationContext.getCorrelationId()).thenReturn("corr-1234");
+
+        adapter.save(domain);
+
+        verify(correlationContext).getCorrelationId();
+        verify(movementRepository).save(argThat(entity -> "corr-1234".equals(entity.getCorrelationId())));
     }
 }

@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ThesisPlanService Unit Tests")
-@SuppressWarnings({"unused", "ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored"})
+@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored", "java:S1192"})
 class ThesisPlanServiceTest {
 
     @Mock
@@ -66,7 +67,7 @@ class ThesisPlanServiceTest {
     private void mockAuthentication(Long id, String role) {
         CustomUserDetails userDetails = new CustomUserDetails(
                 id, "student@unas.edu.pe", "password", true,
-                List.of(new SimpleGrantedAuthority(role))
+                List.of(new SimpleGrantedAuthority(role)), role.replace("ROLE_", "")
         );
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetails);
@@ -238,7 +239,7 @@ class ThesisPlanServiceTest {
         assertEquals(ThesisPlanStatus.OBSERVADO, existingPlan.getEstadoPlan());
         verify(tramiteWorkflow).derivarPlanTesis(
                 12, 404L, ThesisProcedureStatus.OBSERVADO,
-                ReviewerRole.ESTUDIANTE, "OBSERVAR_DIRECTOR", "Faltan firmas", 100
+                ReviewerRole.COORDINADOR_GRUPO, "OBSERVAR_DIRECTOR", "Faltan firmas", 100
         );
     }
 
@@ -911,5 +912,93 @@ class ThesisPlanServiceTest {
         assertNotNull(list);
         assertEquals(1, list.size());
         verify(planRepository).findByEstudiante(101L);
+    }
+
+    @Test
+    @DisplayName("toResponse - covers successful db resolution, null values, and exception path")
+    void testToResponseHelperResolutions() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+
+        // 1. Success path for helpers
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(12)).thenReturn(100);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(12)).thenReturn("COORDINADOR_GRUPO");
+
+        when(jdbcTemplate.queryForMap(contains("usuarios"), anyLong()))
+                .thenReturn(Map.of("nombres", "Juan", "apellidos", "Perez"));
+        when(jdbcTemplate.queryForMap(contains("grupos_investigacion"), anyInt()))
+                .thenReturn(Map.of("nombre_grupo", "Grupo AI", "codigo_grupo", "GRP-AI"));
+        when(jdbcTemplate.queryForMap(contains("lineas_investigacion"), anyInt()))
+                .thenReturn(Map.of("nombre_linea", "AI"));
+        when(jdbcTemplate.queryForMap(contains("documentos"), anyInt()))
+                .thenReturn(Map.of("nombre_original", "documento.pdf"));
+        when(jdbcTemplate.queryForList(contains("movimientos_tramite"), anyInt()))
+                .thenReturn(List.of(Map.of("observacion", "Corregir formato")));
+
+        ThesisPlanResponse response = service.obtenerPorId(12);
+        assertNotNull(response);
+        assertEquals("Juan", response.nombreEstudiante());
+        assertEquals("Grupo AI", response.nombreGrupo());
+        assertEquals("AI", response.nombreLinea());
+        assertEquals("documento.pdf", response.nombreDocumento());
+        assertEquals("Corregir formato", response.observacionActual());
+
+        // 2. Null doc, null idTramite, and exception paths in helpers
+        reset(jdbcTemplate);
+        ThesisPlan planNullDoc = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, null, // null doc
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(planNullDoc));
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(12)).thenReturn(null); // null tramite id
+
+        when(jdbcTemplate.queryForMap(anyString(), any())).thenThrow(new RuntimeException("DB error"));
+
+        ThesisPlanResponse responseNulls = service.obtenerPorId(12);
+        assertNotNull(responseNulls);
+        assertNull(responseNulls.nombreDocumento());
+        assertNull(responseNulls.observacionActual());
+        assertNull(responseNulls.nombreEstudiante());
+
+        // 3. Exception in toResponse method itself
+        reset(tramiteWorkflow);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenThrow(new RuntimeException("Workflow error"));
+
+        ThesisPlanResponse responseErr = service.obtenerPorId(12);
+        assertNotNull(responseErr);
+        assertNull(responseErr.estadoTramite());
+    }
+
+    @Test
+    @DisplayName("resolveObservacionActual - covers empty rows and exception paths")
+    void testResolveObservacionActualBranches() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(12)).thenReturn(100);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(12)).thenReturn("COORDINADOR_GRUPO");
+
+        // Mock empty rows
+        when(jdbcTemplate.queryForList(contains("movimientos_tramite"), anyInt()))
+                .thenReturn(java.util.Collections.emptyList());
+
+        ThesisPlanResponse responseEmpty = service.obtenerPorId(12);
+        assertNull(responseEmpty.observacionActual());
+
+        // Mock DB Exception in movements query
+        when(jdbcTemplate.queryForList(contains("movimientos_tramite"), anyInt()))
+                .thenThrow(new RuntimeException("DB error"));
+
+        ThesisPlanResponse responseException = service.obtenerPorId(12);
+        assertNull(responseException.observacionActual());
     }
 }
