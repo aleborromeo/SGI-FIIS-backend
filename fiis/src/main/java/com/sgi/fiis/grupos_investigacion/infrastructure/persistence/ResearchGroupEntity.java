@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "grupos_investigacion")
@@ -33,4 +34,11 @@ public class ResearchGroupEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_coordinador_actual")
     private UserEntity currentCoordinator;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now(ZoneId.of("UTC"));
+        }
+    }
 }

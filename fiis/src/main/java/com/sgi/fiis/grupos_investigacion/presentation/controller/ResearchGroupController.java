@@ -44,7 +44,6 @@ public class ResearchGroupController {
 
     /** RF-23: List research groups */
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchGroupResponseDto>> list() {
         return ResponseEntity.ok(listGroupsUseCase.execute().stream()
                 .map(mapper::toResponseDto)
@@ -100,7 +99,6 @@ public class ResearchGroupController {
 
     /** RF-26: List research lines associated to a group */
     @GetMapping("/{id}/lines")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchLineResponseDto>> listLines(@PathVariable Integer id) {
         getGroupUseCase.execute(id); // validates group exists
         return ResponseEntity.ok(listResearchLinesByGroupUseCase.execute(id).stream()
@@ -150,5 +148,33 @@ public class ResearchGroupController {
                 """;
         List<Map<String, Object>> users = jdbcTemplate.queryForList(sql);
         return ResponseEntity.ok(users);
+    }
+
+    /** Find active group of a user */
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResearchGroupResponseDto> getGroupByUser(@PathVariable Integer userId) {
+        String sql = """
+                SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
+                       g.id_coordinador_actual, g.es_activo, g.fecha_creacion
+                FROM membresias_grupo m
+                JOIN grupos_investigacion g ON m.id_grupo = g.id_grupo
+                WHERE m.id_usuario = ? AND m.es_activo = TRUE AND g.es_activo = TRUE
+                LIMIT 1
+                """;
+        List<com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup> groups = jdbcTemplate.query(sql, (rs, rowNum) -> com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup.builder()
+                .id(rs.getInt("id_grupo"))
+                .groupCode(rs.getString("codigo_grupo"))
+                .groupName(rs.getString("nombre_grupo"))
+                .currentCoordinatorId(rs.getObject("id_coordinador_actual") != null
+                        ? rs.getInt("id_coordinador_actual") : null)
+                .active(rs.getBoolean("es_activo"))
+                .createdAt(rs.getTimestamp("fecha_creacion") != null
+                        ? rs.getTimestamp("fecha_creacion").toLocalDateTime() : null)
+                .build(), userId);
+        if (groups.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(mapper.toResponseDto(groups.get(0)));
     }
 }

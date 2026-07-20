@@ -231,7 +231,7 @@ INSERT INTO convocatorias (titulo_convocatoria, descripcion, titulo_jsonb, descr
      'Convocatoria anual para la presentación de proyectos de investigación científica y tecnológica en las líneas priorizadas por la FIIS.',
      '{"es": "Convocatoria de Proyectos de Investigación 2026-I"}',
      '{"es": "Convocatoria anual para la presentación de proyectos de investigación científica y tecnológica."}',
-     '2026-01-01', '2026-06-30', 'ABIERTA',
+     '2026-01-01', '2026-12-31', 'ABIERTA',
      (SELECT id_usuario FROM usuarios WHERE dni = '44567891')),
 
     ('Convocatoria de Planes de Tesis 2026-I',

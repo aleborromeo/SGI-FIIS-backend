@@ -69,7 +69,6 @@ public class ResearchLineController {
 
     /** RF-25, RF-27, RF-28: List research lines - all or only active for forms */
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchLineResponseDto>> list(
             @RequestParam(defaultValue = "false") boolean onlyActive) {
         List<ResearchLineResponseDto> lines = listResearchLinesUseCase.execute(onlyActive).stream()
@@ -80,7 +79,6 @@ public class ResearchLineController {
 
     /** Get line by ID */
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResearchLineResponseDto> get(@PathVariable Integer id) {
         return ResponseEntity.ok(mapper.toResponseDto(getResearchLineUseCase.execute(id)));
     }
@@ -98,7 +96,6 @@ public class ResearchLineController {
 
     /** RF-26: List research groups associated to a line */
     @GetMapping("/{id}/groups")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchGroupResponseDto>> listGroups(@PathVariable Integer id) {
         getResearchLineUseCase.execute(id); // validates line exists
         return ResponseEntity.ok(listResearchGroupsByLineUseCase.execute(id).stream()
