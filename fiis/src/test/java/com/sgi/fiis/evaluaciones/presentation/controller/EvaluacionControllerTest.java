@@ -313,4 +313,20 @@ class EvaluacionControllerTest {
                 .andExpect(jsonPath("$[0].id").value(2L))
                 .andExpect(jsonPath("$[0].firstNames").value("Pedro"));
     }
+
+    @Test
+    void listarEvaluadoresPorProyectoDebeRetornarOk() throws Exception {
+        com.sgi.fiis.evaluaciones.application.dto.response.EvaluadorAsignadoResponse response =
+                new com.sgi.fiis.evaluaciones.application.dto.response.EvaluadorAsignadoResponse(
+                        2L, "Pedro", "Gomez", "pedro@sgi.com", "EVALUADOR", "APROBADO", false
+                );
+
+        when(consultarEvaluacionesUseCase.listarEvaluadoresPorProyecto(1L))
+                .thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/v1/evaluaciones/project/1/evaluators"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2L))
+                .andExpect(jsonPath("$[0].nombres").value("Pedro"));
+    }
 }

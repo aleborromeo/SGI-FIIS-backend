@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings({"unused", "ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored", "java:S1192"})
 class CreateProjectInteractorTest {
 
     private SaveProjectPort saveProjectPort;
@@ -194,6 +195,25 @@ class CreateProjectInteractorTest {
         assertThrows(BusinessRuleValidationException.class, () -> interactor.updateStatus(1, "INVALID"));
     }
     
+    @Test
+    void execute_CallNotOpen_ThrowsException() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setCallId(5);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.CLOSED);
+        when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
+
+        BusinessRuleValidationException ex = assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+        assertEquals("La convocatoria especificada no está abierta", ex.getMessage());
+    }
+
     @Test
     void execute_EmptyMembers_DoesNotCallSaveMembers() {
         CreateProjectRequest request = buildValidRequest();

@@ -256,31 +256,71 @@ class AuditingAspectTest {
         SecurityContextHolder.clearContext();
         RequestContextHolder.resetRequestAttributes();
 
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 123L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
         // 1. Success query path
         when(joinPoint.getTarget()).thenReturn(new Object());
         when(joinPoint.proceed()).thenReturn(new Object());
         when(auditable.action()).thenReturn("UPDATE");
         
-        Map<String, Object> mockRow = Map.of("id", 1L, "name", "Test");
-        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), anyLong())).thenReturn(List.of(mockRow));
+        Map<String, Object> mockRow = Map.of("id", 123L, "name", "Test");
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), eq(123L))).thenReturn(List.of(mockRow));
 
         auditingAspect.audit(joinPoint, auditable);
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), eq(123L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
 
         // 2. Fallback query path (first is empty, second has result)
         reset(jdbcTemplate);
-        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), anyLong())).thenReturn(Collections.emptyList());
-        when(jdbcTemplate.queryForList(contains("WHERE id_object = ?"), anyLong())).thenReturn(List.of(mockRow));
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), eq(123L))).thenReturn(Collections.emptyList());
+        when(jdbcTemplate.queryForList(contains("WHERE id_object = ?"), eq(123L))).thenReturn(List.of(mockRow));
 
         auditingAspect.audit(joinPoint, auditable);
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), eq(123L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
 
         // 3. Exception path
         reset(jdbcTemplate);
-        when(jdbcTemplate.queryForList(anyString(), anyLong())).thenThrow(new RuntimeException("DB error"));
+        when(jdbcTemplate.queryForList(anyString(), anyLong()))
+                .thenThrow(new org.springframework.jdbc.CannotGetJdbcConnectionException("Connection error", new java.sql.SQLException("Connection failed")));
 
         auditingAspect.audit(joinPoint, auditable);
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), eq(123L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("audit: extracts register ID from args when parameter has ID in name")
+    void audit_extractsRegisterIdFromArgs() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 456L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "projectId" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        Map<String, Object> mockRow = Map.of("id", 456L);
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), eq(456L))).thenReturn(List.of(mockRow));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(456L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("audit: clears correlation context when proceed throws exception")
+    void audit_clearsContextOnException() throws Throwable {
+        when(joinPoint.proceed()).thenThrow(new RuntimeException("Test exception"));
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("CREATE");
+
+        assertThrows(RuntimeException.class, () -> auditingAspect.audit(joinPoint, auditable));
+        verify(correlationContext).clear();
     }
 
     private static class TestInteractor {}

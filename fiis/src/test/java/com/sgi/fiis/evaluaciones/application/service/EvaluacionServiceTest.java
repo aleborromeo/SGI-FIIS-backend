@@ -10,7 +10,6 @@ import com.sgi.fiis.evaluaciones.domain.model.Evaluacion;
 import com.sgi.fiis.evaluaciones.domain.ports.out.EvaluacionRepositoryPort;
 import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored", "java:S1192"})
 class EvaluacionServiceTest {
 
     @Mock
@@ -680,4 +680,116 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         assertNull(responseErr.planTesisTitulo());
     }
 
+    @Test
+    void asignarEvaluadoresSinIdsDebeLanzarExcepcion() {
+        assertThrows(EvaluacionException.class, () -> evaluacionService.asignarEvaluadores(1L, null, null));
+        assertThrows(EvaluacionException.class, () -> evaluacionService.asignarEvaluadores(1L, null, List.of()));
+    }
+
+    @Test
+    void evaluarEvaluacionNoExistenteDebeLanzarExcepcion() {
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(2L, List.of(), 85, "Bueno", "Ok", "APROBADO");
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, req));
+    }
+
+    @Test
+    void evaluarConEvaluadorDiferenteDebeLanzarExcepcion() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(99L, List.of(), 85, "Bueno", "Ok", "APROBADO");
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, req));
+    }
+
+    @Test
+    void evaluarAprobadoConObservacionesDebeRegistrar() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(2L, List.of(), 85, "Observaciones", "Ok", "APROBADO_CON_OBSERVACIONES");
+        EvaluacionResponse res = evaluacionService.evaluar(1L, req);
+        assertEquals(ResultadoEvaluacion.CON_OBSERVACIONES, res.resultado());
+    }
+
+    @Test
+    void evaluarDesaprobadoDebeRegistrar() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(2L, List.of(), 85, "Rechazo", "Ok", "DESAPROBADO");
+        EvaluacionResponse res = evaluacionService.evaluar(1L, req);
+        assertEquals(ResultadoEvaluacion.RECHAZADO, res.resultado());
+    }
+
+    @Test
+    void consultarDetalleAnonimoDeProyectoDebeRetornarPlaceholder() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        var res = evaluacionService.consultarDetalleAnonimo(1L);
+        assertEquals("PROY-10", res.expedienteCode());
+    }
+
+    @Test
+    void consultarDetalleAnonimoDeTesisDebeRetornarPlaceholder() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, null, 20L, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        var res = evaluacionService.consultarDetalleAnonimo(1L);
+        assertEquals("TESIS-20", res.expedienteCode());
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesSinProyectoDebeQueryAll() {
+        when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of(Map.of(
+                "id_usuario", 2, "nombres", "Pedro", "apellidos", "Gomez", "correo_institucional", "p@sgi.com", "codigo_rol", "EVALUADOR", "descripcion", "Evaluador"
+        )));
+        var res = evaluacionService.execute(null);
+        assertEquals(1, res.size());
+        assertEquals("Pedro", res.get(0).firstNames());
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesConProyectoSinGrupoDebeRetornarVacio() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), eq(10L))).thenReturn(null);
+        var res = evaluacionService.execute(10L);
+        assertTrue(res.isEmpty());
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesConProyectoYGrupoDebeQueryGroup() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), eq(10L))).thenReturn(50L);
+        when(jdbcTemplate.queryForList(anyString(), eq(50L))).thenReturn(List.of(Map.of(
+                "id_usuario", 2, "nombres", "Pedro", "apellidos", "Gomez", "correo_institucional", "p@sgi.com", "codigo_rol", "EVALUADOR", "descripcion", "Evaluador"
+        )));
+        var res = evaluacionService.execute(10L);
+        assertEquals(1, res.size());
+        assertEquals("Pedro", res.get(0).firstNames());
+    }
+
+    @Test
+    void listarEvaluadoresPorProyectoNuloDebeRetornarVacio() {
+        var res = evaluacionService.listarEvaluadoresPorProyecto(null);
+        assertTrue(res.isEmpty());
+    }
+
+    @Test
+    void listarEvaluadoresPorProyectoDebeQueryDb() {
+        when(jdbcTemplate.queryForList(anyString(), eq(10L))).thenReturn(List.of(Map.of(
+                "id_evaluador", 2L, "nombres", "Pedro", "apellidos", "Gomez", "correo_institucional", "p@sgi.com", "codigo_rol", "EVALUADOR", "resultado", "APROBADO", "fecha_evaluacion", java.sql.Timestamp.valueOf(LocalDateTime.now())
+        )));
+        var res = evaluacionService.listarEvaluadoresPorProyecto(10L);
+        assertEquals(1, res.size());
+        assertEquals("Pedro", res.get(0).nombres());
+    }
 }

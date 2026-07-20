@@ -973,4 +973,32 @@ class ThesisPlanServiceTest {
         assertNotNull(responseErr);
         assertNull(responseErr.estadoTramite());
     }
+
+    @Test
+    @DisplayName("resolveObservacionActual - covers empty rows and exception paths")
+    void testResolveObservacionActualBranches() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        ThesisPlan plan = new ThesisPlan(
+                12, "AI Thesis", "Abstract", 101L, 1, 2, 99,
+                ThesisPlanStatus.POSTULADO, null, null
+        );
+        when(planRepository.findById(12)).thenReturn(Optional.of(plan));
+        when(tramiteWorkflow.obtenerIdTramitePorPlanTesis(12)).thenReturn(100);
+        when(tramiteWorkflow.obtenerEstadoTramitePorPlanTesis(12)).thenReturn("PENDIENTE_COORDINADOR");
+        when(tramiteWorkflow.obtenerRevisorTramitePorPlanTesis(12)).thenReturn("COORDINADOR_GRUPO");
+
+        // Mock empty rows
+        when(jdbcTemplate.queryForList(contains("movimientos_tramite"), anyInt()))
+                .thenReturn(java.util.Collections.emptyList());
+
+        ThesisPlanResponse responseEmpty = service.obtenerPorId(12);
+        assertNull(responseEmpty.observacionActual());
+
+        // Mock DB Exception in movements query
+        when(jdbcTemplate.queryForList(contains("movimientos_tramite"), anyInt()))
+                .thenThrow(new RuntimeException("DB error"));
+
+        ThesisPlanResponse responseException = service.obtenerPorId(12);
+        assertNull(responseException.observacionActual());
+    }
 }
