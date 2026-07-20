@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -37,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@SuppressWarnings("unchecked")
 @DisplayName("ObservationController Integration Tests")
 class ObservationControllerTest extends TestcontainersConfig {
 
@@ -87,8 +87,7 @@ class ObservationControllerTest extends TestcontainersConfig {
     void testListMyObservationsSuccess() throws Exception {
         CustomUserDetails userDetails = new CustomUserDetails(5L, "student@unas.edu.pe", "pass", true, Collections.emptyList(), "ESTUDIANTE");
 
-        org.springframework.jdbc.core.RowMapper<ObservationResponseDTO> mapper = any();
-        when(jdbcTemplate.query(anyString(), mapper, eq(5L)))
+        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq(5L)))
                 .thenReturn(List.of(ObservationResponseDTO.builder().id(300).description("Falta anexos").build()));
 
         mockMvc.perform(get("/api/observations/my")

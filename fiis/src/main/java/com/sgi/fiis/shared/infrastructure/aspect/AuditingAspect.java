@@ -99,8 +99,9 @@ public class AuditingAspect {
         return tableName;
     }
 
+    @SuppressWarnings("java:S2077")
     private String queryPreviousState(String tableName, Long idRegistro) {
-        if (tableName == null || !tableName.matches("^[a-zA-Z0-9_]+$")) {
+        if (tableName == null || !tableName.matches("^\\w+$")) {
             return null;
         }
         try {
@@ -113,7 +114,7 @@ public class AuditingAspect {
             if (!rows.isEmpty()) {
                 return objectMapper.writeValueAsString(rows.get(0));
             }
-        } catch (Exception ignored) {
+        } catch (JsonProcessingException | org.springframework.dao.DataAccessException ignored) {
             // Ignored because falling back to returning null is the default safe state
         }
         return null;

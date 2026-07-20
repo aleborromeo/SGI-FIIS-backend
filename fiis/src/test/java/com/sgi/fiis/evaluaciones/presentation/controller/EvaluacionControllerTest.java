@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class EvaluacionControllerTest {
 
+    private static final String ID_EVALUACION_JSON_PATH = "$.idEvaluacion";
+    private static final String ID_EVALUACION_ARRAY_JSON_PATH = "$[0].idEvaluacion";
+
     private AsignarEvaluadorUseCase asignarEvaluadorUseCase;
     private AsignarEvaluadoresUseCase asignarEvaluadoresUseCase;
     private RegistrarResultadoEvaluacionUseCase registrarResultadoEvaluacionUseCase;
@@ -43,7 +47,7 @@ class EvaluacionControllerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         asignarEvaluadorUseCase = mock(AsignarEvaluadorUseCase.class);
         asignarEvaluadoresUseCase = mock(AsignarEvaluadoresUseCase.class);
         registrarResultadoEvaluacionUseCase = mock(RegistrarResultadoEvaluacionUseCase.class);
@@ -83,7 +87,7 @@ class EvaluacionControllerTest {
                 null,
                 null,
                 null,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 null,
                 true
         );
@@ -95,7 +99,7 @@ class EvaluacionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_JSON_PATH).value(1))
                 .andExpect(jsonPath("$.idProyecto").value(1))
                 .andExpect(jsonPath("$.idEvaluador").value(2))
                 .andExpect(jsonPath("$.pendiente").value(true));
@@ -128,8 +132,8 @@ class EvaluacionControllerTest {
                 ResultadoEvaluacion.APROBADO,
                 90,
                 "Cumple con los criterios establecidos.",
-                LocalDateTime.now(),
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 false
         );
 
@@ -140,7 +144,7 @@ class EvaluacionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_JSON_PATH).value(1))
                 .andExpect(jsonPath("$.resultado").value("APROBADO"))
                 .andExpect(jsonPath("$.puntaje").value(90))
                 .andExpect(jsonPath("$.pendiente").value(false));
@@ -165,7 +169,7 @@ class EvaluacionControllerTest {
                 null,
                 null,
                 null,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 null,
                 true
         );
@@ -175,7 +179,7 @@ class EvaluacionControllerTest {
 
         mockMvc.perform(get("/api/v1/evaluaciones"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_ARRAY_JSON_PATH).value(1))
                 .andExpect(jsonPath("$[0].idEvaluador").value(2));
     }
 
@@ -189,7 +193,7 @@ class EvaluacionControllerTest {
                 null,
                 null,
                 null,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 null,
                 true
         );
@@ -199,7 +203,7 @@ class EvaluacionControllerTest {
 
         mockMvc.perform(get("/api/v1/evaluaciones/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_JSON_PATH).value(1))
                 .andExpect(jsonPath("$.idProyecto").value(1));
     }
 
@@ -214,7 +218,7 @@ class EvaluacionControllerTest {
                 """;
 
         EvaluacionResponse response = new EvaluacionResponse(
-                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null, true
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(ZoneId.of("UTC")), null, true
         );
 
         when(asignarEvaluadoresUseCase.asignarEvaluadores(anyLong(), any(), anyList()))
@@ -224,7 +228,7 @@ class EvaluacionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$[0].idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_ARRAY_JSON_PATH).value(1))
                 .andExpect(jsonPath("$[0].idProyecto").value(1));
     }
 
@@ -243,7 +247,7 @@ class EvaluacionControllerTest {
 
         EvaluacionResponse response = new EvaluacionResponse(
                 1L, 1L, null, 2L, ResultadoEvaluacion.APROBADO, 85, "Bueno",
-                LocalDateTime.now(), LocalDateTime.now(), false
+                LocalDateTime.now(ZoneId.of("UTC")), LocalDateTime.now(ZoneId.of("UTC")), false
         );
 
         when(evaluarEvaluacionUseCase.evaluar(anyLong(), any())).thenReturn(response);
@@ -252,7 +256,7 @@ class EvaluacionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_JSON_PATH).value(1))
                 .andExpect(jsonPath("$.resultado").value("APROBADO"))
                 .andExpect(jsonPath("$.puntaje").value(85));
     }
@@ -281,7 +285,7 @@ class EvaluacionControllerTest {
                 null,
                 null,
                 null,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of("UTC")),
                 null,
                 true
         );
@@ -291,7 +295,7 @@ class EvaluacionControllerTest {
 
         mockMvc.perform(get("/api/v1/evaluaciones/evaluador/2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].idEvaluacion").value(1))
+                .andExpect(jsonPath(ID_EVALUACION_ARRAY_JSON_PATH).value(1))
                 .andExpect(jsonPath("$[0].idEvaluador").value(2));
     }
 

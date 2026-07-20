@@ -648,9 +648,17 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
 
     @Test
     void testConvertirAResponsePaths() {
-        var evaluacion = Evaluacion.reconstruir(
-                1L, 10L, 20L, 2L, ResultadoEvaluacion.APROBADO, 85, "Bueno", LocalDateTime.now(), LocalDateTime.now()
-        );
+        var evaluacion = mock(Evaluacion.class);
+        when(evaluacion.getIdEvaluacion()).thenReturn(1L);
+        when(evaluacion.getIdProyecto()).thenReturn(10L);
+        when(evaluacion.getIdPlanTesis()).thenReturn(20L);
+        when(evaluacion.getIdEvaluador()).thenReturn(2L);
+        when(evaluacion.getResultado()).thenReturn(ResultadoEvaluacion.APROBADO);
+        when(evaluacion.getPuntaje()).thenReturn(85);
+        when(evaluacion.getObservaciones()).thenReturn("Bueno");
+        when(evaluacion.getFechaAsignacion()).thenReturn(LocalDateTime.now());
+        when(evaluacion.getFechaEvaluacion()).thenReturn(LocalDateTime.now());
+        when(evaluacion.estaPendiente()).thenReturn(false);
         when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
 
         // 1. Success paths for projects and thesis plans

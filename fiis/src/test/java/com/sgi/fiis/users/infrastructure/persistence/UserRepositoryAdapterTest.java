@@ -187,6 +187,7 @@ class UserRepositoryAdapterTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     @DisplayName("Should find all users paged")
     void testFindAllPaged() {
         UserEntity entity = getTestUserEntity();

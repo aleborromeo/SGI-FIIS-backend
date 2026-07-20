@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ThesisPlanService Unit Tests")
-@SuppressWarnings({"unused", "ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored"})
+@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored", "java:S1192"})
 class ThesisPlanServiceTest {
 
     @Mock

@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProcedureRepositoryAdapter Unit Tests")
-@SuppressWarnings({"unused", "java:S100", "java:S1192", "MethodName", "MultipleStringLiterals"})
+@SuppressWarnings({"java:S100", "java:S1192", "MethodName", "MultipleStringLiterals"})
 class ProcedureRepositoryAdapterTest {
 
     @Mock private SpringDataProcedureRepository procedureRepository;

@@ -12,10 +12,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *
  * Uso: hacer que la clase de test extienda esta clase.
  */
-@SuppressWarnings("resource")
 public abstract class TestcontainersConfig {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestcontainersConfig.class);
     private static final PostgreSQLContainer<?> POSTGRES;
+
+    protected TestcontainersConfig() {
+        // Constructor protegido para ocultar el constructor publico implicito
+    }
 
     static {
         PostgreSQLContainer<?> container = null;
@@ -30,7 +34,7 @@ public abstract class TestcontainersConfig {
             Runtime.getRuntime().addShutdownHook(new Thread(container::close));
         } catch (Exception e) {
             // Docker no disponible (local) - usar docker-compose PostgreSQL
-            System.out.println("[Testcontainers] Docker no disponible. Usando docker-compose PostgreSQL en localhost:5433");
+            log.info("[Testcontainers] Docker no disponible. Usando docker-compose PostgreSQL en localhost:5433");
         }
         POSTGRES = container;
     }

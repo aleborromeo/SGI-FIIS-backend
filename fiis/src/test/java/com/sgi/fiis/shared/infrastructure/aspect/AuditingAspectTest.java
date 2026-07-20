@@ -265,6 +265,7 @@ class AuditingAspectTest {
         when(jdbcTemplate.queryForList(contains("WHERE id = ?"), anyLong())).thenReturn(List.of(mockRow));
 
         auditingAspect.audit(joinPoint, auditable);
+        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
 
         // 2. Fallback query path (first is empty, second has result)
         reset(jdbcTemplate);
@@ -272,15 +273,14 @@ class AuditingAspectTest {
         when(jdbcTemplate.queryForList(contains("WHERE id_object = ?"), anyLong())).thenReturn(List.of(mockRow));
 
         auditingAspect.audit(joinPoint, auditable);
+        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
 
         // 3. Exception path
         reset(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), anyLong())).thenThrow(new RuntimeException("DB error"));
 
         auditingAspect.audit(joinPoint, auditable);
-
-        // Verify everything went through
-        verify(jdbcTemplate, times(3)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
     }
 
     private static class TestInteractor {}
