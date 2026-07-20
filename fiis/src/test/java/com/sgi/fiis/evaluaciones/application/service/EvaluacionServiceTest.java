@@ -14,11 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,12 +39,8 @@ class EvaluacionServiceTest {
     @Mock
     private JdbcTemplate jdbcTemplate;
 
+    @InjectMocks
     private EvaluacionService evaluacionService;
-
-    @BeforeEach
-    void setUp() {
-        evaluacionService = new EvaluacionService(evaluacionRepositoryPort, userRepositoryPort, jdbcTemplate);
-    }
 
     private User evaluatorUser() {
         return User.builder().id(2L).roleCode("EVALUADOR").build();
@@ -646,6 +644,32 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
 
         verify(evaluacionRepositoryPort).existeEvaluacionPendienteParaProyecto(10L, 20L);
         verify(evaluacionRepositoryPort, never()).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void testConvertirAResponsePaths() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, 20L, 2L, ResultadoEvaluacion.APROBADO, 85, "Bueno", LocalDateTime.now(), LocalDateTime.now()
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        // 1. Success paths for projects and thesis plans
+        when(jdbcTemplate.queryForMap(contains("proyectos WHERE id = ?"), eq(10L)))
+                .thenReturn(Map.of("titulo", "Proyecto 1", "resumen", "Resumen 1"));
+        when(jdbcTemplate.queryForMap(contains("planes_tesis WHERE id = ?"), eq(20L)))
+                .thenReturn(Map.of("titulo", "Tesis 1", "resumen", "Resumen Tesis 1"));
+
+        var response = evaluacionService.buscarPorId(1L);
+        assertEquals("Proyecto 1", response.proyectoTitulo());
+        assertEquals("Tesis 1", response.planTesisTitulo());
+
+        // 2. Exception paths
+        reset(jdbcTemplate);
+        when(jdbcTemplate.queryForMap(anyString(), anyLong())).thenThrow(new RuntimeException("DB Error"));
+
+        var responseErr = evaluacionService.buscarPorId(1L);
+        assertNull(responseErr.proyectoTitulo());
+        assertNull(responseErr.planTesisTitulo());
     }
 
 }

@@ -31,16 +31,13 @@ class FileControllerTest {
     private ProjectJpaRepository projectRepository;
     private GroupMembershipJpaRepository membershipRepository;
     private FileController fileController;
-    private Path tempUploadDir;
 
     @BeforeEach
-    void setup() throws IOException {
+    void setup() {
         documentRepository = mock(DocumentJpaRepository.class);
         projectRepository = mock(ProjectJpaRepository.class);
         membershipRepository = mock(GroupMembershipJpaRepository.class);
-        tempUploadDir = Files.createTempDirectory("test-uploads");
-        fileController = new FileController(documentRepository, projectRepository, membershipRepository,
-                tempUploadDir.toString());
+        fileController = new FileController(documentRepository, projectRepository, membershipRepository);
     }
 
     @Test
@@ -152,22 +149,5 @@ class FileControllerTest {
         assertEquals(200, response.getStatusCode().value());
 
         Files.deleteIfExists(tempFile);
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        if (tempUploadDir != null) {
-            // Clean up all files in temp dir first
-            try (var files = Files.list(tempUploadDir)) {
-                files.forEach(file -> {
-                    try {
-                        Files.deleteIfExists(file);
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                });
-            }
-            Files.deleteIfExists(tempUploadDir);
-        }
     }
 }

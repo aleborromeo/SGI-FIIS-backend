@@ -72,7 +72,7 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
         entity.setName(domain.getLineName());
         entity.setActive(domain.isActive());
         entity.setCreatedAt(domain.getCreatedAt());
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
         return entity;
     }
 }

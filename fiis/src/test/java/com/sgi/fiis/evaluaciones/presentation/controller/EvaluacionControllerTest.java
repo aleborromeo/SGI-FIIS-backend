@@ -3,6 +3,7 @@ package com.sgi.fiis.evaluaciones.presentation.controller;
 import com.sgi.fiis.evaluaciones.application.dto.command.AsignarEvaluadorCommand;
 import com.sgi.fiis.evaluaciones.application.dto.command.RegistrarResultadoEvaluacionCommand;
 import com.sgi.fiis.evaluaciones.application.dto.response.EvaluacionResponse;
+import com.sgi.fiis.evaluaciones.application.dto.response.EvaluadorDisponibleResponse;
 import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadorUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadoresUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarDetalleAnonimoUseCase;
@@ -292,5 +293,20 @@ class EvaluacionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idEvaluacion").value(1))
                 .andExpect(jsonPath("$[0].idEvaluador").value(2));
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesDebeRetornarOk() throws Exception {
+        EvaluadorDisponibleResponse response = new EvaluadorDisponibleResponse(
+                2L, "Pedro", "Gomez", "pedro@sgi.com", "EVALUADOR", "Rol Evaluador"
+        );
+
+        when(listarEvaluadoresDisponiblesUseCase.execute(1L))
+                .thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/v1/evaluaciones/available-evaluators?projectId=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2L))
+                .andExpect(jsonPath("$[0].firstNames").value("Pedro"));
     }
 }

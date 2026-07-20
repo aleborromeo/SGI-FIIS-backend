@@ -25,6 +25,7 @@ class ProjectProcedureAdapterTest {
     private ProjectJpaRepository projectRepository;
     private SpringDataProcedureRepository procedureRepository;
     private ProcedureMovementJpaRepository movementRepository;
+    private CorrelationContext correlationContext;
     private ProjectProcedureAdapter adapter;
 
     @BeforeEach
@@ -32,7 +33,7 @@ class ProjectProcedureAdapterTest {
         projectRepository = mock(ProjectJpaRepository.class);
         procedureRepository = mock(SpringDataProcedureRepository.class);
         movementRepository = mock(ProcedureMovementJpaRepository.class);
-        CorrelationContext correlationContext = mock(CorrelationContext.class);
+        correlationContext = mock(CorrelationContext.class);
         adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository, correlationContext);
     }
 
@@ -173,5 +174,28 @@ class ProjectProcedureAdapterTest {
         ArgumentCaptor<ProcedureEntity> procedureCaptor = ArgumentCaptor.forClass(ProcedureEntity.class);
         verify(procedureRepository).save(procedureCaptor.capture());
         assertNull(procedureCaptor.getValue().getGroup());
+    }
+
+    @Test
+    void createPostulationProcedureShouldSaveWithCorrelationIdWhenPresent() {
+        Project project = Project.builder().id(1).build();
+        UserEntity responsible = new UserEntity();
+        responsible.setId(10L);
+        ProjectEntity projectEntity = createProjectEntity(1, responsible, null);
+
+        ProcedureEntity savedProcedure = ProcedureEntity.builder()
+                .id(100)
+                .code("TRM-2026-ABCD1234")
+                .build();
+
+        when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
+        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
+        when(correlationContext.getCorrelationId()).thenReturn("corr-5555");
+
+        adapter.createPostulationProcedure(project);
+
+        ArgumentCaptor<ProcedureMovementEntity> movementCaptor = ArgumentCaptor.forClass(ProcedureMovementEntity.class);
+        verify(movementRepository).save(movementCaptor.capture());
+        assertEquals("corr-5555", movementCaptor.getValue().getCorrelationId());
     }
 }

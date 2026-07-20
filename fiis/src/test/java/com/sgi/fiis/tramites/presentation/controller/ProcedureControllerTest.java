@@ -204,4 +204,27 @@ class ProcedureControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
     }
+
+    @Test
+    @DisplayName("list: page offset out of bounds returns empty content PageDto")
+    void list_pageOutOfBounds() {
+        List<ProcedureResponseDto> expectedContent = List.of(
+                ProcedureResponseDto.builder().id(1L).build(),
+                ProcedureResponseDto.builder().id(2L).build()
+        );
+        when(listProceduresUseCase.execute(RoleEnum.COORDINADOR_GRUPO, 10L)).thenReturn(expectedContent);
+
+        ResponseEntity<PageDto<ProcedureResponseDto>> response = controller.list(2, 2, coordinator);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().getContent().size());
+        assertEquals(2, response.getBody().getTotalElements());
+    }
+
+    @Test
+    @DisplayName("approve: null role throws BusinessException")
+    void approve_nullRole_throwsBusinessException() {
+        CustomUserDetails nullRole = new CustomUserDetails(1L, "x@x.com", "pwd", true, List.of(), null);
+        assertThrows(BusinessException.class, () -> controller.approve(1L, nullRole));
+    }
 }

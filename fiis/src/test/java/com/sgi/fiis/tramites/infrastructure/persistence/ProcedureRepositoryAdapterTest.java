@@ -636,4 +636,54 @@ class ProcedureRepositoryAdapterTest {
         assertTrue(result.isEmpty());
         verify(procedureRepository).findByStatusAndGroupId("PENDIENTE_DIRECCION", 99L);
     }
+
+    @Test
+    @DisplayName("findByReviewerRole should return mapped list")
+    void findByReviewerRole_returnsList() {
+        when(procedureRepository.findByReviewerRole("COORDINADOR_GRUPO")).thenReturn(List.of(buildEntity(1)));
+
+        List<Procedure> result = adapter.findByReviewerRole(RoleEnum.COORDINADOR_GRUPO);
+
+        assertEquals(1, result.size());
+        verify(procedureRepository).findByReviewerRole("COORDINADOR_GRUPO");
+    }
+
+    @Test
+    @DisplayName("findByStatusAndReviewerRole should return mapped list")
+    void findByStatusAndReviewerRole_returnsList() {
+        when(procedureRepository.findByStatusAndReviewerRole("PENDIENTE_COORDINADOR", "COORDINADOR_GRUPO"))
+                .thenReturn(List.of(buildEntity(1)));
+
+        List<Procedure> result = adapter.findByStatusAndReviewerRole(
+                ProcedureStatus.PENDIENTE_COORDINADOR, RoleEnum.COORDINADOR_GRUPO
+        );
+
+        assertEquals(1, result.size());
+        verify(procedureRepository).findByStatusAndReviewerRole("PENDIENTE_COORDINADOR", "COORDINADOR_GRUPO");
+    }
+
+    @Test
+    @DisplayName("save: movement sets correlationId from context when present")
+    void save_setsCorrelationIdFromContext() {
+        List<ProcedureMovement> movs = List.of(ProcedureMovement.builder()
+                .action("APROBADO")
+                .movementAt(DATE)
+                .build());
+
+        Procedure domain = Procedure.builder()
+                .id(1L)
+                .code("TRM-2026-001")
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .movements(movs)
+                .build();
+
+        when(procedureRepository.save(any())).thenReturn(buildEntity(1));
+        when(movementRepository.countByProcedure_Id(1L)).thenReturn(0L);
+        when(correlationContext.getCorrelationId()).thenReturn("corr-1234");
+
+        adapter.save(domain);
+
+        verify(correlationContext).getCorrelationId();
+        verify(movementRepository).save(argThat(entity -> "corr-1234".equals(entity.getCorrelationId())));
+    }
 }

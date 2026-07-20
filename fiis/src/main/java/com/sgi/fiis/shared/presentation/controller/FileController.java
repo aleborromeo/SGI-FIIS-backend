@@ -46,23 +46,14 @@ public class FileController {
     private final DocumentJpaRepository documentRepository;
     private final ProjectJpaRepository projectRepository;
     private final GroupMembershipJpaRepository membershipRepository;
-    private final String uploadDir;
 
     @Deprecated(since = "2.0.0", forRemoval = true)
     public FileController(DocumentJpaRepository documentRepository,
                           ProjectJpaRepository projectRepository,
-                          GroupMembershipJpaRepository membershipRepository,
-                          @Value("${app.upload-dir:/app/uploads}") String uploadDir) {
+                          GroupMembershipJpaRepository membershipRepository) {
         this.documentRepository = documentRepository;
         this.projectRepository = projectRepository;
         this.membershipRepository = membershipRepository;
-        this.uploadDir = uploadDir;
-
-        // Ensure upload directory exists
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
     }
 
     /**

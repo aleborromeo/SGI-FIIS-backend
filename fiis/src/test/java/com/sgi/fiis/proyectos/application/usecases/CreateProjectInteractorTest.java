@@ -338,4 +338,68 @@ class CreateProjectInteractorTest {
         interactor.updateStatus(1, "POSTULADO");
         assertEquals(ProjectStatus.POSTULATED, p.getStatus());
     }
+
+    @Test
+    void execute_RequiredFieldsMissing_ThrowsException() {
+        CreateProjectRequest request = new CreateProjectRequest();
+        request.setDraft(false);
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+    }
+
+    @Test
+    void getDraftsByResponsible_Success() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.DRAFT);
+        when(saveProjectPort.findByResponsibleIdAndStatus(2L, ProjectStatus.DRAFT)).thenReturn(List.of(p));
+
+        var result = interactor.getDraftsByResponsible(2L);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void deleteDraft_Success() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.DRAFT);
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+
+        interactor.deleteDraft(1, 2L);
+        verify(saveProjectPort).deleteById(1);
+    }
+
+    @Test
+    void deleteDraft_NotDraft_ThrowsException() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.APPROVED);
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.deleteDraft(1, 2L));
+    }
+
+    @Test
+    void deleteDraft_NotResponsible_ThrowsException() {
+        Project p = new Project(1, "CODE", "T", "S", "O", 1, "LN", new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "P", 2L, 3, "GC", 4, 5, ProjectStatus.DRAFT);
+        when(saveProjectPort.findById(1)).thenReturn(Optional.of(p));
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.deleteDraft(1, 99L));
+    }
+
+    @Test
+    void deleteDraft_NotFound_ThrowsException() {
+        when(saveProjectPort.findById(1)).thenReturn(Optional.empty());
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.deleteDraft(1, 2L));
+    }
+
+    @Test
+    void execute_CallIdNull_NoOpenCalls_ThrowsException() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setCallId(null);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(List.of());
+
+        assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+    }
 }

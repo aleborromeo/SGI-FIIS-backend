@@ -100,6 +100,9 @@ public class AuditingAspect {
     }
 
     private String queryPreviousState(String tableName, Long idRegistro) {
+        if (tableName == null || !tableName.matches("^[a-zA-Z0-9_]+$")) {
+            return null;
+        }
         try {
             String sql = "SELECT * FROM " + tableName + " WHERE id = ?";
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, idRegistro);
@@ -111,6 +114,7 @@ public class AuditingAspect {
                 return objectMapper.writeValueAsString(rows.get(0));
             }
         } catch (Exception ignored) {
+            // Ignored because falling back to returning null is the default safe state
         }
         return null;
     }

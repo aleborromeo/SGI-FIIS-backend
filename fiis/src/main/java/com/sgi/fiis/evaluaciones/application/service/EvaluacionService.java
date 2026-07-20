@@ -345,6 +345,7 @@ public class EvaluacionService implements
                 proyectoTitulo = (String) projectRow.get("titulo");
                 proyectoResumen = (String) projectRow.get("resumen");
             } catch (Exception ignored) {
+                // Ignored because project details are optional in the response representation
             }
         }
 

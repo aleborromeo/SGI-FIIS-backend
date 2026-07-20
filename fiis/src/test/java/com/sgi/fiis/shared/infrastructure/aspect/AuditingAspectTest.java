@@ -1,7 +1,6 @@
 package com.sgi.fiis.shared.infrastructure.aspect;
 
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
-import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.proyectos.application.dto.ProjectResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
@@ -21,6 +20,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -247,6 +248,39 @@ class AuditingAspectTest {
         auditingAspect.audit(joinPoint, auditable);
 
         verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("queryPreviousState: covers successful query, fallback query, exception and invalid name")
+    void testQueryPreviousStateCoverage() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        // 1. Success query path
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        
+        Map<String, Object> mockRow = Map.of("id", 1L, "name", "Test");
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), anyLong())).thenReturn(List.of(mockRow));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        // 2. Fallback query path (first is empty, second has result)
+        reset(jdbcTemplate);
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), anyLong())).thenReturn(Collections.emptyList());
+        when(jdbcTemplate.queryForList(contains("WHERE id_object = ?"), anyLong())).thenReturn(List.of(mockRow));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        // 3. Exception path
+        reset(jdbcTemplate);
+        when(jdbcTemplate.queryForList(anyString(), anyLong())).thenThrow(new RuntimeException("DB error"));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        // Verify everything went through
+        verify(jdbcTemplate, times(3)).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
     }
 
     private static class TestInteractor {}

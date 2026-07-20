@@ -172,4 +172,41 @@ class UserRepositoryAdapterTest {
         assertTrue(adapter.existsByEmail("juan.perez@unas.edu.pe"));
         verify(springDataRepository).existsByInstitutionalEmail("juan.perez@unas.edu.pe");
     }
+
+    @Test
+    @DisplayName("Should search users with filters query, role and active status")
+    void testSearchWithFilters() {
+        UserEntity entity = getTestUserEntity();
+        when(springDataRepository.search("Juan", "ADMIN", true)).thenReturn(List.of(entity));
+
+        List<User> result = adapter.search("Juan", "ADMIN", true);
+
+        assertEquals(1, result.size());
+        assertEquals("12345678", result.get(0).getDni());
+        verify(springDataRepository).search("Juan", "ADMIN", true);
+    }
+
+    @Test
+    @DisplayName("Should find all users paged")
+    void testFindAllPaged() {
+        UserEntity entity = getTestUserEntity();
+        org.springframework.data.domain.Page<UserEntity> page = mock(org.springframework.data.domain.Page.class);
+        when(page.stream()).thenReturn(java.util.stream.Stream.of(entity));
+        when(springDataRepository.findAll(any(org.springframework.data.domain.PageRequest.class))).thenReturn(page);
+
+        List<User> result = adapter.findAllPaged(0, 10);
+
+        assertEquals(1, result.size());
+        assertEquals("12345678", result.get(0).getDni());
+        verify(springDataRepository).findAll(org.springframework.data.domain.PageRequest.of(0, 10));
+    }
+
+    @Test
+    @DisplayName("Should count all users")
+    void testCountAll() {
+        when(springDataRepository.count()).thenReturn(5L);
+
+        assertEquals(5L, adapter.countAll());
+        verify(springDataRepository).count();
+    }
 }
