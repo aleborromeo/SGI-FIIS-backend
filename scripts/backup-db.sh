@@ -18,7 +18,6 @@ DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-sgifiis}"
 DB_USER="${DB_USER:-sgifiis}"
-DB_PASSWORD="${DB_PASSWORD:-}"
 BACKUP_DIR="${1:-${BACKUP_DIR:-/opt/sgi-fiis/backups}}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 
@@ -45,7 +44,7 @@ log "Base de datos: ${DB_NAME}"
 log "Archivo: ${BACKUP_FILE}"
 
 # Exportar password para pg_dump (no mostrar en logs)
-export PGPASSWORD="$DB_PASSWORD"
+export PGPASSWORD="${DB_PASSWORD:-}"
 
 if pg_dump --version > /dev/null 2>&1; then
     pg_dump \
