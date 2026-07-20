@@ -10,6 +10,7 @@ import com.sgi.fiis.tramites.domain.model.ProcedureStatus;
 import com.sgi.fiis.tramites.domain.model.ProcedureType;
 import com.sgi.fiis.users.domain.model.RoleEnum;
 import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ class ProcedureRepositoryAdapterTest {
     @Mock private SpringDataUserRepository userRepository;
     @Mock private ResearchGroupJpaRepository groupRepository;
     @Mock private ProjectJpaRepository projectRepository;
+    @Mock private CorrelationContext correlationContext;
     @InjectMocks private ProcedureRepositoryAdapter adapter;
 
     private static final LocalDateTime DATE = LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0);

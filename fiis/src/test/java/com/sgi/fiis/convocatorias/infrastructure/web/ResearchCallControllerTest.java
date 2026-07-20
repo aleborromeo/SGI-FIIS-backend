@@ -81,7 +81,7 @@ class ResearchCallControllerTest {
     private void authenticateAs(Long userId, String username, String role) {
         CustomUserDetails userDetails = new CustomUserDetails(
                 userId, username, "password", true,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                List.of(new SimpleGrantedAuthority("ROLE_" + role)), role);
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);

@@ -3,6 +3,7 @@ package com.sgi.fiis.users.application.usecase;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.shared.domain.utils.PasswordGenerator;
 import com.sgi.fiis.users.domain.model.User;
@@ -38,6 +39,7 @@ public class CreateUserUseCase {
     }
 
     @Transactional
+    @Auditable(action = "CREATE_USER", table = "usuarios")
     public User execute(User user) {
         // Validate that the role exists
         if (user.getRoleCode() == null) {

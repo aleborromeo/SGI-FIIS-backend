@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 import java.util.Map;
 
+import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 @RestController
@@ -27,7 +28,6 @@ import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
-    private static final String ROLE_PREFIX = "ROLE_";
     private static final String ROLE_DOCENTE_INVESTIGADOR = "DOCENTE_INVESTIGADOR";
 
     private final CreateProjectUseCase createProjectUseCase;
@@ -47,10 +47,7 @@ public class ProjectController {
             @Valid @RequestBody CreateProjectRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
-                .orElse("");
+        String role = currentUser.getRole();
         
         if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
             throw new BusinessRuleValidationException("Solo los docentes investigadores pueden registrar proyectos de investigación.");
@@ -67,15 +64,14 @@ public class ProjectController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List research projects with optional filters")
     @ApiResponse(responseCode = "200", description = "List of projects retrieved successfully")
-    public ResponseEntity<List<ProjectResponse>> getProjects(
+    public ResponseEntity<PageDto<ProjectResponse>> getProjects(
             @RequestParam(value = "responsibleId", required = false) Long responsibleId,
             @RequestParam(value = "groupId", required = false) Integer groupId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
-                .orElse("");
+        String role = currentUser.getRole();
 
         List<ProjectResponse> response;
 
@@ -103,24 +99,31 @@ public class ProjectController {
             response = createProjectUseCase.getAllProjects();
         }
 
-        return ResponseEntity.ok(response);
+        int total = response.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<ProjectResponse> pageContent = response.subList(fromIndex, toIndex);
+
+        return ResponseEntity.ok(new PageDto<>(pageContent, total, page, size));
     }
 
     @GetMapping("/drafts")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List draft projects for the authenticated user")
     @ApiResponse(responseCode = "200", description = "List of draft projects")
-    public ResponseEntity<List<ProjectResponse>> getMyDrafts(
+    public ResponseEntity<PageDto<ProjectResponse>> getMyDrafts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
-                .orElse("");
+        String role = currentUser.getRole();
         if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(new PageDto<>(List.of(), 0, page, size));
         }
         List<ProjectResponse> allDrafts = createProjectUseCase.getDraftsByResponsible(currentUser.getId());
-        return ResponseEntity.ok(allDrafts);
+        int total = allDrafts.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        return ResponseEntity.ok(new PageDto<>(allDrafts.subList(fromIndex, toIndex), total, page, size));
     }
 
     @GetMapping("/{id}")
@@ -135,10 +138,7 @@ public class ProjectController {
         
         ProjectResponse project = createProjectUseCase.getProjectById(id);
 
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
-                .orElse("");
+        String role = currentUser.getRole();
 
         if (ROLE_DOCENTE_INVESTIGADOR.equals(role) && (project.getResponsibleId() == null || !project.getResponsibleId().equals(currentUser.getId()))) {
             return ResponseEntity.status(403).build();
@@ -171,10 +171,7 @@ public class ProjectController {
     public ResponseEntity<Void> deleteDraft(
             @PathVariable("id") Integer id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace(ROLE_PREFIX, ""))
-                .orElse("");
+        String role = currentUser.getRole();
         if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
             return ResponseEntity.status(403).build();
         }

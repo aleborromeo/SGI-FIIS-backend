@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/audit")
@@ -22,6 +23,13 @@ public class AuditLogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(auditLogRepository.findAll(page, size));
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR_INVESTIGACION', 'DECANO')")
+    public ResponseEntity<Map<String, Object>> stats() {
+        Map<String, Object> stats = auditLogRepository.getStats();
+        return ResponseEntity.ok(stats);
     }
 
     @GetMapping("/tabla/{tabla}")

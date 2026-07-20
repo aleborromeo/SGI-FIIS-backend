@@ -3,11 +3,14 @@ package com.sgi.fiis.evaluaciones.presentation.controller;
 import com.sgi.fiis.evaluaciones.application.dto.command.AsignarEvaluadorCommand;
 import com.sgi.fiis.evaluaciones.application.dto.command.RegistrarResultadoEvaluacionCommand;
 import com.sgi.fiis.evaluaciones.application.dto.response.EvaluacionResponse;
+import com.sgi.fiis.evaluaciones.application.dto.response.EvaluadorAsignadoResponse;
+import com.sgi.fiis.evaluaciones.application.dto.response.EvaluadorDisponibleResponse;
 import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadorUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadoresUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarDetalleAnonimoUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarEvaluacionesUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.EvaluarEvaluacionUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.ListarEvaluadoresDisponiblesUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.RegistrarResultadoEvaluacionUseCase;
 import com.sgi.fiis.evaluaciones.presentation.dto.AnonymousProjectDetailResponse;
 import com.sgi.fiis.evaluaciones.presentation.dto.AsignarEvaluadorRequest;
@@ -37,6 +40,7 @@ public class EvaluacionController {
     private final ConsultarEvaluacionesUseCase consultarEvaluacionesUseCase;
     private final EvaluarEvaluacionUseCase evaluarEvaluacionUseCase;
     private final ConsultarDetalleAnonimoUseCase consultarDetalleAnonimoUseCase;
+    private final ListarEvaluadoresDisponiblesUseCase listarEvaluadoresDisponiblesUseCase;
 
     public EvaluacionController(
             AsignarEvaluadorUseCase asignarEvaluadorUseCase,
@@ -44,7 +48,8 @@ public class EvaluacionController {
             RegistrarResultadoEvaluacionUseCase registrarResultadoEvaluacionUseCase,
             ConsultarEvaluacionesUseCase consultarEvaluacionesUseCase,
             EvaluarEvaluacionUseCase evaluarEvaluacionUseCase,
-            ConsultarDetalleAnonimoUseCase consultarDetalleAnonimoUseCase
+            ConsultarDetalleAnonimoUseCase consultarDetalleAnonimoUseCase,
+            ListarEvaluadoresDisponiblesUseCase listarEvaluadoresDisponiblesUseCase
     ) {
         this.asignarEvaluadorUseCase = asignarEvaluadorUseCase;
         this.asignarEvaluadoresUseCase = asignarEvaluadoresUseCase;
@@ -52,6 +57,7 @@ public class EvaluacionController {
         this.consultarEvaluacionesUseCase = consultarEvaluacionesUseCase;
         this.evaluarEvaluacionUseCase = evaluarEvaluacionUseCase;
         this.consultarDetalleAnonimoUseCase = consultarDetalleAnonimoUseCase;
+        this.listarEvaluadoresDisponiblesUseCase = listarEvaluadoresDisponiblesUseCase;
     }
 
     @PostMapping("/asignar")
@@ -165,5 +171,25 @@ public class EvaluacionController {
     ) {
         AnonymousProjectDetailResponse response = consultarDetalleAnonimoUseCase.consultarDetalleAnonimo(idEvaluacion);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/available-evaluators")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
+    @Operation(summary = "Listar evaluadores disponibles", description = "Obtiene la lista de evaluadores disponibles. Si se indica projectId, filtra por miembros del grupo de investigación del proyecto.")
+    @ApiResponse(responseCode = "200", description = "Lista de evaluadores disponibles")
+    public ResponseEntity<List<EvaluadorDisponibleResponse>> listarEvaluadoresDisponibles(
+            @RequestParam(required = false) Long projectId
+    ) {
+        return ResponseEntity.ok(listarEvaluadoresDisponiblesUseCase.execute(projectId));
+    }
+
+    @GetMapping("/project/{projectId}/evaluators")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Listar evaluadores asignados a un proyecto", description = "Obtiene la lista de evaluadores asignados a un proyecto específico con sus datos y resultado.")
+    @ApiResponse(responseCode = "200", description = "Lista de evaluadores asignados")
+    public ResponseEntity<List<EvaluadorAsignadoResponse>> listarEvaluadoresPorProyecto(
+            @PathVariable Long projectId
+    ) {
+        return ResponseEntity.ok(consultarEvaluacionesUseCase.listarEvaluadoresPorProyecto(projectId));
     }
 }

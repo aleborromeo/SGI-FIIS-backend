@@ -1,5 +1,6 @@
 package com.sgi.fiis.tramites.application.usecase;
 
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.tramites.application.dto.ProcedureRequestDto;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
@@ -23,6 +24,7 @@ public class CreateProcedureUseCase {
     }
 
     @Transactional
+    @Auditable(action = "CREATE_PROCEDURE", table = "tramites")
     public ProcedureResponseDto execute(ProcedureRequestDto dto) {
         Procedure tramite = Procedure.builder()
                 .code(generarCodigo())

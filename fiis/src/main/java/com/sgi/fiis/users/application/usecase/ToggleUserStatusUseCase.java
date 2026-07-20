@@ -2,6 +2,7 @@ package com.sgi.fiis.users.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ToggleUserStatusUseCase {
     }
 
     @Transactional
+    @Auditable(action = "TOGGLE_USER_STATUS", table = "usuarios")
     public User execute(Long id, boolean activate, Long authenticatedUserId) {
         // RF-13: Prevent admin from deactivating their own account
         if (id.equals(authenticatedUserId) && !activate) {

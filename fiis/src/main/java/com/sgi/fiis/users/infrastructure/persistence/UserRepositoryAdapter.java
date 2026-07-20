@@ -56,6 +56,13 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public List<User> search(String query, String role, Boolean active) {
+        return springDataRepository.search(query, role, active).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
     public boolean existsByDni(String dni) {
         return springDataRepository.existsByDni(dni);
     }
@@ -63,6 +70,20 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     @Override
     public boolean existsByEmail(String institutionalEmail) {
         return springDataRepository.existsByInstitutionalEmail(institutionalEmail);
+    }
+
+    @Override
+    public List<User> findAllPaged(int page, int size) {
+        return springDataRepository.findAll(
+                org.springframework.data.domain.PageRequest.of(page, size)
+        ).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countAll() {
+        return springDataRepository.count();
     }
 
     // ========== Internal Mappers ==========

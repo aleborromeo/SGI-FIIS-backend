@@ -6,7 +6,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -193,21 +192,19 @@ public class DocumentController {
     }
 
     /**
-     * Extrae el rol principal del usuario autenticado.
-     * Stripea el prefijo "ROLE_" si existe, ya que los use cases comparan
-     * contra nombres sin prefijo (ej: "ADMIN", "DECANO").
-     * Retorna null si no hay authorities configuradas.
+     * Extrae el rol del usuario autenticado de forma determinista.
+     * Primero intenta obtenerlo desde CustomUserDetails.getRole() (rol principal).
+     * Si el principal no es CustomUserDetails, fallback a la primera autoridad.
      */
     private String extractRole(Authentication authentication) {
-        if (authentication == null || authentication.getAuthorities().isEmpty()) {
-            return null;
+        if (authentication == null) return null;
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return userDetails.getRole();
         }
-        GrantedAuthority authority = authentication.getAuthorities().iterator().next();
-        String role = authority.getAuthority();
-        if (role.startsWith("ROLE_")) {
-            return role.substring(5);
-        }
-        return role;
+        return authentication.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().startsWith("ROLE_") ? a.getAuthority().substring(5) : a.getAuthority())
+                .orElse(null);
     }
 
     private MediaType resolveContentType(String extension) {

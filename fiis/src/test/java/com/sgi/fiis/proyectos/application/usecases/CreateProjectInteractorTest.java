@@ -1,6 +1,7 @@
 package com.sgi.fiis.proyectos.application.usecases;
 
 import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
+import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
 import com.sgi.fiis.proyectos.application.dto.CreateProjectRequest;
 import com.sgi.fiis.proyectos.application.dto.MemberRequest;
@@ -71,6 +72,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
         
         Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
@@ -205,6 +207,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
@@ -229,6 +232,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(100, "PRJ-2026-XXXX", "Title", null, null, 3, "Line", new BigDecimal("100"), LocalDate.now(), LocalDate.now(), null, 2L, 1, "GRP", null, null, ProjectStatus.POSTULATED);
@@ -277,6 +281,7 @@ class CreateProjectInteractorTest {
         when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
 
         ResearchCall call = mock(ResearchCall.class);
+        when(call.getStatus()).thenReturn(CallStatus.OPEN);
         when(saveCallPort.findById(5)).thenReturn(Optional.of(call));
 
         Project savedProject = new Project(100, "BOR-2026-XYZ99999", "Project Title", "Project summary",

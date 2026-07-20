@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import com.sgi.fiis.observations.application.dto.ObservationRequestDTO;
 import com.sgi.fiis.observations.application.dto.ObservationResponseDTO;
 import com.sgi.fiis.observations.application.dto.RemedyRequestDTO;
@@ -31,6 +32,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 /**
  * REST Controller for managing procedure observations and remedies.
@@ -47,6 +50,7 @@ public class ObservationController {
     private final ListObservationsByProcedureUseCase listObservationsByProcedureUseCase;
     private final GetObservationUseCase getObservationUseCase;
     private final ListRemediesByObservationUseCase listRemediesByObservationUseCase;
+    private final JdbcTemplate jdbcTemplate;
 
     private static final String ERROR_KEY = "error";
 
@@ -120,6 +124,44 @@ public class ObservationController {
             @PathVariable Integer id) {
         List<RemedyResponseDTO> response = listRemediesByObservationUseCase.execute(id);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Lists all observations for the current user's procedures.
+     */
+    @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "List my observations", description = "Retrieves all observations associated with the current user's procedures.")
+    @ApiResponse(responseCode = "200", description = "List retrieved successfully")
+    public ResponseEntity<List<ObservationResponseDTO>> listMyObservations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+        String sql = """
+                SELECT o.id_observacion, o.id_tramite, o.id_revisor, o.tipo_observacion,
+                       o.descripcion, o.estado_observacion, o.rol_revisor,
+                       o.fecha_registro, o.fecha_actualizacion
+                FROM observaciones o
+                INNER JOIN tramites t ON o.id_tramite = t.id_tramite
+                WHERE t.id_solicitante = ?
+                ORDER BY o.fecha_registro DESC
+                """;
+        List<ObservationResponseDTO> results = jdbcTemplate.query(sql, (rs, rowNum) ->
+                ObservationResponseDTO.builder()
+                        .id(rs.getInt("id_observacion"))
+                        .procedureId(rs.getInt("id_tramite"))
+                        .reviewerId(rs.getInt("id_revisor"))
+                        .type(rs.getString("tipo_observacion"))
+                        .description(rs.getString("descripcion"))
+                        .status(rs.getString("estado_observacion"))
+                        .reviewerRole(rs.getString("rol_revisor"))
+                        .createdAt(rs.getTimestamp("fecha_registro") != null
+                                ? rs.getTimestamp("fecha_registro").toLocalDateTime() : null)
+                        .updatedAt(rs.getTimestamp("fecha_actualizacion") != null
+                                ? rs.getTimestamp("fecha_actualizacion").toLocalDateTime() : null)
+                        .build(),
+                userId
+        );
+        return ResponseEntity.ok(results);
     }
 
     @ExceptionHandler(ObservationNotFoundException.class)

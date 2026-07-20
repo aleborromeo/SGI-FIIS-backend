@@ -2,6 +2,7 @@ package com.sgi.fiis.users.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.users.domain.model.Role;
 import com.sgi.fiis.users.domain.model.User;
@@ -29,6 +30,7 @@ public class UpdateUserUseCase {
     }
 
     @Transactional
+    @Auditable(action = "UPDATE_USER", table = "usuarios")
     public User execute(Long id, String firstNames, String lastNames,
                         String institutionalEmail, String phone, String roleCode) {
         User user = userRepository.findById(id)

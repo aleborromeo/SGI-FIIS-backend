@@ -32,16 +32,13 @@ public class TraceabilityRepositoryImpl implements TraceabilityRepositoryPort {
             m.estado_nuevo,
             m.observacion,
             m.fecha_movimiento,
-            ag.ip_origen
+            COALESCE(ag.ip_origen, '0.0.0.0') AS ip_origen
         FROM movimientos_tramite m
         JOIN tramites  t ON t.id_tramite   = m.id_tramite
         JOIN usuarios  u ON u.id_usuario   = m.id_usuario_accion
         JOIN roles     r ON r.id_rol       = u.id_rol_principal
-        LEFT JOIN auditoria_general ag
-            ON ag.id_usuario = m.id_usuario_accion
-            AND ag.fecha_accion BETWEEN m.fecha_movimiento - INTERVAL '5 seconds'
-                                   AND m.fecha_movimiento + INTERVAL '5 seconds'
-            AND ag.tabla_afectada IN ('proyectos','convocatorias','tramites','planes_tesis','informes_avance','informes_tesis')
+        LEFT JOIN auditoria_general ag ON m.correlation_id IS NOT NULL
+            AND ag.correlation_id = m.correlation_id
         WHERE m.id_tramite = ?
         ORDER BY m.fecha_movimiento DESC
         """;

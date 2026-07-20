@@ -8,6 +8,7 @@ import com.sgi.fiis.evaluaciones.application.ports.in.AsignarEvaluadoresUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarDetalleAnonimoUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.ConsultarEvaluacionesUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.EvaluarEvaluacionUseCase;
+import com.sgi.fiis.evaluaciones.application.ports.in.ListarEvaluadoresDisponiblesUseCase;
 import com.sgi.fiis.evaluaciones.application.ports.in.RegistrarResultadoEvaluacionUseCase;
 import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
 import com.sgi.fiis.evaluaciones.presentation.dto.AnonymousProjectDetailResponse;
@@ -37,6 +38,7 @@ class EvaluacionControllerTest {
     private ConsultarEvaluacionesUseCase consultarEvaluacionesUseCase;
     private EvaluarEvaluacionUseCase evaluarEvaluacionUseCase;
     private ConsultarDetalleAnonimoUseCase consultarDetalleAnonimoUseCase;
+    private ListarEvaluadoresDisponiblesUseCase listarEvaluadoresDisponiblesUseCase;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -47,6 +49,7 @@ class EvaluacionControllerTest {
         consultarEvaluacionesUseCase = mock(ConsultarEvaluacionesUseCase.class);
         evaluarEvaluacionUseCase = mock(EvaluarEvaluacionUseCase.class);
         consultarDetalleAnonimoUseCase = mock(ConsultarDetalleAnonimoUseCase.class);
+        listarEvaluadoresDisponiblesUseCase = mock(ListarEvaluadoresDisponiblesUseCase.class);
 
         EvaluacionController controller = new EvaluacionController(
                 asignarEvaluadorUseCase,
@@ -54,7 +57,8 @@ class EvaluacionControllerTest {
                 registrarResultadoEvaluacionUseCase,
                 consultarEvaluacionesUseCase,
                 evaluarEvaluacionUseCase,
-                consultarDetalleAnonimoUseCase
+                consultarDetalleAnonimoUseCase,
+                listarEvaluadoresDisponiblesUseCase
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();

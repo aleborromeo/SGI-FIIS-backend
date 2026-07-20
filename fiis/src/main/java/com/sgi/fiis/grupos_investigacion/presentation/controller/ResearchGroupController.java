@@ -33,7 +33,7 @@ public class ResearchGroupController {
     private final ResearchLineMapper lineMapper;
     private final JdbcTemplate jdbcTemplate;
 
-    /** RF-22: Create research group */
+    /** Create research group */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchGroupResponseDto> create(
@@ -42,7 +42,7 @@ public class ResearchGroupController {
                 .body(mapper.toResponseDto(createGroupUseCase.execute(mapper.toDomain(dto))));
     }
 
-    /** RF-23: List research groups */
+    /** RF-15: List research groups */
     @GetMapping
     public ResponseEntity<List<ResearchGroupResponseDto>> list() {
         return ResponseEntity.ok(listGroupsUseCase.execute().stream()
@@ -57,7 +57,7 @@ public class ResearchGroupController {
         return ResponseEntity.ok(mapper.toResponseDto(getGroupUseCase.execute(id)));
     }
 
-    /** RF-19: Assign coordinator to a group */
+    /** RF-18: Assign coordinator to a group */
     @PatchMapping("/{id}/coordinator")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResearchGroupResponseDto> assignCoordinator(
@@ -67,7 +67,7 @@ public class ResearchGroupController {
                 assignCoordinatorUseCase.execute(id, dto.getUserId())));
     }
 
-    /** RF-20: Add member to group */
+    /** RF-19: Register active membership */
     @PostMapping("/{id}/members")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MembershipResponseDto> assignMember(
@@ -88,7 +88,7 @@ public class ResearchGroupController {
                 removeMemberUseCase.execute(id, userId)));
     }
 
-    /** RF-20: List active members of the group */
+    /** RF-22: List active members of the group */
     @GetMapping("/{id}/members")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<MembershipResponseDto>> listMembers(@PathVariable Integer id) {
@@ -97,7 +97,7 @@ public class ResearchGroupController {
                 .toList());
     }
 
-    /** RF-26: List research lines associated to a group */
+    /** RF-24: List research lines associated to a group */
     @GetMapping("/{id}/lines")
     public ResponseEntity<List<ResearchLineResponseDto>> listLines(@PathVariable Integer id) {
         getGroupUseCase.execute(id); // validates group exists

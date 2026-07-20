@@ -24,5 +24,6 @@ public record ThesisPlanResponse(
         String nombreGrupo,
         String codigoGrupo,
         String nombreLinea,
-        String nombreDocumento
+        String nombreDocumento,
+        String observacionActual
 ) {}

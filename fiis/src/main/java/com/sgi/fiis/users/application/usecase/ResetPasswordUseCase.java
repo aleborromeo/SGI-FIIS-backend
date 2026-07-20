@@ -4,6 +4,7 @@ import com.sgi.fiis.auth.domain.port.EmailSenderPort;
 import com.sgi.fiis.auth.domain.port.PasswordEncoderPort;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.shared.domain.utils.PasswordGenerator;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class ResetPasswordUseCase {
     }
 
     @Transactional
+    @Auditable(action = "RESET_PASSWORD", table = "usuarios")
     public void execute(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));

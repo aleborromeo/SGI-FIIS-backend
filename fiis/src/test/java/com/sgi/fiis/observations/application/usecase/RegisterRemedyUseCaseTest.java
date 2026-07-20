@@ -162,7 +162,7 @@ class RegisterRemedyUseCaseTest {
                 .attachedDocumentId(45)
                 .build();
 
-        CustomUserDetails userDetails = new CustomUserDetails(99L, "student@test.com", "pass", true, List.of());
+        CustomUserDetails userDetails = new CustomUserDetails(99L, "student@test.com", "pass", true, List.of(), "");
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(userDetails);
         SecurityContextHolder.getContext().setAuthentication(auth);

@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,6 +25,26 @@ public class AuditLogRepository {
     private static final String COL_FECHA_ACCION = "fecha_accion";
 
     private final JdbcTemplate jdbcTemplate;
+
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+
+        Long totalRecords = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auditoria_general", Long.class);
+        Long tablesCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(DISTINCT tabla_afectada) FROM auditoria_general", Long.class);
+        Long usersCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(DISTINCT id_usuario) FROM auditoria_general", Long.class);
+        Long todayCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auditoria_general WHERE DATE(fecha_accion) = CURRENT_DATE", Long.class);
+
+        stats.put("totalRecords", totalRecords != null ? totalRecords : 0);
+        stats.put("tablesAffected", tablesCount != null ? tablesCount : 0);
+        stats.put("activeUsers", usersCount != null ? usersCount : 0);
+        stats.put("todayActions", todayCount != null ? todayCount : 0);
+
+        return stats;
+    }
 
     public List<AuditLogEntryDTO> findAll(int page, int size) {
         int offset = page * size;

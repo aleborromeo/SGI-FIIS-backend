@@ -82,6 +82,7 @@ class DocumentControllerTest {
         org.mockito.Mockito.when(userDetails.getUsername()).thenReturn("testuser@unas.edu.pe");
         org.mockito.Mockito.when(userDetails.getAuthorities())
                 .thenReturn(List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+        org.mockito.Mockito.when(userDetails.getRole()).thenReturn(role);
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,

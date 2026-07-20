@@ -4,6 +4,7 @@ import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
 import com.sgi.fiis.lineas_investigacion.domain.port.ResearchLineRepositoryPort;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,8 +58,8 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
                 .id(entity.getId())
                 .lineName(entity.getName())
                 .active(entity.isActive())
-                .createdAt(null)
-                .updatedAt(null)
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -70,6 +71,8 @@ public class ResearchLineRepositoryAdapter implements ResearchLineRepositoryPort
         entity.setId(domain.getId());
         entity.setName(domain.getLineName());
         entity.setActive(domain.isActive());
+        entity.setCreatedAt(domain.getCreatedAt());
+        entity.setUpdatedAt(LocalDateTime.now());
         return entity;
     }
 }

@@ -5,6 +5,7 @@ import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.tramites.infrastructure.persistence.*;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,8 @@ class ProjectProcedureAdapterTest {
         projectRepository = mock(ProjectJpaRepository.class);
         procedureRepository = mock(SpringDataProcedureRepository.class);
         movementRepository = mock(ProcedureMovementJpaRepository.class);
-        adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository);
+        CorrelationContext correlationContext = mock(CorrelationContext.class);
+        adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository, correlationContext);
     }
 
     private ProjectEntity createProjectEntity(Integer id, UserEntity responsible, ResearchGroupEntity group) {

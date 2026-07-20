@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.presentation.controller;
 
+import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.users.application.dto.UserRequestDto;
 import com.sgi.fiis.users.application.dto.UserResponseDto;
 import com.sgi.fiis.users.application.dto.UserUpdateDto;
@@ -65,20 +66,25 @@ public class UserController {
         return ResponseEntity.ok(mapper.toResponseDto(updated));
     }
 
-    /** RF-14: List and search users */
+    /** RF-14: List and search users with pagination, optional role and active filters */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> list(
-            @RequestParam(required = false) String query) {
-        List<UserResponseDto> users = listUsersUseCase.execute(query).stream()
+    public ResponseEntity<PageDto<UserResponseDto>> list(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean active) {
+        PageDto<User> users = listUsersUseCase.execute(query, page, size, role, active);
+        List<UserResponseDto> dtos = users.getContent().stream()
                 .map(mapper::toResponseDto)
                 .toList();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(new PageDto<>(dtos, users.getTotalElements(), users.getPage(), users.getSize()));
     }
 
-    /** Get user by ID */
+    /** Get user by ID — any authenticated user can look up another user's name */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDto> get(@PathVariable Long id) {
         User user = getUserUseCase.execute(id);
         return ResponseEntity.ok(mapper.toResponseDto(user));

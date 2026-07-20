@@ -3,6 +3,7 @@ package com.sgi.fiis.resolutions.application.usecase;
 import com.sgi.fiis.resolutions.domain.model.Resolution;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionCommand;
 import com.sgi.fiis.resolutions.domain.port.in.IssueResolutionUseCase;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.resolutions.domain.port.out.DocumentStoragePort;
 import com.sgi.fiis.resolutions.domain.port.out.ResolutionRepositoryPort;
 import com.sgi.fiis.resolutions.domain.port.out.ProcedureRepositoryPort;
@@ -33,6 +34,7 @@ public class IssueResolutionService implements IssueResolutionUseCase {
 
     @Override
     @Transactional
+    @Auditable(action = "ISSUE_RESOLUTION", table = "resoluciones")
     public Resolution issue(IssueResolutionCommand command) {
         // 1. Validate that the procedure exists
         if (!procedureRepositoryPort.existsProcedure(command.idTramite())) {

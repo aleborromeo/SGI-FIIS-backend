@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.thesis.domain.ThesisProcedureStatus;
 import com.sgi.fiis.thesis.domain.ReviewerRole;
 import com.sgi.fiis.thesis.domain.port.out.ProcedureWorkflowPort;
@@ -16,7 +17,11 @@ import com.sgi.fiis.thesis.domain.port.out.ProcedureWorkflowPort;
 @Component
 public class ProcedureWorkflowJdbcAdapter implements ProcedureWorkflowPort {
     private final JdbcTemplate jdbcTemplate;
-    public ProcedureWorkflowJdbcAdapter(JdbcTemplate jdbcTemplate) { this.jdbcTemplate = jdbcTemplate; }
+    private final CorrelationContext correlationContext;
+    public ProcedureWorkflowJdbcAdapter(JdbcTemplate jdbcTemplate, CorrelationContext correlationContext) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.correlationContext = correlationContext;
+    }
 
     @Override
     public Integer crearTramitePlanTesis(Integer idPlanTesis, Long idSolicitante, Integer idGrupo) {
@@ -120,11 +125,20 @@ public class ProcedureWorkflowJdbcAdapter implements ProcedureWorkflowPort {
 
     private void registrarMovimiento(Integer idTramite, Long idUsuarioAccion, String accion, String estadoAnterior,
                                       String estadoNuevo, String observacion, Integer idDocumentoAdjunto) {
-        jdbcTemplate.update("""
-            INSERT INTO movimientos_tramite (id_tramite, id_usuario_accion, accion, estado_anterior, estado_nuevo,
-                                             observacion, id_documento_adjunto)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, idTramite, idUsuarioAccion, accion, estadoAnterior, estadoNuevo, observacion, idDocumentoAdjunto);
+        String corrId = correlationContext.getCorrelationId();
+        if (corrId != null) {
+            jdbcTemplate.update("""
+                INSERT INTO movimientos_tramite (id_tramite, id_usuario_accion, accion, estado_anterior, estado_nuevo,
+                                                 observacion, id_documento_adjunto, correlation_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, idTramite, idUsuarioAccion, accion, estadoAnterior, estadoNuevo, observacion, idDocumentoAdjunto, corrId);
+        } else {
+            jdbcTemplate.update("""
+                INSERT INTO movimientos_tramite (id_tramite, id_usuario_accion, accion, estado_anterior, estado_nuevo,
+                                                 observacion, id_documento_adjunto)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, idTramite, idUsuarioAccion, accion, estadoAnterior, estadoNuevo, observacion, idDocumentoAdjunto);
+        }
     }
 
     private String generarCodigoTramite() {

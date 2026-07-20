@@ -8,11 +8,14 @@ import com.sgi.fiis.evaluaciones.presentation.dto.EvaluarEvaluacionRequest;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 import com.sgi.fiis.evaluaciones.domain.model.Evaluacion;
 import com.sgi.fiis.evaluaciones.domain.ports.out.EvaluacionRepositoryPort;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,17 +31,28 @@ class EvaluacionServiceTest {
     @Mock
     private EvaluacionRepositoryPort evaluacionRepositoryPort;
 
+    @Mock
+    private UserRepositoryPort userRepositoryPort;
+
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
     private EvaluacionService evaluacionService;
 
     @BeforeEach
     void setUp() {
-        evaluacionService = new EvaluacionService(evaluacionRepositoryPort);
+        evaluacionService = new EvaluacionService(evaluacionRepositoryPort, userRepositoryPort, jdbcTemplate);
+    }
+
+    private User evaluatorUser() {
+        return User.builder().id(2L).roleCode("EVALUADOR").build();
     }
 
     @Test
     void asignarEvaluadorAProyectoDebeGuardarEvaluacion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(1L, null, 2L);
 
+        when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(1L, 2L))
                 .thenReturn(false);
 
@@ -70,6 +84,7 @@ class EvaluacionServiceTest {
     void asignarEvaluadorAPlanTesisDebeGuardarEvaluacion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 5L, 2L);
 
+        when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(5L, 2L))
                 .thenReturn(false);
 
@@ -99,6 +114,7 @@ class EvaluacionServiceTest {
     void asignarEvaluadorConProyectoDuplicadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(1L, null, 2L);
 
+        when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(1L, 2L))
                 .thenReturn(true);
 
@@ -299,6 +315,7 @@ void asignarEvaluadorConCommandNuloDebeLanzarExcepcion() {
 void asignarEvaluadorConPlanTesisDuplicadoDebeLanzarExcepcion() {
     AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 5L, 2L);
 
+    when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
     when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(5L, 2L))
             .thenReturn(true);
 
@@ -356,6 +373,7 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, null, 20L);
         LocalDateTime fechaAsignacion = LocalDateTime.now();
 
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
                 .thenReturn(false);
 
@@ -389,6 +407,7 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 30L, 20L);
         LocalDateTime fechaAsignacion = LocalDateTime.now();
 
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(30L, 20L))
                 .thenReturn(false);
 
@@ -491,6 +510,8 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         var evaluacion = Evaluacion.reconstruir(
                 1L, 10L, null, 20L, null, null, null, LocalDateTime.now(), null
         );
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
+        when(userRepositoryPort.findById(30L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
                 .thenReturn(false);
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 30L))
@@ -609,6 +630,7 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
     void asignarEvaluadorDuplicadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, null, 20L);
 
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
                 .thenReturn(true);
 

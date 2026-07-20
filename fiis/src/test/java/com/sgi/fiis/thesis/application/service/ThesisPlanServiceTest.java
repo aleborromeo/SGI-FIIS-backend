@@ -66,7 +66,7 @@ class ThesisPlanServiceTest {
     private void mockAuthentication(Long id, String role) {
         CustomUserDetails userDetails = new CustomUserDetails(
                 id, "student@unas.edu.pe", "password", true,
-                List.of(new SimpleGrantedAuthority(role))
+                List.of(new SimpleGrantedAuthority(role)), role.replace("ROLE_", "")
         );
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetails);
@@ -238,7 +238,7 @@ class ThesisPlanServiceTest {
         assertEquals(ThesisPlanStatus.OBSERVADO, existingPlan.getEstadoPlan());
         verify(tramiteWorkflow).derivarPlanTesis(
                 12, 404L, ThesisProcedureStatus.OBSERVADO,
-                ReviewerRole.ESTUDIANTE, "OBSERVAR_DIRECTOR", "Faltan firmas", 100
+                ReviewerRole.COORDINADOR_GRUPO, "OBSERVAR_DIRECTOR", "Faltan firmas", 100
         );
     }
 

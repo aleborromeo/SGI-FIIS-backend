@@ -3,6 +3,7 @@ package com.sgi.fiis.tramites.application.usecase;
 import com.sgi.fiis.observations.application.dto.ObservationRequestDTO;
 import com.sgi.fiis.observations.application.usecase.RegisterObservationUseCase;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
@@ -35,6 +36,7 @@ public class FlagProcedureUseCase {
     }
 
     @Transactional
+    @Auditable(action = "FLAG_PROCEDURE", table = "tramites")
     public ProcedureResponseDto execute(Long idTramite, RoleEnum rolEjecutor, Long idEjecutor,
                                       String textoObservacion) {
         Procedure tramite = procedureRepositoryPort.findById(idTramite)
