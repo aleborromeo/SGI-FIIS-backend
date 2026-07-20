@@ -24,6 +24,7 @@ public class ProgressReport {
     private String difficulties;
     private String recommendations;
     private Long attachedDocumentId; // nullable (RF-72)
+    private String observation; // Director/Coordinator observation text (RF-76)
     private ProgressReportStatus reportStatus;
     private LocalDateTime registrationDate;
     private LocalDateTime lastUpdatedDate;
@@ -67,9 +68,10 @@ public class ProgressReport {
         this.lastUpdatedDate = LocalDateTime.now(ZoneId.systemDefault());
     }
 
-    /** Director observes (RF-75). */
-    public void observe() {
+    /** Director observes with feedback text (RF-75, RF-76). */
+    public void observe(String observation) {
         requireStatus(ProgressReportStatus.UNDER_REVIEW, "observe");
+        this.observation    = observation;
         this.reportStatus   = ProgressReportStatus.OBSERVED;
         this.lastUpdatedDate = LocalDateTime.now(ZoneId.systemDefault());
     }

@@ -66,6 +66,7 @@ class ReviewProgressReportServiceTest {
         ProgressReportResponse response = service.observe(10L, "Needs corrections");
 
         assertEquals(ProgressReportStatus.OBSERVED, response.getReportStatus());
+        assertEquals("Needs corrections", response.getObservation());
     }
 
     @Test

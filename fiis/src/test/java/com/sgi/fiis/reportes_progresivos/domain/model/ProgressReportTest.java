@@ -193,15 +193,24 @@ class ProgressReportTest {
     @DisplayName("Observe transitions UNDER_REVIEW to OBSERVED")
     void observeChangesStatus() {
         ProgressReport report = buildReportInReview();
-        report.observe();
+        report.observe("Corregir tabla 3");
         assertEquals(ProgressReportStatus.OBSERVED, report.getReportStatus());
+        assertEquals("Corregir tabla 3", report.getObservation());
+    }
+
+    @Test
+    @DisplayName("Observe stores observation text")
+    void observeStoresObservationText() {
+        ProgressReport report = buildReportInReview();
+        report.observe("Revisar metodología");
+        assertEquals("Revisar metodología", report.getObservation());
     }
 
     @Test
     @DisplayName("Observe from PENDING throws IllegalStateException")
     void observeFromPendienteThrows() {
         ProgressReport report = buildDefaultReport();
-        assertThrows(IllegalStateException.class, report::observe);
+        assertThrows(IllegalStateException.class, () -> report.observe("text"));
     }
 
     // =========================================================================

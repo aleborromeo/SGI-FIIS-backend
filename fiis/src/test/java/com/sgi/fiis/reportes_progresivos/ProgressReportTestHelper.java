@@ -27,7 +27,7 @@ public class ProgressReportTestHelper {
             report.approve();
         } else if (status == ProgressReportStatus.OBSERVED) {
             report.submitForReview();
-            report.observe();
+            report.observe("Test observation");
         } else if (status == ProgressReportStatus.REJECTED) {
             report.submitForReview();
             report.reject();

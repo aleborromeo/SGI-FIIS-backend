@@ -48,6 +48,9 @@ public class ProgressReportEntity {
     @Column(name = "id_documento_adjunto")
     private Long attachedDocumentId;
 
+    @Column(name = "observacion", columnDefinition = "TEXT")
+    private String observation;
+
     @Column(name = "estado_informe", nullable = false, length = 30)
     private String reportStatus;
 
