@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatusCode;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,6 +37,17 @@ class AuditLogControllerTest {
         assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
         assertEquals(1, response.getBody().size());
         assertEquals(1L, response.getBody().get(0).getId());
+    }
+
+    @Test
+    void statsShouldReturnAuditLogStats() {
+        Map<String, Object> expectedStats = Map.of("totalLogs", 10L, "byTable", Map.of("tramites", 5L));
+        when(auditLogRepository.getStats()).thenReturn(expectedStats);
+
+        var response = auditLogController.stats();
+
+        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
+        assertEquals(expectedStats, response.getBody());
     }
 
     @Test
