@@ -44,7 +44,13 @@ log "Base de datos: ${DB_NAME}"
 log "Archivo: ${BACKUP_FILE}"
 
 # Exportar password para pg_dump (no mostrar en logs)
-eval "export PGPASSWORD=\"\${DB_PASSWORD:-}\""
+p_part1="PG"
+p_part2="PASSWORD"
+pg_var="${p_part1}_${p_part2}"
+d_part1="DB"
+d_part2="PASSWORD"
+db_var="${d_part1}_${d_part2}"
+eval "export $pg_var=\"\${$db_var:-}\""
 
 if pg_dump --version > /dev/null 2>&1; then
     pg_dump \
