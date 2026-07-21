@@ -58,7 +58,7 @@ class ThesisReportServiceTest {
     private void mockAuthentication(Long id, String role) {
         CustomUserDetails userDetails = new CustomUserDetails(
                 id, "user@unas.edu.pe", "password", true,
-                List.of(new SimpleGrantedAuthority(role))
+                List.of(new SimpleGrantedAuthority(role)), role.replace("ROLE_", "")
         );
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetails);
@@ -231,5 +231,49 @@ class ThesisReportServiceTest {
         ThesisReport report = new ThesisReport(5, 12, "AI", 200, null, ThesisReportStatus.APROBADO);
         when(informeRepository.findById(5)).thenReturn(Optional.of(report));
         assertThrows(com.sgi.fiis.thesis.domain.exception.InvalidStateTransitionException.class, () -> service.observarInforme(5, "Motivo"));
+    }
+
+    @Test
+    @DisplayName("aprobarInforme - coordinador can approve report")
+    void coordinadorCanApproveReport() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisReport report = new ThesisReport(5, 12, "AI Final", 200, null, ThesisReportStatus.EN_REVISION);
+        when(informeRepository.findById(5)).thenReturn(Optional.of(report));
+        when(informeRepository.save(any(ThesisReport.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ThesisReportResponse response = service.aprobarInforme(5);
+
+        assertNotNull(response);
+        assertEquals(ThesisReportStatus.APROBADO, report.getEstadoInforme());
+        verify(informeRepository).save(report);
+    }
+
+    @Test
+    @DisplayName("observarInforme - coordinador can observe report")
+    void coordinadorCanObserveReport() {
+        mockAuthentication(303L, "ROLE_COORDINADOR_GRUPO");
+        ThesisReport report = new ThesisReport(5, 12, "AI Final", 200, null, ThesisReportStatus.EN_REVISION);
+        when(informeRepository.findById(5)).thenReturn(Optional.of(report));
+        when(informeRepository.save(any(ThesisReport.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ThesisReportResponse response = service.observarInforme(5, "Corregir capítulo 3");
+
+        assertNotNull(response);
+        assertEquals(ThesisReportStatus.OBSERVADO, report.getEstadoInforme());
+        verify(informeRepository).save(report);
+    }
+
+    @Test
+    @DisplayName("validarRolDirector - docente investigador is rejected")
+    void docenteInvestigadorIsRejected() {
+        mockAuthentication(606L, "ROLE_DOCENTE_INVESTIGADOR");
+        assertThrows(BusinessRuleViolationException.class, () -> service.aprobarInforme(5));
+    }
+
+    @Test
+    @DisplayName("validarRolDirector - estudiante is rejected")
+    void estudianteIsRejected() {
+        mockAuthentication(101L, "ROLE_ESTUDIANTE");
+        assertThrows(BusinessRuleViolationException.class, () -> service.observarInforme(5, "Motivo"));
     }
 }

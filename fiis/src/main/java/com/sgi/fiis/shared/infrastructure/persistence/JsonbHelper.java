@@ -3,6 +3,7 @@ package com.sgi.fiis.shared.infrastructure.persistence;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sgi.fiis.shared.domain.exception.JsonbSerializationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,14 +13,13 @@ public class JsonbHelper {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private JsonbHelper() {
-        throw new UnsupportedOperationException("Utility class");
     }
 
     public static String toJson(Map<String, String> map) {
         try {
             return MAPPER.writeValueAsString(map);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize JSONB map", e);
+            throw new JsonbSerializationException("Failed to serialize JSONB map", e);
         }
     }
 
@@ -29,12 +29,18 @@ public class JsonbHelper {
             defaultMap.put("es", "");
             return defaultMap;
         }
+        if (!json.trim().startsWith("{")) {
+            Map<String, String> fallbackMap = new HashMap<>();
+            fallbackMap.put("es", json);
+            return fallbackMap;
+        }
         try {
-            return MAPPER.readValue(json, new TypeReference<Map<String, String>>() {});
+            return MAPPER.readValue(json, new TypeReference<Map<String, String>>() {
+            });
         } catch (JsonProcessingException e) {
-            Map<String, String> legacyMap = new HashMap<>();
-            legacyMap.put("es", json);
-            return legacyMap;
+            Map<String, String> fallbackMap = new HashMap<>();
+            fallbackMap.put("es", json);
+            return fallbackMap;
         }
     }
 

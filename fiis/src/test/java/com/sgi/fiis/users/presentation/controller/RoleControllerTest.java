@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.presentation.controller;
 
+import com.sgi.fiis.TestcontainersConfig;
 import com.sgi.fiis.users.domain.model.Role;
 import com.sgi.fiis.users.domain.port.RoleRepositoryPort;
 import com.sgi.fiis.users.presentation.mapper.RoleMapper;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("RoleController Integration Tests")
-class RoleControllerTest {
+class RoleControllerTest extends TestcontainersConfig {
 
     @Autowired
     private MockMvc mockMvc;

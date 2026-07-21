@@ -5,6 +5,8 @@ import com.sgi.fiis.documentacion.application.exception.DocumentAccessDeniedExce
 import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
 import com.sgi.fiis.documentacion.domain.port.FileStoragePort;
+import com.sgi.fiis.resolutions.domain.port.out.ResolutionRepositoryPort;
+import com.sgi.fiis.tramites.domain.port.ProcedureRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,23 +20,28 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("all")
 class DocumentUseCaseTest {
 
     private DocumentRepositoryPort documentRepositoryPort;
     private FileStoragePort fileStoragePort;
+    private ResolutionRepositoryPort resolutionRepositoryPort;
+    private ProcedureRepositoryPort procedureRepositoryPort;
     
     private UploadDocumentUseCase uploadDocumentUseCase;
     private DownloadDocumentUseCase downloadDocumentUseCase;
 
     @BeforeEach
-    void setUp() {
-        // Simulamos los puertos (APIs externas/infraestructura) usando Mockito
+    public void setUp() {
         this.documentRepositoryPort = mock(DocumentRepositoryPort.class);
         this.fileStoragePort = mock(FileStoragePort.class);
+        this.resolutionRepositoryPort = mock(ResolutionRepositoryPort.class);
+        this.procedureRepositoryPort = mock(ProcedureRepositoryPort.class);
 
-        // Instanciamos tus casos de uso bajo entorno aislado
         this.uploadDocumentUseCase = new UploadDocumentUseCase(documentRepositoryPort, fileStoragePort);
-        this.downloadDocumentUseCase = new DownloadDocumentUseCase(documentRepositoryPort, fileStoragePort);
+        this.downloadDocumentUseCase = new DownloadDocumentUseCase(
+                documentRepositoryPort, fileStoragePort,
+                resolutionRepositoryPort, procedureRepositoryPort);
     }
 
     @Test
@@ -85,9 +92,8 @@ class DocumentUseCaseTest {
         Long userId = 42L;
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            uploadDocumentUseCase.execute(fakeStream, fileName, sizeBytes, userId);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> uploadDocumentUseCase.execute(fakeStream, fileName, sizeBytes, userId));
 
         assertTrue(exception.getMessage().contains("Extensión de archivo no permitida"));
         verify(documentRepositoryPort, never()).save(any(Document.class));
@@ -144,9 +150,9 @@ class DocumentUseCaseTest {
         when(documentRepositoryPort.findById(docId)).thenReturn(Optional.of(stubDoc));
 
         // Act & Assert
-        assertThrows(DocumentAccessDeniedException.class, () -> {
-            downloadDocumentUseCase.execute(docId, foreignUserId, foreignUserRole);
-        });
+        Exception exception = assertThrows(DocumentAccessDeniedException.class,
+                () -> downloadDocumentUseCase.execute(docId, foreignUserId, foreignUserRole));
+        assertNotNull(exception);
 
         verify(fileStoragePort, never()).load(anyString());
     }

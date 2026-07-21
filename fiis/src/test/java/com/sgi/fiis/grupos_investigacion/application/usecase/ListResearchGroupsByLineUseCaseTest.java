@@ -2,7 +2,6 @@ package com.sgi.fiis.grupos_investigacion.application.usecase;
 
 import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
 import com.sgi.fiis.grupos_investigacion.domain.port.ResearchGroupRepositoryPort;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("all")
 class ListResearchGroupsByLineUseCaseTest {
 
     @Mock

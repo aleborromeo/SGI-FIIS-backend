@@ -19,4 +19,13 @@ public interface SpringDataUserRepository extends JpaRepository<UserEntity, Long
             "LOWER(u.lastNames) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(u.institutionalEmail) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<UserEntity> search(@Param("query") String query);
+
+    @Query("SELECT u FROM UserEntity u WHERE " +
+            "(LOWER(u.dni) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(u.firstNames) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(u.lastNames) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(u.institutionalEmail) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "AND (:role IS NULL OR u.role.code = :role) " +
+            "AND (:active IS NULL OR u.active = :active)")
+    List<UserEntity> search(@Param("query") String query, @Param("role") String role, @Param("active") Boolean active);
 }

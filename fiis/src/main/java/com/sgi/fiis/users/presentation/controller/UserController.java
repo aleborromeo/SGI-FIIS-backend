@@ -1,5 +1,6 @@
 package com.sgi.fiis.users.presentation.controller;
 
+import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.users.application.dto.UserRequestDto;
 import com.sgi.fiis.users.application.dto.UserResponseDto;
 import com.sgi.fiis.users.application.dto.UserUpdateDto;
@@ -10,6 +11,7 @@ import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +47,7 @@ public class UserController {
 
     /** RF-07: Register user */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> create(@Valid @RequestBody UserRequestDto dto) {
         User user = mapper.toDomain(dto);
         User created = createUserUseCase.execute(user);
@@ -53,6 +56,7 @@ public class UserController {
 
     /** RF-08: Edit user */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> update(@PathVariable Long id,
                                                      @Valid @RequestBody UserUpdateDto dto) {
         User updated = updateUserUseCase.execute(
@@ -62,18 +66,25 @@ public class UserController {
         return ResponseEntity.ok(mapper.toResponseDto(updated));
     }
 
-    /** RF-14: List and search users */
+    /** RF-14: List and search users with pagination, optional role and active filters */
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> list(
-            @RequestParam(required = false) String query) {
-        List<UserResponseDto> users = listUsersUseCase.execute(query).stream()
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageDto<UserResponseDto>> list(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean active) {
+        PageDto<User> users = listUsersUseCase.execute(query, page, size, role, active);
+        List<UserResponseDto> dtos = users.getContent().stream()
                 .map(mapper::toResponseDto)
                 .toList();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(new PageDto<>(dtos, users.getTotalElements(), users.getPage(), users.getSize()));
     }
 
-    /** Get user by ID */
+    /** Get user by ID — any authenticated user can look up another user's name */
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDto> get(@PathVariable Long id) {
         User user = getUserUseCase.execute(id);
         return ResponseEntity.ok(mapper.toResponseDto(user));
@@ -81,6 +92,7 @@ public class UserController {
 
     /** RF-11: Activate or deactivate user */
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> toggleStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> body) {
@@ -96,6 +108,7 @@ public class UserController {
 
     /** RF-12: Reset password */
     @PatchMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id) {
         resetPasswordUseCase.execute(id);
         return ResponseEntity.ok(Map.of("message", "Contraseña reiniciada exitosamente"));

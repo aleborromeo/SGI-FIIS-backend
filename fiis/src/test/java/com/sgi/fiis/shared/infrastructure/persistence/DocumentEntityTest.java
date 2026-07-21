@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +23,7 @@ class DocumentEntityTest {
     void testAllArgsConstructor() {
         DocumentEntity entity = new DocumentEntity(
                 1, "report.pdf", "/uploads/report.pdf",
-                2048L, "pdf", 10L, null
+                2048L, "pdf", 10L, null, true
         );
 
         assertEquals(1, entity.getId());
@@ -85,5 +86,31 @@ class DocumentEntityTest {
 
         assertNotNull(entity.getCreatedAt());
         assertTrue(entity.getCreatedAt() instanceof LocalDateTime);
+    }
+
+    @Test
+    @DisplayName("Should set and get createdAt via setter")
+    void testSetCreatedAt() {
+        DocumentEntity entity = new DocumentEntity();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+        entity.setCreatedAt(now);
+        assertEquals(now, entity.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Should set and get active via setter")
+    void testSetActive() {
+        DocumentEntity entity = DocumentEntity.builder().active(true).build();
+        assertTrue(entity.isActive());
+
+        entity.setActive(false);
+        assertFalse(entity.isActive());
+    }
+
+    @Test
+    @DisplayName("Should default active to true via builder")
+    void testDefaultActive() {
+        DocumentEntity entity = DocumentEntity.builder().build();
+        assertTrue(entity.isActive());
     }
 }

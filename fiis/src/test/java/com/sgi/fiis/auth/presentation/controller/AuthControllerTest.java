@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,9 +21,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,6 +51,7 @@ class AuthControllerTest {
     private UserRepositoryPort userRepository;
     private UserMapper userMapper;
     private MessageSource messageSource;
+    private JdbcTemplate jdbcTemplate;
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -61,11 +66,12 @@ class AuthControllerTest {
         userRepository = mock(UserRepositoryPort.class);
         userMapper = mock(UserMapper.class);
         messageSource = mock(MessageSource.class);
+        jdbcTemplate = mock(JdbcTemplate.class);
 
         AuthController controller = new AuthController(
                 loginUseCase, registerUseCase, verifyRegistrationUseCase, resendCodeUseCase,
                 changePasswordUseCase, forgotPasswordUseCase, selfResetPasswordUseCase,
-                userRepository, userMapper, messageSource
+                userRepository, userMapper, messageSource, jdbcTemplate
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
@@ -217,13 +223,13 @@ class AuthControllerTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getName()).thenReturn("test@test.com");
 
-        try {
-            mockMvc.perform(get("/api/v1/auth/profile").principal(auth));
-            org.junit.jupiter.api.Assertions.fail("Expected exception");
-        } catch (Exception e) {
-            org.junit.jupiter.api.Assertions.assertTrue(e.getCause() instanceof RuntimeException);
-            org.junit.jupiter.api.Assertions.assertEquals("Usuario no encontrado", e.getCause().getMessage());
-        }
+        Exception exception = assertThrows(Exception.class, () -> 
+            mockMvc.perform(get("/api/v1/auth/profile").principal(auth))
+        );
+
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertEquals("Usuario no encontrado", exception.getCause().getMessage());
     }
 
     @Test
@@ -254,5 +260,36 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("Contraseña restablecida con éxito."));
 
         verify(selfResetPasswordUseCase).execute("test@unas.edu.pe", "123456", "NewPass123!", "NewPass123!");
+    }
+
+    @Test
+    void getPublicStats_Success() throws Exception {
+        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM proyectos", Integer.class)).thenReturn(5);
+        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM planes_tesis", Integer.class)).thenReturn(3);
+        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM usuarios WHERE es_activo = TRUE", Integer.class)).thenReturn(10);
+        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM grupos_investigacion WHERE es_activo = TRUE", Integer.class)).thenReturn(2);
+        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM proyectos WHERE estado_proyecto = 'FINALIZADO'", Integer.class)).thenReturn(1);
+
+        mockMvc.perform(get("/api/v1/auth/public-stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.proyectosRegistrados").value(5))
+                .andExpect(jsonPath("$.tesis").value(3))
+                .andExpect(jsonPath("$.docentesInvestigadores").value(10))
+                .andExpect(jsonPath("$.gruposInvestigacion").value(2))
+                .andExpect(jsonPath("$.proyectosCulminados").value(1));
+    }
+
+    @Test
+    void getPublicGroups_Success() throws Exception {
+        when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of(
+                Map.of("codigo", "G01", "nombre", "Grupo Alpha", "miembros", 5, "publicaciones", 3),
+                Map.of("codigo", "G02", "nombre", "Grupo Beta", "miembros", 3, "publicaciones", 1)
+        ));
+
+        mockMvc.perform(get("/api/v1/auth/public-groups"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].codigo").value("G01"))
+                .andExpect(jsonPath("$[0].nombre").value("Grupo Alpha"))
+                .andExpect(jsonPath("$[1].codigo").value("G02"));
     }
 }

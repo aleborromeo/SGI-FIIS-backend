@@ -19,6 +19,7 @@ public class UserResponseDto {
     private String lastNames;
     private String institutionalEmail;
     private String phone;
+    private String temporaryPassword;
     private boolean active;
     private boolean mustChangePassword;
     private String roleCode;

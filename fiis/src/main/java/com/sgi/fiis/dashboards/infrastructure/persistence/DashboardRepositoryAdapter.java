@@ -23,7 +23,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
             "SELECT COUNT(*) FROM proyectos WHERE estado_proyecto = 'EN_EJECUCION'";
     private static final String SQL_COUNT_RESOLUTIONS = "SELECT COUNT(*) FROM resoluciones";
     private static final String SQL_COUNT_OPEN_CALLS =
-            "SELECT COUNT(*) FROM convocatorias WHERE estado = 'ABIERTA'";
+            "SELECT COUNT(*) FROM convocatorias WHERE estado = 'ABIERTA' AND fecha_fin >= CURRENT_DATE";
 
     private static final String SQL_COUNT_GROUP_PROCEDURES =
             "SELECT COUNT(*) FROM tramites WHERE id_grupo = ";
@@ -34,7 +34,12 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
 
     private static final String FILTER_ACTIVE = " AND es_activo = TRUE";
     private static final String FILTER_PROCEDURE_NOT_CLOSED =
-            " AND estado_actual NOT IN ('APROBADO','RECHAZADO')";
+            " AND estado_actual NOT IN ('APROBADO_CON_RESOLUCION','RECHAZADO','FINALIZADO')";
+    private static final String ALERT_ACTIVE_CALL_TITLE = "dashboard.alert.active-call.title";
+
+    private static final String COL_ID_GRUPO = "id_grupo";
+    private static final String COL_NOMBRE_GRUPO = "nombre_grupo";
+    private static final String COL_CODIGO_GRUPO = "codigo_grupo";
 
     private final JdbcTemplate jdbcTemplate;
     private final DashboardMessageService messages;
@@ -51,10 +56,10 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         int totalActiveGroups = count("SELECT COUNT(*) FROM grupos_investigacion WHERE es_activo = TRUE");
         int totalProjects = count(SQL_COUNT_PROJECTS);
         int activeProjects = count(SQL_COUNT_PROJECTS_IN_EXECUTION);
-        int pendingProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual NOT IN ('APROBADO','RECHAZADO','FINALIZADO')");
+        int pendingProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual NOT IN ('APROBADO_CON_RESOLUCION','RECHAZADO','FINALIZADO')");
         int issuedResolutions = count(SQL_COUNT_RESOLUTIONS);
-        int proceduresUnderReview = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'EN_REVISION'");
-        int approvedProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'APROBADO'");
+        int proceduresUnderReview = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'REGISTRADO'");
+        int approvedProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'APROBADO_CON_RESOLUCION'");
         int rejectedProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual = 'RECHAZADO'");
 
         List<AlertItem> alerts = new ArrayList<>();
@@ -80,7 +85,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.admin.description", openCalls))
                     .build());
         }
@@ -122,7 +127,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         int proceduresWithCoordinator = count("SELECT COUNT(*) FROM tramites WHERE rol_revisor_actual = 'COORDINADOR_GRUPO'");
         int proceduresWithDirector = count("SELECT COUNT(*) FROM tramites WHERE rol_revisor_actual = 'DIRECTOR_INVESTIGACION'");
         int proceduresWithDean = count("SELECT COUNT(*) FROM tramites WHERE rol_revisor_actual = 'DECANO'");
-        int completedProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual IN ('APROBADO','RECHAZADO')");
+        int completedProcedures = count("SELECT COUNT(*) FROM tramites WHERE estado_actual IN ('APROBADO_CON_RESOLUCION','RECHAZADO')");
 
         List<AlertItem> alerts = new ArrayList<>();
 
@@ -145,7 +150,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.director.description"))
                     .build());
         }
@@ -188,10 +193,10 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         List<java.util.Map<String, Object>> groupResult = jdbcTemplate.queryForList(sqlGroup, userId);
         if (!groupResult.isEmpty()) {
             java.util.Map<String, Object> row = groupResult.get(0);
-            Object idVal = row.get("id_grupo");
+            Object idVal = row.get(COL_ID_GRUPO);
             groupId = idVal instanceof Number number ? number.intValue() : null;
-            groupName = (String) row.get("nombre_grupo");
-            groupCode = (String) row.get("codigo_grupo");
+            groupName = (String) row.get(COL_NOMBRE_GRUPO);
+            groupCode = (String) row.get(COL_CODIGO_GRUPO);
         }
 
         if (groupId == null) {
@@ -217,9 +222,9 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
                         + groupId);
         int groupThesisPlans = count("SELECT COUNT(*) FROM planes_tesis WHERE id_grupo = " + groupId);
 
-        int submittedProcedures = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'POSTULADO'");
-        int proceduresUnderReview = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'EN_REVISION'");
-        int approvedProcedures = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'APROBADO'");
+        int submittedProcedures = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'REGISTRADO'");
+        int proceduresUnderReview = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'PENDIENTE_COORDINADOR'");
+        int approvedProcedures = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'APROBADO_CON_RESOLUCION'");
         int observedProcedures = count(SQL_COUNT_GROUP_PROCEDURES + groupId + " AND estado_actual = 'OBSERVADO'");
 
         List<AlertItem> alerts = new ArrayList<>();
@@ -267,7 +272,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
 
         int projectsAsLead = count(SQL_COUNT_PROJECTS_BY_LEAD + userId);
         int projectsAsMember = count(
-                "SELECT COUNT(*) FROM integrantes_proyecto WHERE id_usuario = " + userId);
+                "SELECT COUNT(*) FROM miembros_proyecto WHERE id_usuario = " + userId);
         int pendingProcedures = count(
                 "SELECT COUNT(*) FROM tramites WHERE id_solicitante = " + userId + FILTER_PROCEDURE_NOT_CLOSED);
         int pendingProgressReports = count(
@@ -283,6 +288,37 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         int approvedProjects = count(SQL_COUNT_PROJECTS_BY_LEAD + userId + " AND estado_proyecto = 'APROBADO'");
         int projectsInExecution = count(SQL_COUNT_PROJECTS_BY_LEAD + userId + " AND estado_proyecto = 'EN_EJECUCION'");
         int completedProjects = count(SQL_COUNT_PROJECTS_BY_LEAD + userId + " AND estado_proyecto = 'FINALIZADO'");
+
+        Integer groupId = null;
+        String groupName = null;
+        String groupCode = null;
+        List<java.util.Map<String, Object>> groupResult = jdbcTemplate.queryForList(
+                """
+                SELECT g.id_grupo, g.nombre_grupo, g.codigo_grupo
+                FROM membresias_grupo m
+                INNER JOIN grupos_investigacion g ON m.id_grupo = g.id_grupo
+                WHERE m.id_usuario = ? AND m.es_activo = TRUE
+                LIMIT 1
+                """, userId);
+        if (!groupResult.isEmpty()) {
+            groupId = ((Number) groupResult.get(0).get(COL_ID_GRUPO)).intValue();
+            groupName = (String) groupResult.get(0).get(COL_NOMBRE_GRUPO);
+            groupCode = (String) groupResult.get(0).get(COL_CODIGO_GRUPO);
+        }
+        if (groupId == null) {
+            List<java.util.Map<String, Object>> coordResult = jdbcTemplate.queryForList(
+                    """
+                    SELECT g.id_grupo, g.nombre_grupo, g.codigo_grupo
+                    FROM grupos_investigacion g
+                    WHERE g.id_coordinador_actual = ? AND g.es_activo = TRUE
+                    LIMIT 1
+                    """, userId);
+            if (!coordResult.isEmpty()) {
+                groupId = ((Number) coordResult.get(0).get(COL_ID_GRUPO)).intValue();
+                groupName = (String) coordResult.get(0).get(COL_NOMBRE_GRUPO);
+                groupCode = (String) coordResult.get(0).get(COL_CODIGO_GRUPO);
+            }
+        }
 
         List<AlertItem> alerts = new ArrayList<>();
 
@@ -306,12 +342,15 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.general.description", openCalls))
                     .build());
         }
 
         return DashboardTeacher.builder()
+                .groupId(groupId)
+                .groupName(groupName != null ? groupName : messages.get("dashboard.default.no-group"))
+                .groupCode(groupCode != null ? groupCode : "")
                 .projectsAsLead(projectsAsLead)
                 .projectsAsMember(projectsAsMember)
                 .pendingProcedures(pendingProcedures)
@@ -382,7 +421,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         int waitingProcedures = pendingSignatureProcedures;
 
         int approvedProceduresThisMonth = count(
-                "SELECT COUNT(*) FROM tramites WHERE estado_actual = 'APROBADO' AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', CURRENT_DATE)");
+                "SELECT COUNT(*) FROM tramites WHERE estado_actual = 'APROBADO_CON_RESOLUCION' AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', CURRENT_DATE)");
         int rejectedProceduresThisMonth = count(
                 "SELECT COUNT(*) FROM tramites WHERE estado_actual = 'RECHAZADO' AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', CURRENT_DATE)");
 
@@ -399,7 +438,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (activeCallsForApplication > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.faculty.description", activeCallsForApplication))
                     .build());
         }
@@ -450,8 +489,8 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
                 LIMIT 1
                 """, userId);
         if (!groupResult.isEmpty()) {
-            groupName = (String) groupResult.get(0).get("nombre_grupo");
-            groupCode = (String) groupResult.get(0).get("codigo_grupo");
+            groupName = (String) groupResult.get(0).get(COL_NOMBRE_GRUPO);
+            groupCode = (String) groupResult.get(0).get(COL_CODIGO_GRUPO);
         }
 
         List<AlertItem> alerts = new ArrayList<>();
@@ -475,7 +514,7 @@ public class DashboardRepositoryAdapter implements DashboardRepositoryPort {
         if (openCalls > 0) {
             alerts.add(AlertItem.builder()
                     .type(INFO_TYPE)
-                    .title(messages.get("dashboard.alert.active-call.title"))
+                    .title(messages.get(ALERT_ACTIVE_CALL_TITLE))
                     .description(messages.get("dashboard.alert.active-call.general.description", openCalls))
                     .build());
         }

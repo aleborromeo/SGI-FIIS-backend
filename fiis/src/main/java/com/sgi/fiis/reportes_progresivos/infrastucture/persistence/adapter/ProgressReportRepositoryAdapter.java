@@ -1,6 +1,7 @@
 package com.sgi.fiis.reportes_progresivos.infrastucture.persistence.adapter;
 
 import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReport;
+import com.sgi.fiis.reportes_progresivos.domain.model.ProgressReportStatus;
 import com.sgi.fiis.reportes_progresivos.domain.port.out.ProgressReportRepositoryPort;
 import com.sgi.fiis.reportes_progresivos.infrastucture.persistence.entity.ProgressReportEntity;
 import com.sgi.fiis.reportes_progresivos.infrastucture.persistence.repository.ProgressReportJpaRepository;
@@ -38,6 +39,23 @@ public class ProgressReportRepositoryAdapter implements ProgressReportRepository
     @Override
     public List<ProgressReport> findByProjectId(Long projectId) {
         return jpaRepository.findByProjectIdOrderByRegistrationDateDesc(projectId)
+                .stream()
+                .map(ProgressReportMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<ProgressReport> findAll() {
+        return jpaRepository.findAllByOrderByRegistrationDateDesc()
+                .stream()
+                .map(ProgressReportMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<ProgressReport> findByStatus(String status) {
+        String dbStatus = ProgressReportMapper.mapStatusToEntity(ProgressReportStatus.valueOf(status));
+        return jpaRepository.findByReportStatusOrderByRegistrationDateDesc(dbStatus)
                 .stream()
                 .map(ProgressReportMapper::toDomain)
                 .toList();

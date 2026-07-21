@@ -84,4 +84,34 @@ class ProgressReportRepositoryAdapterTest {
         assertTrue(exists);
         verify(jpaRepository, times(1)).existsById(1L);
     }
+
+    @Test
+    @DisplayName("Should find all progress reports")
+    void shouldFindAll() {
+        ProgressReport domain = ProgressReportTestHelper.createReport(1L, 10L, null);
+        ProgressReportEntity entity = ProgressReportMapper.toEntity(domain);
+
+        when(jpaRepository.findAllByOrderByRegistrationDateDesc()).thenReturn(List.of(entity));
+
+        List<ProgressReport> found = repositoryAdapter.findAll();
+
+        assertFalse(found.isEmpty());
+        assertEquals(1, found.size());
+        verify(jpaRepository, times(1)).findAllByOrderByRegistrationDateDesc();
+    }
+
+    @Test
+    @DisplayName("Should find progress reports by status")
+    void shouldFindByStatus() {
+        ProgressReport domain = ProgressReportTestHelper.createReport(1L, 10L, null);
+        ProgressReportEntity entity = ProgressReportMapper.toEntity(domain);
+
+        when(jpaRepository.findByReportStatusOrderByRegistrationDateDesc("PENDIENTE")).thenReturn(List.of(entity));
+
+        List<ProgressReport> found = repositoryAdapter.findByStatus("PENDING");
+
+        assertFalse(found.isEmpty());
+        assertEquals(1, found.size());
+        verify(jpaRepository, times(1)).findByReportStatusOrderByRegistrationDateDesc("PENDIENTE");
+    }
 }

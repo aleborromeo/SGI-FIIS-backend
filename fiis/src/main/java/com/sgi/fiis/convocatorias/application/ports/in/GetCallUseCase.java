@@ -6,4 +6,5 @@ import java.util.List;
 public interface GetCallUseCase {
     List<CallResponse> getCalls(String status);
     CallResponse getCallById(Integer id);
+    List<CallResponse> getVigentCalls();
 }

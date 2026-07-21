@@ -143,9 +143,19 @@ class ProgressReportTest {
     }
 
     @Test
-    @DisplayName("Forward from PENDING throws IllegalStateException")
-    void forwardFromPendienteThrows() {
+    @DisplayName("Forward from PENDING transitions to UNDER_REVIEW and updates timestamp")
+    void forwardFromPendienteTransitionsToUnderReview() {
         ProgressReport report = buildDefaultReport();
+        var before = report.getLastUpdatedDate();
+        report.forwardToDirector();
+        assertEquals(ProgressReportStatus.UNDER_REVIEW, report.getReportStatus());
+        assertTrue(report.getLastUpdatedDate().compareTo(before) >= 0);
+    }
+
+    @Test
+    @DisplayName("Forward from OBSERVED throws IllegalStateException")
+    void forwardFromObservadoThrows() {
+        ProgressReport report = buildObservedReport();
         assertThrows(IllegalStateException.class, report::forwardToDirector);
     }
 
@@ -183,15 +193,24 @@ class ProgressReportTest {
     @DisplayName("Observe transitions UNDER_REVIEW to OBSERVED")
     void observeChangesStatus() {
         ProgressReport report = buildReportInReview();
-        report.observe();
+        report.observe("Corregir tabla 3");
         assertEquals(ProgressReportStatus.OBSERVED, report.getReportStatus());
+        assertEquals("Corregir tabla 3", report.getObservation());
+    }
+
+    @Test
+    @DisplayName("Observe stores observation text")
+    void observeStoresObservationText() {
+        ProgressReport report = buildReportInReview();
+        report.observe("Revisar metodología");
+        assertEquals("Revisar metodología", report.getObservation());
     }
 
     @Test
     @DisplayName("Observe from PENDING throws IllegalStateException")
     void observeFromPendienteThrows() {
         ProgressReport report = buildDefaultReport();
-        assertThrows(IllegalStateException.class, report::observe);
+        assertThrows(IllegalStateException.class, () -> report.observe("text"));
     }
 
     // =========================================================================

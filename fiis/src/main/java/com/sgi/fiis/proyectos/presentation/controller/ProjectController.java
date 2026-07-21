@@ -14,8 +14,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.util.List;
 import java.util.Map;
+
+import com.sgi.fiis.shared.application.dto.PageDto;
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -23,20 +28,31 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
-    private final CreateProjectUseCase createProjectUseCase;
+    private static final String ROLE_DOCENTE_INVESTIGADOR = "DOCENTE_INVESTIGADOR";
 
-    public ProjectController(CreateProjectUseCase createProjectUseCase) {
+    private final CreateProjectUseCase createProjectUseCase;
+    private final JdbcTemplate jdbcTemplate;
+
+    public ProjectController(CreateProjectUseCase createProjectUseCase, JdbcTemplate jdbcTemplate) {
         this.createProjectUseCase = createProjectUseCase;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @PostMapping
-    @Operation(summary = "Postulate a new research project")
-    @ApiResponse(responseCode = "200", description = "Project successfully postulated")
+    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
+    @Operation(summary = "Postulate a new research project or save as draft")
+    @ApiResponse(responseCode = "200", description = "Project successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid project request or business rule validation error")
     public ResponseEntity<ProjectResponse> createProject(
             @Valid @RequestBody CreateProjectRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         
+        String role = currentUser.getRole();
+        
+        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
+            throw new BusinessRuleValidationException("Solo los docentes investigadores pueden registrar proyectos de investigación.");
+        }
+
         // RF-39: Associate the project with the logged-in user as the responsible investigator
         request.setResponsibleId(currentUser.getId().intValue());
         
@@ -45,24 +61,36 @@ public class ProjectController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List research projects with optional filters")
     @ApiResponse(responseCode = "200", description = "List of projects retrieved successfully")
-    public ResponseEntity<List<ProjectResponse>> getProjects(
+    public ResponseEntity<PageDto<ProjectResponse>> getProjects(
             @RequestParam(value = "responsibleId", required = false) Long responsibleId,
             @RequestParam(value = "groupId", required = false) Integer groupId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .orElse("");
+        String role = currentUser.getRole();
 
         List<ProjectResponse> response;
 
-        // RF-43 / RN-05 / RNF-19: Enforce role-based filtering
-        if ("DOCENTE_INVESTIGADOR".equals(role)) {
-            // Docente can only see their own projects
+        if (ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
             response = createProjectUseCase.getProjectsByResponsible(currentUser.getId());
+        } else if ("COORDINADOR_GRUPO".equals(role)) {
+            java.util.List<Integer> ids = jdbcTemplate.queryForList(
+                "SELECT id_grupo FROM grupos_investigacion WHERE id_coordinador_actual = ? AND es_activo = TRUE LIMIT 1",
+                Integer.class,
+                currentUser.getId()
+            );
+            Integer coordGroupId = ids.isEmpty() ? null : ids.get(0);
+            if (coordGroupId != null) {
+                response = createProjectUseCase.getProjectsByGroup(coordGroupId);
+            } else {
+                response = List.of();
+            }
+        } else if ("ESTUDIANTE".equals(role)) {
+            response = List.of();
         } else if (responsibleId != null) {
             response = createProjectUseCase.getProjectsByResponsible(responsibleId);
         } else if (groupId != null) {
@@ -71,10 +99,35 @@ public class ProjectController {
             response = createProjectUseCase.getAllProjects();
         }
 
-        return ResponseEntity.ok(response);
+        int total = response.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<ProjectResponse> pageContent = response.subList(fromIndex, toIndex);
+
+        return ResponseEntity.ok(new PageDto<>(pageContent, total, page, size));
+    }
+
+    @GetMapping("/drafts")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "List draft projects for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "List of draft projects")
+    public ResponseEntity<PageDto<ProjectResponse>> getMyDrafts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        String role = currentUser.getRole();
+        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
+            return ResponseEntity.ok(new PageDto<>(List.of(), 0, page, size));
+        }
+        List<ProjectResponse> allDrafts = createProjectUseCase.getDraftsByResponsible(currentUser.getId());
+        int total = allDrafts.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        return ResponseEntity.ok(new PageDto<>(allDrafts.subList(fromIndex, toIndex), total, page, size));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get project details by ID")
     @ApiResponse(responseCode = "200", description = "Details retrieved successfully")
     @ApiResponse(responseCode = "403", description = "Forbidden - not your project")
@@ -85,13 +138,9 @@ public class ProjectController {
         
         ProjectResponse project = createProjectUseCase.getProjectById(id);
 
-        // RF-43 / RN-05: Docentes can only see their own projects
-        String role = currentUser.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .orElse("");
+        String role = currentUser.getRole();
 
-        if ("DOCENTE_INVESTIGADOR".equals(role) && !project.getResponsibleId().equals(currentUser.getId())) {
+        if (ROLE_DOCENTE_INVESTIGADOR.equals(role) && (project.getResponsibleId() == null || !project.getResponsibleId().equals(currentUser.getId()))) {
             return ResponseEntity.status(403).build();
         }
 
@@ -100,7 +149,7 @@ public class ProjectController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
-    @Operation(summary = "Update project status", description = "Updates the status of a research project.")
+    @Operation(summary = "Update project status")
     @ApiResponse(responseCode = "200", description = "Status updated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid status value")
     @ApiResponse(responseCode = "403", description = "Forbidden")
@@ -113,4 +162,20 @@ public class ProjectController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
+    @Operation(summary = "Delete a draft project")
+    @ApiResponse(responseCode = "200", description = "Draft deleted successfully")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Project not found")
+    public ResponseEntity<Void> deleteDraft(
+            @PathVariable("id") Integer id,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        String role = currentUser.getRole();
+        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
+            return ResponseEntity.status(403).build();
+        }
+        createProjectUseCase.deleteDraft(id, currentUser.getId());
+        return ResponseEntity.ok().build();
+    }
 }

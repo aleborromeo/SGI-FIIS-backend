@@ -1,5 +1,6 @@
 package com.sgi.fiis.shared.infrastructure.config;
 
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -12,14 +13,19 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 public class LocaleConfig {
 
     @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
+    }
+
+    @Bean
     public AcceptHeaderLocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
         List<Locale> supportedLocales = Arrays.asList(
-                new Locale("es"),
-                new Locale("en")
+                Locale.forLanguageTag("es"),
+                Locale.forLanguageTag("en")
         );
         resolver.setSupportedLocales(supportedLocales);
-        resolver.setDefaultLocale(new Locale("es"));
+        resolver.setDefaultLocale(Locale.forLanguageTag("es"));
         return resolver;
     }
 }

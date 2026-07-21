@@ -4,6 +4,7 @@ import com.sgi.fiis.documentacion.application.dto.DocumentResponseDto;
 import com.sgi.fiis.documentacion.domain.model.Document;
 import com.sgi.fiis.documentacion.domain.port.DocumentRepositoryPort;
 import com.sgi.fiis.documentacion.domain.port.FileStoragePort;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class UploadDocumentUseCase {
         this.fileStoragePort = fileStoragePort;
     }
 
+    @Auditable(action = "UPLOAD_DOCUMENT", table = "documentos")
     public DocumentResponseDto execute(InputStream fileStream, String originalName, Long sizeBytes, Long userId) {
         // 1. Extraer la extensión del archivo
         String extension = "";

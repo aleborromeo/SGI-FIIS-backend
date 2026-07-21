@@ -13,6 +13,12 @@ public interface QueryProgressReportUseCase {
     /** Full history of reports for a project. */
     List<ProgressReportResponse> listByProject(Long projectId);
 
+    /** All reports, ordered by date descending. */
+    List<ProgressReportResponse> listAll();
+
+    /** All reports filtered by status. */
+    List<ProgressReportResponse> listByStatus(String status);
+
     /** Detail of a specific report. */
     ProgressReportResponse getById(Long reportId);
 }

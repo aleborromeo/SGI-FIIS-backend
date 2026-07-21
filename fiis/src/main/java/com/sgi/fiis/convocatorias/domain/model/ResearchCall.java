@@ -1,10 +1,9 @@
 package com.sgi.fiis.convocatorias.domain.model;
 
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 /**
  * Domain model representing a research call (convocatoria).
@@ -18,8 +17,23 @@ public class ResearchCall {
     private LocalDate endDate;
     private CallStatus status;
     private Integer documentId;
+    private Integer creatorId;
+    private String poblacionObjetivo;
     private final List<Integer> researchLineIds;
 
+    /**
+     * Constructs a ResearchCall with the given parameters.
+     *
+     * @param id               unique identifier
+     * @param title            call title
+     * @param description      call description
+     * @param startDate        start date of submission period
+     * @param endDate          end date of submission period
+     * @param status           current status of the call
+     * @param documentId       associated document identifier
+     * @param researchLineIds  list of research line identifiers
+     * @throws BusinessRuleValidationException if endDate is before startDate
+     */
     private ResearchCall(Builder builder) {
         if (builder.endDate.isBefore(builder.startDate)) {
             throw new BusinessRuleValidationException("convocatorias.error.end-date-before-start");
@@ -31,11 +45,14 @@ public class ResearchCall {
         this.endDate = builder.endDate;
         this.status = builder.status;
         this.documentId = builder.documentId;
+        this.creatorId = builder.creatorId;
+        this.poblacionObjetivo = builder.poblacionObjetivo;
         // Almacenamos una lista completamente inmutable en el dominio
         this.researchLineIds = List.copyOf(builder.researchLineIds);
     }
 
     /** Convenience constructor kept for backward compatibility with existing callers. */
+    @SuppressWarnings("java:S107")
     public ResearchCall(Integer id, String title, String description, LocalDate startDate,
                         LocalDate endDate, CallStatus status, Integer documentId,
                         List<Integer> researchLineIds) {
@@ -43,6 +60,17 @@ public class ResearchCall {
                 .id(id).title(title).description(description)
                 .startDate(startDate).endDate(endDate).status(status)
                 .documentId(documentId).researchLineIds(researchLineIds));
+    }
+
+    /** Full constructor including creatorId. */
+    @SuppressWarnings("java:S107")
+    public ResearchCall(Integer id, String title, String description, LocalDate startDate,
+                        LocalDate endDate, CallStatus status, Integer documentId,
+                        Integer creatorId, List<Integer> researchLineIds) {
+        this(new Builder()
+                .id(id).title(title).description(description)
+                .startDate(startDate).endDate(endDate).status(status)
+                .documentId(documentId).creatorId(creatorId).researchLineIds(researchLineIds));
     }
 
     public static Builder builder() {
@@ -57,7 +85,8 @@ public class ResearchCall {
         private LocalDate endDate;
         private CallStatus status;
         private Integer documentId;
-        // Inicializamos la lista vacía por defecto para evitar nulos molestos
+        private Integer creatorId;
+        private String poblacionObjetivo = "AMBOS";
         private List<Integer> researchLineIds = new ArrayList<>();
 
         private Builder() {}
@@ -69,8 +98,8 @@ public class ResearchCall {
         public Builder endDate(LocalDate endDate)               { this.endDate = endDate; return this; }
         public Builder status(CallStatus status)                { this.status = status; return this; }
         public Builder documentId(Integer documentId)           { this.documentId = documentId; return this; }
-        
-        // SOLUCIÓN DEFINITIVA PARA DEEPSOURCE
+        public Builder creatorId(Integer creatorId)             { this.creatorId = creatorId; return this; }
+        public Builder poblacionObjetivo(String poblacionObjetivo) { this.poblacionObjetivo = poblacionObjetivo; return this; }
         public Builder researchLineIds(List<Integer> lineIds) { 
             if (lineIds == null) {
                 this.researchLineIds = new ArrayList<>();
@@ -80,7 +109,9 @@ public class ResearchCall {
             return this; 
         }
 
-        public ResearchCall build() { return new ResearchCall(this); }
+        public ResearchCall build() {
+            return new ResearchCall(this);
+        }
     }
 
     /**
@@ -88,7 +119,7 @@ public class ResearchCall {
      *
      * @param submissionDate the date the project is being submitted
      * @throws BusinessRuleValidationException if the call is not open or the
-     * date is outside the submission period
+     *                                         date is outside the submission period
      */
     public void validateCanSubmitProject(LocalDate submissionDate) {
         if (status != CallStatus.OPEN) {
@@ -120,6 +151,16 @@ public class ResearchCall {
     /** Returns the associated document identifier. */
     public Integer getDocumentId() {
         return documentId;
+    }
+
+    /** Returns the creator user identifier. */
+    public Integer getCreatorId() {
+        return creatorId;
+    }
+
+    /** Returns the target audience (DOCENTES, ESTUDIANTES, or AMBOS). */
+    public String getPoblacionObjetivo() {
+        return poblacionObjetivo;
     }
 
     /**

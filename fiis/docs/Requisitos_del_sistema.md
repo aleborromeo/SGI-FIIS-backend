@@ -256,7 +256,7 @@ El sistema contempla la participación de distintos roles: Administrador, Estudi
 | **RNF-42** | El sistema debe ser compatible con navegadores modernos como Google Chrome, Mozilla Firefox y Microsoft Edge[cite: 1]. |
 | **RNF-43** | El sistema debe funcionar adecuadamente sobre la infraestructura definida para la FIIS[cite: 1]. |
 | **RNF-44** | El sistema debe ser compatible con base de datos PostgreSQL[cite: 1]. |
-| **RNF-45** | El sistema debe permitir despliegue en servidor Linux con Nginx y PHP-FPM[cite: 1]. |
+| **RNF-45** | El sistema debe permitir despliegue en servidor Linux con Docker, Nginx (frontend) y JRE 17 (backend)[cite: 1]. |
 
 ### 4.9. Auditoría y trazabilidad
 | Código | Requisito no funcional |

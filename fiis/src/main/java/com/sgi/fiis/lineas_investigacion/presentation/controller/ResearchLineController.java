@@ -14,7 +14,6 @@ import com.sgi.fiis.grupos_investigacion.presentation.mapper.ResearchGroupMapper
 import com.sgi.fiis.lineas_investigacion.domain.model.ResearchLine;
 import com.sgi.fiis.lineas_investigacion.presentation.mapper.ResearchLineMapper;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/research-lines")
-@RequiredArgsConstructor
 public class ResearchLineController {
 
     private final RegisterResearchLineUseCase registerResearchLineUseCase;
@@ -38,6 +36,28 @@ public class ResearchLineController {
     private final ResearchLineMapper mapper;
     private final ResearchGroupMapper groupMapper;
 
+    @SuppressWarnings("java:S107")
+    public ResearchLineController(
+            RegisterResearchLineUseCase registerResearchLineUseCase,
+            ListResearchLinesUseCase listResearchLinesUseCase,
+            GetResearchLineUseCase getResearchLineUseCase,
+            ChangeResearchLineStatusUseCase changeResearchLineStatusUseCase,
+            AssignGroupToResearchLineUseCase assignGroupToResearchLineUseCase,
+            RemoveGroupFromResearchLineUseCase removeGroupFromResearchLineUseCase,
+            ListResearchGroupsByLineUseCase listResearchGroupsByLineUseCase,
+            ResearchLineMapper mapper,
+            ResearchGroupMapper groupMapper) {
+        this.registerResearchLineUseCase = registerResearchLineUseCase;
+        this.listResearchLinesUseCase = listResearchLinesUseCase;
+        this.getResearchLineUseCase = getResearchLineUseCase;
+        this.changeResearchLineStatusUseCase = changeResearchLineStatusUseCase;
+        this.assignGroupToResearchLineUseCase = assignGroupToResearchLineUseCase;
+        this.removeGroupFromResearchLineUseCase = removeGroupFromResearchLineUseCase;
+        this.listResearchGroupsByLineUseCase = listResearchGroupsByLineUseCase;
+        this.mapper = mapper;
+        this.groupMapper = groupMapper;
+    }
+
     /** RF-24: Register research line */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -49,7 +69,6 @@ public class ResearchLineController {
 
     /** RF-25, RF-27, RF-28: List research lines - all or only active for forms */
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchLineResponseDto>> list(
             @RequestParam(defaultValue = "false") boolean onlyActive) {
         List<ResearchLineResponseDto> lines = listResearchLinesUseCase.execute(onlyActive).stream()
@@ -60,7 +79,6 @@ public class ResearchLineController {
 
     /** Get line by ID */
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResearchLineResponseDto> get(@PathVariable Integer id) {
         return ResponseEntity.ok(mapper.toResponseDto(getResearchLineUseCase.execute(id)));
     }
@@ -78,7 +96,6 @@ public class ResearchLineController {
 
     /** RF-26: List research groups associated to a line */
     @GetMapping("/{id}/groups")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ResearchGroupResponseDto>> listGroups(@PathVariable Integer id) {
         getResearchLineUseCase.execute(id); // validates line exists
         return ResponseEntity.ok(listResearchGroupsByLineUseCase.execute(id).stream()

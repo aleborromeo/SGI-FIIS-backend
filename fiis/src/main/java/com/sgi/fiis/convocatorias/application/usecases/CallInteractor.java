@@ -74,8 +74,16 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<CallResponse> getVigentCalls() {
+        return saveCallPort.findByStatus(CallStatus.OPEN).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional
-    @Auditable(action = "UPDATE_RESEARCH_CALL_STATUS")
+    @Auditable(action = "UPDATE_RESEARCH_CALL_STATUS", table = "convocatorias", description = "Cambio de estado de convocatoria a {status}")
     public CallResponse updateStatus(Integer id, String status) {
         ResearchCall call = saveCallPort.findById(id)
                 .orElseThrow(() -> new BusinessRuleValidationException("convocatorias.error.not-found", id));
@@ -116,6 +124,7 @@ public class CallInteractor implements GetCallUseCase, UpdateCallStatusUseCase {
                 call.getEndDate(),
                 statusName,
                 call.getDocumentId(),
+                call.getPoblacionObjetivo(),
                 call.getResearchLineIds()
         );
     }

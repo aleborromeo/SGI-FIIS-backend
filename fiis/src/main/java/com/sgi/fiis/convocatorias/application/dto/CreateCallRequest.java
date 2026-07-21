@@ -31,6 +31,8 @@ public class CreateCallRequest {
 
     private Integer documentId;
 
+    private String poblacionObjetivo;
+
     @NotEmpty(message = "{convocatorias.validation.lines.not-empty}")
     private List<Integer> researchLineIds;
 }

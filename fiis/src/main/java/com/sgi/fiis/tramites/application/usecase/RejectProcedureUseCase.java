@@ -2,6 +2,7 @@ package com.sgi.fiis.tramites.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
 import com.sgi.fiis.tramites.domain.model.Procedure;
@@ -14,16 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RejectProcedureUseCase {
 
-    private final ProcedureRepositoryPort tramiteRepositoryPort;
+    private final ProcedureRepositoryPort procedureRepositoryPort;
     private final ProcedureStateMachine stateMachine = new ProcedureStateMachine();
 
-    public RejectProcedureUseCase(ProcedureRepositoryPort tramiteRepositoryPort) {
-        this.tramiteRepositoryPort = tramiteRepositoryPort;
+    public RejectProcedureUseCase(ProcedureRepositoryPort procedureRepositoryPort) {
+        this.procedureRepositoryPort = procedureRepositoryPort;
     }
 
     @Transactional
+    @Auditable(action = "REJECT_PROCEDURE", table = "tramites")
     public ProcedureResponseDto execute(Long idTramite, RoleEnum rolEjecutor, Long idEjecutor) {
-        Procedure tramite = tramiteRepositoryPort.findById(idTramite)
+        Procedure tramite = procedureRepositoryPort.findById(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));
 
         switch (rolEjecutor) {
@@ -33,6 +35,6 @@ public class RejectProcedureUseCase {
                     "El rol [" + rolEjecutor + "] no puede rechazar trámites");
         }
 
-        return ProcedureMapper.toResponse(tramiteRepositoryPort.save(tramite));
+        return ProcedureMapper.toResponse(procedureRepositoryPort.save(tramite));
     }
 }

@@ -89,4 +89,45 @@ class AssignMemberUseCaseTest {
         assertThat(result.getUserId()).isEqualTo(2);
         assertThat(result.getStartDate()).isNotNull();
     }
+
+    @Test
+    void execute_shouldCreateMembership_whenEstudianteIsValid() {
+        Membership saved = Membership.builder()
+                .id(11).groupId(1).userId(3).active(true)
+                .startDate(LocalDateTime.now()).build();
+
+        given(groupRepository.findById(1)).willReturn(Optional.of(
+                ResearchGroup.builder().id(1).build()));
+        given(groupRepository.existsActiveUserWithRole(3, "DOCENTE_INVESTIGADOR")).willReturn(false);
+        given(groupRepository.existsActiveUserWithRole(3, "ESTUDIANTE")).willReturn(true);
+        given(membershipRepository.existsActiveByUser(3)).willReturn(false);
+        given(membershipRepository.save(any())).willReturn(saved);
+
+        Membership result = useCase.execute(1, 3);
+
+        assertThat(result.isActive()).isTrue();
+        assertThat(result.getGroupId()).isEqualTo(1);
+        assertThat(result.getUserId()).isEqualTo(3);
+    }
+
+    @Test
+    void execute_shouldCreateMembership_whenCoordinadorIsValid() {
+        Membership saved = Membership.builder()
+                .id(12).groupId(1).userId(4).active(true)
+                .startDate(LocalDateTime.now()).build();
+
+        given(groupRepository.findById(1)).willReturn(Optional.of(
+                ResearchGroup.builder().id(1).build()));
+        given(groupRepository.existsActiveUserWithRole(4, "DOCENTE_INVESTIGADOR")).willReturn(false);
+        given(groupRepository.existsActiveUserWithRole(4, "ESTUDIANTE")).willReturn(false);
+        given(groupRepository.existsActiveUserWithRole(4, "COORDINADOR_GRUPO")).willReturn(true);
+        given(membershipRepository.existsActiveByUser(4)).willReturn(false);
+        given(membershipRepository.save(any())).willReturn(saved);
+
+        Membership result = useCase.execute(1, 4);
+
+        assertThat(result.isActive()).isTrue();
+        assertThat(result.getGroupId()).isEqualTo(1);
+        assertThat(result.getUserId()).isEqualTo(4);
+    }
 }

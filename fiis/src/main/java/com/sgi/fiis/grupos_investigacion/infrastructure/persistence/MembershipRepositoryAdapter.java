@@ -46,9 +46,17 @@ public class MembershipRepositoryAdapter implements MembershipRepositoryPort {
                        m.fecha_inicio, m.fecha_fin,
                        u.nombres AS user_first_names,
                        u.apellidos AS user_last_names,
-                       u.correo_institucional AS user_email
+                       u.correo_institucional AS user_email,
+                       COALESCE(
+                         (SELECT r2.codigo_rol FROM usuarios_roles ur2
+                            JOIN roles r2 ON ur2.id_rol = r2.id_rol
+                          WHERE ur2.id_usuario = u.id_usuario
+                          ORDER BY r2.codigo_rol LIMIT 1),
+                         r.codigo_rol
+                       ) AS user_role_code
                 FROM membresias_grupo m
                 JOIN usuarios u ON m.id_usuario = u.id_usuario
+                LEFT JOIN roles r ON u.id_rol_principal = r.id_rol
                 WHERE m.id_grupo = ? AND m.es_activo = TRUE
                 ORDER BY u.apellidos, u.nombres
                 """;
@@ -73,6 +81,7 @@ public class MembershipRepositoryAdapter implements MembershipRepositoryPort {
                 .userFirstNames(rs.getString("user_first_names"))
                 .userLastNames(rs.getString("user_last_names"))
                 .userEmail(rs.getString("user_email"))
+                .userRoleCode(rs.getString("user_role_code"))
                 .build();
     }
 

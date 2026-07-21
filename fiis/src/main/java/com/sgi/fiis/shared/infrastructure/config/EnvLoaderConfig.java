@@ -105,7 +105,7 @@ public class EnvLoaderConfig {
     }
 
     private static String cleanEnvValue(String val) {
-        if (((val.startsWith("\"") && val.endsWith("\"")) || (val.startsWith("'") && val.endsWith("'"))) && val.length() >= 2) {
+        if (val.length() >= 2 && ((val.startsWith("\"") && val.endsWith("\"")) || (val.startsWith("'") && val.endsWith("'")))) {
             return val.substring(1, val.length() - 1);
         }
         return val;

@@ -17,4 +17,5 @@ public class ResearchGroupResponseDto {
     private String coordinatorFirstNames;
     private String coordinatorLastNames;
     private boolean active;
+    private String createdAt;
 }

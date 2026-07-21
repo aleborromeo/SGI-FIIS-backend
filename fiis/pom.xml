@@ -12,7 +12,8 @@
     <artifactId>fiis</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>fiis</name>
-    <description/>
+    <description>SGI-FIIS Backend Project</description>
+    <!-- Trigger config update -->
     <url/>
     <licenses>
         <license/>
@@ -29,6 +30,7 @@
     <properties>
         <java.version>17</java.version>
         <maven.compiler.release>17</maven.compiler.release>
+        <testcontainers.version>1.21.0</testcontainers.version>
         <sonar.cpd.exclusions>src/main/java/com/sgi/fiis/dashboards/domain/model/Dashboard*.java,src/main/java/com/sgi/fiis/dashboards/application/dto/Dashboard*Response.java</sonar.cpd.exclusions>
         <sonar.organization>sgi-fiis</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -159,10 +161,20 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- H2 in-memory DB para tests (sin necesitar PostgreSQL local) -->
+        <!-- Testcontainers para tests de integracion con PostgreSQL real -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -175,6 +187,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-maven-plugin</artifactId>
 			<configuration>
+				<mainClass>com.sgi.fiis.FiisApplication</mainClass>
 				<excludes>
 					<exclude>
 						<groupId>org.projectlombok</groupId>
@@ -234,7 +247,7 @@
 		<plugin>
 			<groupId>org.sonarsource.scanner.maven</groupId>
 			<artifactId>sonar-maven-plugin</artifactId>
-			<version>4.0.0.4121</version>
+			<version>5.7.0.6970</version>
 		</plugin>
 
 		<plugin>

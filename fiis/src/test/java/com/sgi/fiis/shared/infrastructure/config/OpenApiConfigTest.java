@@ -6,15 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings({"java:S100", "java:S5786"})
 class OpenApiConfigTest {
 
     private OpenApiConfig openApiConfig;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         openApiConfig = new OpenApiConfig();
         // Provide mock values to avoid null pointer issues during logging, if any
         ReflectionTestUtils.setField(openApiConfig, "mailHost", "smtp.test.com");
@@ -25,8 +27,7 @@ class OpenApiConfigTest {
 
     @Test
     void printMailConfig_shouldExecuteWithoutErrors() {
-        openApiConfig.printMailConfig();
-        // Simply expecting no exception thrown
+        assertDoesNotThrow(() -> openApiConfig.printMailConfig());
     }
 
     @Test

@@ -10,9 +10,17 @@ import java.time.LocalDateTime;
 @Builder
 public class ProcedureFinalizedEvent {
 
-    private final Long idTramite;
-    private final String codigoTramite;
-    private final ProcedureType tipoTramite;
-    private final Long idSolicitante;
-    private final LocalDateTime fechaFinalizacion;
+    private final Long procedureId;
+    private final String code;
+    private final ProcedureType procedureType;
+    private final Long applicantId;
+    private final LocalDateTime finalizationDate;
+
+    public Long getIdTramite() {
+        return procedureId;
+    }
+
+    public LocalDateTime getFechaFinalizacion() {
+        return finalizationDate;
+    }
 }

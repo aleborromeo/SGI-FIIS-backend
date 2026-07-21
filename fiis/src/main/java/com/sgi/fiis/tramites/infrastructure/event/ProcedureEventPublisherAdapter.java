@@ -14,18 +14,18 @@ public class ProcedureEventPublisherAdapter implements ProcedureEventPublisherPo
     @Override
     public void publishProcedureApproved(ProcedureApprovedEvent evento) {
         log.info("[EVENTO] TramiteAprobado: tramite={}, estadoResultante={}, rol={}",
-                evento.getCodigoTramite(), evento.getEstadoResultante(), evento.getRolAprobador());
+                evento.getCode(), evento.getResultingStatus(), evento.getApproverRole());
     }
 
     @Override
     public void publishProcedureFlagged(ProcedureFlaggedEvent evento) {
         log.info("[EVENTO] TramiteObservado: tramite={}, rol={}",
-                evento.getCodigoTramite(), evento.getRolObservador());
+                evento.getCode(), evento.getObserverRole());
     }
 
     @Override
     public void publishProcedureFinalized(ProcedureFinalizedEvent evento) {
         log.info("[EVENTO] TramiteFinalizado: tramite={}, tipo={}",
-                evento.getCodigoTramite(), evento.getTipoTramite());
+                evento.getCode(), evento.getProcedureType());
     }
 }

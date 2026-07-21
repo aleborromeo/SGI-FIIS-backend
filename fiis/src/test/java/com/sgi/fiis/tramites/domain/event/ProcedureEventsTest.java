@@ -17,23 +17,23 @@ class ProcedureEventsTest {
         LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 10, 0);
 
         ProcedureApprovedEvent evento = ProcedureApprovedEvent.builder()
-                .idTramite(1L)
-                .codigoTramite("TRM-2026-001")
-                .tipoTramite(ProcedureType.PROYECTO)
-                .idSolicitante(42L)
-                .estadoResultante(ProcedureStatus.PENDIENTE_COORDINADOR)
-                .idAprobador(10L)
-                .rolAprobador(RoleEnum.COORDINADOR_GRUPO)
-                .fechaAprobacion(fecha)
+                .procedureId(1L)
+                .code("TRM-2026-001")
+                .procedureType(ProcedureType.PROJECT)
+                .applicantId(42L)
+                .resultingStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .approverId(10L)
+                .approverRole(RoleEnum.COORDINADOR_GRUPO)
+                .approvalDate(fecha)
                 .build();
 
         assertEquals(1L, evento.getIdTramite());
-        assertEquals("TRM-2026-001", evento.getCodigoTramite());
-        assertEquals(ProcedureType.PROYECTO, evento.getTipoTramite());
-        assertEquals(42L, evento.getIdSolicitante());
-        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, evento.getEstadoResultante());
+        assertEquals("TRM-2026-001", evento.getCode());
+        assertEquals(ProcedureType.PROJECT, evento.getProcedureType());
+        assertEquals(42L, evento.getApplicantId());
+        assertEquals(ProcedureStatus.PENDIENTE_COORDINADOR, evento.getResultingStatus());
         assertEquals(10L, evento.getIdAprobador());
-        assertEquals(RoleEnum.COORDINADOR_GRUPO, evento.getRolAprobador());
+        assertEquals(RoleEnum.COORDINADOR_GRUPO, evento.getApproverRole());
         assertEquals(fecha, evento.getFechaAprobacion());
     }
 
@@ -42,22 +42,22 @@ class ProcedureEventsTest {
         LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 11, 30);
 
         ProcedureFlaggedEvent evento = ProcedureFlaggedEvent.builder()
-                .idTramite(2L)
-                .codigoTramite("TRM-2026-002")
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idSolicitante(55L)
-                .idObservador(20L)
-                .rolObservador(RoleEnum.DIRECTOR_INVESTIGACION)
-                .textoObservacion("Falta bibliografía actualizada")
-                .fechaObservacion(fecha)
+                .procedureId(2L)
+                .code("TRM-2026-002")
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .applicantId(55L)
+                .observerId(20L)
+                .observerRole(RoleEnum.DIRECTOR_INVESTIGACION)
+                .observationText("Falta bibliografía actualizada")
+                .observationDate(fecha)
                 .build();
 
         assertEquals(2L, evento.getIdTramite());
-        assertEquals("TRM-2026-002", evento.getCodigoTramite());
-        assertEquals(ProcedureType.PLAN_TESIS, evento.getTipoTramite());
-        assertEquals(55L, evento.getIdSolicitante());
+        assertEquals("TRM-2026-002", evento.getCode());
+        assertEquals(ProcedureType.PLAN_TESIS, evento.getProcedureType());
+        assertEquals(55L, evento.getApplicantId());
         assertEquals(20L, evento.getIdObservador());
-        assertEquals(RoleEnum.DIRECTOR_INVESTIGACION, evento.getRolObservador());
+        assertEquals(RoleEnum.DIRECTOR_INVESTIGACION, evento.getObserverRole());
         assertEquals("Falta bibliografía actualizada", evento.getTextoObservacion());
         assertEquals(fecha, evento.getFechaObservacion());
     }
@@ -67,17 +67,17 @@ class ProcedureEventsTest {
         LocalDateTime fecha = LocalDateTime.of(2026, Month.JUNE, 17, 15, 45);
 
         ProcedureFinalizedEvent evento = ProcedureFinalizedEvent.builder()
-                .idTramite(3L)
-                .codigoTramite("TRM-2026-003")
-                .tipoTramite(ProcedureType.INFORME_AVANCE)
-                .idSolicitante(77L)
-                .fechaFinalizacion(fecha)
+                .procedureId(3L)
+                .code("TRM-2026-003")
+                .procedureType(ProcedureType.REPORT_AVANCE)
+                .applicantId(77L)
+                .finalizationDate(fecha)
                 .build();
 
         assertEquals(3L, evento.getIdTramite());
-        assertEquals("TRM-2026-003", evento.getCodigoTramite());
-        assertEquals(ProcedureType.INFORME_AVANCE, evento.getTipoTramite());
-        assertEquals(77L, evento.getIdSolicitante());
+        assertEquals("TRM-2026-003", evento.getCode());
+        assertEquals(ProcedureType.REPORT_AVANCE, evento.getProcedureType());
+        assertEquals(77L, evento.getApplicantId());
         assertEquals(fecha, evento.getFechaFinalizacion());
     }
 }

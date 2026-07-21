@@ -7,4 +7,6 @@ public interface ResolutionRepositoryPort {
     Resolution save(Resolution resolution);
     Optional<Resolution> findById(Long idResolucion);
     boolean existsByNumber(String numeroResolucion);
+    Optional<Resolution> findByDocumentAdjuntoId(Long documentId);
+    Optional<Resolution> findByProcedureId(Long idTramite);
 }

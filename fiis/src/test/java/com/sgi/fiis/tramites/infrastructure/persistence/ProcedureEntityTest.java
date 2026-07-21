@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +31,8 @@ class ProcedureEntityTest {
         ProcedureEntity entity = new ProcedureEntity(
                 1, "TRAM-001", "SOLICITUD_CREACION",
                 applicant, group, "PENDIENTE",
-                "COORDINADOR", null, null, projectRef
+                "COORDINADOR", null, null, projectRef,
+                null, null
         );
 
         assertEquals(1, entity.getId());
@@ -43,6 +45,8 @@ class ProcedureEntityTest {
         assertSame(projectRef, entity.getProjectReference());
         assertNull(entity.getSentAt());
         assertNull(entity.getUpdatedAt());
+        assertNull(entity.getThesisReferenceId());
+        assertNull(entity.getReportReferenceId());
     }
 
     @Test
@@ -115,10 +119,10 @@ class ProcedureEntityTest {
     @DisplayName("Should update only updatedAt on PreUpdate")
     void testOnUpdate() {
         ProcedureEntity entity = new ProcedureEntity();
-        entity.setSentAt(LocalDateTime.of(2025, 1, 1, 10, 0));
+        entity.setSentAt(LocalDateTime.of(2025, Month.JANUARY, 1, 10, 0));
         entity.onUpdate();
 
-        assertEquals(LocalDateTime.of(2025, 1, 1, 10, 0), entity.getSentAt());
+        assertEquals(LocalDateTime.of(2025, Month.JANUARY, 1, 10, 0), entity.getSentAt());
         assertNotNull(entity.getUpdatedAt());
     }
 }

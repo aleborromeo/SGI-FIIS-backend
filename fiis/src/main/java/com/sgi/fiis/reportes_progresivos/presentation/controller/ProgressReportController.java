@@ -9,6 +9,7 @@ import com.sgi.fiis.reportes_progresivos.domain.port.in.QueryProgressReportUseCa
 import com.sgi.fiis.reportes_progresivos.domain.port.in.ReviewProgressReportUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,33 +37,48 @@ public class ProgressReportController {
         this.amendUseCase  = amendUseCase;
     }
 
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ProgressReportResponse>> list(@RequestParam(required = false) String status) {
+        List<ProgressReportResponse> result = (status != null && !status.isBlank())
+                ? queryUseCase.listByStatus(status)
+                : queryUseCase.listAll();
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping
+    @PreAuthorize("hasAnyRole('DOCENTE_INVESTIGADOR', 'ESTUDIANTE')")
     public ResponseEntity<ProgressReportResponse> create(@RequestBody CreateReportCommand command) {
         ProgressReportResponse response = createUseCase.create(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProgressReportResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(queryUseCase.getById(id));
     }
 
     @GetMapping("/project/{projectId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProgressReportResponse>> listByProject(@PathVariable Long projectId) {
         return ResponseEntity.ok(queryUseCase.listByProject(projectId));
     }
 
     @PatchMapping("/{id}/forward")
+    @PreAuthorize("hasRole('COORDINADOR_GRUPO')")
     public ResponseEntity<ProgressReportResponse> forward(@PathVariable Long id) {
         return ResponseEntity.ok(reviewUseCase.forwardToDirector(id));
     }
 
     @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasRole('DIRECTOR_INVESTIGACION')")
     public ResponseEntity<ProgressReportResponse> approve(@PathVariable Long id) {
         return ResponseEntity.ok(reviewUseCase.approve(id));
     }
 
     @PatchMapping("/{id}/observe")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
     public ResponseEntity<ProgressReportResponse> observe(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
@@ -71,11 +87,13 @@ public class ProgressReportController {
     }
 
     @PatchMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('DIRECTOR_INVESTIGACION', 'COORDINADOR_GRUPO')")
     public ResponseEntity<ProgressReportResponse> reject(@PathVariable Long id) {
         return ResponseEntity.ok(reviewUseCase.reject(id));
     }
 
     @PatchMapping("/{id}/amend")
+    @PreAuthorize("hasAnyRole('DOCENTE_INVESTIGADOR', 'ESTUDIANTE')")
     public ResponseEntity<ProgressReportResponse> amend(
             @PathVariable Long id,
             @RequestBody AmendReportCommand command) {

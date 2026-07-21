@@ -12,15 +12,21 @@ import java.time.ZoneId;
 @Builder
 public class Observation {
 
-    private Integer id;
-    private Integer procedureId;
-    private Integer reviewerId;
-    private ObservationType type;
-    private String description;
+    private final Integer id;
+    private final Integer procedureId;
+    private final Integer reviewerId;
+    private final ObservationType type;
+    private final String description;
     private ObservationStatus status;
-    private String reviewerRole;
-    private LocalDateTime createdAt;
+    private final String reviewerRole;
+    private final LocalDateTime createdAt;
+
+    @SuppressWarnings("java:S1450")
     private LocalDateTime updatedAt;
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 
     public static Observation create(Integer procedureId, Integer reviewerId,
                                      ObservationType type,

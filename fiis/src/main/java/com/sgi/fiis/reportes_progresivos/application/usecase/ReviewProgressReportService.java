@@ -36,7 +36,7 @@ public class ReviewProgressReportService implements ReviewProgressReportUseCase 
     @Override
     public ProgressReportResponse observe(Long reportId, String observation) {
         ProgressReport report = findOrFail(reportId);
-        report.observe();
+        report.observe(observation);
         return ProgressReportMapper.toResponse(repositoryPort.save(report));
     }
 

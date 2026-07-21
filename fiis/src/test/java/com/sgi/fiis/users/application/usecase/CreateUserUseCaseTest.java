@@ -33,6 +33,9 @@ class CreateUserUseCaseTest {
     @Mock
     private PasswordEncoderPort passwordEncoder;
 
+    @Mock
+    private com.sgi.fiis.auth.domain.port.EmailSenderPort emailSender;
+
     @InjectMocks
     private CreateUserUseCase createUserUseCase;
 
@@ -51,7 +54,7 @@ class CreateUserUseCaseTest {
         when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
         when(userRepository.existsByDni("12345678")).thenReturn(false);
         when(userRepository.existsByEmail("carlos.santana@unas.edu.pe")).thenReturn(false);
-        when(passwordEncoder.encode("12345678")).thenReturn("encoded-password");
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User result = createUserUseCase.execute(userInput);
@@ -65,7 +68,7 @@ class CreateUserUseCaseTest {
         verify(roleRepository).findByCode("DOCENTE_INVESTIGADOR");
         verify(userRepository).existsByDni("12345678");
         verify(userRepository).existsByEmail("carlos.santana@unas.edu.pe");
-        verify(passwordEncoder).encode("12345678");
+        verify(passwordEncoder).encode(anyString());
         verify(userRepository).save(any(User.class));
     }
 
@@ -134,5 +137,76 @@ class CreateUserUseCaseTest {
         verify(roleRepository).findByCode("DOCENTE_INVESTIGADOR");
         verify(userRepository).existsByDni("12345678");
         verifyNoMoreInteractions(userRepository, passwordEncoder);
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when roleCode is null")
+    void testCreateUserRoleCodeNull() {
+        User userInput = User.builder()
+                .dni("12345678")
+                .firstNames("Carlos")
+                .lastNames("Santana")
+                .roleCode(null)
+                .build();
+
+        assertThrows(com.sgi.fiis.shared.domain.exception.BusinessException.class, () -> createUserUseCase.execute(userInput));
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when DNI is invalid")
+    void testCreateUserDniInvalid() {
+        User userInput = User.builder()
+                .dni("12345")
+                .firstNames("Carlos")
+                .lastNames("Santana")
+                .roleCode("DOCENTE_INVESTIGADOR")
+                .build();
+
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").build();
+        when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
+
+        assertThrows(com.sgi.fiis.shared.domain.exception.BusinessException.class, () -> createUserUseCase.execute(userInput));
+    }
+
+    @Test
+    @DisplayName("Should throw DuplicateResourceException when email already exists")
+    void testCreateUserEmailDuplicate() {
+        User userInput = User.builder()
+                .dni("12345678")
+                .firstNames("Carlos")
+                .lastNames("Santana")
+                .roleCode("DOCENTE_INVESTIGADOR")
+                .build();
+
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").build();
+
+        when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
+        when(userRepository.existsByDni("12345678")).thenReturn(false);
+        when(userRepository.existsByEmail("carlos.santana@unas.edu.pe")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> createUserUseCase.execute(userInput));
+    }
+
+    @Test
+    @DisplayName("Should successfully create user even if email sender fails")
+    void testCreateUserMailSenderException() {
+        User userInput = User.builder()
+                .dni("12345678")
+                .firstNames("Carlos")
+                .lastNames("Santana")
+                .roleCode("DOCENTE_INVESTIGADOR")
+                .build();
+
+        Role role = Role.builder().code("DOCENTE_INVESTIGADOR").description("Docente").build();
+
+        when(roleRepository.findByCode("DOCENTE_INVESTIGADOR")).thenReturn(Optional.of(role));
+        when(userRepository.existsByDni("12345678")).thenReturn(false);
+        when(userRepository.existsByEmail("carlos.santana@unas.edu.pe")).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new RuntimeException("Mail server down")).when(emailSender).sendNewUserCredentials(anyString(), anyString());
+
+        User result = createUserUseCase.execute(userInput);
+        assertNotNull(result);
     }
 }

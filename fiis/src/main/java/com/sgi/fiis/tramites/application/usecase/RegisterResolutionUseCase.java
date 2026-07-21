@@ -1,6 +1,7 @@
 package com.sgi.fiis.tramites.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
 import com.sgi.fiis.tramites.domain.event.ProcedureFinalizedEvent;
@@ -17,31 +18,32 @@ import java.time.ZoneId;
 @Service
 public class RegisterResolutionUseCase {
 
-    private final ProcedureRepositoryPort tramiteRepositoryPort;
+    private final ProcedureRepositoryPort procedureRepositoryPort;
     private final ProcedureEventPublisherPort eventPublisherPort;
     private final ProcedureStateMachine stateMachine = new ProcedureStateMachine();
 
-    public RegisterResolutionUseCase(ProcedureRepositoryPort tramiteRepositoryPort,
+    public RegisterResolutionUseCase(ProcedureRepositoryPort procedureRepositoryPort,
                                        ProcedureEventPublisherPort eventPublisherPort) {
-        this.tramiteRepositoryPort = tramiteRepositoryPort;
+        this.procedureRepositoryPort = procedureRepositoryPort;
         this.eventPublisherPort    = eventPublisherPort;
     }
 
     @Transactional
+    @Auditable(action = "REGISTER_RESOLUTION", table = "tramites")
     public ProcedureResponseDto execute(Long idTramite, Long idDecano) {
-        Procedure tramite = tramiteRepositoryPort.findById(idTramite)
+        Procedure tramite = procedureRepositoryPort.findById(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));
 
         stateMachine.registrarResolucionPorDecano(tramite, idDecano);
 
-        Procedure guardado = tramiteRepositoryPort.save(tramite);
+        Procedure guardado = procedureRepositoryPort.save(tramite);
 
         eventPublisherPort.publishProcedureFinalized(ProcedureFinalizedEvent.builder()
-                .idTramite(guardado.getId())
-                .codigoTramite(guardado.getCodigoTramite())
-                .tipoTramite(guardado.getTipoTramite())
-                .idSolicitante(guardado.getIdSolicitante())
-                .fechaFinalizacion(LocalDateTime.now(ZoneId.systemDefault()))
+                .procedureId(guardado.getId())
+                .code(guardado.getCode())
+                .procedureType(guardado.getProcedureType())
+                .applicantId(guardado.getApplicantId())
+                .finalizationDate(LocalDateTime.now(ZoneId.systemDefault()))
                 .build());
 
         return ProcedureMapper.toResponse(guardado);

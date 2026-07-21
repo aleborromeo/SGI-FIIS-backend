@@ -32,6 +32,7 @@ public class ResearchGroupMapper {
                 .coordinatorFirstNames(domain.getCoordinatorFirstNames())
                 .coordinatorLastNames(domain.getCoordinatorLastNames())
                 .active(domain.isActive())
+                .createdAt(domain.getCreatedAt() != null ? domain.getCreatedAt().toString() : null)
                 .build();
     }
 
@@ -46,6 +47,7 @@ public class ResearchGroupMapper {
                 .userFirstNames(membership.getUserFirstNames())
                 .userLastNames(membership.getUserLastNames())
                 .userEmail(membership.getUserEmail())
+                .userRoleCode(membership.getUserRoleCode())
                 .active(membership.isActive())
                 .startDate(membership.getStartDate() != null ? membership.getStartDate().toString() : null)
                 .endDate(membership.getEndDate() != null ? membership.getEndDate().toString() : null)

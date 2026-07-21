@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.sgi.fiis.thesis.domain.exception.*;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 
 @RestControllerAdvice(basePackages = "com.sgi.fiis.thesis")
 public class ThesisExceptionHandler {
@@ -39,18 +40,18 @@ public class ThesisExceptionHandler {
                 .body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 404, message));
     }
 
-    @ExceptionHandler(BusinessRuleViolationException.class)
-    public ResponseEntity<ApiError> businessRule(BusinessRuleViolationException ex) {
+    @ExceptionHandler({BusinessRuleViolationException.class, InvalidStateTransitionException.class})
+    public ResponseEntity<ApiError> businessRule(BusinessRuleValidationException ex) {
         String message = translate(ex.getErrorKey(), ex.getArgs(), ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 400, message));
     }
 
-    @ExceptionHandler(InvalidStateTransitionException.class)
-    public ResponseEntity<ApiError> stateTransition(InvalidStateTransitionException ex) {
-        String message = translate(ex.getErrorKey(), ex.getArgs(), ex.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 400, message));
+    @ExceptionHandler(PlanAccessDeniedException.class)
+    public ResponseEntity<ApiError> forbidden(PlanAccessDeniedException ex) {
+        String message = translate(ex.getMessage(), null, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiError(LocalDateTime.now(java.time.ZoneId.systemDefault()), 403, message));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

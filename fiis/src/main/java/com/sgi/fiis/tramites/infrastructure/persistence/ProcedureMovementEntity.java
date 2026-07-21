@@ -36,9 +36,15 @@ public class ProcedureMovementEntity {
     @Column(name = "estado_nuevo", nullable = false, length = 30)
     private String newState;
 
-    @Column(name = "comentario", columnDefinition = "TEXT")
+    @Column(name = "observacion", columnDefinition = "TEXT")
     private String comment;
 
     @Column(name = "fecha_movimiento", nullable = false)
     private LocalDateTime movementAt;
+
+    @Column(name = "id_documento_adjunto")
+    private Long documentAttachmentId;
+
+    @Column(name = "correlation_id", length = 36)
+    private String correlationId;
 }

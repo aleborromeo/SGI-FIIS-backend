@@ -1,0 +1,59 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Todos los días a las 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Permite ejecución manual desde la UI de GitHub
+
+jobs:
+  backup:
+    name: Backup Database
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Create backup directory
+        run: mkdir -p backups
+
+      - name: Dump database
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+          BACKUP_FILE="backups/sgifiis_${TIMESTAMP}.sql.gz"
+          export PGPASSWORD="$DB_PASSWORD"
+          pg_dump \
+            --host="$DB_HOST" \
+            --port="$DB_PORT" \
+            --dbname="$DB_NAME" \
+            --username="$DB_USER" \
+            --no-password \
+            --format=custom \
+            | gzip > "$BACKUP_FILE"
+          echo "Backup created: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sgifiis-db-backup-${{ github.run_id }}
+          path: backups/
+          retention-days: 30
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::warning::Database backup failed. Check the logs for details."

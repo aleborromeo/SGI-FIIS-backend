@@ -4,17 +4,22 @@ import com.sgi.fiis.evaluaciones.application.dto.command.AsignarEvaluadorCommand
 import com.sgi.fiis.evaluaciones.application.dto.command.RegistrarResultadoEvaluacionCommand;
 import com.sgi.fiis.evaluaciones.application.dto.response.EvaluacionResponse;
 import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
+import com.sgi.fiis.evaluaciones.presentation.dto.EvaluarEvaluacionRequest;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 import com.sgi.fiis.evaluaciones.domain.model.Evaluacion;
 import com.sgi.fiis.evaluaciones.domain.ports.out.EvaluacionRepositoryPort;
-import org.junit.jupiter.api.BeforeEach;
+import com.sgi.fiis.users.domain.model.User;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,22 +27,30 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ResultOfMethodCallIgnored", "java:S1192"})
 class EvaluacionServiceTest {
 
     @Mock
     private EvaluacionRepositoryPort evaluacionRepositoryPort;
 
+    @Mock
+    private UserRepositoryPort userRepositoryPort;
+
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
+    @InjectMocks
     private EvaluacionService evaluacionService;
 
-    @BeforeEach
-    void setUp() {
-        evaluacionService = new EvaluacionService(evaluacionRepositoryPort);
+    private User evaluatorUser() {
+        return User.builder().id(2L).roleCode("EVALUADOR").build();
     }
 
     @Test
     void asignarEvaluadorAProyectoDebeGuardarEvaluacion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(1L, null, 2L);
 
+        when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(1L, 2L))
                 .thenReturn(false);
 
@@ -69,6 +82,7 @@ class EvaluacionServiceTest {
     void asignarEvaluadorAPlanTesisDebeGuardarEvaluacion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 5L, 2L);
 
+        when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(5L, 2L))
                 .thenReturn(false);
 
@@ -98,6 +112,7 @@ class EvaluacionServiceTest {
     void asignarEvaluadorConProyectoDuplicadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(1L, null, 2L);
 
+        when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(1L, 2L))
                 .thenReturn(true);
 
@@ -298,6 +313,7 @@ void asignarEvaluadorConCommandNuloDebeLanzarExcepcion() {
 void asignarEvaluadorConPlanTesisDuplicadoDebeLanzarExcepcion() {
     AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 5L, 2L);
 
+    when(userRepositoryPort.findById(2L)).thenReturn(Optional.of(evaluatorUser()));
     when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(5L, 2L))
             .thenReturn(true);
 
@@ -355,6 +371,7 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, null, 20L);
         LocalDateTime fechaAsignacion = LocalDateTime.now();
 
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
                 .thenReturn(false);
 
@@ -388,6 +405,7 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(null, 30L, 20L);
         LocalDateTime fechaAsignacion = LocalDateTime.now();
 
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaPlanTesis(30L, 20L))
                 .thenReturn(false);
 
@@ -451,9 +469,166 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
     }
 
     @Test
+    void consultarDetalleAnonimoConProyectoDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var response = evaluacionService.consultarDetalleAnonimo(1L);
+
+        assertEquals("PROY-10", response.expedienteCode());
+        assertEquals(4, response.criterios().size());
+        assertEquals(2, response.objetivosEspecificos().size());
+        assertEquals(50000.0, response.presupuestoTotal());
+        assertEquals(12, response.duracionMeses());
+    }
+
+    @Test
+    void consultarDetalleAnonimoConPlanTesisDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, null, 5L, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var response = evaluacionService.consultarDetalleAnonimo(1L);
+
+        assertEquals("TESIS-5", response.expedienteCode());
+    }
+
+    @Test
+    void consultarDetalleAnonimoNoExistenteDebeLanzarExcepcion() {
+        when(evaluacionRepositoryPort.buscarPorId(99L)).thenReturn(Optional.empty());
+
+        assertThrows(EvaluacionException.class, () -> evaluacionService.consultarDetalleAnonimo(99L));
+    }
+
+    @Test
+    void asignarEvaluadoresDebeAsignarMultiple() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 20L, null, null, null, LocalDateTime.now(), null
+        );
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
+        when(userRepositoryPort.findById(30L)).thenReturn(Optional.of(evaluatorUser()));
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
+                .thenReturn(false);
+        when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 30L))
+                .thenReturn(false);
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenReturn(evaluacion);
+
+        var responses = evaluacionService.asignarEvaluadores(10L, null, List.of(20L, 30L));
+
+        assertEquals(2, responses.size());
+        verify(evaluacionRepositoryPort, times(2)).guardar(any(Evaluacion.class));
+    }
+
+    @Test
+    void asignarEvaluadoresConListaVaciaDebeLanzarExcepcion() {
+        assertThrows(EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluadores(1L, null, List.of()));
+    }
+
+    @Test
+    void asignarEvaluadoresConListaNulaDebeLanzarExcepcion() {
+        assertThrows(EvaluacionException.class,
+                () -> evaluacionService.asignarEvaluadores(1L, null, null));
+    }
+
+    @Test
+    void evaluarConDictamenAprobadoDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 85, "Bueno", "Aprobar", "APROBADO"
+        );
+        var response = evaluacionService.evaluar(1L, request);
+
+        assertEquals(ResultadoEvaluacion.APROBADO, response.resultado());
+        assertEquals(85, response.puntaje());
+        assertEquals("Bueno", response.observaciones());
+    }
+
+    @Test
+    void evaluarConDictamenAprobadoConObservacionesDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 70, "Observaciones", "Aprobar con cambios", "APROBADO_CON_OBSERVACIONES"
+        );
+        var response = evaluacionService.evaluar(1L, request);
+
+        assertEquals(ResultadoEvaluacion.CON_OBSERVACIONES, response.resultado());
+    }
+
+    @Test
+    void evaluarConDictamenDesaprobadoDebeRetornarResponse() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 30, "Insuficiente", "Rechazar", "DESAPROBADO"
+        );
+        var response = evaluacionService.evaluar(1L, request);
+
+        assertEquals(ResultadoEvaluacion.RECHAZADO, response.resultado());
+    }
+
+    @Test
+    void evaluarConDictamenInvalidoDebeLanzarExcepcion() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 50, "N/A", "N/A", "INVALIDO"
+        );
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, request));
+    }
+
+    @Test
+    void evaluarConEvaluadorIncorrectoDebeLanzarExcepcion() {
+        var evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        var request = new EvaluarEvaluacionRequest(
+                99L, List.of(), 85, "Ok", "Aprobar", "APROBADO"
+        );
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, request));
+    }
+
+    @Test
+    void evaluarNoExistenteDebeLanzarExcepcion() {
+        when(evaluacionRepositoryPort.buscarPorId(99L)).thenReturn(Optional.empty());
+
+        var request = new EvaluarEvaluacionRequest(
+                2L, List.of(), 85, "Ok", "Aprobar", "APROBADO"
+        );
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(99L, request));
+    }
+
+    @Test
     void asignarEvaluadorDuplicadoDebeLanzarExcepcion() {
         AsignarEvaluadorCommand command = new AsignarEvaluadorCommand(10L, null, 20L);
 
+        when(userRepositoryPort.findById(20L)).thenReturn(Optional.of(evaluatorUser()));
         when(evaluacionRepositoryPort.existeEvaluacionPendienteParaProyecto(10L, 20L))
                 .thenReturn(true);
 
@@ -471,4 +646,150 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         verify(evaluacionRepositoryPort, never()).guardar(any(Evaluacion.class));
     }
 
+    @Test
+    void testConvertirAResponsePaths() {
+        var evaluacion = mock(Evaluacion.class);
+        when(evaluacion.getIdEvaluacion()).thenReturn(1L);
+        when(evaluacion.getIdProyecto()).thenReturn(10L);
+        when(evaluacion.getIdPlanTesis()).thenReturn(20L);
+        when(evaluacion.getIdEvaluador()).thenReturn(2L);
+        when(evaluacion.getResultado()).thenReturn(ResultadoEvaluacion.APROBADO);
+        when(evaluacion.getPuntaje()).thenReturn(85);
+        when(evaluacion.getObservaciones()).thenReturn("Bueno");
+        when(evaluacion.getFechaAsignacion()).thenReturn(LocalDateTime.now());
+        when(evaluacion.getFechaEvaluacion()).thenReturn(LocalDateTime.now());
+        when(evaluacion.estaPendiente()).thenReturn(false);
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+
+        // 1. Success paths for projects and thesis plans
+        when(jdbcTemplate.queryForMap(contains("proyectos WHERE id = ?"), eq(10L)))
+                .thenReturn(Map.of("titulo", "Proyecto 1", "resumen", "Resumen 1"));
+        when(jdbcTemplate.queryForMap(contains("planes_tesis WHERE id = ?"), eq(20L)))
+                .thenReturn(Map.of("titulo", "Tesis 1", "resumen", "Resumen Tesis 1"));
+
+        var response = evaluacionService.buscarPorId(1L);
+        assertEquals("Proyecto 1", response.proyectoTitulo());
+        assertEquals("Tesis 1", response.planTesisTitulo());
+
+        // 2. Exception paths
+        reset(jdbcTemplate);
+        when(jdbcTemplate.queryForMap(anyString(), anyLong())).thenThrow(new RuntimeException("DB Error"));
+
+        var responseErr = evaluacionService.buscarPorId(1L);
+        assertNull(responseErr.proyectoTitulo());
+        assertNull(responseErr.planTesisTitulo());
+    }
+
+    @Test
+    void asignarEvaluadoresSinIdsDebeLanzarExcepcion() {
+        assertThrows(EvaluacionException.class, () -> evaluacionService.asignarEvaluadores(1L, null, null));
+        assertThrows(EvaluacionException.class, () -> evaluacionService.asignarEvaluadores(1L, null, List.of()));
+    }
+
+    @Test
+    void evaluarEvaluacionNoExistenteDebeLanzarExcepcion() {
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(2L, List.of(), 85, "Bueno", "Ok", "APROBADO");
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, req));
+    }
+
+    @Test
+    void evaluarConEvaluadorDiferenteDebeLanzarExcepcion() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(99L, List.of(), 85, "Bueno", "Ok", "APROBADO");
+        assertThrows(EvaluacionException.class, () -> evaluacionService.evaluar(1L, req));
+    }
+
+    @Test
+    void evaluarAprobadoConObservacionesDebeRegistrar() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(2L, List.of(), 85, "Observaciones", "Ok", "APROBADO_CON_OBSERVACIONES");
+        EvaluacionResponse res = evaluacionService.evaluar(1L, req);
+        assertEquals(ResultadoEvaluacion.CON_OBSERVACIONES, res.resultado());
+    }
+
+    @Test
+    void evaluarDesaprobadoDebeRegistrar() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 1L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        when(evaluacionRepositoryPort.guardar(any(Evaluacion.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EvaluarEvaluacionRequest req = new EvaluarEvaluacionRequest(2L, List.of(), 85, "Rechazo", "Ok", "DESAPROBADO");
+        EvaluacionResponse res = evaluacionService.evaluar(1L, req);
+        assertEquals(ResultadoEvaluacion.RECHAZADO, res.resultado());
+    }
+
+    @Test
+    void consultarDetalleAnonimoDeProyectoDebeRetornarPlaceholder() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, 10L, null, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        var res = evaluacionService.consultarDetalleAnonimo(1L);
+        assertEquals("PROY-10", res.expedienteCode());
+    }
+
+    @Test
+    void consultarDetalleAnonimoDeTesisDebeRetornarPlaceholder() {
+        Evaluacion evaluacion = Evaluacion.reconstruir(
+                1L, null, 20L, 2L, null, null, null, LocalDateTime.now(), null
+        );
+        when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
+        var res = evaluacionService.consultarDetalleAnonimo(1L);
+        assertEquals("TESIS-20", res.expedienteCode());
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesSinProyectoDebeQueryAll() {
+        when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of(Map.of(
+                "id_usuario", 2, "nombres", "Pedro", "apellidos", "Gomez", "correo_institucional", "p@sgi.com", "codigo_rol", "EVALUADOR", "descripcion", "Evaluador"
+        )));
+        var res = evaluacionService.execute(null);
+        assertEquals(1, res.size());
+        assertEquals("Pedro", res.get(0).firstNames());
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesConProyectoSinGrupoDebeRetornarVacio() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), eq(10L))).thenReturn(null);
+        var res = evaluacionService.execute(10L);
+        assertTrue(res.isEmpty());
+    }
+
+    @Test
+    void listarEvaluadoresDisponiblesConProyectoYGrupoDebeQueryGroup() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), eq(10L))).thenReturn(50L);
+        when(jdbcTemplate.queryForList(anyString(), eq(50L))).thenReturn(List.of(Map.of(
+                "id_usuario", 2, "nombres", "Pedro", "apellidos", "Gomez", "correo_institucional", "p@sgi.com", "codigo_rol", "EVALUADOR", "descripcion", "Evaluador"
+        )));
+        var res = evaluacionService.execute(10L);
+        assertEquals(1, res.size());
+        assertEquals("Pedro", res.get(0).firstNames());
+    }
+
+    @Test
+    void listarEvaluadoresPorProyectoNuloDebeRetornarVacio() {
+        var res = evaluacionService.listarEvaluadoresPorProyecto(null);
+        assertTrue(res.isEmpty());
+    }
+
+    @Test
+    void listarEvaluadoresPorProyectoDebeQueryDb() {
+        when(jdbcTemplate.queryForList(anyString(), eq(10L))).thenReturn(List.of(Map.of(
+                "id_evaluador", 2L, "nombres", "Pedro", "apellidos", "Gomez", "correo_institucional", "p@sgi.com", "codigo_rol", "EVALUADOR", "resultado", "APROBADO", "fecha_evaluacion", java.sql.Timestamp.valueOf(LocalDateTime.now())
+        )));
+        var res = evaluacionService.listarEvaluadoresPorProyecto(10L);
+        assertEquals(1, res.size());
+        assertEquals("Pedro", res.get(0).nombres());
+    }
 }

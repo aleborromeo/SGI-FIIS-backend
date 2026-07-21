@@ -5,6 +5,7 @@ import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectEntity;
 import com.sgi.fiis.proyectos.infrastructure.persistence.ProjectJpaRepository;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
+import com.sgi.fiis.shared.infrastructure.aspect.CorrelationContext;
 import com.sgi.fiis.tramites.infrastructure.persistence.*;
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("all")
 class ProjectProcedureAdapterTest {
 
     private ProjectJpaRepository projectRepository;
     private SpringDataProcedureRepository procedureRepository;
     private ProcedureMovementJpaRepository movementRepository;
+    private CorrelationContext correlationContext;
     private ProjectProcedureAdapter adapter;
 
     @BeforeEach
@@ -30,7 +33,8 @@ class ProjectProcedureAdapterTest {
         projectRepository = mock(ProjectJpaRepository.class);
         procedureRepository = mock(SpringDataProcedureRepository.class);
         movementRepository = mock(ProcedureMovementJpaRepository.class);
-        adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository);
+        correlationContext = mock(CorrelationContext.class);
+        adapter = new ProjectProcedureAdapter(projectRepository, procedureRepository, movementRepository, correlationContext);
     }
 
     private ProjectEntity createProjectEntity(Integer id, UserEntity responsible, ResearchGroupEntity group) {
@@ -44,7 +48,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldSucceed_WhenProjectExists() {
+    void createPostulationProcedureShouldSucceedWhenProjectExists() {
         Project project = Project.builder().id(1).build();
         UserEntity responsible = new UserEntity();
         responsible.setId(10L);
@@ -69,7 +73,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldThrow_WhenProjectNotFound() {
+    void createPostulationProcedureShouldThrowWhenProjectNotFound() {
         Project project = Project.builder().id(99).build();
 
         when(projectRepository.findById(99)).thenReturn(Optional.empty());
@@ -84,7 +88,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldSetCorrectProcedureFields() {
+    void createPostulationProcedureShouldSetCorrectProcedureFields() {
         Project project = Project.builder().id(1).build();
         UserEntity responsible = new UserEntity();
         responsible.setId(10L);
@@ -133,7 +137,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldThrow_WhenProjectResponsibleIsNull() {
+    void createPostulationProcedureShouldThrowWhenProjectResponsibleIsNull() {
         Project project = Project.builder().id(1).build();
         ResearchGroupEntity group = new ResearchGroupEntity();
         group.setId(20);
@@ -150,7 +154,7 @@ class ProjectProcedureAdapterTest {
     }
 
     @Test
-    void createPostulationProcedure_ShouldSaveWithNullGroup() {
+    void createPostulationProcedureShouldSaveWithNullGroup() {
         Project project = Project.builder().id(1).build();
         UserEntity responsible = new UserEntity();
         responsible.setId(10L);
@@ -170,5 +174,28 @@ class ProjectProcedureAdapterTest {
         ArgumentCaptor<ProcedureEntity> procedureCaptor = ArgumentCaptor.forClass(ProcedureEntity.class);
         verify(procedureRepository).save(procedureCaptor.capture());
         assertNull(procedureCaptor.getValue().getGroup());
+    }
+
+    @Test
+    void createPostulationProcedureShouldSaveWithCorrelationIdWhenPresent() {
+        Project project = Project.builder().id(1).build();
+        UserEntity responsible = new UserEntity();
+        responsible.setId(10L);
+        ProjectEntity projectEntity = createProjectEntity(1, responsible, null);
+
+        ProcedureEntity savedProcedure = ProcedureEntity.builder()
+                .id(100)
+                .code("TRM-2026-ABCD1234")
+                .build();
+
+        when(projectRepository.findById(1)).thenReturn(Optional.of(projectEntity));
+        when(procedureRepository.save(any(ProcedureEntity.class))).thenReturn(savedProcedure);
+        when(correlationContext.getCorrelationId()).thenReturn("corr-5555");
+
+        adapter.createPostulationProcedure(project);
+
+        ArgumentCaptor<ProcedureMovementEntity> movementCaptor = ArgumentCaptor.forClass(ProcedureMovementEntity.class);
+        verify(movementRepository).save(movementCaptor.capture());
+        assertEquals("corr-5555", movementCaptor.getValue().getCorrelationId());
     }
 }

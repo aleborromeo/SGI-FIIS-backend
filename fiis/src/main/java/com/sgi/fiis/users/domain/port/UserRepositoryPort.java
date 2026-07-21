@@ -15,6 +15,9 @@ public interface UserRepositoryPort {
     Optional<User> findByEmail(String institutionalEmail);
     List<User> findAll();
     List<User> search(String query);
+    List<User> search(String query, String role, Boolean active);
     boolean existsByDni(String dni);
     boolean existsByEmail(String institutionalEmail);
+    List<User> findAllPaged(int page, int size);
+    long countAll();
 }

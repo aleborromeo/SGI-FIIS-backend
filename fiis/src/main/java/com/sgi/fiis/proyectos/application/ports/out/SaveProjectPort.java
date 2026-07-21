@@ -2,6 +2,7 @@ package com.sgi.fiis.proyectos.application.ports.out;
 
 import com.sgi.fiis.proyectos.domain.model.Project;
 import com.sgi.fiis.proyectos.domain.model.ProjectMember;
+import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,5 +32,9 @@ public interface SaveProjectPort {
     void saveMembers(Integer projectId, List<ProjectMember> members);
 
     List<ProjectMember> findMembersByProjectId(Integer projectId);
+
+    List<Project> findByResponsibleIdAndStatus(Long responsibleId, ProjectStatus status);
+
+    void deleteById(Integer projectId);
 
 }

@@ -14,15 +14,15 @@ import lombok.NoArgsConstructor;
 public class ProcedureRequestDto {
 
     @NotNull(message = "El tipo de trámite es obligatorio")
-    private ProcedureType tipoTramite;
+    private ProcedureType procedureType;
 
     // Poblado por el controller desde el JWT — el cliente no lo envía
-    private Long idSolicitante;
+    private Long applicantId;
 
-    private Long idGrupo;
+    private Long groupId;
 
     // Arco excluyente — exactamente uno debe ser no nulo
-    private Long idReferenciaProyecto;
-    private Long idReferenciaTesis;
-    private Long idReferenciaInforme;
+    private Long projectReferenceId;
+    private Long thesisReferenceId;
+    private Long reportReferenceId;
 }

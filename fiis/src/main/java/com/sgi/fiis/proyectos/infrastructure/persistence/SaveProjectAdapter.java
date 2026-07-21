@@ -24,6 +24,14 @@ import java.util.Optional;
 @Component
 public class SaveProjectAdapter implements SaveProjectPort {
 
+    private static final String STATUS_BORRADOR = "BORRADOR";
+    private static final String STATUS_POSTULADO = "POSTULADO";
+    private static final String STATUS_OBSERVADO = "OBSERVADO";
+    private static final String STATUS_APROBADO = "APROBADO";
+    private static final String STATUS_RECHAZADO = "RECHAZADO";
+    private static final String STATUS_EN_EJECUCION = "EN_EJECUCION";
+    private static final String STATUS_FINALIZADO = "FINALIZADO";
+
     private final ProjectJpaRepository projectRepository;
     private final ResearchLineJpaRepository lineRepository;
     private final ResearchGroupJpaRepository groupRepository;
@@ -141,6 +149,28 @@ public class SaveProjectAdapter implements SaveProjectPort {
                 .orElse(false);
     }
 
+    @Override
+    public List<Project> findByResponsibleIdAndStatus(Long responsibleId, ProjectStatus status) {
+        String dbStatus = switch (status) {
+            case DRAFT -> STATUS_BORRADOR;
+            case POSTULATED -> STATUS_POSTULADO;
+            case OBSERVED -> STATUS_OBSERVADO;
+            case APPROVED -> STATUS_APROBADO;
+            case REJECTED -> STATUS_RECHAZADO;
+            case IN_PROGRESS -> STATUS_EN_EJECUCION;
+            case COMPLETED -> STATUS_FINALIZADO;
+        };
+        return projectRepository.findByResponsibleIdAndStatus(responsibleId, dbStatus).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void deleteById(Integer projectId) {
+        projectMemberRepository.deleteByProjectId(projectId);
+        projectRepository.deleteById(projectId);
+    }
+
     private ProjectEntity toEntity(Project domain) {
         ResearchLineEntity line = lineRepository.findById(domain.getResearchLineId())
                 .orElseThrow(() -> new IllegalArgumentException("Research line not found with ID: " + domain.getResearchLineId()));
@@ -157,18 +187,15 @@ public class SaveProjectAdapter implements SaveProjectPort {
                     .orElseThrow(() -> new IllegalArgumentException("Research call not found with ID: " + domain.getCallId()));
         }
 
-        String dbStatus = "POSTULADO";
-        if (domain.getStatus() == ProjectStatus.OBSERVED) {
-            dbStatus = "OBSERVADO";
-        } else if (domain.getStatus() == ProjectStatus.APPROVED) {
-            dbStatus = "APROBADO";
-        } else if (domain.getStatus() == ProjectStatus.REJECTED) {
-            dbStatus = "RECHAZADO";
-        } else if (domain.getStatus() == ProjectStatus.IN_PROGRESS) {
-            dbStatus = "EN_EJECUCION";
-        } else if (domain.getStatus() == ProjectStatus.COMPLETED) {
-            dbStatus = "FINALIZADO";
-        }
+        String dbStatus = switch (domain.getStatus()) {
+            case DRAFT -> STATUS_BORRADOR;
+            case OBSERVED -> STATUS_OBSERVADO;
+            case APPROVED -> STATUS_APROBADO;
+            case REJECTED -> STATUS_RECHAZADO;
+            case IN_PROGRESS -> STATUS_EN_EJECUCION;
+            case COMPLETED -> STATUS_FINALIZADO;
+            default -> STATUS_POSTULADO;
+        };
 
         return ProjectEntity.builder()
                 .id(domain.getId())
@@ -195,15 +222,17 @@ public class SaveProjectAdapter implements SaveProjectPort {
 
     private Project toDomain(ProjectEntity entity) {
         ProjectStatus domainStatus = ProjectStatus.POSTULATED;
-        if ("OBSERVADO".equalsIgnoreCase(entity.getStatus())) {
+        if (STATUS_BORRADOR.equalsIgnoreCase(entity.getStatus())) {
+            domainStatus = ProjectStatus.DRAFT;
+        } else if (STATUS_OBSERVADO.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.OBSERVED;
-        } else if ("APROBADO".equalsIgnoreCase(entity.getStatus())) {
+        } else if (STATUS_APROBADO.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.APPROVED;
-        } else if ("RECHAZADO".equalsIgnoreCase(entity.getStatus())) {
+        } else if (STATUS_RECHAZADO.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.REJECTED;
-        } else if ("EN_EJECUCION".equalsIgnoreCase(entity.getStatus())) {
+        } else if (STATUS_EN_EJECUCION.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.IN_PROGRESS;
-        } else if ("FINALIZADO".equalsIgnoreCase(entity.getStatus())) {
+        } else if (STATUS_FINALIZADO.equalsIgnoreCase(entity.getStatus())) {
             domainStatus = ProjectStatus.COMPLETED;
         }
 

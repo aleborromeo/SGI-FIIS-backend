@@ -1,6 +1,7 @@
 package com.sgi.fiis.tramites.presentation.controller;
 
 import com.sgi.fiis.auth.infrastructure.security.CustomUserDetails;
+import com.sgi.fiis.shared.application.dto.PageDto;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.tramites.application.dto.*;
 import com.sgi.fiis.tramites.application.usecase.*;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.*;
 class ProcedureControllerTest {
 
     @Mock private CreateProcedureUseCase createProcedureUseCase;
+    @Mock private ListProceduresUseCase listProceduresUseCase;
+    @Mock private GetProcedureUseCase getProcedureUseCase;
     @Mock private ApproveProcedureUseCase approveProcedureUseCase;
     @Mock private FlagProcedureUseCase flagProcedureUseCase;
     @Mock private RemediateProcedureUseCase remediateProcedureUseCase;
@@ -45,30 +48,74 @@ class ProcedureControllerTest {
     @BeforeEach
     void setUp() {
         coordinator = new CustomUserDetails(10L, "coord@unas.edu.pe", "pwd", true,
-                List.of(new SimpleGrantedAuthority("ROLE_COORDINADOR_GRUPO")));
+                List.of(new SimpleGrantedAuthority("ROLE_COORDINADOR_GRUPO")), "COORDINADOR_GRUPO");
         student = new CustomUserDetails(5L, "est@unas.edu.pe", "pwd", true,
-                List.of(new SimpleGrantedAuthority("ROLE_ESTUDIANTE")));
+                List.of(new SimpleGrantedAuthority("ROLE_ESTUDIANTE")), "ESTUDIANTE");
     }
 
     @Test
     @DisplayName("create: sets applicant id from JWT, not from request body")
     void create_setsApplicantIdFromJwt_returns201() {
         ProcedureRequestDto dto = ProcedureRequestDto.builder()
-                .tipoTramite(ProcedureType.PLAN_TESIS)
-                .idReferenciaTesis(1L)
+                .procedureType(ProcedureType.PLAN_TESIS)
+                .thesisReferenceId(1L)
                 .build();
         ProcedureResponseDto expected = ProcedureResponseDto.builder()
                 .id(1L)
-                .estadoActual(ProcedureStatus.PENDIENTE_COORDINADOR)
+                .currentStatus(ProcedureStatus.PENDIENTE_COORDINADOR)
                 .build();
         when(createProcedureUseCase.execute(any())).thenReturn(expected);
 
         ResponseEntity<ProcedureResponseDto> response = controller.create(dto, student);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(5L, dto.getIdSolicitante()); // security: set from JWT, not HTTP body
+        assertEquals(5L, dto.getApplicantId());
         assertSame(expected, response.getBody());
         verify(createProcedureUseCase).execute(dto);
+    }
+
+    @Test
+    @DisplayName("list: returns procedures filtered by role from JWT")
+    void list_returnsProceduresByRole() {
+        List<ProcedureResponseDto> expectedContent = List.of(
+                ProcedureResponseDto.builder().id(1L).build(),
+                ProcedureResponseDto.builder().id(2L).build()
+        );
+        when(listProceduresUseCase.execute(RoleEnum.COORDINADOR_GRUPO, 10L)).thenReturn(expectedContent);
+
+        ResponseEntity<PageDto<ProcedureResponseDto>> response = controller.list(0, 20, coordinator);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().getContent().size());
+        assertEquals(2, response.getBody().getTotalElements());
+        verify(listProceduresUseCase).execute(RoleEnum.COORDINADOR_GRUPO, 10L);
+    }
+
+    @Test
+    @DisplayName("list: student role filters to student procedures")
+    void list_studentRole() {
+        List<ProcedureResponseDto> expectedContent = List.of(
+                ProcedureResponseDto.builder().id(3L).build()
+        );
+        when(listProceduresUseCase.execute(RoleEnum.ESTUDIANTE, 5L)).thenReturn(expectedContent);
+
+        ResponseEntity<PageDto<ProcedureResponseDto>> response = controller.list(0, 20, student);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().getContent().size());
+        assertEquals(1, response.getBody().getTotalElements());
+    }
+
+    @Test
+    @DisplayName("get: returns procedure by id")
+    void get_returnsProcedureById() {
+        ProcedureResponseDto expected = ProcedureResponseDto.builder().id(7L).build();
+        when(getProcedureUseCase.execute(7L)).thenReturn(expected);
+
+        ResponseEntity<ProcedureResponseDto> response = controller.get(7L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(expected, response.getBody());
     }
 
     @Test
@@ -87,7 +134,7 @@ class ProcedureControllerTest {
     @Test
     @DisplayName("approve: user without role throws BusinessException before calling use case")
     void approve_userWithoutRole_throwsBusinessException() {
-        CustomUserDetails noRole = new CustomUserDetails(1L, "x@x.com", "pwd", true, List.of());
+        CustomUserDetails noRole = new CustomUserDetails(1L, "x@x.com", "pwd", true, List.of(), "");
 
         assertThrows(BusinessException.class, () -> controller.approve(1L, noRole));
         verifyNoInteractions(approveProcedureUseCase);
@@ -147,8 +194,8 @@ class ProcedureControllerTest {
     @DisplayName("getTraceability: returns movement list without role requirement")
     void getTraceability_returnsMovements_noRoleRequired() {
         List<ProcedureMovementResponseDto> movements = List.of(
-                ProcedureMovementResponseDto.builder().accion("PRESENTADO_POR_SOLICITANTE").build(),
-                ProcedureMovementResponseDto.builder().accion("APROBADO_COORDINADOR").build()
+                ProcedureMovementResponseDto.builder().action("PRESENTADO_POR_SOLICITANTE").build(),
+                ProcedureMovementResponseDto.builder().action("APROBADO_COORDINADOR").build()
         );
         when(getTraceabilityUseCase.execute(6L)).thenReturn(movements);
 
@@ -156,5 +203,28 @@ class ProcedureControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
+    }
+
+    @Test
+    @DisplayName("list: page offset out of bounds returns empty content PageDto")
+    void list_pageOutOfBounds() {
+        List<ProcedureResponseDto> expectedContent = List.of(
+                ProcedureResponseDto.builder().id(1L).build(),
+                ProcedureResponseDto.builder().id(2L).build()
+        );
+        when(listProceduresUseCase.execute(RoleEnum.COORDINADOR_GRUPO, 10L)).thenReturn(expectedContent);
+
+        ResponseEntity<PageDto<ProcedureResponseDto>> response = controller.list(2, 2, coordinator);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().getContent().size());
+        assertEquals(2, response.getBody().getTotalElements());
+    }
+
+    @Test
+    @DisplayName("approve: null role throws BusinessException")
+    void approve_nullRole_throwsBusinessException() {
+        CustomUserDetails nullRole = new CustomUserDetails(1L, "x@x.com", "pwd", true, List.of(), null);
+        assertThrows(BusinessException.class, () -> controller.approve(1L, nullRole));
     }
 }

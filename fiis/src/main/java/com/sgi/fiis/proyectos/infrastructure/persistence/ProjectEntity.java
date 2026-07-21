@@ -6,6 +6,9 @@ import com.sgi.fiis.lineas_investigacion.infrastructure.persistence.ResearchLine
 import com.sgi.fiis.users.infrastructure.persistence.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,15 +40,19 @@ public class ProjectEntity {
     @Column(name = "objetivo_general", nullable = false, columnDefinition = "TEXT")
     private String generalObjective;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "titulo_jsonb", columnDefinition = "jsonb", nullable = false)
     private String titleJson;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "resumen_jsonb", columnDefinition = "jsonb", nullable = false)
     private String summaryJson;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "objetivo_general_jsonb", columnDefinition = "jsonb", nullable = false)
     private String generalObjectiveJson;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "lugar_ejecucion_jsonb", columnDefinition = "jsonb", nullable = false)
     private String executionPlaceJson;
 
@@ -77,10 +84,10 @@ public class ProjectEntity {
     @JoinColumn(name = "id_convocatoria")
     private ResearchCallEntity researchCall;
 
-    @Column(name = "id_documento_propuesta")
+    @Column(name = "id_documento_actual")
     private Integer documentId;
 
-    @Column(name = "estado", nullable = false, length = 50)
+    @Column(name = "estado_proyecto", nullable = false, length = 50)
     private String status;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)

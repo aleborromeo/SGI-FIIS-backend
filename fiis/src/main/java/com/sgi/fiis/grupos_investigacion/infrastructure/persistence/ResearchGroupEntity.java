@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Entity
 @Table(name = "grupos_investigacion")
 @Getter
@@ -25,7 +28,17 @@ public class ResearchGroupEntity {
     @Column(name = "es_activo", nullable = false)
     private boolean active;
 
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_coordinador_actual")
     private UserEntity currentCoordinator;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now(ZoneId.of("UTC"));
+        }
+    }
 }

@@ -37,4 +37,16 @@ public class ResolutionRepositoryAdapter implements ResolutionRepositoryPort {
     public boolean existsByNumber(String numeroResolucion) {
         return repository.existsByNumeroResolucion(numeroResolucion);
     }
+
+    @Override
+    public Optional<Resolution> findByDocumentAdjuntoId(Long documentId) {
+        return repository.findByIdDocumentoAdjunto(documentId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Resolution> findByProcedureId(Long idTramite) {
+        return repository.findByIdTramite(idTramite)
+                .map(mapper::toDomain);
+    }
 }

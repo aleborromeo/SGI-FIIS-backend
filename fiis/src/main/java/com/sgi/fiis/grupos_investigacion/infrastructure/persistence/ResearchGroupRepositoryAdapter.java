@@ -2,6 +2,7 @@ package com.sgi.fiis.grupos_investigacion.infrastructure.persistence;
 
 import com.sgi.fiis.grupos_investigacion.domain.model.ResearchGroup;
 import com.sgi.fiis.grupos_investigacion.domain.port.ResearchGroupRepositoryPort;
+import com.sgi.fiis.users.infrastructure.persistence.SpringDataUserRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +14,14 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
 
     private final SpringDataResearchGroupRepository jpaRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final SpringDataUserRepository userRepository;
 
     public ResearchGroupRepositoryAdapter(SpringDataResearchGroupRepository jpaRepository,
-                                         JdbcTemplate jdbcTemplate) {
+            JdbcTemplate jdbcTemplate,
+            SpringDataUserRepository userRepository) {
         this.jpaRepository = jpaRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -37,22 +41,26 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     public List<ResearchGroup> findAll() {
         String sql = """
                  SELECT g.id_grupo, g.codigo_grupo, g.nombre_grupo,
-                        g.id_coordinador_actual, g.es_activo,
+                        g.id_coordinador_actual, g.es_activo, g.fecha_creacion,
                         u.nombres AS coordinator_first_names,
                         u.apellidos AS coordinator_last_names
-                  FROM grupos_investigacion g
-                  LEFT JOIN usuarios u ON g.id_coordinador_actual = u.id_usuario
-                 ORDER BY g.nombre_grupo
+                   FROM grupos_investigacion g
+                   LEFT JOIN usuarios u ON g.id_coordinador_actual = u.id_usuario
+                  ORDER BY g.nombre_grupo
                 """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> ResearchGroup.builder()
                 .id(rs.getInt("id_grupo"))
                 .groupCode(rs.getString("codigo_grupo"))
                 .groupName(rs.getString("nombre_grupo"))
                 .currentCoordinatorId(rs.getObject("id_coordinador_actual") != null
-                        ? rs.getInt("id_coordinador_actual") : null)
+                        ? rs.getInt("id_coordinador_actual")
+                        : null)
                 .active(rs.getBoolean("es_activo"))
                 .coordinatorFirstNames(rs.getString("coordinator_first_names"))
                 .coordinatorLastNames(rs.getString("coordinator_last_names"))
+                .createdAt(rs.getTimestamp("fecha_creacion") != null
+                        ? rs.getTimestamp("fecha_creacion").toLocalDateTime()
+                        : null)
                 .build());
     }
 
@@ -80,7 +88,7 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
     public boolean existsActiveUserWithRole(Integer userId, String roleCode) {
         String sql = """
                 SELECT COUNT(*) FROM usuarios u
-                WHERE u.id_usuario = ? AND u.es_activo = TRUE 
+                WHERE u.id_usuario = ? AND u.es_activo = TRUE
                   AND (
                     EXISTS (SELECT 1 FROM roles r WHERE r.id_rol = u.id_rol_principal AND r.codigo_rol = ?)
                     OR EXISTS (SELECT 1 FROM usuarios_roles ur JOIN roles r ON ur.id_rol = r.id_rol WHERE ur.id_usuario = u.id_usuario AND r.codigo_rol = ?)
@@ -110,8 +118,11 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
                 .id(entity.getId())
                 .groupCode(entity.getCode())
                 .groupName(entity.getName())
-                .currentCoordinatorId(entity.getCurrentCoordinator() != null ? entity.getCurrentCoordinator().getId().intValue() : null)
+                .currentCoordinatorId(entity.getCurrentCoordinator() != null
+                        ? entity.getCurrentCoordinator().getId().intValue()
+                        : null)
                 .active(entity.isActive())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 
@@ -120,12 +131,14 @@ public class ResearchGroupRepositoryAdapter implements ResearchGroupRepositoryPo
         entity.setId(domain.getId());
         entity.setCode(domain.getGroupCode());
         entity.setName(domain.getGroupName());
-        if (domain.getCurrentCoordinatorId() != null) {
-            com.sgi.fiis.users.infrastructure.persistence.UserEntity coordinator = new com.sgi.fiis.users.infrastructure.persistence.UserEntity();
-            coordinator.setId(domain.getCurrentCoordinatorId().longValue());
-            entity.setCurrentCoordinator(coordinator);
-        }
         entity.setActive(domain.isActive());
+        if (domain.getCreatedAt() != null) {
+            entity.setCreatedAt(domain.getCreatedAt());
+        }
+        if (domain.getCurrentCoordinatorId() != null) {
+            entity.setCurrentCoordinator(
+                    userRepository.getReferenceById(domain.getCurrentCoordinatorId().longValue()));
+        }
         return entity;
     }
 }

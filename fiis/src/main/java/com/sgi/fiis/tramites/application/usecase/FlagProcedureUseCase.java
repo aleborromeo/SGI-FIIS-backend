@@ -1,6 +1,9 @@
 package com.sgi.fiis.tramites.application.usecase;
 
+import com.sgi.fiis.observations.application.dto.ObservationRequestDTO;
+import com.sgi.fiis.observations.application.usecase.RegisterObservationUseCase;
 import com.sgi.fiis.shared.domain.exception.BusinessException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
 import com.sgi.fiis.tramites.application.dto.ProcedureResponseDto;
 import com.sgi.fiis.tramites.application.mapper.ProcedureMapper;
@@ -19,20 +22,24 @@ import java.time.ZoneId;
 @Service
 public class FlagProcedureUseCase {
 
-    private final ProcedureRepositoryPort tramiteRepositoryPort;
+    private final ProcedureRepositoryPort procedureRepositoryPort;
     private final ProcedureEventPublisherPort eventPublisherPort;
+    private final RegisterObservationUseCase registerObservationUseCase;
     private final ProcedureStateMachine stateMachine = new ProcedureStateMachine();
 
-    public FlagProcedureUseCase(ProcedureRepositoryPort tramiteRepositoryPort,
-                                   ProcedureEventPublisherPort eventPublisherPort) {
-        this.tramiteRepositoryPort = tramiteRepositoryPort;
+    public FlagProcedureUseCase(ProcedureRepositoryPort procedureRepositoryPort,
+                                   ProcedureEventPublisherPort eventPublisherPort,
+                                   RegisterObservationUseCase registerObservationUseCase) {
+        this.procedureRepositoryPort = procedureRepositoryPort;
         this.eventPublisherPort    = eventPublisherPort;
+        this.registerObservationUseCase = registerObservationUseCase;
     }
 
     @Transactional
+    @Auditable(action = "FLAG_PROCEDURE", table = "tramites")
     public ProcedureResponseDto execute(Long idTramite, RoleEnum rolEjecutor, Long idEjecutor,
                                       String textoObservacion) {
-        Procedure tramite = tramiteRepositoryPort.findById(idTramite)
+        Procedure tramite = procedureRepositoryPort.findById(idTramite)
                 .orElseThrow(() -> new ResourceNotFoundException("Trámite", "id", idTramite));
 
         switch (rolEjecutor) {
@@ -43,17 +50,25 @@ public class FlagProcedureUseCase {
                     "El rol [" + rolEjecutor + "] no puede observar trámites");
         }
 
-        Procedure guardado = tramiteRepositoryPort.save(tramite);
+        Procedure guardado = procedureRepositoryPort.save(tramite);
+
+        registerObservationUseCase.execute(ObservationRequestDTO.builder()
+                .procedureId(Math.toIntExact(guardado.getId()))
+                .reviewerId(Math.toIntExact(idEjecutor))
+                .type("TECNICA")
+                .description(textoObservacion)
+                .reviewerRole(rolEjecutor.name())
+                .build());
 
         eventPublisherPort.publishProcedureFlagged(ProcedureFlaggedEvent.builder()
-                .idTramite(guardado.getId())
-                .codigoTramite(guardado.getCodigoTramite())
-                .tipoTramite(guardado.getTipoTramite())
-                .idSolicitante(guardado.getIdSolicitante())
-                .idObservador(idEjecutor)
-                .rolObservador(rolEjecutor)
-                .textoObservacion(textoObservacion)
-                .fechaObservacion(LocalDateTime.now(ZoneId.systemDefault()))
+                .procedureId(guardado.getId())
+                .code(guardado.getCode())
+                .procedureType(guardado.getProcedureType())
+                .applicantId(guardado.getApplicantId())
+                .observerId(idEjecutor)
+                .observerRole(rolEjecutor)
+                .observationText(textoObservacion)
+                .observationDate(LocalDateTime.now(ZoneId.systemDefault()))
                 .build());
 
         return ProcedureMapper.toResponse(guardado);

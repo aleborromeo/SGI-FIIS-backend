@@ -14,5 +14,9 @@ public interface ProgressReportRepositoryPort {
 
     List<ProgressReport> findByProjectId(Long projectId);
 
+    List<ProgressReport> findAll();
+
+    List<ProgressReport> findByStatus(String status);
+
     boolean existsById(Long id);
 }

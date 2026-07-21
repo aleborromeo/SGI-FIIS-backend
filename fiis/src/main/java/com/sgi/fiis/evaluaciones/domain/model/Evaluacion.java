@@ -4,81 +4,76 @@ import com.sgi.fiis.evaluaciones.domain.enums.ResultadoEvaluacion;
 import com.sgi.fiis.evaluaciones.domain.exception.EvaluacionException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class Evaluacion {
 
-    private Long idEvaluacion;
-    private Long idProyecto;
-    private Long idPlanTesis;
-    private Long idEvaluador;
+    private final Long idEvaluacion;
+    private final Long idProyecto;
+    private final Long idPlanTesis;
+    private final Long idEvaluador;
 
     private ResultadoEvaluacion resultado;
     private Integer puntaje;
     private String observaciones;
 
-    private LocalDateTime fechaAsignacion;
+    private final LocalDateTime fechaAsignacion;
     private LocalDateTime fechaEvaluacion;
 
-    private Evaluacion(Builder builder) {
-        this.idEvaluacion = builder.idEvaluacion;
-        this.idProyecto = builder.idProyecto;
-        this.idPlanTesis = builder.idPlanTesis;
-        this.idEvaluador = builder.idEvaluador;
-        this.resultado = builder.resultado;
-        this.puntaje = builder.puntaje;
-        this.observaciones = builder.observaciones;
-        this.fechaAsignacion = builder.fechaAsignacion;
-        this.fechaEvaluacion = builder.fechaEvaluacion;
+    @SuppressWarnings("java:S107")
+    private Evaluacion(
+            Long idEvaluacion,
+            Long idProyecto,
+            Long idPlanTesis,
+            Long idEvaluador,
+            ResultadoEvaluacion resultado,
+            Integer puntaje,
+            String observaciones,
+            LocalDateTime fechaAsignacion,
+            LocalDateTime fechaEvaluacion
+    ) {
+        this.idEvaluacion = idEvaluacion;
+        this.idProyecto = idProyecto;
+        this.idPlanTesis = idPlanTesis;
+        this.idEvaluador = idEvaluador;
+        this.resultado = resultado;
+        this.puntaje = puntaje;
+        this.observaciones = observaciones;
+        this.fechaAsignacion = fechaAsignacion;
+        this.fechaEvaluacion = fechaEvaluacion;
 
         validarAsignacion();
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static final class Builder {
-        private Long idEvaluacion;
-        private Long idProyecto;
-        private Long idPlanTesis;
-        private Long idEvaluador;
-        private ResultadoEvaluacion resultado;
-        private Integer puntaje;
-        private String observaciones;
-        private LocalDateTime fechaAsignacion;
-        private LocalDateTime fechaEvaluacion;
-
-        private Builder() {}
-
-        public Builder idEvaluacion(Long v)           { this.idEvaluacion = v; return this; }
-        public Builder idProyecto(Long v)             { this.idProyecto = v; return this; }
-        public Builder idPlanTesis(Long v)            { this.idPlanTesis = v; return this; }
-        public Builder idEvaluador(Long v)            { this.idEvaluador = v; return this; }
-        public Builder resultado(ResultadoEvaluacion v){ this.resultado = v; return this; }
-        public Builder puntaje(Integer v)             { this.puntaje = v; return this; }
-        public Builder observaciones(String v)        { this.observaciones = v; return this; }
-        public Builder fechaAsignacion(LocalDateTime v){ this.fechaAsignacion = v; return this; }
-        public Builder fechaEvaluacion(LocalDateTime v){ this.fechaEvaluacion = v; return this; }
-
-        public Evaluacion build() { return new Evaluacion(this); }
-    }
-
     public static Evaluacion asignarAProyecto(Long idProyecto, Long idEvaluador) {
-        return Evaluacion.builder()
-                .idProyecto(idProyecto)
-                .idEvaluador(idEvaluador)
-                .fechaAsignacion(LocalDateTime.now(java.time.ZoneId.systemDefault()))
-                .build();
+        return new Evaluacion(
+                null,
+                idProyecto,
+                null,
+                idEvaluador,
+                null,
+                null,
+                null,
+                LocalDateTime.now(ZoneId.of("UTC")),
+                null
+        );
     }
 
     public static Evaluacion asignarAPlanTesis(Long idPlanTesis, Long idEvaluador) {
-        return Evaluacion.builder()
-                .idPlanTesis(idPlanTesis)
-                .idEvaluador(idEvaluador)
-                .fechaAsignacion(LocalDateTime.now(java.time.ZoneId.systemDefault()))
-                .build();
+        return new Evaluacion(
+                null,
+                null,
+                idPlanTesis,
+                idEvaluador,
+                null,
+                null,
+                null,
+                LocalDateTime.now(ZoneId.of("UTC")),
+                null
+        );
     }
 
+    @SuppressWarnings("java:S107")
     public static Evaluacion reconstruir(
             Long idEvaluacion,
             Long idProyecto,
@@ -90,17 +85,17 @@ public class Evaluacion {
             LocalDateTime fechaAsignacion,
             LocalDateTime fechaEvaluacion
     ) {
-        return Evaluacion.builder()
-                .idEvaluacion(idEvaluacion)
-                .idProyecto(idProyecto)
-                .idPlanTesis(idPlanTesis)
-                .idEvaluador(idEvaluador)
-                .resultado(resultado)
-                .puntaje(puntaje)
-                .observaciones(observaciones)
-                .fechaAsignacion(fechaAsignacion)
-                .fechaEvaluacion(fechaEvaluacion)
-                .build();
+        return new Evaluacion(
+                idEvaluacion,
+                idProyecto,
+                idPlanTesis,
+                idEvaluador,
+                resultado,
+                puntaje,
+                observaciones,
+                fechaAsignacion,
+                fechaEvaluacion
+        );
     }
 
     public void registrarResultado(
@@ -127,7 +122,7 @@ public class Evaluacion {
         this.resultado = resultado;
         this.puntaje = puntaje;
         this.observaciones = observaciones;
-        this.fechaEvaluacion = LocalDateTime.now(java.time.ZoneId.systemDefault());
+        this.fechaEvaluacion = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     public boolean estaPendiente() {

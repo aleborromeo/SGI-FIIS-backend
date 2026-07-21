@@ -2,7 +2,9 @@ package com.sgi.fiis.users.application.usecase;
 
 import com.sgi.fiis.shared.domain.exception.BusinessException;
 import com.sgi.fiis.shared.domain.exception.DuplicateResourceException;
+import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
 import com.sgi.fiis.shared.domain.exception.ResourceNotFoundException;
+import com.sgi.fiis.users.domain.model.Role;
 import com.sgi.fiis.users.domain.model.User;
 import com.sgi.fiis.users.domain.port.RoleRepositoryPort;
 import com.sgi.fiis.users.domain.port.UserRepositoryPort;
@@ -28,6 +30,7 @@ public class UpdateUserUseCase {
     }
 
     @Transactional
+    @Auditable(action = "UPDATE_USER", table = "usuarios")
     public User execute(Long id, String firstNames, String lastNames,
                         String institutionalEmail, String phone, String roleCode) {
         User user = userRepository.findById(id)
@@ -55,9 +58,9 @@ public class UpdateUserUseCase {
             user.setPhone(phone);
         }
         if (roleCode != null && !roleCode.isBlank()) {
-            roleRepository.findByCode(roleCode)
+            Role role = roleRepository.findByCode(roleCode)
                     .orElseThrow(() -> new ResourceNotFoundException("Rol", "codigo", roleCode));
-            user.setRoleCode(roleCode);
+            user.setRoleCode(role.getCode());
         }
 
         user.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));

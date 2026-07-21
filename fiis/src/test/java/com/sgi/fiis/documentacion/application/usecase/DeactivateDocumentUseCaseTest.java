@@ -15,13 +15,14 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("all")
 class DeactivateDocumentUseCaseTest {
 
     private DocumentRepositoryPort documentRepositoryPort;
     private DeactivateDocumentUseCase deactivateDocumentUseCase;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         this.documentRepositoryPort = mock(DocumentRepositoryPort.class);
         this.deactivateDocumentUseCase = new DeactivateDocumentUseCase(documentRepositoryPort);
     }
@@ -112,9 +113,9 @@ class DeactivateDocumentUseCaseTest {
         when(documentRepositoryPort.findById(docId)).thenReturn(Optional.of(document));
 
         // Act & Assert
-        assertThrows(DocumentAccessDeniedException.class, () -> {
-            deactivateDocumentUseCase.execute(docId, strangerId, role);
-        });
+        Exception exception = assertThrows(DocumentAccessDeniedException.class,
+                () -> deactivateDocumentUseCase.execute(docId, strangerId, role));
+        assertNotNull(exception);
 
         verify(documentRepositoryPort, never()).save(any(Document.class));
     }
@@ -127,8 +128,8 @@ class DeactivateDocumentUseCaseTest {
         when(documentRepositoryPort.findById(nonExistentId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(DocumentNotFoundException.class, () -> {
-            deactivateDocumentUseCase.execute(nonExistentId, 1L, "ADMIN");
-        });
+        Exception exception = assertThrows(DocumentNotFoundException.class,
+                () -> deactivateDocumentUseCase.execute(nonExistentId, 1L, "ADMIN"));
+        assertNotNull(exception);
     }
 }
