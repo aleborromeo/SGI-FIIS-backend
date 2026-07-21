@@ -14,6 +14,7 @@ import com.sgi.fiis.proyectos.domain.model.ProjectMember;
 import com.sgi.fiis.proyectos.domain.model.ProjectStatus;
 import com.sgi.fiis.shared.domain.exception.BusinessRuleValidationException;
 import com.sgi.fiis.shared.infrastructure.aspect.Auditable;
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,15 +34,18 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
     private final SaveProjectPort saveProjectPort;
     private final SaveCallPort saveCallPort;
     private final CreateProcedurePort createProcedurePort;
+    private final UserRepositoryPort userRepositoryPort;
     private final Clock clock;
 
     public CreateProjectInteractor(SaveProjectPort saveProjectPort,
             SaveCallPort saveCallPort,
             CreateProcedurePort createProcedurePort,
+            UserRepositoryPort userRepositoryPort,
             Clock clock) {
         this.saveProjectPort = saveProjectPort;
         this.saveCallPort = saveCallPort;
         this.createProcedurePort = createProcedurePort;
+        this.userRepositoryPort = userRepositoryPort;
         this.clock = clock;
     }
 
@@ -70,6 +74,7 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
             throw new BusinessRuleValidationException("proyectos.error.group-not-active");
         }
         if (request.getResponsibleId() != null && request.getResearchGroupId() != null
+                && !isEstudiante(request.getResponsibleId().longValue())
                 && !saveProjectPort.isUserMemberOfGroup(request.getResponsibleId().longValue(),
                 request.getResearchGroupId())) {
             throw new BusinessRuleValidationException("proyectos.error.responsible-not-member");
@@ -77,6 +82,12 @@ public class CreateProjectInteractor implements CreateProjectUseCase {
         if (request.getResearchLineId() != null && !saveProjectPort.isLineActive(request.getResearchLineId())) {
             throw new BusinessRuleValidationException("proyectos.error.line-not-active");
         }
+    }
+
+    private boolean isEstudiante(Long userId) {
+        return userRepositoryPort.findById(userId)
+                .map(u -> "ESTUDIANTE".equals(u.getRoleCode()))
+                .orElse(false);
     }
 
     private void validateRequiredFields(CreateProjectRequest request) {

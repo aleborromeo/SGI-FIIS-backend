@@ -1,5 +1,6 @@
 package com.sgi.fiis.proyectos;
 
+import com.sgi.fiis.users.domain.port.UserRepositoryPort;
 import com.sgi.fiis.convocatorias.application.ports.out.SaveCallPort;
 import com.sgi.fiis.convocatorias.domain.model.CallStatus;
 import com.sgi.fiis.convocatorias.domain.model.ResearchCall;
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings({"unused", "ResultOfMethodCallIgnored", "ThrowableResultOfMethodCallIgnored"})
 class ProjectModuleTest {
 
     // Fixed dates to avoid system clock usage in tests (SonarCloud S5977)
@@ -45,6 +47,7 @@ class ProjectModuleTest {
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
     private CreateProcedurePort createProcedurePort;
+    private UserRepositoryPort userRepositoryPort;
     private CreateProjectInteractor createProjectInteractor;
     private Clock fixedClock;
 
@@ -53,8 +56,9 @@ class ProjectModuleTest {
         saveProjectPort = mock(SaveProjectPort.class);
         saveCallPort = mock(SaveCallPort.class);
         createProcedurePort = mock(CreateProcedurePort.class);
+        userRepositoryPort = mock(UserRepositoryPort.class);
         fixedClock = Clock.fixed(Instant.parse("2026-06-01T00:00:00Z"), ZoneId.of("UTC"));
-        createProjectInteractor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, fixedClock);
+        createProjectInteractor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, userRepositoryPort, fixedClock);
     }
 
     @Test

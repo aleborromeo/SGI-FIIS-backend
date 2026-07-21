@@ -6,7 +6,7 @@ public enum ProcedureType {
     THESIS("TESIS"),
     REPORT("INFORME"),
     PLAN_TESIS("PLAN_TESIS"),
-    REPORT_AVANCE("REPORTE_AVANCE");
+    REPORT_AVANCE("INFORME_AVANCE");
 
     private final String dbValue;
 

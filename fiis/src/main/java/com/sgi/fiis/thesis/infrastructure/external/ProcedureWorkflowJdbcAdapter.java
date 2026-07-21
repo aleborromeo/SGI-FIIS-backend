@@ -67,17 +67,26 @@ public class ProcedureWorkflowJdbcAdapter implements ProcedureWorkflowPort {
 
     @Override
     public Integer obtenerIdTramitePorPlanTesis(Integer idPlanTesis) {
-        return jdbcTemplate.queryForObject("SELECT id_tramite FROM tramites WHERE tipo_tramite = 'PLAN_TESIS' AND id_referencia_tesis = ?", Integer.class, idPlanTesis);
+        List<Integer> list = jdbcTemplate.queryForList(
+                "SELECT id_tramite FROM tramites WHERE tipo_tramite = 'PLAN_TESIS' AND id_referencia_tesis = ? ORDER BY id_tramite DESC LIMIT 1",
+                Integer.class, idPlanTesis);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override
     public String obtenerEstadoTramitePorPlanTesis(Integer idPlanTesis) {
-        return jdbcTemplate.queryForObject("SELECT estado_actual FROM tramites WHERE tipo_tramite = 'PLAN_TESIS' AND id_referencia_tesis = ?", String.class, idPlanTesis);
+        List<String> list = jdbcTemplate.queryForList(
+                "SELECT estado_actual FROM tramites WHERE tipo_tramite = 'PLAN_TESIS' AND id_referencia_tesis = ? ORDER BY id_tramite DESC LIMIT 1",
+                String.class, idPlanTesis);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override
     public String obtenerRevisorTramitePorPlanTesis(Integer idPlanTesis) {
-        return jdbcTemplate.queryForObject("SELECT rol_revisor_actual FROM tramites WHERE tipo_tramite = 'PLAN_TESIS' AND id_referencia_tesis = ?", String.class, idPlanTesis);
+        List<String> list = jdbcTemplate.queryForList(
+                "SELECT rol_revisor_actual FROM tramites WHERE tipo_tramite = 'PLAN_TESIS' AND id_referencia_tesis = ? ORDER BY id_tramite DESC LIMIT 1",
+                String.class, idPlanTesis);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

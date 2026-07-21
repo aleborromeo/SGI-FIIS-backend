@@ -323,6 +323,419 @@ class AuditingAspectTest {
         verify(correlationContext).clear();
     }
 
+    @Test
+    @DisplayName("extractRegisterIdFromArgs: returns 0 when args is null")
+    void audit_nullArgs() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        Object target = new Object();
+        when(joinPoint.getTarget()).thenReturn(target);
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(null);
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterIdFromArgs: skips null arg elements and non-Number args")
+    void audit_nullArgElementAndNonNumber() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ null, "not a number", 42L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "data", "name", "projectId" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(42L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterIdFromArgs: name does not contain id/Id/ID → returns 0")
+    void audit_argWithNoIdInName() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 99L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "budget" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterIdFromArgs: paramNames null → uses empty string")
+    void audit_paramNamesNull() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 77L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(null);
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterIdFromArgs: param name contains 'Id' (camelCase)")
+    void audit_nameContainsIdCamelCase() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 55L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "userId" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(55L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterIdFromArgs: param name contains 'ID' (uppercase)")
+    void audit_nameContainsID() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 88L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "userID" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(88L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("queryPreviousState: returns null for invalid table name (special chars)")
+    void audit_invalidTableName() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(auditable.table()).thenReturn("valid_table");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 10L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        when(jdbcTemplate.queryForList(anyString(), eq(String.class), anyString()))
+                .thenReturn(List.of("id", "name"));
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), eq(10L)))
+                .thenReturn(List.of(Map.of("id", 10L)));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(10L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("queryPreviousState: empty cols list → no id column found, uses default 'id'")
+    void audit_emptyColsList() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(auditable.table()).thenReturn("testtable");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 10L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        when(jdbcTemplate.queryForList(contains("information_schema"), eq(String.class), eq("testtable")))
+                .thenReturn(Collections.emptyList());
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), eq(10L)))
+                .thenReturn(List.of(Map.of("id", 10L, "name", "Test")));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(10L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("queryPreviousState: cols has id_ prefix column instead of 'id'")
+    void audit_colsHasIdPrefix() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(auditable.table()).thenReturn("testtable");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 10L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        when(jdbcTemplate.queryForList(contains("information_schema"), eq(String.class), eq("testtable")))
+                .thenReturn(List.of("id_proyecto", "nombre"));
+        when(jdbcTemplate.queryForList(contains("WHERE id_proyecto = ?"), eq(10L)))
+                .thenReturn(List.of(Map.of("id_proyecto", 10L, "nombre", "Test")));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(10L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("queryPreviousState: rows empty → datosAnteriores is null")
+    void audit_queryReturnsNullRows() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(auditable.table()).thenReturn("testtable");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 10L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        when(jdbcTemplate.queryForList(contains("information_schema"), eq(String.class), eq("testtable")))
+                .thenReturn(List.of("id"));
+        when(jdbcTemplate.queryForList(contains("WHERE id = ?"), eq(10L)))
+                .thenReturn(Collections.emptyList());
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(10L), anyString(), anyLong(), eq(null), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("serializeArgs: result is null → no resultado key")
+    void audit_serializeArgsNullResult() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(null);
+        when(auditable.action()).thenReturn("UPDATE");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ "value" });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "data" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(argThat(sql -> !sql.contains("resultado")), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterId: result has getIdConvocatoria method")
+    void audit_extractsIdViaGetIdConvocatoria() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("CREATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{});
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{});
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        CallIdHolder holder = new CallIdHolder(77L);
+        when(joinPoint.proceed()).thenReturn(holder);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(77L), eq("CREAR"),
+                anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterId: result has getIdProyecto method")
+    void audit_extractsIdViaGetIdProyecto() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("CREATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{});
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{});
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        ProyectoIdHolder holder = new ProyectoIdHolder(55L);
+        when(joinPoint.proceed()).thenReturn(holder);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(55L), eq("CREAR"),
+                anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterId: null result → returns 0")
+    void audit_extractRegisterIdNullResult() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{});
+        when(joinPoint.getSignature()).thenReturn(mock(org.aspectj.lang.reflect.MethodSignature.class));
+
+        when(joinPoint.proceed()).thenReturn(null);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("resolveTableName: explicit table name from auditable annotation")
+    void audit_explicitTableName() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(auditable.table()).thenReturn("custom_table");
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), eq("custom_table"), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("extractRegisterId: getter returns non-Number → returns 0")
+    void audit_extractRegisterIdGetterReturnsNonNumber() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(joinPoint.getArgs()).thenReturn(new Object[]{});
+        when(joinPoint.getSignature()).thenReturn(mock(org.aspectj.lang.reflect.MethodSignature.class));
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(0L), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("serializeArgs: args with null elements are skipped")
+    void audit_serializeArgsNullElements() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ null, "value" });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "arg0", "arg1" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("queryPreviousState: table name with SQL-injection chars is rejected")
+    void audit_tableNameWithSpecialChars() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+        when(auditable.table()).thenReturn("DROP TABLE;--");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ 10L });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "id" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), eq(10L), anyString(), anyLong(), eq(null), any(), anyString(), any(), anyString());
+    }
+
+    @Test
+    @DisplayName("serializeArgs: JsonProcessingException returns error fallback")
+    void audit_serializeArgsJsonException() throws Throwable {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+
+        when(joinPoint.getTarget()).thenReturn(new Object());
+        when(joinPoint.proceed()).thenReturn(new Object());
+        when(auditable.action()).thenReturn("UPDATE");
+
+        Object problematicArg = new Object() {
+            @SuppressWarnings("unused")
+            public Object getField() {
+                throw new RuntimeException("serialization problem");
+            }
+        };
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ problematicArg });
+        org.aspectj.lang.reflect.MethodSignature sig = mock(org.aspectj.lang.reflect.MethodSignature.class);
+        when(sig.getParameterNames()).thenReturn(new String[]{ "problematic" });
+        when(joinPoint.getSignature()).thenReturn(sig);
+
+        auditingAspect.audit(joinPoint, auditable);
+
+        verify(jdbcTemplate).update(anyString(), anyString(), anyLong(), anyString(), anyLong(), any(), argThat(s -> s.toString().contains("error")), anyString(), any(), anyString());
+    }
+
+    static class CallIdHolder {
+        private final Long idConvocatoria;
+        public CallIdHolder(Long id) { this.idConvocatoria = id; }
+        public Long getIdConvocatoria() { return idConvocatoria; }
+    }
+
+    static class ProyectoIdHolder {
+        private final Long idProyecto;
+        public ProyectoIdHolder(Long id) { this.idProyecto = id; }
+        public Long getIdProyecto() { return idProyecto; }
+    }
+
     private static class TestInteractor {}
     private static class TestService {}
 }

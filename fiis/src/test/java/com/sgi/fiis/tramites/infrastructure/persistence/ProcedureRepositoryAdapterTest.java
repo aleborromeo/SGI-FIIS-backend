@@ -182,7 +182,7 @@ class ProcedureRepositoryAdapterTest {
         ProcedureEntity minimalEntity = new ProcedureEntity();
         minimalEntity.setId(1);
         minimalEntity.setCode("TRM-MINIMAL");
-        minimalEntity.setProcedureType("REPORTE_AVANCE");
+        minimalEntity.setProcedureType("INFORME_AVANCE");
         minimalEntity.setStatus("REGISTRADO");
         minimalEntity.setSentAt(DATE);
         minimalEntity.setUpdatedAt(DATE);

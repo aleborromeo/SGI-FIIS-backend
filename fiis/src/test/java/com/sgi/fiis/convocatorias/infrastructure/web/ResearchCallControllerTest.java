@@ -215,7 +215,7 @@ class ResearchCallControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasActiveGroup").value(false))
                 .andExpect(jsonPath("$.hasVigentCalls").value(false))
-                .andExpect(jsonPath("$.docente").value(false))
+                .andExpect(jsonPath("$.docente").value(true))
                 .andExpect(jsonPath("$.valid").value(false));
     }
 
@@ -264,5 +264,51 @@ class ResearchCallControllerTest {
                 .andExpect(jsonPath("$[0].status").value("CERRADA"));
 
         verify(getCallUseCase).getCalls("CERRADA");
+    }
+
+    @Test
+    void shouldCheckPrerequisitos_AdminRole() throws Exception {
+        authenticateAs(4L, "admin@unas.edu.pe", "ADMIN");
+        when(membershipRepositoryPort.existsActiveByUser(4)).thenReturn(true);
+        when(getCallUseCase.getVigentCalls()).thenReturn(List.of(
+                new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null)
+        ));
+
+        mockMvc.perform(get("/api/v1/calls/prerequisitos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hasActiveGroup").value(true))
+                .andExpect(jsonPath("$.hasVigentCalls").value(true))
+                .andExpect(jsonPath("$.docente").value(false))
+                .andExpect(jsonPath("$.valid").value(false));
+    }
+
+    @Test
+    void shouldCheckPrerequisitos_HasActiveGroup_NoVigentCalls() throws Exception {
+        authenticateAs(5L, "docente3@unas.edu.pe", "DOCENTE_INVESTIGADOR");
+        when(membershipRepositoryPort.existsActiveByUser(5)).thenReturn(true);
+        when(getCallUseCase.getVigentCalls()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/calls/prerequisitos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hasActiveGroup").value(true))
+                .andExpect(jsonPath("$.hasVigentCalls").value(false))
+                .andExpect(jsonPath("$.docente").value(true))
+                .andExpect(jsonPath("$.valid").value(false));
+    }
+
+    @Test
+    void shouldCheckPrerequisitos_DirectorRole() throws Exception {
+        authenticateAs(6L, "director@unas.edu.pe", "DIRECTOR_INVESTIGACION");
+        when(membershipRepositoryPort.existsActiveByUser(6)).thenReturn(true);
+        when(getCallUseCase.getVigentCalls()).thenReturn(List.of(
+                new CallResponse(1, "Call 1", "Desc", FIXED_START, FIXED_END, "ABIERTA", null, "AMBOS", null)
+        ));
+
+        mockMvc.perform(get("/api/v1/calls/prerequisitos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hasActiveGroup").value(true))
+                .andExpect(jsonPath("$.hasVigentCalls").value(true))
+                .andExpect(jsonPath("$.docente").value(false))
+                .andExpect(jsonPath("$.valid").value(false));
     }
 }
