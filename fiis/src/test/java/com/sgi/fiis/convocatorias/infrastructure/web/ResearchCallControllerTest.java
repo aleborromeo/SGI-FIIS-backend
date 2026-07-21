@@ -215,7 +215,7 @@ class ResearchCallControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasActiveGroup").value(false))
                 .andExpect(jsonPath("$.hasVigentCalls").value(false))
-                .andExpect(jsonPath("$.docente").value(false))
+                .andExpect(jsonPath("$.docente").value(true))
                 .andExpect(jsonPath("$.valid").value(false));
     }
 

@@ -173,8 +173,8 @@ class ProjectControllerTest {
                     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
                         CustomUserDetails userDetails = mock(CustomUserDetails.class);
                         when(userDetails.getId()).thenReturn(3L);
-                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_ESTUDIANTE"));
-                        when(userDetails.getRole()).thenReturn("ESTUDIANTE");
+                        when(userDetails.getAuthorities()).thenReturn(List.of(() -> "ROLE_COORDINADOR_GRUPO"));
+                        when(userDetails.getRole()).thenReturn("COORDINADOR_GRUPO");
                         return userDetails;
                     }
                 }).build();
