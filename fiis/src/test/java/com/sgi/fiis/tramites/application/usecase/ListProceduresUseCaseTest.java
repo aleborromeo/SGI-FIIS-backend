@@ -64,92 +64,92 @@ class ListProceduresUseCaseTest {
     }
 
     @Test
-    @DisplayName("execute(DECANO) - returns all procedures")
+    @DisplayName("execute(DECANO) - returns non-terminal procedures for reviewer role")
     void executeDecanoReturnsAll() {
         List<Procedure> all = List.of(
                 buildProcedure(1L, ProcedureStatus.REGISTRADO),
                 buildProcedure(2L, ProcedureStatus.PENDIENTE_DECANATO),
                 buildProcedure(3L, ProcedureStatus.FINALIZADO)
         );
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+        when(procedureRepositoryPort.findByReviewerRole(RoleEnum.DECANO)).thenReturn(all);
 
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.DECANO);
 
-        assertEquals(3, result.size());
-        verify(procedureRepositoryPort).findAll();
+        assertEquals(2, result.size());
+        verify(procedureRepositoryPort).findByReviewerRole(RoleEnum.DECANO);
     }
 
     @Test
-    @DisplayName("execute(COORDINADOR_GRUPO) - returns all procedures")
+    @DisplayName("execute(COORDINADOR_GRUPO) - returns non-terminal procedures for reviewer role")
     void executeCoordinadorReturnsAll() {
         List<Procedure> all = List.of(
                 buildProcedure(1L, ProcedureStatus.PENDIENTE_COORDINADOR),
                 buildProcedure(2L, ProcedureStatus.PENDIENTE_DIRECCION),
                 buildProcedure(3L, ProcedureStatus.APROBADO_CON_RESOLUCION)
         );
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+        when(procedureRepositoryPort.findByReviewerRole(RoleEnum.COORDINADOR_GRUPO)).thenReturn(all);
 
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.COORDINADOR_GRUPO);
 
         assertEquals(3, result.size());
-        verify(procedureRepositoryPort).findAll();
+        verify(procedureRepositoryPort).findByReviewerRole(RoleEnum.COORDINADOR_GRUPO);
     }
 
     @Test
-    @DisplayName("execute(DIRECTOR_INVESTIGACION) - returns all procedures")
+    @DisplayName("execute(DIRECTOR_INVESTIGACION) - returns non-terminal procedures for reviewer role")
     void executeDirectorReturnsAll() {
         List<Procedure> all = List.of(
                 buildProcedure(1L, ProcedureStatus.REGISTRADO),
                 buildProcedure(2L, ProcedureStatus.PENDIENTE_DIRECCION),
                 buildProcedure(3L, ProcedureStatus.PENDIENTE_COORDINADOR)
         );
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+        when(procedureRepositoryPort.findByReviewerRole(RoleEnum.DIRECTOR_INVESTIGACION)).thenReturn(all);
 
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.DIRECTOR_INVESTIGACION);
 
         assertEquals(3, result.size());
-        verify(procedureRepositoryPort).findAll();
+        verify(procedureRepositoryPort).findByReviewerRole(RoleEnum.DIRECTOR_INVESTIGACION);
     }
 
     @Test
-    @DisplayName("execute(ESTUDIANTE) - returns all procedures")
+    @DisplayName("execute(ESTUDIANTE) - returns non-terminal procedures for reviewer role")
     void executeEstudianteReturnsAll() {
         List<Procedure> all = List.of(
                 buildProcedure(1L, ProcedureStatus.REGISTRADO),
                 buildProcedure(2L, ProcedureStatus.FINALIZADO)
         );
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+        when(procedureRepositoryPort.findByReviewerRole(RoleEnum.ESTUDIANTE)).thenReturn(all);
 
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ESTUDIANTE, 1L);
 
-        assertEquals(2, result.size());
-        verify(procedureRepositoryPort).findAll();
+        assertEquals(1, result.size());
+        verify(procedureRepositoryPort).findByReviewerRole(RoleEnum.ESTUDIANTE);
     }
 
     @Test
-    @DisplayName("execute(ADMIN) - returns all procedures")
+    @DisplayName("execute(ADMIN) - returns non-terminal procedures for reviewer role")
     void executeAdminReturnsAll() {
-        List<Procedure> all = List.of(buildProcedure(1L, ProcedureStatus.FINALIZADO));
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+        List<Procedure> all = List.of(buildProcedure(1L, ProcedureStatus.PENDIENTE_COORDINADOR));
+        when(procedureRepositoryPort.findByReviewerRole(RoleEnum.ADMIN)).thenReturn(all);
 
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.ADMIN);
 
         assertEquals(1, result.size());
-        verify(procedureRepositoryPort).findAll();
+        verify(procedureRepositoryPort).findByReviewerRole(RoleEnum.ADMIN);
     }
 
     @Test
-    @DisplayName("execute(COORDINADOR_GRUPO, userId) - returns all procedures")
+    @DisplayName("execute(COORDINADOR_GRUPO, userId) - returns non-terminal procedures for reviewer role")
     void executeCoordinadorWithUserIdReturnsAll() {
         List<Procedure> all = List.of(
                 buildProcedure(1L, ProcedureStatus.PENDIENTE_COORDINADOR),
                 buildProcedure(2L, ProcedureStatus.PENDIENTE_DECANATO)
         );
-        when(procedureRepositoryPort.findAll()).thenReturn(all);
+        when(procedureRepositoryPort.findByReviewerRole(RoleEnum.COORDINADOR_GRUPO)).thenReturn(all);
 
         List<ProcedureResponseDto> result = useCase.execute(RoleEnum.COORDINADOR_GRUPO, 10L);
 
         assertEquals(2, result.size());
-        verify(procedureRepositoryPort).findAll();
+        verify(procedureRepositoryPort).findByReviewerRole(RoleEnum.COORDINADOR_GRUPO);
     }
 }
