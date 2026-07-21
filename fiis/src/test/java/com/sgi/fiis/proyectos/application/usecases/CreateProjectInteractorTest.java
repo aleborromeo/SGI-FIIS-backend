@@ -31,6 +31,7 @@ class CreateProjectInteractorTest {
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
     private CreateProcedurePort createProcedurePort;
+    private com.sgi.fiis.users.domain.port.UserRepositoryPort userRepositoryPort;
     private CreateProjectInteractor interactor;
 
     @BeforeEach
@@ -38,7 +39,8 @@ class CreateProjectInteractorTest {
         saveProjectPort = mock(SaveProjectPort.class);
         saveCallPort = mock(SaveCallPort.class);
         createProcedurePort = mock(CreateProcedurePort.class);
-        interactor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, Clock.systemDefaultZone());
+        userRepositoryPort = mock(com.sgi.fiis.users.domain.port.UserRepositoryPort.class);
+        interactor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, userRepositoryPort, Clock.systemDefaultZone());
     }
 
     private CreateProjectRequest buildValidRequest() {

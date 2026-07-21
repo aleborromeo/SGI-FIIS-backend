@@ -89,11 +89,14 @@ public class ResearchCallController {
         boolean hasVigentCalls = !getCallUseCase.getVigentCalls().isEmpty();
         boolean isDocente = currentUser.getAuthorities().stream()
                 .anyMatch(a -> "ROLE_DOCENTE_INVESTIGADOR".equals(a.getAuthority()));
-        boolean valid = hasActiveGroup && hasVigentCalls && isDocente;
+        boolean isEstudiante = currentUser.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ESTUDIANTE".equals(a.getAuthority()));
+        boolean hasAllowedRole = isDocente || isEstudiante;
+        boolean valid = hasActiveGroup && hasVigentCalls && hasAllowedRole;
         return ResponseEntity.ok(PrerequisitosResponse.builder()
                 .hasActiveGroup(hasActiveGroup)
                 .hasVigentCalls(hasVigentCalls)
-                .docente(isDocente)
+                .docente(hasAllowedRole)
                 .valid(valid)
                 .build());
     }

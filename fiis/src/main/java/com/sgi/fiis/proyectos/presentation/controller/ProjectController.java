@@ -39,7 +39,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DOCENTE_INVESTIGADOR')")
+    @PreAuthorize("hasAnyRole('DOCENTE_INVESTIGADOR', 'ESTUDIANTE')")
     @Operation(summary = "Postulate a new research project or save as draft")
     @ApiResponse(responseCode = "200", description = "Project successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid project request or business rule validation error")
@@ -49,8 +49,8 @@ public class ProjectController {
         
         String role = currentUser.getRole();
         
-        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
-            throw new BusinessRuleValidationException("Solo los docentes investigadores pueden registrar proyectos de investigación.");
+        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role) && !"ESTUDIANTE".equals(role)) {
+            throw new BusinessRuleValidationException("Solo los docentes investigadores y estudiantes pueden registrar proyectos de investigación.");
         }
 
         // RF-39: Associate the project with the logged-in user as the responsible investigator
@@ -90,7 +90,7 @@ public class ProjectController {
                 response = List.of();
             }
         } else if ("ESTUDIANTE".equals(role)) {
-            response = List.of();
+            response = createProjectUseCase.getProjectsByResponsible(currentUser.getId());
         } else if (responsibleId != null) {
             response = createProjectUseCase.getProjectsByResponsible(responsibleId);
         } else if (groupId != null) {
@@ -116,7 +116,7 @@ public class ProjectController {
             @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         String role = currentUser.getRole();
-        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role)) {
+        if (!ROLE_DOCENTE_INVESTIGADOR.equals(role) && !"ESTUDIANTE".equals(role)) {
             return ResponseEntity.ok(new PageDto<>(List.of(), 0, page, size));
         }
         List<ProjectResponse> allDrafts = createProjectUseCase.getDraftsByResponsible(currentUser.getId());
@@ -140,7 +140,8 @@ public class ProjectController {
 
         String role = currentUser.getRole();
 
-        if (ROLE_DOCENTE_INVESTIGADOR.equals(role) && (project.getResponsibleId() == null || !project.getResponsibleId().equals(currentUser.getId()))) {
+        if ((ROLE_DOCENTE_INVESTIGADOR.equals(role) || "ESTUDIANTE".equals(role))
+                && (project.getResponsibleId() == null || !project.getResponsibleId().equals(currentUser.getId()))) {
             return ResponseEntity.status(403).build();
         }
 

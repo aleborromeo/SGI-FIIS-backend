@@ -339,10 +339,10 @@ public class EvaluacionService implements
         if (evaluacion.getIdProyecto() != null) {
             try {
                 var projectRow = jdbcTemplate.queryForMap(
-                        "SELECT titulo, resumen FROM proyectos WHERE id = ?",
+                        "SELECT titulo_proyecto, resumen FROM proyectos WHERE id_proyecto = ?",
                         evaluacion.getIdProyecto()
                 );
-                proyectoTitulo = (String) projectRow.get("titulo");
+                proyectoTitulo = (String) projectRow.get("titulo_proyecto");
                 proyectoResumen = (String) projectRow.get("resumen");
             } catch (Exception ignored) {
                 // Ignored because project details are optional in the response representation
@@ -352,10 +352,10 @@ public class EvaluacionService implements
         if (evaluacion.getIdPlanTesis() != null) {
             try {
                 var thesisRow = jdbcTemplate.queryForMap(
-                        "SELECT titulo, resumen FROM planes_tesis WHERE id = ?",
+                        "SELECT titulo_tesis, resumen FROM planes_tesis WHERE id_plan_tesis = ?",
                         evaluacion.getIdPlanTesis()
                 );
-                planTesisTitulo = (String) thesisRow.get("titulo");
+                planTesisTitulo = (String) thesisRow.get("titulo_tesis");
                 planTesisResumen = (String) thesisRow.get("resumen");
             } catch (Exception ignored) {
                 // Thesis plan might not exist or fields are null
