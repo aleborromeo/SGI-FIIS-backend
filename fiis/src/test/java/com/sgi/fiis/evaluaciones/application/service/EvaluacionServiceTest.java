@@ -662,10 +662,10 @@ void registrarResultadoSinResultadoDebeLanzarExcepcion() {
         when(evaluacionRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(evaluacion));
 
         // 1. Success paths for projects and thesis plans
-        when(jdbcTemplate.queryForMap(contains("proyectos WHERE id = ?"), eq(10L)))
-                .thenReturn(Map.of("titulo", "Proyecto 1", "resumen", "Resumen 1"));
-        when(jdbcTemplate.queryForMap(contains("planes_tesis WHERE id = ?"), eq(20L)))
-                .thenReturn(Map.of("titulo", "Tesis 1", "resumen", "Resumen Tesis 1"));
+        when(jdbcTemplate.queryForMap(contains("proyectos WHERE id_proyecto = ?"), eq(10L)))
+                .thenReturn(Map.of("titulo_proyecto", "Proyecto 1", "resumen", "Resumen 1"));
+        when(jdbcTemplate.queryForMap(contains("planes_tesis WHERE id_plan_tesis = ?"), eq(20L)))
+                .thenReturn(Map.of("titulo_tesis", "Tesis 1", "resumen", "Resumen Tesis 1"));
 
         var response = evaluacionService.buscarPorId(1L);
         assertEquals("Proyecto 1", response.proyectoTitulo());

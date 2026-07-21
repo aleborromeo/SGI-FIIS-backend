@@ -105,13 +105,24 @@ public class AuditingAspect {
             return null;
         }
         try {
-            String sql = "SELECT * FROM " + tableName + " WHERE id = ?";
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, idRegistro);
-            if (rows.isEmpty()) {
-                sql = "SELECT * FROM " + tableName + " WHERE id_" + tableName + " = ?";
-                rows = jdbcTemplate.queryForList(sql, idRegistro);
+            String pkColumn = "id";
+            String queryCols = "SELECT column_name FROM information_schema.columns WHERE table_name = ?";
+            List<String> cols = jdbcTemplate.queryForList(queryCols, String.class, tableName);
+            if (cols != null && !cols.isEmpty()) {
+                if (cols.contains("id")) {
+                    pkColumn = "id";
+                } else {
+                    for (String col : cols) {
+                        if (col.startsWith("id_")) {
+                            pkColumn = col;
+                            break;
+                        }
+                    }
+                }
             }
-            if (!rows.isEmpty()) {
+            String sql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " = ?";
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, idRegistro);
+            if (rows != null && !rows.isEmpty()) {
                 return objectMapper.writeValueAsString(rows.get(0));
             }
         } catch (JsonProcessingException | org.springframework.dao.DataAccessException ignored) {

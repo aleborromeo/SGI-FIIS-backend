@@ -31,6 +31,7 @@ class CreateProjectInteractorTest {
     private SaveProjectPort saveProjectPort;
     private SaveCallPort saveCallPort;
     private CreateProcedurePort createProcedurePort;
+    private com.sgi.fiis.users.domain.port.UserRepositoryPort userRepositoryPort;
     private CreateProjectInteractor interactor;
 
     @BeforeEach
@@ -38,7 +39,8 @@ class CreateProjectInteractorTest {
         saveProjectPort = mock(SaveProjectPort.class);
         saveCallPort = mock(SaveCallPort.class);
         createProcedurePort = mock(CreateProcedurePort.class);
-        interactor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, Clock.systemDefaultZone());
+        userRepositoryPort = mock(com.sgi.fiis.users.domain.port.UserRepositoryPort.class);
+        interactor = new CreateProjectInteractor(saveProjectPort, saveCallPort, createProcedurePort, userRepositoryPort, Clock.systemDefaultZone());
     }
 
     private CreateProjectRequest buildValidRequest() {
@@ -421,5 +423,32 @@ class CreateProjectInteractorTest {
         when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(List.of());
 
         assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+    }
+
+    @Test
+    void execute_CallIdNull_OpenCallsExistButAllFailValidation_ThrowsException() {
+        CreateProjectRequest request = buildValidRequest();
+        request.setCallId(null);
+
+        when(saveProjectPort.isGroupActive(1)).thenReturn(true);
+        when(saveProjectPort.isUserMemberOfGroup(2L, 1)).thenReturn(true);
+        when(saveProjectPort.isLineActive(3)).thenReturn(true);
+        when(saveProjectPort.getGroupCode(1)).thenReturn(Optional.of("GRP-01"));
+        when(saveProjectPort.getLineName(3)).thenReturn(Optional.of("Line-01"));
+
+        ResearchCall call1 = mock(ResearchCall.class);
+        when(call1.getStatus()).thenReturn(CallStatus.OPEN);
+        doThrow(new BusinessRuleValidationException("convocatorias.error.call-closed"))
+                .when(call1).validateCanSubmitProject(any(LocalDate.class));
+
+        ResearchCall call2 = mock(ResearchCall.class);
+        when(call2.getStatus()).thenReturn(CallStatus.OPEN);
+        doThrow(new BusinessRuleValidationException("convocatorias.error.call-not-started"))
+                .when(call2).validateCanSubmitProject(any(LocalDate.class));
+
+        when(saveCallPort.findByStatus(CallStatus.OPEN)).thenReturn(List.of(call1, call2));
+
+        BusinessRuleValidationException ex = assertThrows(BusinessRuleValidationException.class, () -> interactor.execute(request));
+        assertEquals("No existe ninguna convocatoria abierta dentro del rango de fechas permitido", ex.getMessage());
     }
 }
