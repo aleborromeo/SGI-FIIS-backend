@@ -25,13 +25,17 @@ public class ListProceduresUseCase {
                 .toList();
     }
 
-    @SuppressWarnings("java:S1172")
     public List<ProcedureResponseDto> execute(RoleEnum rolUsuario) {
-        return execute();
+        return execute(rolUsuario, null);
     }
 
-    @SuppressWarnings("java:S1172")
     public List<ProcedureResponseDto> execute(RoleEnum rolUsuario, Long userId) {
-        return execute();
+        if (rolUsuario == null) {
+            return execute();
+        }
+        return procedureRepositoryPort.findByReviewerRole(rolUsuario).stream()
+                .filter(t -> t.getCurrentStatus() != null && !t.getCurrentStatus().isTerminalStatus())
+                .map(ProcedureMapper::toResponse)
+                .toList();
     }
 }
