@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -40,7 +41,7 @@ class CreateUserUseCaseTest {
     private CreateUserUseCase createUserUseCase;
 
     @Test
-    @DisplayName("Should successfully create a new user and hash their password using DNI")
+    @DisplayName("Should successfully create a new user with a hashed temporary password")
     void testCreateUserSuccess() {
         User userInput = User.builder()
                 .dni("12345678")
@@ -70,6 +71,44 @@ class CreateUserUseCaseTest {
         verify(userRepository).existsByEmail("carlos.santana@unas.edu.pe");
         verify(passwordEncoder).encode(anyString());
         verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Returns the generated password when persistence returns a new domain object")
+    void testTemporaryPasswordSurvivesPersistenceMapping() {
+        User userInput = User.builder()
+                .dni("99112233")
+                .firstNames("QA")
+                .lastNames("Credentials")
+                .institutionalEmail("qa.credentials@unas.edu.pe")
+                .roleCode("EVALUADOR")
+                .build();
+        User persistedUser = User.builder()
+                .id(999L)
+                .institutionalEmail("qa.credentials@unas.edu.pe")
+                .passwordHash("encoded-password")
+                .active(true)
+                .mustChangePassword(true)
+                .build();
+        when(roleRepository.findByCode("EVALUADOR"))
+                .thenReturn(Optional.of(Role.builder().code("EVALUADOR").build()));
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedInput = invocation.getArgument(0);
+            assertNull(savedInput.getTemporaryPassword(), "Plaintext credentials are not persistence input");
+            return persistedUser;
+        });
+
+        User result = createUserUseCase.execute(userInput);
+
+        ArgumentCaptor<String> rawPassword = ArgumentCaptor.forClass(String.class);
+        verify(passwordEncoder).encode(rawPassword.capture());
+        assertSame(persistedUser, result);
+        assertNotNull(result.getTemporaryPassword());
+        assertFalse(result.getTemporaryPassword().isBlank());
+        assertEquals(rawPassword.getValue(), result.getTemporaryPassword());
+        assertNotEquals(userInput.getDni(), result.getTemporaryPassword());
+        verify(emailSender).sendNewUserCredentials("qa.credentials@unas.edu.pe", rawPassword.getValue());
     }
 
     @Test

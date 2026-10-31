@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 /**
  * Use case: Create user (RF-07).
  * - Generates institutional email automatically if not provided (RF-10).
- * - Initial password is the user's DNI, hashed with BCrypt.
+ * - Generates a secure temporary password and returns it for the administrator.
  */
 @Service
 public class CreateUserUseCase {
@@ -74,13 +74,14 @@ public class CreateUserUseCase {
         // Generate secure temporary password
         String rawPassword = PasswordGenerator.generateSecurePassword();
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
-        user.setTemporaryPassword(rawPassword);
         user.setActive(true);
         user.setMustChangePassword(true);
         user.setCreatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         user.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
 
         User savedUser = userRepository.save(user);
+        // Persistence returns a new domain object without transient credentials.
+        savedUser.setTemporaryPassword(rawPassword);
 
         // Send email with credentials
         try {
