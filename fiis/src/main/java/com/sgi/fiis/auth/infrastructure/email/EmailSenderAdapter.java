@@ -23,6 +23,9 @@ public class EmailSenderAdapter implements EmailSenderPort {
     @Value("${app.mail.from:sgi@nilver.store}")
     private String fromEmail;
 
+    @Value("${app.frontend-url:http://localhost:3000}")
+    private String frontendUrl;
+
     public EmailSenderAdapter(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -125,6 +128,7 @@ public class EmailSenderAdapter implements EmailSenderPort {
     @Async
     public void sendNewUserCredentials(String to, String rawPassword) {
         String subject = "Bienvenido a SGI FIIS - Tus Credenciales de Acceso";
+        String loginUrl = frontendUrl.replaceAll("/+$", "") + "/login";
         String htmlContent = "<!DOCTYPE html>"
                 + "<html>"
                 + "<head><meta charset=\"UTF-8\"><title>Bienvenido a SGI FIIS</title></head>"
@@ -153,7 +157,7 @@ public class EmailSenderAdapter implements EmailSenderPort {
                 + "        </table>"
                 + "        <p style=\"margin: 24px 0 16px 0; font-size: 14px; line-height: 1.6; color: #ef4444;\"><strong>Importante:</strong> Por motivos de seguridad, el sistema te solicitará cambiar esta contraseña temporal obligatoriamente en tu primer inicio de sesión.</p>"
                 + "        <div style=\"text-align: center; margin: 30px 0;\">"
-                + "          <a href=\"http://localhost:5173/login\" style=\"background-color: #2563eb; color: #ffffff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block;\">Iniciar Sesión</a>"
+                + "          <a href=\"" + loginUrl + "\" style=\"background-color: #2563eb; color: #ffffff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block;\">Iniciar Sesión</a>"
                 + "        </div>"
                 + "      </td>"
                 + "    </tr>"

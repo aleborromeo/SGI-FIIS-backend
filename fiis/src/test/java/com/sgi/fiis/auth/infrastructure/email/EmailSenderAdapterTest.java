@@ -3,6 +3,8 @@ package com.sgi.fiis.auth.infrastructure.email;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.Message;
+import jakarta.mail.Multipart;
+import jakarta.mail.Part;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,6 +81,7 @@ class EmailSenderAdapterTest {
     @DisplayName("Should successfully send new user credentials email")
     void sendNewUserCredentials_shouldSendCorrectMail() throws Exception {
         ReflectionTestUtils.setField(emailSenderAdapter, "fromEmail", "test-sender@unas.edu.pe");
+        ReflectionTestUtils.setField(emailSenderAdapter, "frontendUrl", "https://qa.sgi.example.edu.pe");
 
         MimeMessage mimeMessage = new MimeMessage((Session) null);
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
@@ -96,6 +99,40 @@ class EmailSenderAdapterTest {
         
         Object content = mimeMessage.getContent();
         assertTrue(content instanceof jakarta.mail.internet.MimeMultipart);
+        mimeMessage.saveChanges();
+        assertTrue(extractHtml(mimeMessage).contains("href=\"https://qa.sgi.example.edu.pe/login\""));
+    }
+
+    @Test
+    @DisplayName("Welcome link uses the configured deployment URL with a trailing slash")
+    void sendNewUserCredentials_shouldNormalizeFrontendUrl() throws Exception {
+        ReflectionTestUtils.setField(emailSenderAdapter, "fromEmail", "test-sender@unas.edu.pe");
+        ReflectionTestUtils.setField(emailSenderAdapter, "frontendUrl", "https://qa.sgi.example.edu.pe/");
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+        emailSenderAdapter.sendNewUserCredentials("newuser@unas.edu.pe", "temporary-qa-password");
+
+        verify(mailSender).send(mimeMessage);
+        mimeMessage.saveChanges();
+        String html = extractHtml(mimeMessage);
+        assertTrue(html.contains("href=\"https://qa.sgi.example.edu.pe/login\""));
+        assertTrue(!html.contains("localhost"));
+    }
+
+    private String extractHtml(Part part) throws Exception {
+        if (part.isMimeType("text/html")) {
+            return (String) part.getContent();
+        }
+        if (part.getContent() instanceof Multipart multipart) {
+            for (int index = 0; index < multipart.getCount(); index++) {
+                String html = extractHtml(multipart.getBodyPart(index));
+                if (!html.isEmpty()) {
+                    return html;
+                }
+            }
+        }
+        return "";
     }
 
     @Test
